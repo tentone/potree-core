@@ -2,12 +2,12 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<title>UNO Potree</title>
+		<title>Potree</title>
 	</head>
 
 	<body>
-		<script src="libs/jquery-3.1.1.min.js"></script>
 		<script src="libs/three.min.js"></script>
+		<script src="libs/jquery-3.1.1.min.js"></script>
 		<script src="libs/BinaryHeap.js"></script>
 		<script src="libs/tween.min.js"></script>
 		<script src="libs/proj4.js"></script>
@@ -32,7 +32,6 @@
 			viewer.setClipTask(Potree.ClipTask.HIGHLIGHT);
 			viewer.setClipMethod(Potree.ClipMethod.INSIDE_ANY);
 			viewer.setShowBoundingBox(false);
-			viewer.setFreeze(false);
 			viewer.setNavigationMode(Potree.OrbitControls);
 			viewer.setFOV(60);
 			viewer.setPointBudget(1000000);
@@ -63,7 +62,6 @@
 			}
 
 			var timestamp = 0;
-
 			function loop()
 			{	
 				var delta = viewer.clock.getDelta();
@@ -74,7 +72,6 @@
 
 				requestAnimationFrame(loop);
 			};
-
 			loop();
 
 		</script>

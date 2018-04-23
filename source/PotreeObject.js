@@ -4,8 +4,6 @@
  * Potree object is a wrapper to use Potree alongside other THREE based frameworks.
  * 
  * The object can be used a normal Object3D.
- * 
- * It depends on some libraries to work...
  */
 class PotreeObject extends THREE.EventDispatcher
 {
@@ -13,14 +11,15 @@ class PotreeObject extends THREE.EventDispatcher
 	{
 		super();
 
+		this.useEDL = false;
+		this.useRep = false;
+		this.useHQ = false;
+
 		this.fov = 60;
-		this.isFlipYZ = false;
-		this.useDEMCollisions = false;
 		this.generateDEM = false;
 		this.minNodeSize = 30;
 		this.edlStrength = 1.0;
 		this.edlRadius = 1.4;
-		this.useEDL = false;
 		this.classifications = [];
 
 		this.moveSpeed = 10;
@@ -34,8 +33,6 @@ class PotreeObject extends THREE.EventDispatcher
 		this.lengthUnit = this.LENGTH_UNITS.METER;
 
 		this.showBoundingBox = false;
-		this.showAnnotations = true;
-		this.freeze = false;
 		this.clipTask = Potree.ClipTask.HIGHLIGHT;
 		this.clipMethod = Potree.ClipMethod.INSIDE_ANY;
 
@@ -45,8 +42,6 @@ class PotreeObject extends THREE.EventDispatcher
 		this.pRenderer = null;
 
 		this.scene = null;
-		this.overlay = null;
-		this.overlayCamera = null;
 
 		this.inputHandler = null;
 
@@ -60,9 +55,6 @@ class PotreeObject extends THREE.EventDispatcher
 
 		this.createRenderer();
 
-		this.overlay = new THREE.Scene();
-		this.overlayCamera = new THREE.OrthographicCamera(0, 1, 1, 0, -1000, 1000);
-		
 		this.pRenderer = new Potree.Renderer(this.renderer);
 		
 		var near = 2.5;
@@ -88,39 +80,6 @@ class PotreeObject extends THREE.EventDispatcher
 
 		this.clippingTool.setScene(this.scene);
 		
-		var onPointcloudAdded = (e) =>
-		{
-			if(this.scene.pointclouds.length === 1)
-			{
-				var speed = e.pointcloud.boundingBox.getSize().length();
-				speed = speed / 5;
-				this.setMoveSpeed(speed);
-			}
-		};
-
-		var onVolumeRemoved = (e) =>
-		{
-			this.inputHandler.deselect(e.volume);
-		};
-
-		this.addEventListener("scene_changed", (e) =>
-		{
-			this.inputHandler.setScene(e.scene);
-			this.clippingTool.setScene(this.scene);
-			
-			if(!e.scene.hasEventListener("pointcloud_added", onPointcloudAdded)){
-				e.scene.addEventListener("pointcloud_added", onPointcloudAdded);
-			}
-
-			if(!e.scene.hasEventListener("volume_removed", onPointcloudAdded)){
-				e.scene.addEventListener("volume_removed", onVolumeRemoved);
-			}
-			
-		});
-
-		this.scene.addEventListener("volume_removed", onVolumeRemoved);
-		this.scene.addEventListener("pointcloud_added", onPointcloudAdded);
-
 		//Default values
 		this.setFOV(60);
 		this.setEDLEnabled(false);
@@ -130,7 +89,6 @@ class PotreeObject extends THREE.EventDispatcher
 		this.setClipMethod(Potree.ClipMethod.INSIDE_ANY);
 		this.setPointBudget(1*1000*1000);
 		this.setShowBoundingBox(false);
-		this.setFreeze(false);
 		this.setNavigationMode(Potree.OrbitControls);
 		this.setBackground("gradient");
 		this.scaleFactor = 1;
@@ -267,21 +225,6 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	}
 
-	setFreeze(value)
-	{
-		value = Boolean(value);
-		if(this.freeze !== value)
-		{
-			this.freeze = value;
-			this.dispatchEvent({"type": "freeze_changed", "viewer": this});
-		}
-	}
-
-	getFreeze()
-	{
-		return this.freeze;
-	}
-
 	getClipTask()
 	{
 		return this.clipTask;
@@ -325,34 +268,6 @@ class PotreeObject extends THREE.EventDispatcher
 	{
 		return Potree.pointBudget;
 	};
-
-	setShowAnnotations(value)
-	{
-		if(this.showAnnotations !== value)
-		{
-			this.showAnnotations = value;
-			this.dispatchEvent({"type": "show_annotations_changed", "viewer": this});
-		}
-	}
-
-	getShowAnnotations()
-	{
-		return this.showAnnotations;
-	}
-	
-	setDEMCollisionsEnabled(value)
-	{
-		if(this.useDEMCollisions !== value)
-		{
-			this.useDEMCollisions = value;
-			this.dispatchEvent({"type": "use_demcollisions_changed", "viewer": this});
-		};
-	}
-
-	getDEMCollisionsEnabled()
-	{
-		return this.useDEMCollisions;
-	}
 
 	setEDLEnabled(value)
 	{
@@ -822,33 +737,30 @@ class PotreeObject extends THREE.EventDispatcher
 			bbRoot.children = visibleBoxes;
 		}
 
-		if(!this.freeze)
+		var result = Potree.updatePointClouds(scene.pointclouds, camera, this.renderer);
+
+		if(result.lowestSpacing !== Infinity)
 		{
-			var result = Potree.updatePointClouds(scene.pointclouds, camera, this.renderer);
+			var near = result.lowestSpacing * 10.0;
+			var far = -this.getBoundingBox().applyMatrix4(camera.matrixWorldInverse).min.z;
 
-			if(result.lowestSpacing !== Infinity)
+			far = Math.max(far * 1.5, 1000);
+			near = Math.min(100.0, Math.max(0.01, near));
+			far = Math.max(far, near + 1000);
+
+			if(near === Infinity)
 			{
-				var near = result.lowestSpacing * 10.0;
-				var far = -this.getBoundingBox().applyMatrix4(camera.matrixWorldInverse).min.z;
-
-				far = Math.max(far * 1.5, 1000);
-				near = Math.min(100.0, Math.max(0.01, near));
-				far = Math.max(far, near + 1000);
-
-				if(near === Infinity)
-				{
-					near = 0.1;
-				}
-				
-				camera.near = near;
-				camera.far = far;
+				near = 0.1;
 			}
+			
+			camera.near = near;
+			camera.far = far;
+		}
 
-			if(this.scene.cameraMode == Potree.CameraMode.ORTHOGRAPHIC)
-			{
-				camera.near = -camera.far;
-			}
-		} 
+		if(this.scene.cameraMode == Potree.CameraMode.ORTHOGRAPHIC)
+		{
+			camera.near = -camera.far;
+		}
 		
 		this.scene.cameraP.fov = this.fov;
 		
@@ -983,8 +895,6 @@ class PotreeObject extends THREE.EventDispatcher
 				this.potreeRenderer.render();
 			}
 		}
-
-		this.renderer.render(this.overlay, this.overlayCamera);
 	}
 
 	resize()

@@ -88,19 +88,23 @@ class PotreeObject extends THREE.EventDispatcher
 
 		this.clippingTool.setScene(this.scene);
 		
-		var onPointcloudAdded = (e) => {
-			if(this.scene.pointclouds.length === 1) {
+		var onPointcloudAdded = (e) =>
+		{
+			if(this.scene.pointclouds.length === 1)
+			{
 				var speed = e.pointcloud.boundingBox.getSize().length();
 				speed = speed / 5;
 				this.setMoveSpeed(speed);
 			}
 		};
 
-		var onVolumeRemoved = (e) => {
+		var onVolumeRemoved = (e) =>
+		{
 			this.inputHandler.deselect(e.volume);
 		};
 
-		this.addEventListener("scene_changed", (e) => {
+		this.addEventListener("scene_changed", (e) =>
+		{
 			this.inputHandler.setScene(e.scene);
 			this.clippingTool.setScene(this.scene);
 			
@@ -132,8 +136,10 @@ class PotreeObject extends THREE.EventDispatcher
 		this.scaleFactor = 1;
 	}
 
-	setScene (scene) {
-		if(scene === this.scene) {
+	setScene(scene)
+	{
+		if(scene === this.scene)
+		{
 			return;
 		}
 
@@ -148,53 +154,72 @@ class PotreeObject extends THREE.EventDispatcher
 
 		$(".annotation").detach();
 
-		if(!this.onAnnotationAdded) {
-			this.onAnnotationAdded = e => {
-				e.annotation.traverse(node => {
+		if(!this.onAnnotationAdded)
+		{
+			this.onAnnotationAdded = e =>
+			{
+				e.annotation.traverse(node =>
+				{
 					node.scene = this.scene;
 				});
 			};
 		}
 
-		if(oldScene) {
+		if(oldScene)
+		{
 			oldScene.annotations.removeEventListener("annotation_added", this.onAnnotationAdded);
 		}
 		this.scene.annotations.addEventListener("annotation_added", this.onAnnotationAdded);
 	};
 
-	getControls (navigationMode) {
-		if(navigationMode === Potree.OrbitControls) {
+	getControls(navigationMode)
+	{
+		if(navigationMode === Potree.OrbitControls)
+		{
 			return this.orbitControls;
-		} else if(navigationMode === Potree.FirstPersonControls) {
+		}
+		else if(navigationMode === Potree.FirstPersonControls)
+		{
 			return this.fpControls;
-		} else if(navigationMode === Potree.EarthControls) {
+		}
+		else if(navigationMode === Potree.EarthControls)
+		{
 			return this.earthControls;
-		} else {
+		}
+		else
+		{
 			return null;
 		}
 	}
 
-	getMinNodeSize () {
+	getMinNodeSize()
+	{
 		return this.minNodeSize;
 	};
 
-	setMinNodeSize (value) {
-		if(this.minNodeSize !== value) {
+	setMinNodeSize(value)
+	{
+		if(this.minNodeSize !== value)
+		{
 			this.minNodeSize = value;
 			this.dispatchEvent({"type": "minnodesize_changed", "viewer": this});
 		}
 	};
 
-	getBackground () {
+	getBackground()
+	{
 		return this.background;
 	};
 
-	setBackground(bg){
-		if(this.background === bg) {
+	setBackground(bg)
+	{
+		if(this.background === bg)
+		{
 			return;
 		}
 
-		if(bg === "skybox"){
+		if(bg === "skybox")
+		{
 			this.skybox = Potree.utils.loadSkybox(new URL(Potree.resourcePath + "/textures/skybox2/").href);
 		}
 
@@ -202,62 +227,77 @@ class PotreeObject extends THREE.EventDispatcher
 		this.dispatchEvent({"type": "background_changed", "viewer": this});
 	}
 
-	setNavigationMode (value) {
+	setNavigationMode(value)
+	{
 		this.scene.view.navigationMode = value;
 	};
 
-	setShowBoundingBox (value) {
-		if(this.showBoundingBox !== value) {
+	setShowBoundingBox(value)
+	{
+		if(this.showBoundingBox !== value)
+		{
 			this.showBoundingBox = value;
 			this.dispatchEvent({"type": "show_boundingbox_changed", "viewer": this});
 		}
 	};
 
-	getShowBoundingBox () {
+	getShowBoundingBox()
+	{
 		return this.showBoundingBox;
 	};
 
-	setMoveSpeed (value) {
-		if(this.moveSpeed !== value) {
+	setMoveSpeed(value)
+	{
+		if(this.moveSpeed !== value)
+		{
 			this.moveSpeed = value;
 			this.dispatchEvent({"type": "move_speed_changed", "viewer": this, "speed": value});
 		}
 	};
 
-	getMoveSpeed () {
+	getMoveSpeed()
+	{
 		return this.moveSpeed;
 	};
 
-	setWeightClassification (w) {
-		for(var i = 0; i < this.scene.pointclouds.length; i++) {
+	setWeightClassification(w)
+	{
+		for(var i = 0; i < this.scene.pointclouds.length; i++)
+		{
 			this.scene.pointclouds[i].material.weightClassification = w;
 			this.dispatchEvent({"type": "attribute_weights_changed" + i, "viewer": this});
 		}
 	};
 
-	setFreeze (value) {
+	setFreeze(value)
+	{
 		value = Boolean(value);
-		if(this.freeze !== value) {
+		if(this.freeze !== value)
+		{
 			this.freeze = value;
 			this.dispatchEvent({"type": "freeze_changed", "viewer": this});
 		}
 	};
 
-	getFreeze () {
+	getFreeze()
+	{
 		return this.freeze;
 	};
 
-	getClipTask(){
+	getClipTask()
+	{
 		return this.clipTask;
 	}
 
-	getClipMethod(){
+	getClipMethod()
+	{
 		return this.clipMethod;
 	}
 
-	setClipTask(value){
-		if(this.clipTask !== value){
-
+	setClipTask(value)
+	{
+		if(this.clipTask !== value)
+		{
 			this.clipTask = value;
 
 			this.dispatchEvent({
@@ -266,9 +306,10 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	}
 
-	setClipMethod(value){
-		if(this.clipMethod !== value){
-
+	setClipMethod(value)
+	{
+		if(this.clipMethod !== value)
+		{
 			this.clipMethod = value;
 			
 			this.dispatchEvent({
@@ -277,41 +318,49 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	}
 
-	setPointBudget (value) {
-		if(Potree.pointBudget !== value) {
+	setPointBudget(value)
+	{
+		if(Potree.pointBudget !== value)
+		{
 			Potree.pointBudget = parseInt(value);
 			this.dispatchEvent({"type": "point_budget_changed", "viewer": this});
 		}
 	};
 
-	getPointBudget () {
+	getPointBudget()
+	{
 		return Potree.pointBudget;
 	};
 
-	setShowAnnotations (value) {
-		if(this.showAnnotations !== value) {
+	setShowAnnotations(value)
+	{
+		if(this.showAnnotations !== value)
+		{
 			this.showAnnotations = value;
 			this.dispatchEvent({"type": "show_annotations_changed", "viewer": this});
 		}
 	}
 
-	getShowAnnotations () {
+	getShowAnnotations()
+	{
 		return this.showAnnotations;
 	}
 	
-	setDEMCollisionsEnabled(value){
-		if(this.useDEMCollisions !== value){
+	setDEMCollisionsEnabled(value)
+	{
+		if(this.useDEMCollisions !== value)
+		{
 			this.useDEMCollisions = value;
 			this.dispatchEvent({"type": "use_demcollisions_changed", "viewer": this});
 		};
 	};
 
-	getDEMCollisionsEnabled ()
+	getDEMCollisionsEnabled()
 	{
 		return this.useDEMCollisions;
 	};
 
-	setEDLEnabled (value)
+	setEDLEnabled(value)
 	{
 		value = Boolean(value);
 		if(this.useEDL !== value)
@@ -321,11 +370,12 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	};
 
-	getEDLEnabled () {
+	getEDLEnabled()
+	{
 		return this.useEDL;
 	};
 
-	setEDLRadius (value)
+	setEDLRadius(value)
 	{
 		if(this.edlRadius !== value)
 		{
@@ -334,12 +384,12 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	};
 
-	getEDLRadius ()
+	getEDLRadius()
 	{
 		return this.edlRadius;
 	};
 
-	setEDLStrength (value)
+	setEDLStrength(value)
 	{
 		if(this.edlStrength !== value)
 		{
@@ -348,12 +398,12 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	};
 
-	getEDLStrength ()
+	getEDLStrength()
 	{
 		return this.edlStrength;
 	};
 
-	setFOV (value)
+	setFOV(value)
 	{
 		if(this.fov !== value)
 		{
@@ -362,11 +412,12 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	};
 
-	getFOV () {
+	getFOV()
+	{
 		return this.fov;
 	};
 
-	setClassificationVisibility (key, value)
+	setClassificationVisibility(key, value)
 	{
 		if(!this.classifications[key])
 		{
@@ -380,9 +431,10 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	};
 
-	setLengthUnit (value)
+	setLengthUnit(value)
 	{
-		switch (value) {
+		switch(value)
+		{
 			case "m":
 				this.lengthUnit = this.LENGTH_UNITS.METER;
 				break;
@@ -493,7 +545,7 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	}
 
-	createControls ()
+	createControls()
 	{
 		// create FIRST PERSON CONTROLS
 		this.fpControls = new Potree.FirstPersonControls(this);
@@ -508,7 +560,7 @@ class PotreeObject extends THREE.EventDispatcher
 		this.earthControls.enabled = false;
 	};
 
-	toggleMap ()
+	toggleMap()
 	{
 		if(this.mapView)
 		{
@@ -516,12 +568,12 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	};
 
-	setServer (server)
+	setServer(server)
 	{
 		this.server = server;
 	}
 
-	initThree ()
+	initThree()
 	{
 		var width = window.innerWidth;
 		var height = window.innerHeight;
@@ -551,9 +603,10 @@ class PotreeObject extends THREE.EventDispatcher
 		gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);		
 	}
 
-	updateAnnotations () {
-
-		if(!this.visibleAnnotations){
+	updateAnnotations()
+	{
+		if(!this.visibleAnnotations)
+		{
 			this.visibleAnnotations = new Set();
 		}
 
@@ -571,11 +624,13 @@ class PotreeObject extends THREE.EventDispatcher
 		var visibleNow = [];
 		this.scene.annotations.traverse(annotation => {
 
-			if(annotation === this.scene.annotations) {
+			if(annotation === this.scene.annotations)
+			{
 				return true;
 			}
 
-			if(!annotation.visible) {
+			if(!annotation.visible)
+			{
 				return false;
 			}
 
@@ -614,10 +669,10 @@ class PotreeObject extends THREE.EventDispatcher
 
 			element.css("left", screenPos.x + "px");
 			element.css("top", screenPos.y + "px");
-			//element.css("display", "block");
 
 			var zIndex = 10000000 - distance * (10000000 / this.scene.cameraP.far);
-			if(annotation.descriptionVisible){
+			if(annotation.descriptionVisible)
+			{
 				zIndex += 10000000;
 			}
 			element.css("z-index", parseInt(zIndex));
@@ -763,10 +818,12 @@ class PotreeObject extends THREE.EventDispatcher
 			}
 		}
 
-		if(!this.freeze) {
+		if(!this.freeze)
+		{
 			var result = Potree.updatePointClouds(scene.pointclouds, camera, this.renderer);
 
-			if(result.lowestSpacing !== Infinity){
+			if(result.lowestSpacing !== Infinity)
+			{
 				var near = result.lowestSpacing * 10.0;
 				var far = -this.getBoundingBox().applyMatrix4(camera.matrixWorldInverse).min.z;
 
@@ -780,20 +837,21 @@ class PotreeObject extends THREE.EventDispatcher
 				
 				camera.near = near;
 				camera.far = far;
-			}else{
-				// don"t change near and far in this case
 			}
 
-			if(this.scene.cameraMode == Potree.CameraMode.ORTHOGRAPHIC) {
+			if(this.scene.cameraMode == Potree.CameraMode.ORTHOGRAPHIC)
+			{
 				camera.near = -camera.far;
 			}
 		} 
 		
 		this.scene.cameraP.fov = this.fov;
 		
-		// Navigation mode changed?
-		if(this.getControls(scene.view.navigationMode) !== this.controls) {
-			if(this.controls) {
+		//Navigation mode changed
+		if(this.getControls(scene.view.navigationMode) !== this.controls)
+		{
+			if(this.controls)
+			{
 				this.controls.enabled = false;
 				this.inputHandler.removeInputListener(this.controls);
 			}
@@ -803,7 +861,8 @@ class PotreeObject extends THREE.EventDispatcher
 			this.inputHandler.addInputListener(this.controls);
 		}
 		
-		if(this.controls !== null) {
+		if(this.controls !== null)
+		{
 			this.controls.setScene(scene);
 			this.controls.update(delta);
 
@@ -822,67 +881,69 @@ class PotreeObject extends THREE.EventDispatcher
 		camera.updateMatrixWorld();
 		camera.matrixWorldInverse.getInverse(camera.matrixWorld);
 
+		if(this._previousCamera === undefined)
 		{
-			if(this._previousCamera === undefined){
-				this._previousCamera = this.scene.getActiveCamera().clone();
-				this._previousCamera.rotation.copy(this.scene.getActiveCamera());
-			}
-
-			if(!this._previousCamera.matrixWorld.equals(camera.matrixWorld)){
-				this.dispatchEvent({
-					type: "camera_changed",
-					previous: this._previousCamera,
-					camera: camera
-				});
-			}else if(!this._previousCamera.projectionMatrix.equals(camera.projectionMatrix)){
-				this.dispatchEvent({
-					type: "camera_changed",
-					previous: this._previousCamera,
-					camera: camera
-				});
-			}
-
 			this._previousCamera = this.scene.getActiveCamera().clone();
 			this._previousCamera.rotation.copy(this.scene.getActiveCamera());
-
 		}
 
-		{ // update clip boxes
-			var boxes = [];
-			
-			// volumes with clipping enabled
-			boxes.push(...this.scene.volumes.filter(v => v.clip));
-
-			// profile segments
-			for(var profile of this.scene.profiles){
-				boxes.push(...profile.boxes);
-			}
-			
-			var clipBoxes = boxes.map( box => {
-				box.updateMatrixWorld();
-				var boxInverse = new THREE.Matrix4().getInverse(box.matrixWorld);
-				var boxPosition = box.getWorldPosition();
-				return {box: box, inverse: boxInverse, position: boxPosition};
+		if(!this._previousCamera.matrixWorld.equals(camera.matrixWorld))
+		{
+			this.dispatchEvent({
+				type: "camera_changed",
+				previous: this._previousCamera,
+				camera: camera
 			});
-
-			var clipPolygons = this.scene.polygonClipVolumes.filter(vol => vol.initialized);
-			
-			// set clip volumes in material
-			for(var pointcloud of this.scene.pointclouds.filter(pc => pc.visible)){
-				pointcloud.material.setClipBoxes(clipBoxes);
-				pointcloud.material.setClipPolygons(clipPolygons, this.clippingTool.maxPolygonVertices);
-				pointcloud.material.clipTask = this.clipTask;
-				pointcloud.material.clipMethod = this.clipMethod;
-			}
+		}
+		else if(!this._previousCamera.projectionMatrix.equals(camera.projectionMatrix))
+		{
+			this.dispatchEvent({
+				type: "camera_changed",
+				previous: this._previousCamera,
+				camera: camera
+			});
 		}
 
-		{ // update navigation cube
-			this.navigationCube.update(camera.rotation);
+		this._previousCamera = this.scene.getActiveCamera().clone();
+		this._previousCamera.rotation.copy(this.scene.getActiveCamera());
+
+		//Update clip boxes
+		var boxes = [];
+		
+		// volumes with clipping enabled
+		boxes.push(...this.scene.volumes.filter(v => v.clip));
+
+		// profile segments
+		for(var profile of this.scene.profiles)
+		{
+			boxes.push(...profile.boxes);
 		}
+		
+		var clipBoxes = boxes.map(box => {
+			box.updateMatrixWorld();
+			var boxInverse = new THREE.Matrix4().getInverse(box.matrixWorld);
+			var boxPosition = box.getWorldPosition();
+			return {box: box, inverse: boxInverse, position: boxPosition};
+		});
+
+		var clipPolygons = this.scene.polygonClipVolumes.filter(vol => vol.initialized);
+		
+		//Set clip volumes in material
+		for(var pointcloud of this.scene.pointclouds.filter(pc => pc.visible))
+		{
+			pointcloud.material.setClipBoxes(clipBoxes);
+			pointcloud.material.setClipPolygons(clipPolygons, this.clippingTool.maxPolygonVertices);
+			pointcloud.material.clipTask = this.clipTask;
+			pointcloud.material.clipMethod = this.clipMethod;
+		}
+
+		//Update navigation cube
+		this.navigationCube.update(camera.rotation);
 
 		this.updateAnnotations();
 		
-		if(this.mapView){
+		if(this.mapView)
+		{
 			this.mapView.update(delta);
 		}
 

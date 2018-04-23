@@ -1747,36 +1747,6 @@ Potree.Renderer = class Renderer {
 
 		let currentTextureBindingPoint = 0;
 
-		//if(!["r", "r2", "r0", "r26", "r22", "r06", "r24", "r20", "r04", "r00", "r02"].includes(node.name)){
-		//	if(!["r", "r2", "r0"].includes(node.name)){
-		//		continue;
-		//	}
-
-		//nodes = nodes.filter(node => {
-		//	return ["r", "r6", "r66", "r664", "r6646", "r6644", "r64", "r646", "r4", "r66446", "r6642", "r660", "r62", "r2", "r6640"].includes(node.name)});
-
-		//nodes = nodes.filter(node => {
-		//	return [
-		//		//"r", 
-		//		"r6", 
-		//		"r2", 
-		//		"r4", 
-		//		"r64", 
-		//		"r66", 
-		//		"r62", 
-		//		"r664", 
-		//		"r646", 
-		//		"r660", 
-		//		"r6646", 
-		//		//"r6644", 
-		//		//"r6642", 
-		//		//"r6640",
-		//		//"r66446", 
-		//		].includes(node.name)});
-
-	
-
-
 		if (material.pointSizeType >= 0) {
 			if (material.pointSizeType === Potree.PointSizeType.ADAPTIVE ||
 				material.pointColorType === Potree.PointColorType.LOD) {
@@ -1791,27 +1761,6 @@ Potree.Renderer = class Renderer {
 
 			}
 		}
-
-		//nodes = nodes.filter(node => {
-		//	return [
-		//		"r", 
-		//		"r6", 
-		//		"r2", 
-		//		"r4", 
-		//		"r64", 
-		//		"r66", 
-		//		"r62", 
-		//		"r664", 
-		//		"r646", 
-		//		"r660", 
-
-		//		"r6646", 
-
-		//		"r6644", 
-		//		"r6642", 
-		//		"r6640",
-		//		"r66446", 
-		//		].includes(node.name)});
 
 		{ // UPDATE SHADER AND TEXTURES
 			if (!this.shaders.has(material)) {
@@ -1829,11 +1778,14 @@ Potree.Renderer = class Renderer {
 
 				let numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
 				let numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
+				//let numClipSpheres = (material.clipSpheres && material.clipSpheres.length) ? material.clipSpheres.length : 0;
+				let numClipSpheres = (params.clipSpheres && params.clipSpheres.length) ? params.clipSpheres.length : 0;
 				let numClipPolygons = (material.clipPolygons && material.clipPolygons.length) ? material.clipPolygons.length : 0;
 				let defines = [
 					`#define num_shadowmaps ${shadowMaps.length}`,
 					`#define num_snapshots ${numSnapshots}`,
 					`#define num_clipboxes ${numClipBoxes}`,
+					`#define num_clipspheres ${numClipSpheres}`,
 					`#define num_clippolygons ${numClipPolygons}`,
 				];
 
@@ -1950,11 +1902,42 @@ Potree.Renderer = class Renderer {
 			shader.setUniform1i("clipMethod", material.clipMethod);
 
 			if (material.clipBoxes && material.clipBoxes.length > 0) {
-				
-				let flattenedMatrices = [].concat(...material.clipBoxes.map(c => c.inverse.elements));
+				//let flattenedMatrices = [].concat(...material.clipBoxes.map(c => c.inverse.elements));
+
+				//const lClipBoxes = shader.uniformLocations["clipBoxes[0]"];
+				//gl.uniformMatrix4fv(lClipBoxes, false, flattenedMatrices);
 
 				const lClipBoxes = shader.uniformLocations["clipBoxes[0]"];
-				gl.uniformMatrix4fv(lClipBoxes, false, flattenedMatrices);
+				gl.uniformMatrix4fv(lClipBoxes, false, material.uniforms.clipBoxes.value);
+			}
+
+			// TODO CLIPSPHERES
+			if(params.clipSpheres && params.clipSpheres.length > 0){
+
+				let clipSpheres = params.clipSpheres;
+
+				let matrices = [];
+				for(let clipSphere of clipSpheres){
+					//let mScale = new THREE.Matrix4().makeScale(...clipSphere.scale.toArray());
+					//let mTranslate = new THREE.Matrix4().makeTranslation(...clipSphere.position.toArray());
+
+					//let clipToWorld = new THREE.Matrix4().multiplyMatrices(mTranslate, mScale);
+					let clipToWorld = clipSphere.matrixWorld;
+					let viewToWorld = camera.matrixWorld
+					let worldToClip = new THREE.Matrix4().getInverse(clipToWorld);
+
+					let viewToClip = new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
+
+					matrices.push(viewToClip);
+				}
+
+				let flattenedMatrices = [].concat(...matrices.map(matrix => matrix.elements));
+
+				const lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
+				gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
+				
+				//const lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
+				//gl.uniformMatrix4fv(lClipSpheres, false, material.uniforms.clipSpheres.value);
 			}
 
 			shader.setUniform1f("size", material.size);
@@ -2079,7 +2062,7 @@ Potree.Renderer = class Renderer {
 		gl.activeTexture(gl.TEXTURE0);
 	}
 
-	render(scene, camera, target, params = {}) {
+	render(scene, camera, target = null, params = {}) {
 
 		const gl = this.gl;
 
@@ -2577,6 +2560,7 @@ uniform mat4 modelMatrix;
 uniform mat4 modelViewMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
+uniform mat4 uViewInv;
 
 uniform float uScreenWidth;
 uniform float uScreenHeight;
@@ -2605,11 +2589,16 @@ uniform int clipMethod;
 	uniform mat4 clipBoxes[num_clipboxes];
 #endif
 
+#if defined(num_clipspheres) && num_clipspheres > 0
+	uniform mat4 uClipSpheres[num_clipspheres];
+#endif
+
 #if defined(num_clippolygons) && num_clippolygons > 0
 	uniform int uClipPolygonVCount[num_clippolygons];
 	uniform vec3 uClipPolygonVertices[num_clippolygons * 8];
 	uniform mat4 uClipPolygonWVP[num_clippolygons];
 #endif
+
 
 uniform float size;
 uniform float minSize;
@@ -2653,15 +2642,6 @@ uniform sampler2D classificationLUT;
 uniform sampler2D uShadowMap[num_shadowmaps];
 uniform mat4 uShadowWorldView[num_shadowmaps];
 uniform mat4 uShadowProj[num_shadowmaps];
-#endif
-
-#if defined(num_snapshots) && num_snapshots > 0
-uniform sampler2D uSnapshot[num_snapshots];
-uniform mat4 uSnapView[num_snapshots];
-uniform mat4 uSnapProj[num_snapshots];
-uniform mat4 uSnapScreenToCurrentView[num_snapshots];
-
-varying float vSnapTextureID;
 #endif
 
 varying vec3	vColor;
@@ -3263,19 +3243,22 @@ void main() {
 
 	// CLIPPING
 	doClipping();
-	
 
+	#if defined(num_clipspheres) && num_clipspheres > 0
+		for(int i = 0; i < num_clipspheres; i++){
+			vec4 sphereLocal = uClipSpheres[i] * mvPosition;
 
+			float distance = length(sphereLocal.xyz);
 
-
-	//#if defined(num_snapshots) && num_snapshots > 0
-
-	//	for(int i = 0; i < num_snapshots; i++){
-	//		vSnapProjected[i] = uSnapProj[i] * uSnapView[i] * modelMatrix * vec4(position, 1.0);	
-	//		vSnapProjectedDistance[i] = -(uSnapView[i] * modelMatrix * vec4(position, 1.0)).z;
-	//	}
-	//	
-	//#endif
+			if(distance < 1.0){
+				float w = distance;
+				vec3 cGradient = texture2D(gradient, vec2(w, 1.0 - w)).rgb;
+				
+				vColor = cGradient;
+				//vColor = cGradient * 0.7 + vColor * 0.3;
+			}
+		}
+	#endif
 
 	#if defined(num_shadowmaps) && num_shadowmaps > 0
 
@@ -3335,11 +3318,13 @@ void main() {
 
 	#endif
 
-	if(uDebug){
-		vColor.b = (vColor.r + vColor.g + vColor.b) / 3.0;
-		vColor.r = 1.0;
-		vColor.g = 1.0;
-	}
+	//vColor = vec3(1.0, 0.0, 0.0);
+
+	//if(uDebug){
+	//	vColor.b = (vColor.r + vColor.g + vColor.b) / 3.0;
+	//	vColor.r = 1.0;
+	//	vColor.g = 1.0;
+	//}
 
 }
 `
@@ -3378,21 +3363,6 @@ varying float	vRadius;
 varying float 	vPointSize;
 varying vec3 	vPosition;
 
-#if defined(num_snapshots) && num_snapshots > 0
-uniform sampler2D uSnapshot[num_snapshots];
-uniform sampler2D uSnapshotDepth[num_snapshots];
-uniform mat4 uSnapView[num_snapshots];
-uniform mat4 uSnapProj[num_snapshots];
-uniform mat4 uSnapProjInv[num_snapshots];
-uniform mat4 uSnapViewInv[num_snapshots];
-
-varying float vSnapTextureID;
-#endif
-
-
-
-
-
 
 float specularStrength = 1.0;
 
@@ -3400,59 +3370,6 @@ void main() {
 
 	vec3 color = vColor;
 	float depth = gl_FragCoord.z;
-
-
-	//#if defined(num_snapshots) && num_snapshots > 0
-	//	vec3 sRGB = vec3(0.0, 0.0, 0.0);
-	//	float sA = 0.0;
-
-	//	for(int i = 0; i < num_snapshots; i++){
-
-	//		float snapLinearDistance = 0.0;
-	//		float currentLinearDistance = vSnapProjectedDistance[i];
-	//		vec2 uv;
-
-	//		{
-	//			vec2 pc = vec2(gl_PointCoord.x - 0.5, (1.0 - gl_PointCoord.y) - 0.5);
-	//			vec2 offset = (pc * vPointSize) / vec2(uScreenWidth, uScreenHeight);
-	//	
-	//			uv = 0.5 * (vSnapProjected[i].xy /vSnapProjected[i].w) + 0.5 + offset;	
-	//			
-	//			vec4 td = texture2D(uSnapshotDepth[i], uv);
-	//			float d = td.r;
-
-	//			// TODO save linear distance in uSnapshotDepth!!!
-	//			vec4 snapViewPos = uSnapProjInv[i] * vec4(uv * 2.0 - 1.0, d * 2.0 - 1.0, 1.0);
-	//			snapViewPos = snapViewPos / snapViewPos.w;
-	//			snapLinearDistance = -snapViewPos.z;
-
-	//		}
-
-	//		if(abs(currentLinearDistance - snapLinearDistance) < vRadius * 1.0){
-	//			vec4 col = texture2D(uSnapshot[i], uv);
-	//			//vec4 col = vec4(0.5, 1.0, 0.0, 1.0);
-	//			sRGB += col.rgb;
-
-	//			if(col.a != 0.0){
-	//				sA = sA + 1.0;
-	//			}
-	//		}else{
-	//			//sRGB += vColor;
-	//			//sA += 1.0;
-	//			
-	//		}
-
-	//	}
-
-
-	//	color = sRGB / sA;
-	//	if(sA == 0.0){
-	//		//color = vColor;
-	//		discard;
-	//	}
-	//
-	//#endif
-
 
 	#if defined(circle_point_shape) || defined(paraboloid_point_shape) 
 		float u = 2.0 * gl_PointCoord.x - 1.0;
@@ -4657,7 +4574,7 @@ Potree.GreyhoundLoader.load = function load (url, callback) {
 	try {
 		// We assume everything ater the string 'greyhound://' is the server url
 		let serverURL = url.split('greyhound://')[1];
-		if (serverURL.split('http://').length === 1) {
+		if (serverURL.split('http://').length === 1 && serverURL.split('https://').length === 1) {
 			serverURL = 'http://' + serverURL;
 		}
 
@@ -5299,7 +5216,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this._pointColorType = Potree.PointColorType.RGB;
 		this._useClipBox = false;
 		this.clipBoxes = [];
-		this.numClipBoxes = 0;
+		//this.clipSpheres = [];
 		this.clipPolygons = [];
 		this._weighted = false;
 		this._gradient = Potree.Gradients.SPECTRAL;
@@ -5346,17 +5263,21 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			octreeSize:			{ type: "f", value: 0 },
 			bbSize:				{ type: "fv", value: [0, 0, 0] },
 			elevationRange:		{ type: "2fv", value: [0, 0] },
+
 			clipBoxCount:		{ type: "f", value: 0 },
+			//clipSphereCount:	{ type: "f", value: 0 },
 			clipPolygonCount:	{ type: "i", value: 0 },
+			clipBoxes:			{ type: "Matrix4fv", value: [] },
+			//clipSpheres:		{ type: "Matrix4fv", value: [] },
+			clipPolygons:		{ type: "3fv", value: [] },
+			clipPolygonVCount:	{ type: "iv", value: [] },
+			clipPolygonVP:		{ type: "Matrix4fv", value: [] },
+
 			visibleNodes:		{ type: "t", value: this.visibleNodesTexture },
 			pcIndex:			{ type: "f", value: 0 },
 			gradient:			{ type: "t", value: this.gradientTexture },
 			classificationLUT:	{ type: "t", value: this.classificationTexture },
 			uHQDepthMap:		{ type: "t", value: null },
-			clipBoxes:			{ type: "Matrix4fv", value: [] },
-			clipPolygons:		{ type: "3fv", value: [] },
-			clipPolygonVCount:	{ type: "iv", value: [] },
-			clipPolygonVP:		{ type: "Matrix4fv", value: [] },
 			toModel:			{ type: "Matrix4f", value: [] },
 			diffuse:			{ type: "fv", value: [1, 1, 1] },
 			transition:			{ type: "f", value: 0.5 },
@@ -5508,14 +5429,6 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			defines.push('#define weighted_splats');
 		}
 
-		if (this.numClipBoxes > 0) {
-			defines.push('#define use_clip_box');
-		}
-
-		if(this.clipPolygons.length > 0) {
-			defines.push('#define use_clip_polygon');
-		}
-
 		for(let [key, value] of this.defines){
 			defines.push(value);
 		}
@@ -5528,19 +5441,18 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			return;
 		}
 
-		this.clipBoxes = clipBoxes;
-		let doUpdate = (this.numClipBoxes !== clipBoxes.length) && (clipBoxes.length === 0 || this.numClipBoxes === 0);
+		let doUpdate = (this.clipBoxes.length !== clipBoxes.length) && (clipBoxes.length === 0 || this.clipBoxes.length === 0);
 
-		this.numClipBoxes = clipBoxes.length;
-		this.uniforms.clipBoxCount.value = this.numClipBoxes;
+		this.uniforms.clipBoxCount.value = this.clipBoxes.length;
+		this.clipBoxes = clipBoxes;
 
 		if (doUpdate) {
 			this.updateShaderSource();
 		}
 
-		this.uniforms.clipBoxes.value = new Float32Array(this.numClipBoxes * 16);
+		this.uniforms.clipBoxes.value = new Float32Array(this.clipBoxes.length * 16);
 
-		for (let i = 0; i < this.numClipBoxes; i++) {
+		for (let i = 0; i < this.clipBoxes.length; i++) {
 			let box = clipBoxes[i];
 
 			this.uniforms.clipBoxes.value.set(box.inverse.elements, 16 * i);
@@ -5552,6 +5464,35 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			}
 		}
 	}
+
+	//setClipSpheres(clipSpheres){
+	//	if (!clipSpheres) {
+	//		return;
+	//	}
+
+	//	let doUpdate = (this.clipSpheres.length !== clipSpheres.length) && (clipSpheres.length === 0 || this.clipSpheres.length === 0);
+
+	//	this.uniforms.clipSphereCount.value = this.clipSpheres.length;
+	//	this.clipSpheres = clipSpheres;
+
+	//	if (doUpdate) {
+	//		this.updateShaderSource();
+	//	}
+
+	//	this.uniforms.clipSpheres.value = new Float32Array(this.clipSpheres.length * 16);
+
+	//	for (let i = 0; i < this.clipSpheres.length; i++) {
+	//		let sphere = clipSpheres[i];
+
+	//		this.uniforms.clipSpheres.value.set(sphere.matrixWorld.elements, 16 * i);
+	//	}
+
+	//	for (let i = 0; i < this.uniforms.clipSpheres.value.length; i++) {
+	//		if (Number.isNaN(this.uniforms.clipSpheres.value[i])) {
+	//			this.uniforms.clipSpheres.value[i] = Infinity;
+	//		}
+	//	}
+	//}
 
 	setClipPolygons(clipPolygons, maxPolygonVertices) {
 		if(!clipPolygons){
@@ -8497,6 +8438,84 @@ Potree.EarthControls = class EarthControls extends THREE.EventDispatcher {
 	}
 };
 
+/**
+ * @author chrisl / Geodan
+ *
+ * adapted from Potree.FirstPersonControls by
+ *
+ * @author mschuetz / http://mschuetz.at
+ *
+ * and THREE.DeviceOrientationControls  by
+ *
+ * @author richt / http://richt.me
+ * @author WestLangley / http://github.com/WestLangley
+ *
+ *
+ *
+ */
+
+Potree.DeviceOrientationControls = class DeviceOrientationControls extends THREE.EventDispatcher{
+	constructor(viewer){
+		super();
+
+		this.viewer = viewer;
+		this.renderer = viewer.renderer;
+
+		this.scene = null;
+		this.sceneControls = new THREE.Scene();
+
+		this.screenOrientation = window.orientation || 0;
+
+		let deviceOrientationChange = e => {
+			this.deviceOrientation = e;
+		};
+
+		let screenOrientationChange = e => {
+			this.screenOrientation = window.orientation || 0;
+		};
+
+		if ('ondeviceorientationabsolute' in window) {
+			window.addEventListener('deviceorientationabsolute', deviceOrientationChange);
+		} else if ('ondeviceorientation' in window) {
+			window.addEventListener('deviceorientation', deviceOrientationChange);
+		} else {
+			console.warn("No device orientation found.");
+		}
+		// window.addEventListener('deviceorientation', deviceOrientationChange);
+		window.addEventListener('orientationchange', screenOrientationChange);
+	}
+
+	setScene (scene) {
+		this.scene = scene;
+	}
+
+	update (delta) {
+		let computeQuaternion = function (alpha, beta, gamma, orient) {
+			let quaternion = new THREE.Quaternion();
+
+			let zee = new THREE.Vector3(0, 0, 1);
+			let euler = new THREE.Euler();
+			let q0 = new THREE.Quaternion();
+
+			euler.set(beta, gamma, alpha, 'ZXY');
+			quaternion.setFromEuler(euler);
+			quaternion.multiply(q0.setFromAxisAngle(zee, -orient));
+
+			return quaternion;
+		};
+
+		if (typeof this.deviceOrientation !== 'undefined') {
+			let alpha = this.deviceOrientation.alpha ? THREE.Math.degToRad(this.deviceOrientation.alpha) : 0;
+			let beta = this.deviceOrientation.beta ? THREE.Math.degToRad(this.deviceOrientation.beta) : 0;
+			let gamma = this.deviceOrientation.gamma ? THREE.Math.degToRad(this.deviceOrientation.gamma) : 0;
+			let orient = this.screenOrientation ? THREE.Math.degToRad(this.screenOrientation) : 0;
+
+			let quaternion = computeQuaternion(alpha, beta, gamma, orient);
+			viewer.scene.cameraP.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+		}
+	}
+};
+
 
 /**
  *
@@ -8691,6 +8710,7 @@ Potree.Annotation = class extends THREE.EventDispatcher {
 		this.scene = null;
 		this._title = args.title || 'No Title';
 		this._description = args.description || '';
+		this.offset = new THREE.Vector3();
 
 		if (!args.position) {
 			this.position = null;
@@ -8791,6 +8811,161 @@ Potree.Annotation = class extends THREE.EventDispatcher {
 		this.display = false;
 		//this.display = true;
 
+	}
+
+	installHandles(viewer){
+		if(this.handles !== undefined){
+			return;
+		}
+
+		let domElement = $(`
+			<div style="position: absolute; left: 300; top: 200; pointer-events: none">
+				<svg width="300" height="600">
+					<line x1="0" y1="0" x2="1200" y2="200" style="stroke: black; stroke-width:2" />
+					<circle cx="50" cy="50" r="4" stroke="black" stroke-width="2" fill="gray" />
+					<circle cx="150" cy="50" r="4" stroke="black" stroke-width="2" fill="gray" />
+				</svg>
+			</div>
+		`);
+		
+		let svg = domElement.find("svg")[0];
+		let elLine = domElement.find("line")[0];
+		let elStart = domElement.find("circle")[0];
+		let elEnd = domElement.find("circle")[1];
+
+		let setCoordinates = (start, end) => {
+			elStart.setAttribute("cx", `${start.x}`);
+			elStart.setAttribute("cy", `${start.y}`);
+
+			elEnd.setAttribute("cx", `${end.x}`);
+			elEnd.setAttribute("cy", `${end.y}`);
+
+			elLine.setAttribute("x1", start.x);
+			elLine.setAttribute("y1", start.y);
+			elLine.setAttribute("x2", end.x);
+			elLine.setAttribute("y2", end.y);
+
+			let box = svg.getBBox();
+			svg.setAttribute("width", `${box.width}`);
+			svg.setAttribute("height", `${box.height}`);
+			svg.setAttribute("viewBox", `${box.x} ${box.y} ${box.width} ${box.height}`);
+
+			let ya = start.y - end.y;
+			let xa = start.x - end.x;
+
+			if(ya > 0){
+				start.y = start.y - ya;
+			}
+			if(xa > 0){
+				start.x = start.x - xa;
+			}
+
+			domElement.css("left", `${start.x}px`);
+			domElement.css("top", `${start.y}px`);
+
+		};
+
+		$(viewer.renderArea).append(domElement);
+
+
+		let annotationStartPos = this.position.clone();
+		let annotationStartOffset = this.offset.clone();
+
+		$(this.domElement).draggable({
+			start: (event, ui) => {
+				annotationStartPos = this.position.clone();
+				annotationStartOffset = this.offset.clone();
+				$(this.domElement).find(".annotation-titlebar").css("pointer-events", "none");
+
+				console.log($(this.domElement).find(".annotation-titlebar"));
+			},
+			stop: () => {
+				$(this.domElement).find(".annotation-titlebar").css("pointer-events", "");
+			},
+			drag: (event, ui ) => {
+				let renderAreaWidth = viewer.renderer.getSize().width;
+				let renderAreaHeight = viewer.renderer.getSize().height;
+
+				let diff = {
+					x: ui.originalPosition.left - ui.position.left, 
+					y: ui.originalPosition.top - ui.position.top
+				};
+
+				let nDiff = {
+					x: -(diff.x / renderAreaWidth) * 2,
+					y: (diff.y / renderAreaWidth) * 2
+				};
+
+				let camera = viewer.scene.getActiveCamera();
+				let oldScreenPos = new THREE.Vector3()
+					.addVectors(annotationStartPos, annotationStartOffset)
+					.project(camera);
+
+				let newScreenPos = oldScreenPos.clone();
+				newScreenPos.x += nDiff.x;
+				newScreenPos.y += nDiff.y;
+
+				let newPos = newScreenPos.clone();
+				newPos.unproject(camera);
+
+				let newOffset = new THREE.Vector3().subVectors(newPos, this.position);
+				this.offset.copy(newOffset);
+			}
+		});
+
+		let updateCallback = () => {
+			let position = this.position;
+			let scene = viewer.scene;
+
+			let renderAreaWidth = viewer.renderer.getSize().width;
+			let renderAreaHeight = viewer.renderer.getSize().height;
+
+			let start = this.position.clone();
+			let end = new THREE.Vector3().addVectors(this.position, this.offset);
+
+			let toScreen = (position) => {
+				let camera = scene.getActiveCamera();
+				let screenPos = new THREE.Vector3();
+
+				let worldView = new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+				let ndc = new THREE.Vector4(position.x, position.y, position.z, 1.0).applyMatrix4(worldView);
+				// limit w to small positive value, in case position is behind the camera
+				ndc.w = Math.max(ndc.w, 0.1);
+				ndc.divideScalar(ndc.w);
+
+				screenPos.copy(ndc);
+				screenPos.x = renderAreaWidth * (screenPos.x + 1) / 2;
+				screenPos.y = renderAreaHeight * (1 - (screenPos.y + 1) / 2);
+
+				return screenPos;
+			};
+			
+			start = toScreen(start);
+			end = toScreen(end);
+
+			setCoordinates(start, end);
+
+		};
+
+		viewer.addEventListener("update", updateCallback);
+
+		this.handles = {
+			domElement: domElement,
+			setCoordinates: setCoordinates,
+			updateCallback: updateCallback
+		};
+	}
+
+	removeHandles(viewer){
+		if(this.handles === undefined){
+			return;
+		}
+
+		//$(viewer.renderArea).remove(this.handles.domElement);
+		this.handles.domElement.remove();
+		viewer.removeEventListener("update", this.handles.updateCallback);
+
+		delete this.handles;
 	}
 
 	get visible () {
@@ -10596,6 +10771,19 @@ Potree.PointCloudOctree = class extends Potree.PointCloudTree {
 
 	get progress () {
 		return this.visibleNodes.length / this.visibleGeometry.length;
+	}
+
+	find(name){
+		let node = null;
+		for(let char of name){
+			if(char === "r"){
+				node = this.root;
+			}else{
+				node = node.children[char];
+			}
+		}
+
+		return node;
 	}
 };
 
@@ -14311,14 +14499,102 @@ Potree.Volume = class extends THREE.Object3D {
 	constructor (args = {}) {
 		super();
 
-		this.constructor.counter = (this.constructor.counter === undefined) ? 0 : this.constructor.counter + 1;
-
-		this.name = 'volume_' + this.constructor.counter;
-
 		this._clip = args.clip || false;
 		this._visible = true;
 		this.showVolumeLabel = true;
 		this._modifiable = args.modifiable || true;
+
+		this.label = new Potree.TextSprite('0');
+		this.label.setBorderColor({r: 0, g: 255, b: 0, a: 0.0});
+		this.label.setBackgroundColor({r: 0, g: 255, b: 0, a: 0.0});
+		this.label.material.depthTest = false;
+		this.label.material.depthWrite = false;
+		this.label.material.transparent = true;
+		this.label.position.y -= 0.5;
+		this.add(this.label);
+
+		this.label.updateMatrixWorld = () => {
+			let volumeWorldPos = new THREE.Vector3();
+			volumeWorldPos.setFromMatrixPosition(this.matrixWorld);
+			this.label.position.copy(volumeWorldPos);
+			this.label.updateMatrix();
+			this.label.matrixWorld.copy(this.label.matrix);
+			this.label.matrixWorldNeedsUpdate = false;
+
+			for (let i = 0, l = this.label.children.length; i < l; i++) {
+				this.label.children[ i ].updateMatrixWorld(true);
+			}
+		};
+
+		{ // event listeners
+			this.addEventListener('select', e => {});
+			this.addEventListener('deselect', e => {});
+		}
+
+	}
+
+	get visible(){
+		return this._visible;
+	}
+
+	set visible(value){
+		if(this._visible !== value){
+			this._visible = value;
+
+			this.dispatchEvent({type: "visibility_changed", object: this});
+		}
+	}
+
+	getVolume () {
+		console.warn("override this in subclass");
+	}
+
+	update () {
+		
+	};
+
+	raycast (raycaster, intersects) {
+
+	}
+
+	get clip () {
+		return this._clip;
+	}
+
+	set clip (value) {
+
+		if(this._clip !== value){
+			this._clip = value;
+
+			this.update();
+
+			this.dispatchEvent({
+				type: "clip_changed",
+				object: this
+			});
+		}
+		
+	}
+
+	get modifieable () {
+		return this._modifiable;
+	}
+
+	set modifieable (value) {
+		this._modifiable = value;
+
+		this.update();
+	}
+};
+
+
+Potree.BoxVolume = class BoxVolume extends Potree.Volume{
+
+	constructor(args = {}){
+		super(args);
+
+		this.constructor.counter = (this.constructor.counter === undefined) ? 0 : this.constructor.counter + 1;
+		this.name = 'box_' + this.constructor.counter;
 
 		let boxGeometry = new THREE.BoxGeometry(1, 1, 1);
 		boxGeometry.computeBoundingBox();
@@ -14354,7 +14630,6 @@ Potree.Volume = class extends THREE.Object3D {
 			boxFrameGeometry.vertices.push(new THREE.Vector3(-0.5, 0.5, -0.5));
 		}
 
-		this.dimension = new THREE.Vector3(1, 1, 1);
 		this.material = new THREE.MeshBasicMaterial({
 			color: 0x00ff00,
 			transparent: true,
@@ -14370,53 +14645,10 @@ Potree.Volume = class extends THREE.Object3D {
 		// this.frame.mode = THREE.Lines;
 		this.add(this.frame);
 
-		this.label = new Potree.TextSprite('0');
-		this.label.setBorderColor({r: 0, g: 255, b: 0, a: 0.0});
-		this.label.setBackgroundColor({r: 0, g: 255, b: 0, a: 0.0});
-		this.label.material.depthTest = false;
-		this.label.material.depthWrite = false;
-		this.label.material.transparent = true;
-		this.label.position.y -= 0.5;
-		this.add(this.label);
-
-		this.label.updateMatrixWorld = () => {
-			let volumeWorldPos = new THREE.Vector3();
-			volumeWorldPos.setFromMatrixPosition(this.matrixWorld);
-			this.label.position.copy(volumeWorldPos);
-			this.label.updateMatrix();
-			this.label.matrixWorld.copy(this.label.matrix);
-			this.label.matrixWorldNeedsUpdate = false;
-
-			for (let i = 0, l = this.label.children.length; i < l; i++) {
-				this.label.children[ i ].updateMatrixWorld(true);
-			}
-		};
-
-		{ // event listeners
-			this.addEventListener('select', e => {});
-			this.addEventListener('deselect', e => {});
-		}
-
 		this.update();
 	}
 
-	get visible(){
-		return this._visible;
-	}
-
-	set visible(value){
-		if(this._visible !== value){
-			this._visible = value;
-
-			this.dispatchEvent({type: "visibility_changed", object: this});
-		}
-	}
-
-	getVolume () {
-		return Math.abs(this.scale.x * this.scale.y * this.scale.z);
-	}
-
-	update () {
+	update(){
 		this.boundingBox = this.box.geometry.boundingBox;
 		this.boundingSphere = this.boundingBox.getBoundingSphere();
 
@@ -14427,7 +14659,7 @@ Potree.Volume = class extends THREE.Object3D {
 			this.box.visible = true;
 			this.label.visible = this.showVolumeLabel;
 		}
-	};
+	}
 
 	raycast (raycaster, intersects) {
 		let is = [];
@@ -14441,38 +14673,149 @@ Potree.Volume = class extends THREE.Object3D {
 				point: I.point.clone()
 			});
 		}
-	};
-
-	get clip () {
-		return this._clip;
 	}
 
-	set clip (value) {
+	getVolume(){
+		return Math.abs(this.scale.x * this.scale.y * this.scale.z);
+	}
 
-		if(this._clip !== value){
-			this._clip = value;
+};
 
-			this.update();
+Potree.SphereVolume = class SphereVolume extends Potree.Volume{
 
-			this.dispatchEvent({
-				type: "clip_changed",
-				object: this
-			});
+	constructor(args = {}){
+		super(args);
+
+		this.constructor.counter = (this.constructor.counter === undefined) ? 0 : this.constructor.counter + 1;
+		this.name = 'sphere_' + this.constructor.counter;
+
+		let sphereGeometry = new THREE.SphereGeometry(1, 32, 32);
+		sphereGeometry.computeBoundingBox();
+
+		this.material = new THREE.MeshBasicMaterial({
+			color: 0x00ff00,
+			transparent: true,
+			opacity: 0.3,
+			depthTest: true,
+			depthWrite: false});
+		this.sphere = new THREE.Mesh(sphereGeometry, this.material);
+		this.sphere.visible = false;
+		this.sphere.geometry.computeBoundingBox();
+		this.boundingBox = this.sphere.geometry.boundingBox;
+		this.add(this.sphere);
+
+		this.label.visible = false;
+
+
+		let frameGeometry = new THREE.Geometry();
+		{
+			let steps = 64;
+			let uSegments = 8;
+			let vSegments = 5;
+			let r = 1;
+
+			for(let uSegment = 0; uSegment < uSegments; uSegment++){
+
+				let alpha = (uSegment / uSegments) * Math.PI * 2;
+				let dirx = Math.cos(alpha);
+				let diry = Math.sin(alpha);
+
+				for(let i = 0; i <= steps; i++){
+					let v = (i / steps) * Math.PI * 2;
+					let vNext = v + 2 * Math.PI / steps;
+
+					let height = Math.sin(v);
+					let xyAmount = Math.cos(v);
+
+					let heightNext = Math.sin(vNext);
+					let xyAmountNext = Math.cos(vNext);
+
+					let vertex = new THREE.Vector3(dirx * xyAmount, diry * xyAmount, height);
+					frameGeometry.vertices.push(vertex);
+
+					let vertexNext = new THREE.Vector3(dirx * xyAmountNext, diry * xyAmountNext, heightNext);
+					frameGeometry.vertices.push(vertexNext);
+				}
+			}
+
+			// creates rings at poles, just because it's easier to implement
+			for(let vSegment = 0; vSegment <= vSegments + 1; vSegment++){
+
+				//let height = (vSegment / (vSegments + 1)) * 2 - 1; // -1 to 1
+				let uh = (vSegment / (vSegments + 1)); // -1 to 1
+				uh = (1 - uh) * (-Math.PI / 2) + uh *(Math.PI / 2);
+				let height = Math.sin(uh);
+
+				console.log(uh, height);
+
+				for(let i = 0; i <= steps; i++){
+					let u = (i / steps) * Math.PI * 2;
+					let uNext = u + 2 * Math.PI / steps;
+
+					let dirx = Math.cos(u);
+					let diry = Math.sin(u);
+
+					let dirxNext = Math.cos(uNext);
+					let diryNext = Math.sin(uNext);
+
+					let xyAmount = Math.sqrt(1 - height * height);
+
+					let vertex = new THREE.Vector3(dirx * xyAmount, diry * xyAmount, height);
+					frameGeometry.vertices.push(vertex);
+
+					let vertexNext = new THREE.Vector3(dirxNext * xyAmount, diryNext * xyAmount, height);
+					frameGeometry.vertices.push(vertexNext);
+				}
+			}
 		}
-		
-	}
 
-	get modifieable () {
-		return this._modifiable;
-	}
+		this.frame = new THREE.LineSegments(frameGeometry, new THREE.LineBasicMaterial({color: 0x000000}));
+		this.add(this.frame);
 
-	set modifieable (value) {
-		this._modifiable = value;
+		let frameMaterial = new THREE.MeshBasicMaterial({wireframe: true, color: 0x000000});
+		this.frame = new THREE.Mesh(sphereGeometry, frameMaterial);
+		//this.add(this.frame);
+
+		//this.frame = new THREE.LineSegments(boxFrameGeometry, new THREE.LineBasicMaterial({color: 0x000000}));
+		// this.frame.mode = THREE.Lines;
+		//this.add(this.frame);
 
 		this.update();
 	}
-};
 
+	update(){
+		this.boundingBox = this.sphere.geometry.boundingBox;
+		this.boundingSphere = this.boundingBox.getBoundingSphere();
+
+		//if (this._clip) {
+		//	this.sphere.visible = false;
+		//	this.label.visible = false;
+		//} else {
+		//	this.sphere.visible = true;
+		//	this.label.visible = this.showVolumeLabel;
+		//}
+	}
+
+	raycast (raycaster, intersects) {
+		let is = [];
+		this.sphere.raycast(raycaster, is);
+
+		if (is.length > 0) {
+			let I = is[0];
+			intersects.push({
+				distance: I.distance,
+				object: this,
+				point: I.point.clone()
+			});
+		}
+	}
+	
+	// see https://en.wikipedia.org/wiki/Ellipsoid#Volume
+	getVolume(){
+		return (4 / 3) * Math.PI * this.scale.x * this.scale.y * this.scale.z;
+	}
+
+};
 
 Potree.VolumeTool = class VolumeTool extends THREE.EventDispatcher {
 	constructor (viewer) {
@@ -14528,7 +14871,13 @@ Potree.VolumeTool = class VolumeTool extends THREE.EventDispatcher {
 	}
 
 	startInsertion (args = {}) {
-		let volume = new Potree.Volume();
+		let volume;
+		if(args.type){
+			volume = new args.type();
+		}else{
+			volume = new Potree.BoxVolume();
+		}
+		
 		volume.clip = args.clip || false;
 		volume.name = args.name || 'Volume';
 
@@ -14807,7 +15156,7 @@ Potree.ScreenBoxSelectTool = class ScreenBoxSelectTool extends THREE.EventDispat
 	startInsertion(){
 		let domElement = this.viewer.renderer.domElement;
 
-		let volume = new Potree.Volume();
+		let volume = new Potree.BoxVolume();
 		volume.position.set(12345, 12345, 12345);
 		volume.showVolumeLabel = false;
 		volume.visible = false;
@@ -17063,7 +17412,9 @@ class PotreeRenderer {
 		let activeCam = viewer.scene.getActiveCamera();
 		//viewer.renderer.render(viewer.scene.scenePointCloud, activeCam);
 		
-		viewer.pRenderer.render(viewer.scene.scenePointCloud, activeCam);
+		viewer.pRenderer.render(viewer.scene.scenePointCloud, activeCam, null, {
+			clipSpheres: viewer.scene.volumes.filter(v => (v instanceof Potree.SphereVolume)),
+		});
 		
 		
 		//Potree.endQuery(queryPC, viewer.renderer.getContext());
@@ -17334,11 +17685,13 @@ class EDLRenderer{
 		// TODO adapt to multiple lights
 		if(lights.length > 0){
 			viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtEDL, {
+				clipSpheres: viewer.scene.volumes.filter(v => (v instanceof Potree.SphereVolume)),
 				shadowMaps: [this.shadowMap],
 				transparent: false,
 			});
 		}else{
 			viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtEDL, {
+				clipSpheres: viewer.scene.volumes.filter(v => (v instanceof Potree.SphereVolume)),
 				transparent: false,
 			});
 		}
@@ -17544,6 +17897,7 @@ class HQSplatRenderer {
 			}
 			
 			viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtDepth, {
+				clipSpheres: viewer.scene.volumes.filter(v => (v instanceof Potree.SphereVolume)),
 				//material: this.depthMaterial
 			});
 		}
@@ -17604,6 +17958,7 @@ class HQSplatRenderer {
 
 			viewer.renderer.setRenderTarget(null);
 			viewer.pRenderer.render(viewer.scene.scenePointCloud, camera, this.rtAttribute, {
+				clipSpheres: viewer.scene.volumes.filter(v => (v instanceof Potree.SphereVolume)),
 				//material: this.attributeMaterial,
 				blendFunc: [gl.SRC_ALPHA, gl.ONE],
 				//depthTest: false,
@@ -18175,6 +18530,7 @@ Potree.Scene = class extends THREE.EventDispatcher{
 		this.orbitControls = null;
 		this.earthControls = null;
 		this.geoControls = null;
+		this.deviceControls = null;
 		this.inputHandler = null;
 
 		this.view = new Potree.View();
@@ -18576,6 +18932,18 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 		this.initThree();
 
 		{
+			let canvas = this.renderer.domElement;
+			canvas.addEventListener("webglcontextlost", (e) => {
+				console.log(e);
+				this.postMessage("WebGL context lost. \u2639");
+
+				let gl = this.renderer.getContext();
+				let error = gl.getError();
+				console.log(error);
+			}, false);
+		}
+
+		{
 			this.overlay = new THREE.Scene();
 			this.overlayCamera = new THREE.OrthographicCamera(
 				0, 1,
@@ -18773,6 +19141,8 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 			return this.fpControls;
 		} else if (navigationMode === Potree.EarthControls) {
 			return this.earthControls;
+		} else if (navigationMode === Potree.DeviceOrientationControls) {
+			return this.deviceControls;
 		} else {
 			return null;
 		}
@@ -19306,6 +19676,13 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 			this.earthControls.addEventListener('start', this.disableAnnotations.bind(this));
 			this.earthControls.addEventListener('end', this.enableAnnotations.bind(this));
 		}
+
+		{ // create DEVICE ORIENTATION CONTROLS
+			this.deviceControls = new Potree.DeviceOrientationControls(this);
+			this.deviceControls.enabled = false;
+			this.deviceControls.addEventListener('start', this.disableAnnotations.bind(this));
+			this.deviceControls.addEventListener('end', this.enableAnnotations.bind(this));
+		}
 	};
 
 	toggleSidebar () {
@@ -19480,7 +19857,8 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 
 			let element = annotation.domElement;
 
-			let position = annotation.position;
+			let position = annotation.position.clone();
+			position.add(annotation.offset);
 			if (!position) {
 				position = annotation.boundingBox.getCenter();
 			}
@@ -19738,7 +20116,13 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 			this.inputHandler.addInputListener(this.controls);
 		}
 		
-		if (this.controls !== null) {
+		if (this.getControls(scene.view.navigationMode) === this.deviceControls) {
+			this.controls.setScene(scene);
+			this.controls.update(delta);
+
+			this.scene.cameraP.position.copy(scene.view.position);
+			this.scene.cameraO.position.copy(scene.view.position);
+		} else if (this.controls !== null) {
 			this.controls.setScene(scene);
 			this.controls.update(delta);
 
@@ -19786,7 +20170,8 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 			let boxes = [];
 			
 			// volumes with clipping enabled
-			boxes.push(...this.scene.volumes.filter(v => v.clip));
+			//boxes.push(...this.scene.volumes.filter(v => (v.clip)));
+			boxes.push(...this.scene.volumes.filter(v => (v.clip && v instanceof Potree.BoxVolume)));
 
 			// profile segments
 			for(let profile of this.scene.profiles){
@@ -19810,7 +20195,7 @@ Potree.Viewer = class PotreeViewer extends THREE.EventDispatcher{
 				pointcloud.material.clipMethod = this.clipMethod;
 			}
 		}
-
+		
 		{ // update navigation cube
 			this.navigationCube.update(camera.rotation);
 		}
@@ -21868,6 +22253,20 @@ initSidebar = (viewer) => {
 			}
 		));
 
+		// SPHERE VOLUME
+		elToolbar.append(createToolIcon(
+			Potree.resourcePath + '/icons/sphere_distances.svg',
+			'[title]tt.volume_measurement',
+			function () { 
+				let volume = volumeTool.startInsertion({type: Potree.SphereVolume}); 
+
+				let measurementsRoot = $("#jstree_scene").jstree().get_json("measurements");
+				let jsonNode = measurementsRoot.children.find(child => child.data.uuid === volume.uuid);
+				$.jstree.reference(jsonNode.id).deselect_all();
+				$.jstree.reference(jsonNode.id).select_node(jsonNode.id);
+			}
+		));
+
 		// PROFILE
 		elToolbar.append(createToolIcon(
 			Potree.resourcePath + '/icons/profile.svg',
@@ -23061,6 +23460,21 @@ class VolumePanel extends MeasurePanel{
 		let copyIconPath = Potree.resourcePath + '/icons/copy.svg';
 		let removeIconPath = Potree.resourcePath + '/icons/remove.svg';
 
+		let lblLengthText = new Map([
+			[Potree.BoxVolume, "length"],
+			[Potree.SphereVolume, "rx"],
+		]).get(measurement.constructor);
+
+		let lblWidthText = new Map([
+			[Potree.BoxVolume, "width"],
+			[Potree.SphereVolume, "ry"],
+		]).get(measurement.constructor);
+
+		let lblHeightText = new Map([
+			[Potree.BoxVolume, "height"],
+			[Potree.SphereVolume, "rz"],
+		]).get(measurement.constructor);
+
 		this.elContent = $(`
 			<div class="measurement_content selectable">
 				<span class="coordinates_table_container"></span>
@@ -23084,9 +23498,9 @@ class VolumePanel extends MeasurePanel{
 
 				<table class="measurement_value_table">
 					<tr>
-						<th>length</th>
-						<th>width</th>
-						<th>height</th>
+						<th>${lblLengthText}</th>
+						<th>${lblWidthText}</th>
+						<th>${lblHeightText}</th>
 						<th></th>
 					</tr>
 					<tr>
@@ -23125,6 +23539,7 @@ class VolumePanel extends MeasurePanel{
 
 				<!-- ACTIONS -->
 				<input id="volume_reset_orientation" type="button" value="reset orientation"/>
+				<input id="volume_make_uniform" type="button" value="make uniform"/>
 				<div style="display: flex; margin-top: 12px">
 					<span></span>
 					<span style="flex-grow: 1"></span>
@@ -23172,6 +23587,11 @@ class VolumePanel extends MeasurePanel{
 
 		this.elContent.find("#volume_reset_orientation").click(() => {
 			measurement.rotation.set(0, 0, 0);
+		});
+
+		this.elContent.find("#volume_make_uniform").click(() => {
+			let mean = (measurement.scale.x + measurement.scale.y + measurement.scale.z) / 3;
+			measurement.scale.set(mean, mean, mean);
 		});
 
 		this.elCheckClip = this.elContent.find('#volume_clip');

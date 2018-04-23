@@ -1,14 +1,19 @@
 # Potree Loader
 
 ### How to use it
- - TODO
+ - Include three.js and pottree in your project code
+ - Get potree folder from XXXX
 
 ### Example
  - TODO
 
 ### Setup
- - Download potree source code from GitHub
+ - Download potree source code from GitHub and and build it
     - https://github.com/potree/potree
+    - cd potree
+    - npm install
+    - npm install -g gulp
+    - gulp watch
 
 ### To do
  - Remove JQuery, TWEEN and Proj4 dependencies

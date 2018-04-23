@@ -16,13 +16,11 @@
 		<script src="libs/potree/potree.js"></script>
 		<script src="source/PotreeObject.js"></script>
 
-		<div id="container" style="position: absolute; width: 100%; height: 100%; left: 0px; top: 0px;"></div>
-
 		<script>
-			window.viewer = new PotreeObject(document.getElementById("container"));
+			window.viewer = new PotreeObject();
 			
 			//Lighting effects
-			viewer.setEDLEnabled(true);
+			viewer.setEDLEnabled(false);
 			viewer.setEDLRadius(1.4);
 			viewer.setEDLStrength(0.4);
 

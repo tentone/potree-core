@@ -37,23 +37,30 @@
 			viewer.setFOV(60);
 			viewer.setPointBudget(1000000);
 			viewer.setBackground("white");
-			
-			Potree.loadPointCloud("data/models/galp/cloud.js", "galp", function(e)
+				
+			loadCloud("galp");
+			loadCloud("leixoes", -79, -40, -18, 0.2, 0.2, 0.2);
+
+			function loadCloud(name, pX, pY, pZ, sX, sY, sZ)
 			{
-				var pointcloud = e.pointcloud;
-				pointcloud
-				console.log(pointcloud);
+				Potree.loadPointCloud("data/models/" + name + "/cloud.js", name, function(e)
+				{
+					var pointcloud = e.pointcloud;
 
-				var material = pointcloud.material;
-				material.size = 1;
-				material.pointColorType = Potree.PointColorType.RGB;
-				material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
-				material.shape = Potree.PointShape.SQUARE;
+					if(pX !== undefined) pointcloud.position.set(pX, pY, pZ);
+					if(sX !== undefined) pointcloud.scale.set(sX, sY, sZ);
 
-				viewer.scene.addPointCloud(pointcloud);
+					console.log(pointcloud);
 
-				//console.log(viewer.scene.scenePointCloud);
-			});
+					var material = pointcloud.material;
+					material.size = 1;
+					material.pointColorType = Potree.PointColorType.RGB;
+					material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+					material.shape = Potree.PointShape.SQUARE;
+
+					viewer.scene.addPointCloud(pointcloud);
+				});
+			}
 
 			var timestamp = 0;
 

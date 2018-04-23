@@ -892,21 +892,9 @@ class PotreeObject extends THREE.EventDispatcher
 			this._previousCamera.rotation.copy(this.scene.getActiveCamera());
 		}
 
-		if(!this._previousCamera.matrixWorld.equals(camera.matrixWorld))
+		if(!this._previousCamera.matrixWorld.equals(camera.matrixWorld) || !this._previousCamera.projectionMatrix.equals(camera.projectionMatrix))
 		{
-			this.dispatchEvent({
-				type: "camera_changed",
-				previous: this._previousCamera,
-				camera: camera
-			});
-		}
-		else if(!this._previousCamera.projectionMatrix.equals(camera.projectionMatrix))
-		{
-			this.dispatchEvent({
-				type: "camera_changed",
-				previous: this._previousCamera,
-				camera: camera
-			});
+			this.dispatchEvent({type: "camera_changed", previous: this._previousCamera, camera: camera});
 		}
 
 		this._previousCamera = this.scene.getActiveCamera().clone();

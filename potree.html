@@ -52,6 +52,22 @@
 
 				console.log(viewer.scene.scenePointCloud);
 			});
+
+			var timestamp = 0;
+
+			function loop()
+			{	
+				var delta = viewer.clock.getDelta();
+				timestamp += delta;
+
+				viewer.update(delta, timestamp);
+				viewer.render();
+
+				requestAnimationFrame(loop);
+			};
+
+			loop();
+
 		</script>
 	</body>
 </html>

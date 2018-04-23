@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>UNO Potree</title>
+	</head>
+
+	<body>
+		<script src="libs/jquery-3.1.1.min.js"></script>
+		<script src="libs/three.min.js"></script>
+		<script src="libs/stats.min.js"></script>
+		<script src="libs/BinaryHeap.js"></script>
+		<script src="libs/tween.min.js"></script>
+		<script src="libs/proj4.js"></script>
+		
+		<script src="libs/potree/potree.js"></script>
+		<script src="source/PotreeObject.js"></script>
+
+		<div id="container" style="position: absolute; width: 100%; height: 100%; left: 0px; top: 0px;"></div>
+
+		<script>
+			window.viewer = new PotreeObject(document.getElementById("container"));
+			
+			//Lighting effects
+			viewer.setEDLEnabled(true);
+			viewer.setEDLRadius(1.4);
+			viewer.setEDLStrength(0.4);
+
+			viewer.setClipTask(Potree.ClipTask.HIGHLIGHT);
+			viewer.setClipMethod(Potree.ClipMethod.INSIDE_ANY);
+			viewer.setShowBoundingBox(false);
+			viewer.setFreeze(false);
+			viewer.setNavigationMode(Potree.OrbitControls);
+			viewer.setFOV(60);
+			viewer.setPointBudget(1000000);
+			viewer.setBackground("white"); // ["skybox", "gradient", "black", "white"];
+			
+			Potree.loadPointCloud("data/models/galp/cloud.js", "galp", function(e)
+			{
+				var pointcloud = e.pointcloud;
+
+				var material = pointcloud.material;
+				material.size = 1;
+				material.pointColorType = Potree.PointColorType.RGB;
+				material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+				material.shape = Potree.PointShape.SQUARE;
+
+				viewer.scene.addPointCloud(pointcloud);
+
+				//Set camera to fit screen
+				viewer.fitToScreen();
+
+				console.log(viewer.scene.scenePointCloud);
+			});
+		</script>
+	</body>
+</html>

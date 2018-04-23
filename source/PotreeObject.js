@@ -58,7 +58,7 @@ class PotreeObject extends THREE.EventDispatcher
 		this.clock = new THREE.Clock();
 		this.background = null;
 
-		this.initThree();
+		this.createRenderer();
 
 		this.overlay = new THREE.Scene();
 		this.overlayCamera = new THREE.OrthographicCamera(0, 1, 1, 0, -1000, 1000);
@@ -168,7 +168,7 @@ class PotreeObject extends THREE.EventDispatcher
 			oldScene.annotations.removeEventListener("annotation_added", this.onAnnotationAdded);
 		}
 		this.scene.annotations.addEventListener("annotation_added", this.onAnnotationAdded);
-	};
+	}
 
 	getControls(navigationMode)
 	{
@@ -193,7 +193,7 @@ class PotreeObject extends THREE.EventDispatcher
 	getMinNodeSize()
 	{
 		return this.minNodeSize;
-	};
+	}
 
 	setMinNodeSize(value)
 	{
@@ -202,12 +202,12 @@ class PotreeObject extends THREE.EventDispatcher
 			this.minNodeSize = value;
 			this.dispatchEvent({"type": "minnodesize_changed", "viewer": this});
 		}
-	};
+	}
 
 	getBackground()
 	{
 		return this.background;
-	};
+	}
 
 	setBackground(bg)
 	{
@@ -228,7 +228,7 @@ class PotreeObject extends THREE.EventDispatcher
 	setNavigationMode(value)
 	{
 		this.scene.view.navigationMode = value;
-	};
+	}
 
 	setShowBoundingBox(value)
 	{
@@ -237,12 +237,12 @@ class PotreeObject extends THREE.EventDispatcher
 			this.showBoundingBox = value;
 			this.dispatchEvent({"type": "show_boundingbox_changed", "viewer": this});
 		}
-	};
+	}
 
 	getShowBoundingBox()
 	{
 		return this.showBoundingBox;
-	};
+	}
 
 	setMoveSpeed(value)
 	{
@@ -251,12 +251,12 @@ class PotreeObject extends THREE.EventDispatcher
 			this.moveSpeed = value;
 			this.dispatchEvent({"type": "move_speed_changed", "viewer": this, "speed": value});
 		}
-	};
+	}
 
 	getMoveSpeed()
 	{
 		return this.moveSpeed;
-	};
+	}
 
 	setWeightClassification(w)
 	{
@@ -265,7 +265,7 @@ class PotreeObject extends THREE.EventDispatcher
 			this.scene.pointclouds[i].material.weightClassification = w;
 			this.dispatchEvent({"type": "attribute_weights_changed" + i, "viewer": this});
 		}
-	};
+	}
 
 	setFreeze(value)
 	{
@@ -275,12 +275,12 @@ class PotreeObject extends THREE.EventDispatcher
 			this.freeze = value;
 			this.dispatchEvent({"type": "freeze_changed", "viewer": this});
 		}
-	};
+	}
 
 	getFreeze()
 	{
 		return this.freeze;
-	};
+	}
 
 	getClipTask()
 	{
@@ -298,9 +298,7 @@ class PotreeObject extends THREE.EventDispatcher
 		{
 			this.clipTask = value;
 
-			this.dispatchEvent({
-				type: "cliptask_changed", 
-				viewer: this});		
+			this.dispatchEvent({type: "cliptask_changed", viewer: this});		
 		}
 	}
 
@@ -310,9 +308,7 @@ class PotreeObject extends THREE.EventDispatcher
 		{
 			this.clipMethod = value;
 			
-			this.dispatchEvent({
-				type: "clipmethod_changed", 
-				viewer: this});		
+			this.dispatchEvent({type: "clipmethod_changed", viewer: this});		
 		}
 	}
 
@@ -351,12 +347,12 @@ class PotreeObject extends THREE.EventDispatcher
 			this.useDEMCollisions = value;
 			this.dispatchEvent({"type": "use_demcollisions_changed", "viewer": this});
 		};
-	};
+	}
 
 	getDEMCollisionsEnabled()
 	{
 		return this.useDEMCollisions;
-	};
+	}
 
 	setEDLEnabled(value)
 	{
@@ -366,12 +362,12 @@ class PotreeObject extends THREE.EventDispatcher
 			this.useEDL = value;
 			this.dispatchEvent({"type": "use_edl_changed", "viewer": this});
 		}
-	};
+	}
 
 	getEDLEnabled()
 	{
 		return this.useEDL;
-	};
+	}
 
 	setEDLRadius(value)
 	{
@@ -380,12 +376,12 @@ class PotreeObject extends THREE.EventDispatcher
 			this.edlRadius = value;
 			this.dispatchEvent({"type": "edl_radius_changed", "viewer": this});
 		}
-	};
+	}
 
 	getEDLRadius()
 	{
 		return this.edlRadius;
-	};
+	}
 
 	setEDLStrength(value)
 	{
@@ -394,12 +390,12 @@ class PotreeObject extends THREE.EventDispatcher
 			this.edlStrength = value;
 			this.dispatchEvent({"type": "edl_strength_changed", "viewer": this});
 		}
-	};
+	}
 
 	getEDLStrength()
 	{
 		return this.edlStrength;
-	};
+	}
 
 	setFOV(value)
 	{
@@ -408,12 +404,12 @@ class PotreeObject extends THREE.EventDispatcher
 			this.fov = value;
 			this.dispatchEvent({"type": "fov_changed", "viewer": this});
 		}
-	};
+	}
 
 	getFOV()
 	{
 		return this.fov;
-	};
+	}
 
 	setClassificationVisibility(key, value)
 	{
@@ -427,7 +423,7 @@ class PotreeObject extends THREE.EventDispatcher
 			this.classifications[key].visible = value;
 			this.dispatchEvent({"type": "classification_visibility_changed", "viewer": this});
 		}
-	};
+	}
 
 	setLengthUnit(value)
 	{
@@ -488,7 +484,6 @@ class PotreeObject extends THREE.EventDispatcher
 		var pos = startPosition.clone();
 		var tween = new TWEEN.Tween(pos).to(endPosition, animationDuration);
 		tween.easing(easing);
-
 		tween.onUpdate(() =>
 		{
 			view.position.copy(pos);
@@ -500,22 +495,24 @@ class PotreeObject extends THREE.EventDispatcher
 		var target = startTarget.clone();
 		var tween = new TWEEN.Tween(target).to(endTarget, animationDuration);
 		tween.easing(easing);
-		tween.onUpdate(() => {
+		tween.onUpdate(() =>
+		{
 			view.lookAt(target);
 		});
-		tween.onComplete(() => {
+		tween.onComplete(() =>
+		{
 			view.lookAt(target);
 			this.dispatchEvent({type: "focusing_finished", target: this});
 		});
 
 		this.dispatchEvent({type: "focusing_started", target: this});
 		tween.start();
-	};
+	}
 
 	getBoundingBox(pointclouds)
 	{
 		return this.scene.getBoundingBox(pointclouds);
-	};
+	}
 
 	fitToScreen(factor = 1, animationDuration = 0)
 	{
@@ -545,15 +542,15 @@ class PotreeObject extends THREE.EventDispatcher
 
 	createControls()
 	{
-		// create FIRST PERSON CONTROLS
+		//Create FIRST PERSON CONTROLS
 		this.fpControls = new Potree.FirstPersonControls(this);
 		this.fpControls.enabled = false;
 
-		// create ORBIT CONTROLS
+		//Create ORBIT CONTROLS
 		this.orbitControls = new Potree.OrbitControls(this);
 		this.orbitControls.enabled = false;
 
-		// create EARTH CONTROLS
+		//Create EARTH CONTROLS
 		this.earthControls = new Potree.EarthControls(this);
 		this.earthControls.enabled = false;
 	};
@@ -566,7 +563,7 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	};
 
-	initThree()
+	createRenderer()
 	{
 		var width = window.innerWidth;
 		var height = window.innerHeight;
@@ -1026,4 +1023,4 @@ class PotreeObject extends THREE.EventDispatcher
 		
 		this.renderer.setSize(width, height);
 	}
-};
+}

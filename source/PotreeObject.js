@@ -5,12 +5,10 @@
  * 
  * The object can be used a normal Object3D.
  */
-class PotreeObject extends THREE.EventDispatcher
+class PotreeObject
 {
 	constructor()
 	{
-		super();
-
 		this.useEDL = false;
 		this.useRep = false;
 		this.useHQ = false;
@@ -39,7 +37,6 @@ class PotreeObject extends THREE.EventDispatcher
 		this.potreeRenderer = null;
 		this.edlRenderer = null;
 		this.renderer = null;
-		this.pRenderer = null;
 
 		this.scene = null;
 
@@ -56,17 +53,12 @@ class PotreeObject extends THREE.EventDispatcher
 		this.createRenderer();
 
 		this.pRenderer = new Potree.Renderer(this.renderer);
-		
-		var near = 2.5;
-		var far = 10.0;
-		var fov = 90;
-		
-		this.shadowTestCam = new THREE.PerspectiveCamera(90, 1, near, far);
+	
+		this.shadowTestCam = new THREE.PerspectiveCamera(90, 1, 2.5, 10);
 		this.shadowTestCam.position.set(3.50, -2.80, 8.561);
 		this.shadowTestCam.lookAt(new THREE.Vector3(0, 0, 4.87));
 		
-		var scene = new Potree.Scene(this.renderer);
-		this.setScene(scene);
+		this.setScene(new Potree.Scene(this.renderer));
 
 		this.inputHandler = new Potree.InputHandler(this);
 		this.inputHandler.setScene(this.scene);
@@ -87,12 +79,14 @@ class PotreeObject extends THREE.EventDispatcher
 		this.setEDLStrength(0.4);
 		this.setClipTask(Potree.ClipTask.HIGHLIGHT);
 		this.setClipMethod(Potree.ClipMethod.INSIDE_ANY);
-		this.setPointBudget(1*1000*1000);
+		this.setPointBudget(1000000);
 		this.setShowBoundingBox(false);
 		this.setNavigationMode(Potree.OrbitControls);
 		this.setBackground("gradient");
 		this.scaleFactor = 1;
 	}
+
+	dispatchEvent(){}
 
 	setScene(scene)
 	{
@@ -101,14 +95,7 @@ class PotreeObject extends THREE.EventDispatcher
 			return;
 		}
 
-		var oldScene = this.scene;
 		this.scene = scene;
-
-		this.dispatchEvent({
-			type: "scene_changed",
-			oldScene: oldScene,
-			scene: scene
-		});
 
 		if(!this.onAnnotationAdded)
 		{
@@ -120,12 +107,6 @@ class PotreeObject extends THREE.EventDispatcher
 				});
 			};
 		}
-
-		if(oldScene)
-		{
-			oldScene.annotations.removeEventListener("annotation_added", this.onAnnotationAdded);
-		}
-		this.scene.annotations.addEventListener("annotation_added", this.onAnnotationAdded);
 	}
 
 	getControls(navigationMode)
@@ -158,7 +139,6 @@ class PotreeObject extends THREE.EventDispatcher
 		if(this.minNodeSize !== value)
 		{
 			this.minNodeSize = value;
-			this.dispatchEvent({"type": "minnodesize_changed", "viewer": this});
 		}
 	}
 
@@ -180,7 +160,6 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 
 		this.background = bg;
-		this.dispatchEvent({"type": "background_changed", "viewer": this});
 	}
 
 	setNavigationMode(value)
@@ -193,7 +172,6 @@ class PotreeObject extends THREE.EventDispatcher
 		if(this.showBoundingBox !== value)
 		{
 			this.showBoundingBox = value;
-			this.dispatchEvent({"type": "show_boundingbox_changed", "viewer": this});
 		}
 	}
 
@@ -207,7 +185,6 @@ class PotreeObject extends THREE.EventDispatcher
 		if(this.moveSpeed !== value)
 		{
 			this.moveSpeed = value;
-			this.dispatchEvent({"type": "move_speed_changed", "viewer": this, "speed": value});
 		}
 	}
 
@@ -221,7 +198,6 @@ class PotreeObject extends THREE.EventDispatcher
 		for(var i = 0; i < this.scene.pointclouds.length; i++)
 		{
 			this.scene.pointclouds[i].material.weightClassification = w;
-			this.dispatchEvent({"type": "attribute_weights_changed" + i, "viewer": this});
 		}
 	}
 
@@ -239,9 +215,7 @@ class PotreeObject extends THREE.EventDispatcher
 	{
 		if(this.clipTask !== value)
 		{
-			this.clipTask = value;
-
-			this.dispatchEvent({type: "cliptask_changed", viewer: this});		
+			this.clipTask = value;	
 		}
 	}
 
@@ -250,8 +224,6 @@ class PotreeObject extends THREE.EventDispatcher
 		if(this.clipMethod !== value)
 		{
 			this.clipMethod = value;
-			
-			this.dispatchEvent({type: "clipmethod_changed", viewer: this});		
 		}
 	}
 
@@ -260,7 +232,6 @@ class PotreeObject extends THREE.EventDispatcher
 		if(Potree.pointBudget !== value)
 		{
 			Potree.pointBudget = parseInt(value);
-			this.dispatchEvent({"type": "point_budget_changed", "viewer": this});
 		}
 	};
 
@@ -275,7 +246,6 @@ class PotreeObject extends THREE.EventDispatcher
 		if(this.useEDL !== value)
 		{
 			this.useEDL = value;
-			this.dispatchEvent({"type": "use_edl_changed", "viewer": this});
 		}
 	}
 
@@ -289,7 +259,6 @@ class PotreeObject extends THREE.EventDispatcher
 		if(this.edlRadius !== value)
 		{
 			this.edlRadius = value;
-			this.dispatchEvent({"type": "edl_radius_changed", "viewer": this});
 		}
 	}
 
@@ -303,7 +272,6 @@ class PotreeObject extends THREE.EventDispatcher
 		if(this.edlStrength !== value)
 		{
 			this.edlStrength = value;
-			this.dispatchEvent({"type": "edl_strength_changed", "viewer": this});
 		}
 	}
 
@@ -317,7 +285,6 @@ class PotreeObject extends THREE.EventDispatcher
 		if(this.fov !== value)
 		{
 			this.fov = value;
-			this.dispatchEvent({"type": "fov_changed", "viewer": this});
 		}
 	}
 
@@ -331,12 +298,10 @@ class PotreeObject extends THREE.EventDispatcher
 		if(!this.classifications[key])
 		{
 			this.classifications[key] = {visible: value, name: "no name"};
-			this.dispatchEvent({"type": "classification_visibility_changed", "viewer": this});
 		}
 		else if(this.classifications[key].visible !== value)
 		{
 			this.classifications[key].visible = value;
-			this.dispatchEvent({"type": "classification_visibility_changed", "viewer": this});
 		}
 	}
 
@@ -354,8 +319,6 @@ class PotreeObject extends THREE.EventDispatcher
 				this.lengthUnit = this.LENGTH_UNITS.INCH;
 				break;
 		}
-
-		this.dispatchEvent({"type": "length_unit_changed", "viewer": this, value: value});
 	}
 
 	zoomTo(node, factor, animationDuration = 0)
@@ -417,10 +380,8 @@ class PotreeObject extends THREE.EventDispatcher
 		tween.onComplete(() =>
 		{
 			view.lookAt(target);
-			this.dispatchEvent({type: "focusing_finished", target: this});
 		});
 
-		this.dispatchEvent({type: "focusing_started", target: this});
 		tween.start();
 	}
 
@@ -798,20 +759,6 @@ class PotreeObject extends THREE.EventDispatcher
 		camera.updateMatrixWorld();
 		camera.matrixWorldInverse.getInverse(camera.matrixWorld);
 
-		if(this._previousCamera === undefined)
-		{
-			this._previousCamera = this.scene.getActiveCamera().clone();
-			this._previousCamera.rotation.copy(this.scene.getActiveCamera());
-		}
-
-		if(!this._previousCamera.matrixWorld.equals(camera.matrixWorld) || !this._previousCamera.projectionMatrix.equals(camera.projectionMatrix))
-		{
-			this.dispatchEvent({type: "camera_changed", previous: this._previousCamera, camera: camera});
-		}
-
-		this._previousCamera = this.scene.getActiveCamera().clone();
-		this._previousCamera.rotation.copy(this.scene.getActiveCamera());
-
 		//Update clip boxes
 		var boxes = [];
 		
@@ -853,8 +800,6 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 
 		TWEEN.update(timestamp);
-
-		this.dispatchEvent({type: "update", delta: delta, timestamp: timestamp});
 	}
 	
 	render()

@@ -1,17 +1,17 @@
 "use strict";
 
+/*
+ * Potree object is a wrapper to use Potree alongside other THREE based frameworks.
+ * 
+ * The object can be used a normal Object3D.
+ * 
+ * It depends on some libraries to work...
+ */
 class PotreeObject extends THREE.EventDispatcher
 {
 	constructor()
 	{
 		super();
-
-		this.renderArea = null;
-		this.guiLoaded = false;	
-		this.guiLoadTasks = [];
-
-		this.messages = [];
-		this.server = null;
 
 		this.fov = 60;
 		this.isFlipYZ = false;
@@ -121,7 +121,7 @@ class PotreeObject extends THREE.EventDispatcher
 		this.scene.addEventListener("volume_removed", onVolumeRemoved);
 		this.scene.addEventListener("pointcloud_added", onPointcloudAdded);
 
-		//Set defaults
+		//Default values
 		this.setFOV(60);
 		this.setEDLEnabled(false);
 		this.setEDLRadius(1.4);
@@ -151,8 +151,6 @@ class PotreeObject extends THREE.EventDispatcher
 			oldScene: oldScene,
 			scene: scene
 		});
-
-		$(".annotation").detach();
 
 		if(!this.onAnnotationAdded)
 		{
@@ -568,30 +566,19 @@ class PotreeObject extends THREE.EventDispatcher
 		}
 	};
 
-	setServer(server)
-	{
-		this.server = server;
-	}
-
 	initThree()
 	{
 		var width = window.innerWidth;
 		var height = window.innerHeight;
 
 		this.renderer = new THREE.WebGLRenderer({alpha: true, premultipliedAlpha: false});
-		this.renderer.sortObjects = false;
+		this.renderer.sortObjects = true;
 		this.renderer.setSize(width, height);
 		this.renderer.autoClear = false;
-
 		this.renderer.domElement.style.position = "absolute";
 		this.renderer.domElement.style.top = "0px";
 		this.renderer.domElement.style.bottom = "0px";
 		document.body.appendChild(this.renderer.domElement);
-
-		this.renderer.domElement.addEventListener("mousedown", () =>
-		{
-			this.renderer.domElement.focus();
-		});
 
 		//Enable frag_depth extension for the interpolation shader, if available
 		var gl = this.renderer.context;
@@ -639,7 +626,8 @@ class PotreeObject extends THREE.EventDispatcher
 			var element = annotation.domElement;
 
 			var position = annotation.position;
-			if(!position) {
+			if(!position)
+			{
 				position = annotation.boundingBox.getCenter();
 			}
 
@@ -649,22 +637,22 @@ class PotreeObject extends THREE.EventDispatcher
 			var screenPos = new THREE.Vector3();
 			var screenSize = 0;
 
+			//Screen position
+			screenPos.copy(position).project(this.scene.getActiveCamera());
+			screenPos.x = renderAreaWidth * (screenPos.x + 1) / 2;
+			screenPos.y = renderAreaHeight * (1 - (screenPos.y + 1) / 2);
+
+			//Screen size
+			if(viewer.scene.cameraMode == Potree.CameraMode.PERSPECTIVE)
 			{
-				// SCREEN POS
-				screenPos.copy(position).project(this.scene.getActiveCamera());
-				screenPos.x = renderAreaWidth * (screenPos.x + 1) / 2;
-				screenPos.y = renderAreaHeight * (1 - (screenPos.y + 1) / 2);
-
-
-				// SCREEN SIZE
-				if(viewer.scene.cameraMode == Potree.CameraMode.PERSPECTIVE) {
-					var fov = Math.PI * viewer.scene.cameraP.fov / 180;
-					var slope = Math.tan(fov / 2.0);
-					var projFactor =  0.5 * renderAreaHeight / (slope * distance);
-					screenSize = radius * projFactor;
-				} else {
-					screenSize = Potree.utils.projectedRadiusOrtho(radius, viewer.scene.cameraO.projectionMatrix, renderAreaWidth, renderAreaHeight);
-				}
+				var fov = Math.PI * viewer.scene.cameraP.fov / 180;
+				var slope = Math.tan(fov / 2.0);
+				var projFactor =  0.5 * renderAreaHeight / (slope * distance);
+				screenSize = radius * projFactor;
+			}
+			else
+			{
+				screenSize = Potree.utils.projectedRadiusOrtho(radius, viewer.scene.cameraO.projectionMatrix, renderAreaWidth, renderAreaHeight);
 			}
 
 			element.css("left", screenPos.x + "px");
@@ -677,56 +665,56 @@ class PotreeObject extends THREE.EventDispatcher
 			}
 			element.css("z-index", parseInt(zIndex));
 
-			if(annotation.children.length > 0){
+			if(annotation.children.length > 0)
+			{
 				var expand = screenSize > annotation.collapseThreshold || annotation.boundingBox.containsPoint(this.scene.getActiveCamera().position);
 				annotation.expand = expand;
 
-				if(!expand) {
-					//annotation.display = (screenPos.z >= -1 && screenPos.z <= 1);
+				if(!expand)
+				{
 					var inFrustum = (screenPos.z >= -1 && screenPos.z <= 1);
-					if(inFrustum){
+					if(inFrustum)
+					{
 						visibleNow.push(annotation);
 					}
 				}
 
 				return expand;
-			} else {
-				//annotation.display = (screenPos.z >= -1 && screenPos.z <= 1);
+			}
+			else
+			{
 				var inFrustum = (screenPos.z >= -1 && screenPos.z <= 1);
-				if(inFrustum){
+				if(inFrustum)
+				{
 					visibleNow.push(annotation);
 				}
 			}
-			
 		});
 
 		var notVisibleAnymore = new Set(this.visibleAnnotations);
-		for(var annotation of visibleNow){
+		for(var annotation of visibleNow)
+		{
 			annotation.display = true;
-			
 			notVisibleAnymore.delete(annotation);
 		}
+
 		this.visibleAnnotations = visibleNow;
 
-		for(var annotation of notVisibleAnymore){
+		for(var annotation of notVisibleAnymore)
+		{
 			annotation.display = false;
 		}
-
 	}
 
-	update(delta, timestamp){
+	update(delta, timestamp)
+	{
+		var u = Math.sin(0.0005 * timestamp) * 0.5 - 0.4;
+		var x = Math.cos(u);
+		var y = Math.sin(u);
 		
-		{
-			var u = Math.sin(0.0005 * timestamp) * 0.5 - 0.4;
-			
-			var x = Math.cos(u);
-			var y = Math.sin(u);
-			
-			this.shadowTestCam.position.set(7 * x, 7 * y, 8.561);
-			this.shadowTestCam.lookAt(new THREE.Vector3(0, 0, 0));
-		}
-		
-		
+		this.shadowTestCam.position.set(7 * x, 7 * y, 8.561);
+		this.shadowTestCam.lookAt(new THREE.Vector3(0, 0, 0));
+
 		var scene = this.scene;
 		var camera = scene.getActiveCamera();
 		
@@ -735,33 +723,41 @@ class PotreeObject extends THREE.EventDispatcher
 		this.scene.directionalLight.position.copy(camera.position);
 		this.scene.directionalLight.lookAt(new THREE.Vector3().addVectors(camera.position, camera.getWorldDirection()));
 
-		for(var pointcloud of this.scene.pointclouds) {
-			if(!pointcloud.material._defaultIntensityRangeChanged) {
+		for(var pointcloud of this.scene.pointclouds)
+		{
+			if(!pointcloud.material._defaultIntensityRangeChanged)
+			{
 				var root = pointcloud.pcoGeometry.root;
-				if(root != null && root.loaded) {
+				if(root != null && root.loaded)
+				{
 					var attributes = pointcloud.pcoGeometry.root.geometry.attributes;
-					if(attributes.intensity) {
+					if(attributes.intensity)
+					{
 						var array = attributes.intensity.array;
 
-						// chose max value from the 0.75 percentile
+						//Chose max value from the 0.75 percentile
 						var ordered = [];
-						for(var j = 0; j < array.length; j++) {
+						for(var j = 0; j < array.length; j++)
+						{
 							ordered.push(array[j]);
 						}
 						ordered.sort();
 						var capIndex = parseInt((ordered.length - 1) * 0.75);
 						var cap = ordered[capIndex];
 
-						if(cap <= 1) {
+						if(cap <= 1)
+						{
 							pointcloud.material.intensityRange = [0, 1];
-						} else if(cap <= 256) {
+						}
+						else if(cap <= 256)
+						{
 							pointcloud.material.intensityRange = [0, 255];
-						} else {
+						}
+						else
+						{
 							pointcloud.material.intensityRange = [0, cap];
 						}
-
 					}
-					// pointcloud._intensityMaxEvaluated = true;
 				}
 			}
 			
@@ -770,52 +766,63 @@ class PotreeObject extends THREE.EventDispatcher
 			pointcloud.minimumNodePixelSize = this.minNodeSize;
 		}
 
-		// update classification visibility
-		for(var pointcloud of this.scene.pointclouds) {
+		//Update classification visibility
+		for(var pointcloud of this.scene.pointclouds)
+		{
 			var classification = pointcloud.material.classification;
 			var somethingChanged = false;
-			for(var key of Object.keys(this.classifications)) {
+			for(var key of Object.keys(this.classifications))
+			{
 				var w = this.classifications[key].visible ? 1 : 0;
 
-				if(classification[key]) {
-					if(classification[key].w !== w) {
+				if(classification[key])
+				{
+					if(classification[key].w !== w)
+					{
 						classification[key].w = w;
 						somethingChanged = true;
 					}
-				} else if(classification.DEFAULT) {
+				}
+				else if(classification.DEFAULT)
+				{
 					classification[key] = classification.DEFAULT;
 					somethingChanged = true;
-				} else {
+				}
+				else
+				{
 					classification[key] = new THREE.Vector4(0.3, 0.6, 0.6, 0.5);
 					somethingChanged = true;
 				}
 			}
 
-			if(somethingChanged) {
+			if(somethingChanged)
+			{
 				pointcloud.material.recomputeClassification();
 			}
 		}
 
+		if(this.showBoundingBox)
 		{
-			if(this.showBoundingBox){
-				var bbRoot = this.scene.scene.getObjectByName("potree_bounding_box_root");
-				if(!bbRoot){
-					var node = new THREE.Object3D();
-					node.name = "potree_bounding_box_root";
-					this.scene.scene.add(node);
-					bbRoot = node;
-				}
-
-				var visibleBoxes = [];
-				for(var pointcloud of this.scene.pointclouds){
-					for(var node of pointcloud.visibleNodes.filter(vn => vn.boundingBoxNode !== undefined)){
-						var box = node.boundingBoxNode;
-						visibleBoxes.push(box);
-					}
-				}
-
-				bbRoot.children = visibleBoxes;
+			var bbRoot = this.scene.scene.getObjectByName("potree_bounding_box_root");
+			if(!bbRoot)
+			{
+				var node = new THREE.Object3D();
+				node.name = "potree_bounding_box_root";
+				this.scene.scene.add(node);
+				bbRoot = node;
 			}
+
+			var visibleBoxes = [];
+			for(var pointcloud of this.scene.pointclouds)
+			{
+				for(var node of pointcloud.visibleNodes.filter(vn => vn.boundingBoxNode !== undefined))
+				{
+					var box = node.boundingBoxNode;
+					visibleBoxes.push(box);
+				}
+			}
+
+			bbRoot.children = visibleBoxes;
 		}
 
 		if(!this.freeze)
@@ -831,7 +838,8 @@ class PotreeObject extends THREE.EventDispatcher
 				near = Math.min(100.0, Math.max(0.01, near));
 				far = Math.max(far, near + 1000);
 
-				if(near === Infinity){
+				if(near === Infinity)
+				{
 					near = 0.1;
 				}
 				
@@ -910,10 +918,10 @@ class PotreeObject extends THREE.EventDispatcher
 		//Update clip boxes
 		var boxes = [];
 		
-		// volumes with clipping enabled
+		//Volumes with clipping enabled
 		boxes.push(...this.scene.volumes.filter(v => v.clip));
 
-		// profile segments
+		//Profile segments
 		for(var profile of this.scene.profiles)
 		{
 			boxes.push(...profile.boxes);
@@ -949,13 +957,52 @@ class PotreeObject extends THREE.EventDispatcher
 
 		TWEEN.update(timestamp);
 
-		this.dispatchEvent({
-			type: "update",
-			delta: delta,
-			timestamp: timestamp});
+		this.dispatchEvent({type: "update", delta: delta, timestamp: timestamp});
 	}
 	
 	render()
+	{
+		if(this.useRep)
+		{
+			if(!this.repRenderer)
+			{
+				this.repRenderer = new RepRenderer(this);
+			}
+			this.repRenderer.render(this.renderer);
+		}
+		else if(this.useHQ)
+		{
+			if(!this.hqRenderer)
+			{
+				this.hqRenderer = new HQSplatRenderer(this);
+			}
+			this.hqRenderer.useEDL = this.useEDL;
+			this.hqRenderer.render(this.renderer);
+		}
+		else
+		{
+			if(this.useEDL && Potree.Features.SHADER_EDL.isSupported())
+			{
+				if(!this.edlRenderer)
+				{
+					this.edlRenderer = new EDLRenderer(this);
+				}
+				this.edlRenderer.render(this.renderer);
+			}
+			else
+			{
+				if(!this.potreeRenderer)
+				{
+					this.potreeRenderer = new PotreeRenderer(this);
+				}
+				this.potreeRenderer.render();
+			}
+		}
+
+		this.renderer.render(this.overlay, this.overlayCamera);
+	}
+
+	resize()
 	{
 		var width = this.scaleFactor * window.innerWidth;
 		var height = this.scaleFactor * window.innerHeight;
@@ -978,42 +1025,5 @@ class PotreeObject extends THREE.EventDispatcher
 		this.scene.cameraScreenSpace.updateProjectionMatrix();
 		
 		this.renderer.setSize(width, height);
-
-		if(this.useRep)
-		{
-			if(!this.repRenderer)
-			{
-				this.repRenderer = new RepRenderer(this);
-			}
-			this.repRenderer.render(this.renderer);
-		}
-		else if(this.useHQ)
-		{
-			if(!this.hqRenderer)
-			{
-				this.hqRenderer = new HQSplatRenderer(this);
-			}
-			this.hqRenderer.useEDL = this.useEDL;
-			this.hqRenderer.render(this.renderer);
-		}
-		else
-		{
-			if(this.useEDL && Potree.Features.SHADER_EDL.isSupported()) {
-				if(!this.edlRenderer)
-				{
-					this.edlRenderer = new EDLRenderer(this);
-				}
-				this.edlRenderer.render(this.renderer);
-			} else
-			{
-				if(!this.potreeRenderer)
-				{
-					this.potreeRenderer = new PotreeRenderer(this);
-				}
-				this.potreeRenderer.render();
-			}
-		}
-
-		this.renderer.render(this.overlay, this.overlayCamera);
 	}
 };

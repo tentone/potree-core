@@ -19,11 +19,16 @@
 		<script>
 			window.viewer = new PotreeObject();
 			
+			viewer.resize();
+			document.body.onresize = function()
+			{
+				viewer.resize();
+			}
+				
 			//Lighting effects
 			viewer.setEDLEnabled(false);
 			viewer.setEDLRadius(1.4);
 			viewer.setEDLStrength(0.4);
-
 			viewer.setClipTask(Potree.ClipTask.HIGHLIGHT);
 			viewer.setClipMethod(Potree.ClipMethod.INSIDE_ANY);
 			viewer.setShowBoundingBox(false);
@@ -31,11 +36,13 @@
 			viewer.setNavigationMode(Potree.OrbitControls);
 			viewer.setFOV(60);
 			viewer.setPointBudget(1000000);
-			viewer.setBackground("white"); // ["skybox", "gradient", "black", "white"];
+			viewer.setBackground("white");
 			
 			Potree.loadPointCloud("data/models/galp/cloud.js", "galp", function(e)
 			{
 				var pointcloud = e.pointcloud;
+				pointcloud
+				console.log(pointcloud);
 
 				var material = pointcloud.material;
 				material.size = 1;
@@ -45,10 +52,7 @@
 
 				viewer.scene.addPointCloud(pointcloud);
 
-				//Set camera to fit screen
-				viewer.fitToScreen();
-
-				console.log(viewer.scene.scenePointCloud);
+				//console.log(viewer.scene.scenePointCloud);
 			});
 
 			var timestamp = 0;

@@ -1,13 +1,14 @@
 # Potree Loader
 
 ### How to use it
- - Include three.js and pottree in your project code
- - Get potree folder from XXXX
+ - Include three.js and potree in your project code
 
 ### Example
  - TODO
 
 ### Setup
+ - Download threejs from github repository
+ 	- https://github.com/mrdoob/three.js/tree/dev/build
  - Download potree source code from GitHub and and build it
     - https://github.com/potree/potree
     - cd potree
@@ -17,7 +18,8 @@
 
 ### To do
  - Remove JQuery, TWEEN and Proj4 dependencies
- - Create a pre-bundled version with potree and binary heap
+ - Remove all the CSS based anotation system out
+ - Create a pre-bundled build with potree and binary heap
 
 ### Dependencies
  - BinaryHeap

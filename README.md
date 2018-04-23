@@ -1,18 +1,24 @@
 # Potree Loader
 
-### Documentation
+### How to use it
+ - TODO
+
+### Example
  - TODO
 
 ### Setup
  - Download potree source code from GitHub
     - https://github.com/potree/potree
 
+### To do
+ - Remove JQuery, TWEEN and Proj4 dependencies
+ - Create a pre-bundled version with potree and binary heap
+
 ### Dependencies
  - BinaryHeap
- - JQuery 3.1.1
+ - JQuery
  - Proj4
  - Three.js
- - stats.js
  - tweenjs
 
 ### Create Point Clouds

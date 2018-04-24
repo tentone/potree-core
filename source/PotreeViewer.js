@@ -12,8 +12,6 @@ class PotreeViewer
 		this.minNodeSize = 30;
 		this.scaleFactor = 1;
 
-		this.time = 0;
-
 		Potree.pointBudget = 1000000;
 
 		this.createRenderer();
@@ -74,12 +72,6 @@ class PotreeViewer
 
 	update(delta)
 	{
-		this.time += delta;
-
-		var u = Math.sin(0.0005 * this.time) * 0.5 - 0.4;
-		var x = Math.cos(u);
-		var y = Math.sin(u);
-
 		Potree.pointLoadLimit = Potree.pointBudget * 2;
 
 		for(var pointcloud of this.scene.pointclouds)
@@ -110,7 +102,7 @@ class PotreeViewer
 		{
 			camera = this.scene.cameraP;
 		}
-		
+
 		this.pRenderer.render(this.scene.scenePointCloud, camera);
 	}
 

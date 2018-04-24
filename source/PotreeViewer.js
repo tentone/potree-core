@@ -9,42 +9,12 @@ class PotreeViewer
 {
 	constructor()
 	{
-		this.useEDL = false;
-		this.useRep = false;
-		this.useHQ = false;
-
 		this.fov = 60;
-		this.generateDEM = false;
 		this.minNodeSize = 30;
-		this.edlStrength = 1.0;
-		this.edlRadius = 1.4;
-		this.classifications = [];
-
 		this.moveSpeed = 10;
+		this.scaleFactor = 1;
 
-		this.LENGTH_UNITS =
-		{
-			METER: {code: "m"},
-			FEET: {code: "ft"},
-			INCH: {code: "\u2033"}
-		};
-		this.lengthUnit = this.LENGTH_UNITS.METER;
-
-		this.showBoundingBox = false;
-		this.clipTask = Potree.ClipTask.HIGHLIGHT;
-		this.clipMethod = Potree.ClipMethod.INSIDE_ANY;
-
-		this.potreeRenderer = null;
-		this.edlRenderer = null;
-		this.renderer = null;
-
-		this.scene = null;
-
-		this.inputHandler = null;
-
-		this.clippingTool =  null;
-		this.transformationTool = null;
-		this.navigationCube = null;
+		Potree.pointBudget = 1000000;
 		
 		this.skybox = null;
 		this.clock = new THREE.Clock();
@@ -53,272 +23,21 @@ class PotreeViewer
 		this.createRenderer();
 
 		this.pRenderer = new Potree.Renderer(this.renderer);
-	
-		this.shadowTestCam = new THREE.PerspectiveCamera(90, 1, 2.5, 10);
-		this.shadowTestCam.position.set(3.50, -2.80, 8.561);
-		this.shadowTestCam.lookAt(new THREE.Vector3(0, 0, 4.87));
 		
-		this.setScene(new Potree.Scene(this.renderer));
+		this.scene = new Potree.Scene(this.renderer);
 
+		this.controls = new Potree.OrbitControls(this);
+		
 		this.inputHandler = new Potree.InputHandler(this);
 		this.inputHandler.setScene(this.scene);
-
-		this.clippingTool = new Potree.ClippingTool(this);
-		this.transformationTool = new Potree.TransformationTool(this);
-		this.navigationCube = new Potree.NavigationCube(this);
-		this.navigationCube.visible = false;
-		
-		this.createControls();
-
-		this.clippingTool.setScene(this.scene);
-		
-		//Default values
-		this.setFOV(60);
-		this.setEDLEnabled(false);
-		this.setEDLRadius(1.4);
-		this.setEDLStrength(0.4);
-		this.setClipTask(Potree.ClipTask.HIGHLIGHT);
-		this.setClipMethod(Potree.ClipMethod.INSIDE_ANY);
-		this.setPointBudget(1000000);
-		this.setShowBoundingBox(false);
-		this.setNavigationMode(Potree.OrbitControls);
-		this.setBackground("gradient");
-		this.scaleFactor = 1;
+		this.inputHandler.addInputListener(this.controls);
 	}
 
 	dispatchEvent(){}
 
-	setScene(scene)
-	{
-		if(scene === this.scene)
-		{
-			return;
-		}
-
-		this.scene = scene;
-
-		if(!this.onAnnotationAdded)
-		{
-			this.onAnnotationAdded = e =>
-			{
-				e.annotation.traverse(node =>
-				{
-					node.scene = this.scene;
-				});
-			};
-		}
-	}
-
-	getControls(navigationMode)
-	{
-		if(navigationMode === Potree.OrbitControls)
-		{
-			return this.orbitControls;
-		}
-		else if(navigationMode === Potree.FirstPersonControls)
-		{
-			return this.fpControls;
-		}
-		else if(navigationMode === Potree.EarthControls)
-		{
-			return this.earthControls;
-		}
-		else
-		{
-			return null;
-		}
-	}
-
-	getMinNodeSize()
-	{
-		return this.minNodeSize;
-	}
-
-	setMinNodeSize(value)
-	{
-		if(this.minNodeSize !== value)
-		{
-			this.minNodeSize = value;
-		}
-	}
-
-	getBackground()
-	{
-		return this.background;
-	}
-
-	setBackground(bg)
-	{
-		if(this.background === bg)
-		{
-			return;
-		}
-
-		if(bg === "skybox")
-		{
-			this.skybox = Potree.utils.loadSkybox(new URL(Potree.resourcePath + "/textures/skybox2/").href);
-		}
-
-		this.background = bg;
-	}
-
-	setNavigationMode(value)
-	{
-		this.scene.view.navigationMode = value;
-	}
-
-	setShowBoundingBox(value)
-	{
-		if(this.showBoundingBox !== value)
-		{
-			this.showBoundingBox = value;
-		}
-	}
-
-	getShowBoundingBox()
-	{
-		return this.showBoundingBox;
-	}
-
 	setMoveSpeed(value)
 	{
-		if(this.moveSpeed !== value)
-		{
-			this.moveSpeed = value;
-		}
-	}
-
-	getMoveSpeed()
-	{
-		return this.moveSpeed;
-	}
-
-	setWeightClassification(w)
-	{
-		for(var i = 0; i < this.scene.pointclouds.length; i++)
-		{
-			this.scene.pointclouds[i].material.weightClassification = w;
-		}
-	}
-
-	getClipTask()
-	{
-		return this.clipTask;
-	}
-
-	getClipMethod()
-	{
-		return this.clipMethod;
-	}
-
-	setClipTask(value)
-	{
-		if(this.clipTask !== value)
-		{
-			this.clipTask = value;	
-		}
-	}
-
-	setClipMethod(value)
-	{
-		if(this.clipMethod !== value)
-		{
-			this.clipMethod = value;
-		}
-	}
-
-	setPointBudget(value)
-	{
-		if(Potree.pointBudget !== value)
-		{
-			Potree.pointBudget = parseInt(value);
-		}
-	};
-
-	getPointBudget()
-	{
-		return Potree.pointBudget;
-	};
-
-	setEDLEnabled(value)
-	{
-		value = Boolean(value);
-		if(this.useEDL !== value)
-		{
-			this.useEDL = value;
-		}
-	}
-
-	getEDLEnabled()
-	{
-		return this.useEDL;
-	}
-
-	setEDLRadius(value)
-	{
-		if(this.edlRadius !== value)
-		{
-			this.edlRadius = value;
-		}
-	}
-
-	getEDLRadius()
-	{
-		return this.edlRadius;
-	}
-
-	setEDLStrength(value)
-	{
-		if(this.edlStrength !== value)
-		{
-			this.edlStrength = value;
-		}
-	}
-
-	getEDLStrength()
-	{
-		return this.edlStrength;
-	}
-
-	setFOV(value)
-	{
-		if(this.fov !== value)
-		{
-			this.fov = value;
-		}
-	}
-
-	getFOV()
-	{
-		return this.fov;
-	}
-
-	setClassificationVisibility(key, value)
-	{
-		if(!this.classifications[key])
-		{
-			this.classifications[key] = {visible: value, name: "no name"};
-		}
-		else if(this.classifications[key].visible !== value)
-		{
-			this.classifications[key].visible = value;
-		}
-	}
-
-	setLengthUnit(value)
-	{
-		switch(value)
-		{
-			case "m":
-				this.lengthUnit = this.LENGTH_UNITS.METER;
-				break;
-			case "ft":
-				this.lengthUnit = this.LENGTH_UNITS.FEET;
-				break;
-			case "in":
-				this.lengthUnit = this.LENGTH_UNITS.INCH;
-				break;
-		}
+		this.moveSpeed = value;
 	}
 
 	zoomTo(node, factor, animationDuration = 0)
@@ -356,50 +75,14 @@ class PotreeViewer
 		var startRadius = view.radius;
 		var endRadius = endPosition.distanceTo(endTarget);
 
-		var easing = TWEEN.Easing.Quartic.Out;
-
-		//Animate camera position
-		var pos = startPosition.clone();
-		var tween = new TWEEN.Tween(pos).to(endPosition, animationDuration);
-		tween.easing(easing);
-		tween.onUpdate(() =>
-		{
-			view.position.copy(pos);
-		});
-
-		tween.start();
-
-		//Animate camera target
-		var target = startTarget.clone();
-		var tween = new TWEEN.Tween(target).to(endTarget, animationDuration);
-		tween.easing(easing);
-		tween.onUpdate(() =>
-		{
-			view.lookAt(target);
-		});
-		tween.onComplete(() =>
-		{
-			view.lookAt(target);
-		});
-
-		tween.start();
+		view.position.copy(endPosition);
+		view.lookAt(endTarget);
 	}
 
 	getBoundingBox(pointclouds)
 	{
 		return this.scene.getBoundingBox(pointclouds);
 	}
-
-	fitToScreen(factor = 1, animationDuration = 0)
-	{
-		var box = this.getBoundingBox(this.scene.pointclouds);
-
-		var node = new THREE.Object3D();
-		node.boundingBox = box;
-
-		this.zoomTo(node, factor, animationDuration);
-		this.controls.stop();
-	};
 
 	toggleNavigationCube()
 	{
@@ -415,21 +98,6 @@ class PotreeViewer
 			pointcloud.material.useOrthographicCamera = mode == Potree.CameraMode.ORTHOGRAPHIC;
 		}
 	}
-
-	createControls()
-	{
-		//Create FIRST PERSON CONTROLS
-		this.fpControls = new Potree.FirstPersonControls(this);
-		this.fpControls.enabled = false;
-
-		//Create ORBIT CONTROLS
-		this.orbitControls = new Potree.OrbitControls(this);
-		this.orbitControls.enabled = false;
-
-		//Create EARTH CONTROLS
-		this.earthControls = new Potree.EarthControls(this);
-		this.earthControls.enabled = false;
-	};
 
 	toggleMap()
 	{
@@ -463,138 +131,16 @@ class PotreeViewer
 		gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);		
 	}
 
-	updateAnnotations()
-	{
-		if(!this.visibleAnnotations)
-		{
-			this.visibleAnnotations = new Set();
-		}
-
-		this.scene.annotations.updateBounds();
-		this.scene.cameraP.updateMatrixWorld();
-		this.scene.cameraO.updateMatrixWorld();
-		
-		var distances = [];
-
-		var renderAreaWidth = this.renderer.getSize().width;
-		var renderAreaHeight = this.renderer.getSize().height;
-
-		var viewer = this;
-
-		var visibleNow = [];
-		this.scene.annotations.traverse(annotation => {
-
-			if(annotation === this.scene.annotations)
-			{
-				return true;
-			}
-
-			if(!annotation.visible)
-			{
-				return false;
-			}
-
-			annotation.scene = this.scene;
-
-			var element = annotation.domElement;
-
-			var position = annotation.position;
-			if(!position)
-			{
-				position = annotation.boundingBox.getCenter();
-			}
-
-			var distance = viewer.scene.cameraP.position.distanceTo(position);
-			var radius = annotation.boundingBox.getBoundingSphere().radius;
-
-			var screenPos = new THREE.Vector3();
-			var screenSize = 0;
-
-			//Screen position
-			screenPos.copy(position).project(this.scene.getActiveCamera());
-			screenPos.x = renderAreaWidth * (screenPos.x + 1) / 2;
-			screenPos.y = renderAreaHeight * (1 - (screenPos.y + 1) / 2);
-
-			//Screen size
-			if(viewer.scene.cameraMode == Potree.CameraMode.PERSPECTIVE)
-			{
-				var fov = Math.PI * viewer.scene.cameraP.fov / 180;
-				var slope = Math.tan(fov / 2.0);
-				var projFactor =  0.5 * renderAreaHeight / (slope * distance);
-				screenSize = radius * projFactor;
-			}
-			else
-			{
-				screenSize = Potree.utils.projectedRadiusOrtho(radius, viewer.scene.cameraO.projectionMatrix, renderAreaWidth, renderAreaHeight);
-			}
-
-			element.css("left", screenPos.x + "px");
-			element.css("top", screenPos.y + "px");
-
-			var zIndex = 10000000 - distance * (10000000 / this.scene.cameraP.far);
-			if(annotation.descriptionVisible)
-			{
-				zIndex += 10000000;
-			}
-			element.css("z-index", parseInt(zIndex));
-
-			if(annotation.children.length > 0)
-			{
-				var expand = screenSize > annotation.collapseThreshold || annotation.boundingBox.containsPoint(this.scene.getActiveCamera().position);
-				annotation.expand = expand;
-
-				if(!expand)
-				{
-					var inFrustum = (screenPos.z >= -1 && screenPos.z <= 1);
-					if(inFrustum)
-					{
-						visibleNow.push(annotation);
-					}
-				}
-
-				return expand;
-			}
-			else
-			{
-				var inFrustum = (screenPos.z >= -1 && screenPos.z <= 1);
-				if(inFrustum)
-				{
-					visibleNow.push(annotation);
-				}
-			}
-		});
-
-		var notVisibleAnymore = new Set(this.visibleAnnotations);
-		for(var annotation of visibleNow)
-		{
-			annotation.display = true;
-			notVisibleAnymore.delete(annotation);
-		}
-
-		this.visibleAnnotations = visibleNow;
-
-		for(var annotation of notVisibleAnymore)
-		{
-			annotation.display = false;
-		}
-	}
-
 	update(delta, timestamp)
 	{
 		var u = Math.sin(0.0005 * timestamp) * 0.5 - 0.4;
 		var x = Math.cos(u);
 		var y = Math.sin(u);
-		
-		this.shadowTestCam.position.set(7 * x, 7 * y, 8.561);
-		this.shadowTestCam.lookAt(new THREE.Vector3(0, 0, 0));
 
 		var scene = this.scene;
 		var camera = scene.getActiveCamera();
 		
 		Potree.pointLoadLimit = Potree.pointBudget * 2;
-
-		this.scene.directionalLight.position.copy(camera.position);
-		this.scene.directionalLight.lookAt(new THREE.Vector3().addVectors(camera.position, camera.getWorldDirection()));
 
 		for(var pointcloud of this.scene.pointclouds)
 		{
@@ -634,68 +180,9 @@ class PotreeViewer
 				}
 			}
 			
-			pointcloud.showBoundingBox = this.showBoundingBox;
-			pointcloud.generateDEM = this.generateDEM;
+			pointcloud.showBoundingBox = false;
+			pointcloud.generateDEM = false;
 			pointcloud.minimumNodePixelSize = this.minNodeSize;
-		}
-
-		//Update classification visibility
-		for(var pointcloud of this.scene.pointclouds)
-		{
-			var classification = pointcloud.material.classification;
-			var somethingChanged = false;
-			for(var key of Object.keys(this.classifications))
-			{
-				var w = this.classifications[key].visible ? 1 : 0;
-
-				if(classification[key])
-				{
-					if(classification[key].w !== w)
-					{
-						classification[key].w = w;
-						somethingChanged = true;
-					}
-				}
-				else if(classification.DEFAULT)
-				{
-					classification[key] = classification.DEFAULT;
-					somethingChanged = true;
-				}
-				else
-				{
-					classification[key] = new THREE.Vector4(0.3, 0.6, 0.6, 0.5);
-					somethingChanged = true;
-				}
-			}
-
-			if(somethingChanged)
-			{
-				pointcloud.material.recomputeClassification();
-			}
-		}
-
-		if(this.showBoundingBox)
-		{
-			var bbRoot = this.scene.scene.getObjectByName("potree_bounding_box_root");
-			if(!bbRoot)
-			{
-				var node = new THREE.Object3D();
-				node.name = "potree_bounding_box_root";
-				this.scene.scene.add(node);
-				bbRoot = node;
-			}
-
-			var visibleBoxes = [];
-			for(var pointcloud of this.scene.pointclouds)
-			{
-				for(var node of pointcloud.visibleNodes.filter(vn => vn.boundingBoxNode !== undefined))
-				{
-					var box = node.boundingBoxNode;
-					visibleBoxes.push(box);
-				}
-			}
-
-			bbRoot.children = visibleBoxes;
 		}
 
 		var result = Potree.updatePointClouds(scene.pointclouds, camera, this.renderer);
@@ -725,20 +212,6 @@ class PotreeViewer
 		
 		this.scene.cameraP.fov = this.fov;
 		
-		//Navigation mode changed
-		if(this.getControls(scene.view.navigationMode) !== this.controls)
-		{
-			if(this.controls)
-			{
-				this.controls.enabled = false;
-				this.inputHandler.removeInputListener(this.controls);
-			}
-
-			this.controls = this.getControls(scene.view.navigationMode);
-			this.controls.enabled = true;
-			this.inputHandler.addInputListener(this.controls);
-		}
-		
 		if(this.controls !== null)
 		{
 			this.controls.setScene(scene);
@@ -758,129 +231,24 @@ class PotreeViewer
 		camera.updateMatrix();
 		camera.updateMatrixWorld();
 		camera.matrixWorldInverse.getInverse(camera.matrixWorld);
-
-		//Update clip boxes
-		var boxes = [];
-		
-		//Volumes with clipping enabled
-		boxes.push(...this.scene.volumes.filter(v => v.clip));
-
-		//Profile segments
-		for(var profile of this.scene.profiles)
-		{
-			boxes.push(...profile.boxes);
-		}
-		
-		var clipBoxes = boxes.map(box => {
-			box.updateMatrixWorld();
-			var boxInverse = new THREE.Matrix4().getInverse(box.matrixWorld);
-			var boxPosition = box.getWorldPosition();
-			return {box: box, inverse: boxInverse, position: boxPosition};
-		});
-
-		var clipPolygons = this.scene.polygonClipVolumes.filter(vol => vol.initialized);
-		
-		//Set clip volumes in material
-		for(var pointcloud of this.scene.pointclouds.filter(pc => pc.visible))
-		{
-			pointcloud.material.setClipBoxes(clipBoxes);
-			pointcloud.material.setClipPolygons(clipPolygons, this.clippingTool.maxPolygonVertices);
-			pointcloud.material.clipTask = this.clipTask;
-			pointcloud.material.clipMethod = this.clipMethod;
-		}
-
-		//Update navigation cube
-		this.navigationCube.update(camera.rotation);
-
-		this.updateAnnotations();
-		
-		if(this.mapView)
-		{
-			this.mapView.update(delta);
-		}
-
-		TWEEN.update(timestamp);
 	}
 	
 	render()
 	{
-		if(this.useRep)
-		{
-			if(!this.repRenderer)
-			{
-				this.repRenderer = new RepRenderer(this);
-			}
-			this.repRenderer.render(this.renderer);
-		}
-		else if(this.useHQ)
-		{
-			if(!this.hqRenderer)
-			{
-				this.hqRenderer = new HQSplatRenderer(this);
-			}
-			this.hqRenderer.useEDL = this.useEDL;
-			this.hqRenderer.render(this.renderer);
-		}
-		else
-		{
-			if(this.useEDL && Potree.Features.SHADER_EDL.isSupported())
-			{
-				if(!this.edlRenderer)
-				{
-					this.edlRenderer = new EDLRenderer(this);
-				}
-				this.edlRenderer.render(this.renderer);
-			}
-			else
-			{
-				if(!this.potreeRenderer)
-				{
-					this.potreeRenderer = new PotreeRenderer(this);
-				}
-				this.potreeRenderer.render();
-			}
-		}
-
-		/*
-		let query = Potree.startQuery('render', renderer.getContext());
-		for(let pointcloud of this.viewer.scene.pointclouds)
-		{
-			pointcloud.material.useEDL = false;
-		}
-		
-		//let queryPC = Potree.startQuery("PointCloud", renderer.getContext());
-		let activeCam = viewer.scene.getActiveCamera();
-		//renderer.render(viewer.scene.scenePointCloud, activeCam);
-		
-		viewer.pRenderer.render(viewer.scene.scenePointCloud, activeCam, null,
-		{
-			clipSpheres: viewer.scene.volumes.filter(v => (v instanceof Potree.SphereVolume)),
-		});
-		*/
+		var activeCam = this.scene.getActiveCamera();
+		this.pRenderer.render(this.scene.scenePointCloud, activeCam);
 	}
 
 	resize()
 	{
 		var width = this.scaleFactor * window.innerWidth;
 		var height = this.scaleFactor * window.innerHeight;
+		this.renderer.setSize(width, height);
 
 		var pixelRatio = this.renderer.getPixelRatio();
 		var aspect = width / height;
 
 		this.scene.cameraP.aspect = aspect;
 		this.scene.cameraP.updateProjectionMatrix();
-
-		var frustumScale = this.scene.view.radius;
-		this.scene.cameraO.left = -frustumScale;
-		this.scene.cameraO.right = frustumScale;		
-		this.scene.cameraO.top = frustumScale * 1 / aspect;
-		this.scene.cameraO.bottom = -frustumScale * 1 / aspect;		
-		this.scene.cameraO.updateProjectionMatrix();
-
-		this.scene.cameraScreenSpace.top = 1/aspect;
-		this.scene.cameraScreenSpace.bottom = -1/aspect;
-		this.scene.cameraScreenSpace.updateProjectionMatrix();
-		
-		this.renderer.setSize(width, height);
 	}
 }

@@ -83,7 +83,7 @@
 				renderer.render(scene, camera);
 
 				//Potree
-				viewer.update(delta);
+				viewer.update(delta, camera);
 				viewer.render(camera);
 
 				requestAnimationFrame(loop);

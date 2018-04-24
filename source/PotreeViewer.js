@@ -76,7 +76,7 @@ class PotreeViewer
 		document.body.appendChild(this.renderer.domElement);
 	}
 
-	update(delta)
+	update(delta, camera)
 	{
 		Potree.pointLoadLimit = Potree.pointBudget * 2;
 
@@ -87,18 +87,25 @@ class PotreeViewer
 			pointcloud.minimumNodePixelSize = this.minNodeSize;
 		}
 
-		Potree.updatePointClouds(this.scene.pointclouds, this.scene.camera, this.renderer);
+		if(camera === undefined)
+		{
+			Potree.updatePointClouds(this.scene.pointclouds, this.scene.camera, this.renderer);
 
-		this.controls.setScene(this.scene);
-		this.controls.update(delta);
+			this.controls.setScene(this.scene);
+			this.controls.update(delta);
 
-		this.scene.camera.position.copy(this.scene.view.position);
-		this.scene.camera.rotation.order = "ZXY";
-		this.scene.camera.rotation.x = Math.PI / 2 + this.scene.view.pitch;
-		this.scene.camera.rotation.z = this.scene.view.yaw;
-		this.scene.camera.updateMatrix();
-		this.scene.camera.updateMatrixWorld();
-		this.scene.camera.matrixWorldInverse.getInverse(this.scene.camera.matrixWorld);
+			this.scene.camera.position.copy(this.scene.view.position);
+			this.scene.camera.rotation.order = "ZXY";
+			this.scene.camera.rotation.x = Math.PI / 2 + this.scene.view.pitch;
+			this.scene.camera.rotation.z = this.scene.view.yaw;
+			this.scene.camera.updateMatrix();
+			this.scene.camera.updateMatrixWorld();
+			this.scene.camera.matrixWorldInverse.getInverse(this.scene.camera.matrixWorld);
+		}
+		else
+		{
+			Potree.updatePointClouds(this.scene.pointclouds, camera, this.renderer);
+		}
 	}
 	
 	render(camera)

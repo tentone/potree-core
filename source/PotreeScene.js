@@ -9,18 +9,17 @@ class PotreeScene
 		this.scene = new THREE.Scene();
 		
 		this.scenePointCloud = new THREE.Scene();
-		this.scenePointCloud.rotation.set(1.57, 0, 0);
-
+		this.scenePointCloud.rotation.set(-Math.PI / 2, 0, 0);
+		this.scenePointCloud.updateMatrixWorld(true);
+		
 		this.referenceFrame = new THREE.Object3D();
 
 		this.scenePointCloud.add(this.referenceFrame);
 
 		this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000000);
-		this.camera.up.set(0, 1, 0);
 		this.camera.position.set(1000, 1000, 1000);
 
 		this.pointclouds = [];
-
 		this.measurements = [];
 		this.profiles = [];
 		this.volumes = [];
@@ -60,9 +59,7 @@ class PotreeScene
 					continue;
 				}
 
-				let h = node.geometryNode.mean.z +
-					pointcloud.position.z +
-					node.geometryNode.boundingBox.min.z;
+				let h = node.geometryNode.mean.z + pointcloud.position.z + node.geometryNode.boundingBox.min.z;
 
 				if(node.geometryNode.spacing <= pFromSpacing)
 				{
@@ -109,18 +106,18 @@ class PotreeScene
 		return box;
 	}
 
-	addPointCloud (pointcloud)
+	addPointCloud(pointcloud)
 	{
 		this.pointclouds.push(pointcloud);
 		this.scenePointCloud.add(pointcloud);
 	};
 
-	addVolume (volume)
+	addVolume(volume)
 	{
 		this.volumes.push(volume);
 	};
 
-	removeVolume (volume)
+	removeVolume(volume)
 	{
 		let index = this.volumes.indexOf(volume);
 		if(index > -1)
@@ -149,7 +146,7 @@ class PotreeScene
 		this.measurements.push(measurement);
 	};
 
-	removeMeasurement (measurement)
+	removeMeasurement(measurement)
 	{
 		let index = this.measurements.indexOf(measurement);
 		if(index > -1)
@@ -158,12 +155,12 @@ class PotreeScene
 		}
 	}
 
-	addProfile (profile)
+	addProfile(profile)
 	{
 		this.profiles.push(profile);
 	}
 
-	removeProfile (profile)
+	removeProfile(profile)
 	{
 		let index = this.profiles.indexOf(profile);
 		if(index > -1)
@@ -172,7 +169,7 @@ class PotreeScene
 		}
 	}
 
-	removeAllMeasurements ()
+	removeAllMeasurements()
 	{
 		while(this.measurements.length > 0)
 		{
@@ -206,6 +203,6 @@ class PotreeScene
 
 	getActiveCamera()
 	{
-		return this.camera;		
+		return this.camera;
 	}
 };

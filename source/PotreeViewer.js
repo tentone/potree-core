@@ -7,18 +7,24 @@
  */
 class PotreeViewer
 {
-	constructor()
+	constructor(renderer)
 	{
 		this.minNodeSize = 30;
-		this.scaleFactor = 1;
 
-		Potree.pointBudget = 1000000;
+		Potree.pointBudget = 100000;
 
-		this.createRenderer();
+		if(renderer === undefined)
+		{
+			this.createRenderer();
+		}
+		else
+		{
+			this.renderer = renderer;
+		}
 
-		this.pRenderer = new Potree.Renderer(this.renderer);
+		this.pointRenderer = new PotreeRenderer2(this.renderer);
 		
-		this.scene = new Potree.Scene(this.renderer);
+		this.scene = new PotreeScene(this.renderer);
 
 		this.controls = new Potree.OrbitControls(this);
 		
@@ -48,17 +54,9 @@ class PotreeViewer
 
 	createRenderer()
 	{
-		var width = window.innerWidth;
-		var height = window.innerHeight;
-
 		this.renderer = new THREE.WebGLRenderer({alpha: true, premultipliedAlpha: false});
 		this.renderer.sortObjects = true;
-		this.renderer.setSize(width, height);
 		this.renderer.autoClear = false;
-		this.renderer.domElement.style.position = "absolute";
-		this.renderer.domElement.style.top = "0px";
-		this.renderer.domElement.style.bottom = "0px";
-		document.body.appendChild(this.renderer.domElement);
 
 		//Enable frag_depth extension for the interpolation shader, if available
 		var gl = this.renderer.context;
@@ -67,7 +65,15 @@ class PotreeViewer
 		
 		var extVAO = gl.getExtension("OES_vertex_array_object");
 		gl.createVertexArray = extVAO.createVertexArrayOES.bind(extVAO);
-		gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);		
+		gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
+
+		var width = window.innerWidth;
+		var height = window.innerHeight;
+		this.renderer.setSize(width, height);
+		this.renderer.domElement.style.position = "absolute";
+		this.renderer.domElement.style.top = "0px";
+		this.renderer.domElement.style.bottom = "0px";
+		document.body.appendChild(this.renderer.domElement);
 	}
 
 	update(delta)
@@ -81,41 +87,35 @@ class PotreeViewer
 			pointcloud.minimumNodePixelSize = this.minNodeSize;
 		}
 
-		Potree.updatePointClouds(this.scene.pointclouds, this.scene.cameraP, this.renderer);
+		Potree.updatePointClouds(this.scene.pointclouds, this.scene.camera, this.renderer);
 
 		this.controls.setScene(this.scene);
 		this.controls.update(delta);
 
-		this.scene.cameraP.fov = 60;
-		this.scene.cameraP.position.copy(this.scene.view.position);
-		this.scene.cameraP.rotation.order = "ZXY";
-		this.scene.cameraP.rotation.x = Math.PI / 2 + this.scene.view.pitch;
-		this.scene.cameraP.rotation.z = this.scene.view.yaw;
-		this.scene.cameraP.updateMatrix();
-		this.scene.cameraP.updateMatrixWorld();
-		this.scene.cameraP.matrixWorldInverse.getInverse(this.scene.cameraP.matrixWorld);
+		this.scene.camera.position.copy(this.scene.view.position);
+		this.scene.camera.rotation.order = "ZXY";
+		this.scene.camera.rotation.x = Math.PI / 2 + this.scene.view.pitch;
+		this.scene.camera.rotation.z = this.scene.view.yaw;
+		this.scene.camera.updateMatrix();
+		this.scene.camera.updateMatrixWorld();
+		this.scene.camera.matrixWorldInverse.getInverse(this.scene.camera.matrixWorld);
 	}
 	
 	render(camera)
 	{
 		if(camera === undefined)
 		{
-			camera = this.scene.cameraP;
+			camera = this.scene.camera;
 		}
 
-		this.pRenderer.render(this.scene.scenePointCloud, camera);
+		this.pointRenderer.render(this.scene.scenePointCloud, camera);
 	}
 
-	resize()
+	resize(width, height)
 	{
-		var width = this.scaleFactor * window.innerWidth;
-		var height = this.scaleFactor * window.innerHeight;
 		this.renderer.setSize(width, height);
 
-		var pixelRatio = this.renderer.getPixelRatio();
-		var aspect = width / height;
-
-		this.scene.cameraP.aspect = aspect;
-		this.scene.cameraP.updateProjectionMatrix();
+		this.scene.camera.aspect = width / height;
+		this.scene.camera.updateProjectionMatrix();
 	}
 }

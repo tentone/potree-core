@@ -7,7 +7,18 @@
 	<body>
 		<script src="libs/threejs/three.min.js"></script>
 		<script src="libs/threejs/OrbitControls.js"></script>
+
+		<script src="libs/jquery-3.1.1.min.js"></script>
+		<script src="libs/BinaryHeap.js"></script>
+		<script src="libs/proj4.js"></script>
+
+		<script src="libs/potree/potree.js"></script>
+		
+		<script src="source/PotreeRenderer.js"></script>
+		<script src="source/PotreeScene.js"></script>
+		<script src="source/PotreeViewer.js"></script>
 		<script>
+			//three.js
 			var scene = new THREE.Scene();
 			var camera = new THREE.PerspectiveCamera(60, 1, 0.1, 10000);
 
@@ -36,10 +47,44 @@
 			var controls = new THREE.OrbitControls(camera, canvas);
 			camera.position.z = 10;
 
-			var loop = function()
+			//Potree
+			var viewer = new PotreeViewer(renderer);
+			var clock = new THREE.Clock();
+
+			loadCloud("galp");
+			loadCloud("leixoes", -59, -40, -18, 0.2, 0.2, 0.2);
+
+			function loadCloud(name, pX, pY, pZ, sX, sY, sZ)
 			{
+				Potree.loadPointCloud("data/models/" + name + "/cloud.js", name, function(e)
+				{
+					var pointcloud = e.pointcloud;
+
+					if(pX !== undefined) pointcloud.position.set(pX, pY, pZ);
+					if(sX !== undefined) pointcloud.scale.set(sX, sY, sZ);
+
+					var material = pointcloud.material;
+					material.size = 1;
+					material.pointColorType = Potree.PointColorType.RGB;
+					material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+					material.shape = Potree.PointShape.SQUARE;
+
+					console.log(pointcloud);
+					viewer.scene.addPointCloud(pointcloud);
+				});
+			}
+
+			function loop()
+			{	
+				var delta = clock.getDelta();
+
+				//three.js
 				controls.update();
 				renderer.render(scene, camera);
+
+				//Potree
+				viewer.update(delta);
+				viewer.render(camera);
 
 				requestAnimationFrame(loop);
 			};
@@ -50,9 +95,13 @@
 				var width = window.innerWidth;
 				var height = window.innerHeight;
 
+				//three.js
 				renderer.setSize(width, height);
 				camera.aspect = width / height;
 				camera.updateProjectionMatrix();
+
+				//Potree
+				viewer.resize(width, height);
 			}
 			document.body.onresize();
 		</script>

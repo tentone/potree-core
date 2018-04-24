@@ -1,2 +1,211 @@
 "use strict";
 
+class PotreeScene
+{
+	constructor()
+	{
+		this.annotations = new Potree.Annotation();
+		
+		this.scene = new THREE.Scene();
+		
+		this.scenePointCloud = new THREE.Scene();
+		this.scenePointCloud.rotation.set(1.57, 0, 0);
+
+		this.referenceFrame = new THREE.Object3D();
+
+		this.scenePointCloud.add(this.referenceFrame);
+
+		this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000000);
+		this.camera.up.set(0, 1, 0);
+		this.camera.position.set(1000, 1000, 1000);
+
+		this.pointclouds = [];
+
+		this.measurements = [];
+		this.profiles = [];
+		this.volumes = [];
+		this.polygonClipVolumes = [];
+
+		this.view = new Potree.View();
+	}
+	
+	estimateHeightAt(position)
+	{
+		let height = null;
+		let fromSpacing = Infinity;
+
+		for(let pointcloud of this.pointclouds)
+		{
+			if(pointcloud.root.geometryNode === undefined)
+			{
+				continue;
+			}
+
+			let pHeight = null;
+			let pFromSpacing = Infinity;
+
+			let lpos = position.clone().sub(pointcloud.position);
+			lpos.z = 0;
+			let ray = new THREE.Ray(lpos, new THREE.Vector3(0, 0, 1));
+
+			let stack = [pointcloud.root];
+			while(stack.length > 0)
+			{
+				let node = stack.pop();
+				let box = node.getBoundingBox();
+				let inside = ray.intersectBox(box);
+
+				if(!inside)
+				{
+					continue;
+				}
+
+				let h = node.geometryNode.mean.z +
+					pointcloud.position.z +
+					node.geometryNode.boundingBox.min.z;
+
+				if(node.geometryNode.spacing <= pFromSpacing)
+				{
+					pHeight = h;
+					pFromSpacing = node.geometryNode.spacing;
+				}
+
+				for(let index of Object.keys(node.children))
+				{
+					let child = node.children[index];
+					if(child.geometryNode)
+					{
+						stack.push(node.children[index]);
+					}
+				}
+			}
+
+			if(height === null || pFromSpacing < fromSpacing)
+			{
+				height = pHeight;
+				fromSpacing = pFromSpacing;
+			}
+		}
+
+		return height;
+	}
+	
+	getBoundingBox(pointclouds = this.pointclouds)
+	{
+		let box = new THREE.Box3();
+
+		this.scenePointCloud.updateMatrixWorld(true);
+		this.referenceFrame.updateMatrixWorld(true);
+
+		for(let pointcloud of pointclouds)
+		{
+			pointcloud.updateMatrixWorld(true);
+
+			let pointcloudBox = pointcloud.pcoGeometry.tightBoundingBox ? pointcloud.pcoGeometry.tightBoundingBox : pointcloud.boundingBox;
+			let boxWorld = Potree.utils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
+			box.union(boxWorld);
+		}
+
+		return box;
+	}
+
+	addPointCloud (pointcloud)
+	{
+		this.pointclouds.push(pointcloud);
+		this.scenePointCloud.add(pointcloud);
+	};
+
+	addVolume (volume)
+	{
+		this.volumes.push(volume);
+	};
+
+	removeVolume (volume)
+	{
+		let index = this.volumes.indexOf(volume);
+		if(index > -1)
+		{
+			this.volumes.splice(index, 1);
+		}
+	};
+
+	addPolygonClipVolume(volume)
+	{
+		this.polygonClipVolumes.push(volume);
+	};
+	
+	removePolygonClipVolume(volume)
+	{
+		let index = this.polygonClipVolumes.indexOf(volume);
+		if(index > -1)
+		{
+			this.polygonClipVolumes.splice(index, 1);
+		}
+	};
+	
+	addMeasurement(measurement)
+	{
+		measurement.lengthUnit = this.lengthUnit;
+		this.measurements.push(measurement);
+	};
+
+	removeMeasurement (measurement)
+	{
+		let index = this.measurements.indexOf(measurement);
+		if(index > -1)
+		{
+			this.measurements.splice(index, 1);
+		}
+	}
+
+	addProfile (profile)
+	{
+		this.profiles.push(profile);
+	}
+
+	removeProfile (profile)
+	{
+		let index = this.profiles.indexOf(profile);
+		if(index > -1)
+		{
+			this.profiles.splice(index, 1);
+		}
+	}
+
+	removeAllMeasurements ()
+	{
+		while(this.measurements.length > 0)
+		{
+			this.removeMeasurement(this.measurements[0]);
+		}
+
+		while(this.profiles.length > 0)
+		{
+			this.removeProfile(this.profiles[0]);
+		}
+
+		while(this.volumes.length > 0)
+		{
+			this.removeVolume(this.volumes[0]);
+		}
+	}
+
+	removeAllClipVolumes()
+	{
+		let clipVolumes = this.volumes.filter(volume => volume.clip === true);
+		for(let clipVolume of clipVolumes)
+		{
+			this.removeVolume(clipVolume);
+		}
+
+		while(this.polygonClipVolumes.length > 0)
+		{
+			this.removePolygonClipVolume(this.polygonClipVolumes[0]);
+		}
+	}
+
+	getActiveCamera()
+	{
+		return this.camera;		
+	}
+};

@@ -15,15 +15,13 @@
 
 		<script src="libs/potree/potree.js"></script>
 		
+		<script src="source/PotreeRenderer.js"></script>
+		<script src="source/PotreeScene.js"></script>
 		<script src="source/PotreeViewer.js"></script>
 		<script>
 			window.viewer = new PotreeViewer();
 
 			var clock = new THREE.Clock();
-
-			//var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 10000);
-			//camera.position.z = 10;
-			//var controls = new THREE.OrbitControls(camera);
 
 			loadCloud("galp");
 			loadCloud("leixoes", -59, -40, -18, 0.2, 0.2, 0.2);
@@ -59,14 +57,14 @@
 			};
 			loop();
 
-			viewer.resize();
 			document.body.onresize = function()
 			{
-				viewer.resize();
-				//camera.aspect = aspect;
-				//camera.updateProjectionMatrix();
-			}
+				var width = window.innerWidth;
+				var height = window.innerHeight;
 
+				viewer.resize(width, height);
+			}
+			document.body.onresize();
 		</script>
 	</body>
 </html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+	</head>
+	<body>
+		<script src="libs/three.min.js"></script>
+		<script src="libs/OrbitControls.js"></script>
+		<script src="libs/jquery-3.1.1.min.js"></script>
+		<script src="libs/BinaryHeap.js"></script>
+		<script src="libs/proj4.js"></script>
+		<script src="libs/tween.min.js"></script>
+		<script src="libs/potree/potree.js"></script>
+
+		<script src="source/Renderer.js"></script>
+		<script>
+			var scene = new THREE.Scene();
+			var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 10000);
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+
+			var geometry = new THREE.BoxGeometry(1, 1, 1);
+			var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+			var cube = new THREE.Mesh(geometry, material);
+			scene.add(cube);
+
+			var controls = new THREE.OrbitControls(camera);
+
+			camera.position.z = 5;
+
+			var animate = function()
+			{
+				requestAnimationFrame(animate);
+
+				controls.update();
+
+				renderer.render(scene, camera);
+			};
+			animate();
+
+			loadCloud("galp");
+
+			function loadCloud(name, pX, pY, pZ, sX, sY, sZ)
+			{
+				Potree.loadPointCloud("data/models/" + name + "/cloud.js", name, function(e)
+				{
+					var pointcloud = e.pointcloud;
+
+					if(pX !== undefined) pointcloud.position.set(pX, pY, pZ);
+					if(sX !== undefined) pointcloud.scale.set(sX, sY, sZ);
+
+					var material = pointcloud.material;
+					material.size = 1;
+					material.pointColorType = Potree.PointColorType.RGB;
+					material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+					material.shape = Potree.PointShape.SQUARE;
+				});
+			}
+		</script>
+	</body>
+</html>

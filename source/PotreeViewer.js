@@ -5,7 +5,7 @@
  * 
  * The object can be used a normal Object3D.
  */
-class PotreeObject
+class PotreeViewer
 {
 	constructor()
 	{
@@ -840,6 +840,23 @@ class PotreeObject
 				this.potreeRenderer.render();
 			}
 		}
+
+		/*
+		let query = Potree.startQuery('render', renderer.getContext());
+		for(let pointcloud of this.viewer.scene.pointclouds)
+		{
+			pointcloud.material.useEDL = false;
+		}
+		
+		//let queryPC = Potree.startQuery("PointCloud", renderer.getContext());
+		let activeCam = viewer.scene.getActiveCamera();
+		//renderer.render(viewer.scene.scenePointCloud, activeCam);
+		
+		viewer.pRenderer.render(viewer.scene.scenePointCloud, activeCam, null,
+		{
+			clipSpheres: viewer.scene.volumes.filter(v => (v instanceof Potree.SphereVolume)),
+		});
+		*/
 	}
 
 	resize()

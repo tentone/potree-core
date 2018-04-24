@@ -17,13 +17,13 @@
 		<script src="source/PotreeViewer.js"></script>
 		<script>
 			window.viewer = new PotreeViewer();
-			
-			viewer.resize();
-			document.body.onresize = function()
-			{
-				viewer.resize();
-			}
-				
+
+			var clock = new THREE.Clock();
+
+			//var camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 10000);
+			//camera.position.z = 10;
+			//var controls = new THREE.OrbitControls(camera);
+
 			loadCloud("galp");
 			loadCloud("leixoes", -59, -40, -18, 0.2, 0.2, 0.2);
 
@@ -47,18 +47,24 @@
 				});
 			}
 
-			var timestamp = 0;
 			function loop()
 			{	
-				var delta = viewer.clock.getDelta();
-				timestamp += delta;
+				var delta = clock.getDelta();
 
-				viewer.update(delta, timestamp);
+				viewer.update(delta);
 				viewer.render();
 
 				requestAnimationFrame(loop);
 			};
 			loop();
+
+			viewer.resize();
+			document.body.onresize = function()
+			{
+				viewer.resize();
+				//camera.aspect = aspect;
+				//camera.updateProjectionMatrix();
+			}
 
 		</script>
 	</body>

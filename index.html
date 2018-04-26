@@ -37,7 +37,7 @@
 			var controls = new THREE.OrbitControls(camera, canvas);
 			camera.position.z = 10;
 
-			var points = new PotreeObject(renderer);
+			var points = new Potree.Object(renderer);
 			points.setPointBudget(10000000)
 			scene.add(points);
 

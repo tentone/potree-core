@@ -13,7 +13,15 @@
  - The following classes were rewritten
     - XHRFactory
 
+### How to use
+ - Download the custom build from the build folder
+ - Include it alonside the worker folder in your project
+ - Download threejs from github repository
+ 	- https://github.com/mrdoob/three.js/tree/dev/build
+
 ### Example
+
+ - Bellow its a fully functional example of how to use this wrapper to load potree point clouds to a THREE.js project
 
 ```javascript
 var scene = new THREE.Scene();
@@ -37,7 +45,7 @@ scene.add(cube);
 var controls = new THREE.OrbitControls(camera, canvas);
 camera.position.z = 10;
 
-var points = new PotreeObject(renderer);
+var points = new Potree.Object(renderer);
 points.setPointBudget(10000000)
 scene.add(points);
 
@@ -66,15 +74,11 @@ document.body.onresize = function()
 document.body.onresize();
 ```
 
-### Documentation
- - Potree.PointCloudMaterial
-	- Material based on rawshader material used to render Potree pointclouds.
-
-### Setup
- - Download the custom build from the build folder
- - Include it alonside the worker folder in your project
- - Download threejs from github repository
- 	- https://github.com/mrdoob/three.js/tree/dev/build
+### Building
+ - The output javascript is not a module of any kind
+ - The project can be build using closure
+    - npm install
+    - npm run build
 
 ### Create Point Clouds
  - Use the Potree Converter tool to create point cloud data from LAS, ZLAS or BIN point cloud files

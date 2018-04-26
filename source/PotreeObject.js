@@ -9,7 +9,7 @@
  * 
  * Also takes care of geometry ajustments to allow the point clouds to be frustum culled.
  */
-class PotreeObject extends THREE.Mesh
+Potree.Object = class PotreeObject extends THREE.Mesh
 {
 	constructor()
 	{

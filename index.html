@@ -37,7 +37,7 @@
 			gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
 
 			var geometry = new THREE.BoxGeometry(1, 1, 1);
-			var material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+			var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
 			var cube = new THREE.Mesh(geometry, material);
 			scene.add(cube);
 
@@ -48,7 +48,8 @@
 			var viewer = new PotreeViewer(renderer);
 
 			loadCloud("galp");
-			loadCloud("leixoes", -59, -40, -18, 0.2, 0.2, 0.2);
+			loadCloud("leixoes", -110, -40, -38, 0.4, 0.4, 0.4);
+			loadCloud("coalescedor", 11, -40, -43, 0.4, 0.4, 0.4);
 
 			function loadCloud(name, pX, pY, pZ, sX, sY, sZ)
 			{
@@ -59,12 +60,14 @@
 					if(pX !== undefined) pointcloud.position.set(pX, pY, pZ);
 					if(sX !== undefined) pointcloud.scale.set(sX, sY, sZ);
 
-					var material = pointcloud.material;
+					/*var material = pointcloud.material;
 					material.size = 1;
 					material.pointColorType = Potree.PointColorType.RGB;
 					material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
-					material.shape = Potree.PointShape.SQUARE;
+					material.shape = Potree.PointShape.SQUARE;*/
 					
+					console.log(pointcloud)
+
 					viewer.scene.addPointCloud(pointcloud);
 				});
 			}
@@ -73,12 +76,10 @@
 			{
 				cube.rotation.y += 0.01;
 
-				//three.js
 				controls.update();
-				renderer.render(scene, camera);
-
-				//Potree
 				viewer.update(camera);
+
+				renderer.render(scene, camera);
 				viewer.render(camera);
 
 				requestAnimationFrame(loop);

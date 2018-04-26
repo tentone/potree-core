@@ -1,6 +1,7 @@
-# Potree
+# Potree Object
 
- - This project is based on Potree V1.6 the following elements were removed from the library
+ - This project is based on Potree V1.6
+ - The following elements were removed from the library
  	- PotreeViewer
  	- Controls, Input, GUI, Tools
  	- Anotations, Actions, ProfileRequest
@@ -9,6 +10,8 @@
  	- Potree.MOUSE, Potree.CameraMode
  	- PotreeRenderer, RepRenderer, Potree.Renderer
 	- JQuery, TWEEN and Proj4 dependencies
+ - The following classes were rewritten
+    - XHRFactory
 
 ### Example
  - TODO

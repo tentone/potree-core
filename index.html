@@ -52,7 +52,7 @@
 
 			function loadCloud(name, pX, pY, pZ, sX, sY, sZ)
 			{
-				Potree.loadPointCloud("data/models/" + name + "/cloud.js", name, function(e)
+				Potree.loadPointCloud("data/" + name + "/cloud.js", name, function(e)
 				{
 					var pointcloud = e.pointcloud;
 
@@ -64,8 +64,7 @@
 					material.pointColorType = Potree.PointColorType.RGB;
 					material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
 					material.shape = Potree.PointShape.SQUARE;
-
-					console.log(pointcloud);
+					
 					viewer.scene.addPointCloud(pointcloud);
 				});
 			}

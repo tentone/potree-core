@@ -1,4 +1,4 @@
-# Potree Loader
+# Potree Boilerplate
 
 ### How to use it
  - Include three.js and potree in your project code

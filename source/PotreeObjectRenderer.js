@@ -1,6 +1,6 @@
 "use strict";
 
-class PotreeSceneRenderer
+class PotreeObjectRenderer
 {
 	constructor(renderer)
 	{
@@ -15,8 +15,6 @@ class PotreeSceneRenderer
 		this.glTypeMapping.set(Float32Array, this.gl.FLOAT);
 		this.glTypeMapping.set(Uint8Array, this.gl.UNSIGNED_BYTE);
 		this.glTypeMapping.set(Uint16Array, this.gl.UNSIGNED_SHORT);
-
-		this.toggle = 0;
 	}
 
 	createBuffer(geometry)
@@ -43,7 +41,8 @@ class PotreeSceneRenderer
 			gl.vertexAttribPointer(attributeLocation, bufferAttribute.itemSize, type, normalized, 0, 0);
 			gl.enableVertexAttribArray(attributeLocation);
 
-			webglBuffer.vbos.set(attributeName, {
+			webglBuffer.vbos.set(attributeName,
+			{
 				handle: vbo,
 				name: attributeName,
 				count: bufferAttribute.count,
@@ -177,7 +176,7 @@ class PotreeSceneRenderer
 			}
 			shader.setUniform("uIsLeafNode", isLeaf);
 
-			// TODO consider passing matrices in an array to avoid uniformMatrix4fv overhead
+			//TODO <consider passing matrices in an array to avoid uniformMatrix4fv overhead>
 			const lModel = shader.uniformLocations["modelMatrix"];
 			if(lModel)
 			{
@@ -186,12 +185,7 @@ class PotreeSceneRenderer
 			}
 
 			const lModelView = shader.uniformLocations["modelViewMatrix"];
-			//mat4holder.set(worldView.elements);
-			// faster then set in chrome 63
-			for(let j = 0; j < 16; j++)
-			{
-				mat4holder[j] = worldView.elements[j];
-			}
+			mat4holder.set(worldView.elements);
 			gl.uniformMatrix4fv(lModelView, false, mat4holder);
 
 			//Clip Polygons
@@ -260,9 +254,7 @@ class PotreeSceneRenderer
 					gl.bindTexture(gl.TEXTURE_2D, glTexture);
 				}
 
-				let worldViewMatrices = shadowMaps
-					.map(sm => sm.camera.matrixWorldInverse)
-					.map(view => new THREE.Matrix4().multiplyMatrices(view, world))
+				let worldViewMatrices = shadowMaps.map(sm => sm.camera.matrixWorldInverse).map(view => new THREE.Matrix4().multiplyMatrices(view, world))
 
 				let flattenedMatrices = [].concat(...worldViewMatrices.map(c => c.elements));
 				const lWorldView = shader.uniformLocations["uShadowWorldView[0]"];

@@ -1,26 +1,70 @@
 "use strict";
 
-class PotreeScene
+class PotreeScene extends THREE.Object3D
 {
 	constructor()
 	{
-		this.scene = new THREE.Object3D();
-		
-		this.scenePointCloud = new THREE.Object3D();
-		this.scenePointCloud.rotation.set(-Math.PI / 2, 0, 0);
-		this.scenePointCloud.updateMatrixWorld(true);
-		
-		this.referenceFrame = new THREE.Object3D();
-		this.scenePointCloud.add(this.referenceFrame);
+		super();
 
-		this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000000);
-		this.camera.position.set(1000, 1000, 1000);
+		this.rotation.set(-Math.PI / 2, 0, 0);
+		this.updateMatrixWorld(true);
 
 		this.pointclouds = [];
-		this.volumes = [];
-		this.polygonClipVolumes = [];
+		this.minNodeSize = 30;
 	}
-	
+
+	update(camera, renderer)
+	{
+		Potree.pointLoadLimit = Potree.pointBudget * 2;
+
+		for(var pointcloud of this.pointclouds)
+		{
+			pointcloud.showBoundingBox = false;
+			pointcloud.generateDEM = false;
+			pointcloud.minimumNodePixelSize = this.minNodeSize;
+		}
+
+		Potree.updatePointClouds(this.pointclouds, camera, renderer);
+	}
+
+	raycast(raycaster, intersects) 
+	{
+		//TODO <ADD CODE HERE>
+	}
+
+	onBeforeRender(renderer, scene, camera, geometry, material, group)
+	{
+		//TODO <ADD CODE HERE>
+	}
+
+	addPointCloud(object)
+	{
+		if(object instanceof Potree.PointCloudTree)
+		{
+			this.pointclouds.push(object);
+		}
+
+		this.add(object);
+	}
+
+	getBoundingBox()
+	{
+		let box = new THREE.Box3();
+
+		this.updateMatrixWorld(true);
+
+		for(let pointcloud of this.pointclouds)
+		{
+			pointcloud.updateMatrixWorld(true);
+
+			let pointcloudBox = pointcloud.pcoGeometry.tightBoundingBox ? pointcloud.pcoGeometry.tightBoundingBox : pointcloud.boundingBox;
+			let boxWorld = Potree.utils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
+			box.union(boxWorld);
+		}
+
+		return box;
+	}
+
 	estimateHeightAt(position)
 	{
 		let height = null;
@@ -78,85 +122,5 @@ class PotreeScene
 		}
 
 		return height;
-	}
-	
-	getBoundingBox(pointclouds = this.pointclouds)
-	{
-		let box = new THREE.Box3();
-
-		this.scenePointCloud.updateMatrixWorld(true);
-		this.referenceFrame.updateMatrixWorld(true);
-
-		for(let pointcloud of pointclouds)
-		{
-			pointcloud.updateMatrixWorld(true);
-
-			let pointcloudBox = pointcloud.pcoGeometry.tightBoundingBox ? pointcloud.pcoGeometry.tightBoundingBox : pointcloud.boundingBox;
-			let boxWorld = Potree.utils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
-			box.union(boxWorld);
-		}
-
-		return box;
-	}
-
-	addPointCloud(pointcloud)
-	{
-		this.pointclouds.push(pointcloud);
-		this.scenePointCloud.add(pointcloud);
-	};
-
-	addVolume(volume)
-	{
-		this.volumes.push(volume);
-	};
-
-	removeVolume(volume)
-	{
-		let index = this.volumes.indexOf(volume);
-		if(index > -1)
-		{
-			this.volumes.splice(index, 1);
-		}
-	};
-
-	addPolygonClipVolume(volume)
-	{
-		this.polygonClipVolumes.push(volume);
-	};
-	
-	removePolygonClipVolume(volume)
-	{
-		let index = this.polygonClipVolumes.indexOf(volume);
-		if(index > -1)
-		{
-			this.polygonClipVolumes.splice(index, 1);
-		}
-	};
-
-	removeAllMeasurements()
-	{
-		while(this.volumes.length > 0)
-		{
-			this.removeVolume(this.volumes[0]);
-		}
-	}
-
-	removeAllClipVolumes()
-	{
-		let clipVolumes = this.volumes.filter(volume => volume.clip === true);
-		for(let clipVolume of clipVolumes)
-		{
-			this.removeVolume(clipVolume);
-		}
-
-		while(this.polygonClipVolumes.length > 0)
-		{
-			this.removePolygonClipVolume(this.polygonClipVolumes[0]);
-		}
-	}
-
-	getActiveCamera()
-	{
-		return this.camera;
 	}
 };

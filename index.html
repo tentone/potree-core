@@ -8,13 +8,10 @@
 		<script src="libs/threejs/three.min.js"></script>
 		<script src="libs/threejs/OrbitControls.js"></script>
 
-		<script src="libs/jquery-3.1.1.min.js"></script>
+		<script src="libs/potree/potree.nogui.js"></script>
 		<script src="libs/BinaryHeap.js"></script>
-		<script src="libs/proj4.js"></script>
-
-		<script src="libs/potree/potree.js"></script>
 		
-		<script src="source/PotreeSceneRenderer.js"></script>
+		<script src="source/PotreeObjectRenderer.js"></script>
 		<script src="source/PotreeScene.js"></script>
 		<script src="source/PotreeViewer.js"></script>
 		<script>
@@ -49,7 +46,6 @@
 
 			//Potree
 			var viewer = new PotreeViewer(renderer);
-			var clock = new THREE.Clock();
 
 			loadCloud("galp");
 			loadCloud("leixoes", -59, -40, -18, 0.2, 0.2, 0.2);
@@ -75,15 +71,15 @@
 			}
 
 			function loop()
-			{	
-				var delta = clock.getDelta();
+			{
+				cube.rotation.y += 0.01;
 
 				//three.js
 				controls.update();
 				renderer.render(scene, camera);
 
 				//Potree
-				viewer.update(delta, camera);
+				viewer.update(camera);
 				viewer.render(camera);
 
 				requestAnimationFrame(loop);
@@ -99,9 +95,6 @@
 				renderer.setSize(width, height);
 				camera.aspect = width / height;
 				camera.updateProjectionMatrix();
-
-				//Potree
-				viewer.resize(width, height);
 			}
 			document.body.onresize();
 		</script>

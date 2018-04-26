@@ -1,6 +1,6 @@
 "use strict";
 
-class PotreeRenderer2
+class PotreeSceneRenderer
 {
 	constructor(renderer)
 	{

@@ -11,31 +11,13 @@ class PotreeViewer
 	{
 		this.minNodeSize = 30;
 
-		Potree.pointBudget = 100000;
+		Potree.pointBudget = 10000000;
 
-		if(renderer === undefined)
-		{
-			this.createRenderer();
-		}
-		else
-		{
-			this.renderer = renderer;
-		}
-
-		this.pointRenderer = new PotreeRenderer2(this.renderer);
+		this.renderer = renderer !== undefined ? renderer : this.createRenderer();
+		this.pointRenderer = new PotreeSceneRenderer(this.renderer);
 		
 		this.scene = new PotreeScene(this.renderer);
-
-		this.controls = new Potree.OrbitControls(this);
-		
-		this.inputHandler = new Potree.InputHandler(this);
-		this.inputHandler.setScene(this.scene);
-		this.inputHandler.addInputListener(this.controls);
 	}
-
-	dispatchEvent(){}
-
-	setMoveSpeed(value){}
 
 	getBoundingBox(pointclouds)
 	{
@@ -52,30 +34,6 @@ class PotreeViewer
 		}
 	}
 
-	createRenderer()
-	{
-		this.renderer = new THREE.WebGLRenderer({alpha: true, premultipliedAlpha: false});
-		this.renderer.sortObjects = true;
-		this.renderer.autoClear = false;
-
-		//Enable frag_depth extension for the interpolation shader, if available
-		var gl = this.renderer.context;
-		gl.getExtension("EXT_frag_depth");
-		gl.getExtension("WEBGL_depth_texture");
-		
-		var extVAO = gl.getExtension("OES_vertex_array_object");
-		gl.createVertexArray = extVAO.createVertexArrayOES.bind(extVAO);
-		gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
-
-		var width = window.innerWidth;
-		var height = window.innerHeight;
-		this.renderer.setSize(width, height);
-		this.renderer.domElement.style.position = "absolute";
-		this.renderer.domElement.style.top = "0px";
-		this.renderer.domElement.style.bottom = "0px";
-		document.body.appendChild(this.renderer.domElement);
-	}
-
 	update(delta, camera)
 	{
 		Potree.pointLoadLimit = Potree.pointBudget * 2;
@@ -87,25 +45,7 @@ class PotreeViewer
 			pointcloud.minimumNodePixelSize = this.minNodeSize;
 		}
 
-		if(camera === undefined)
-		{
-			Potree.updatePointClouds(this.scene.pointclouds, this.scene.camera, this.renderer);
-
-			this.controls.setScene(this.scene);
-			this.controls.update(delta);
-
-			this.scene.camera.position.copy(this.scene.view.position);
-			this.scene.camera.rotation.order = "ZXY";
-			this.scene.camera.rotation.x = Math.PI / 2 + this.scene.view.pitch;
-			this.scene.camera.rotation.z = this.scene.view.yaw;
-			this.scene.camera.updateMatrix();
-			this.scene.camera.updateMatrixWorld();
-			this.scene.camera.matrixWorldInverse.getInverse(this.scene.camera.matrixWorld);
-		}
-		else
-		{
-			Potree.updatePointClouds(this.scene.pointclouds, camera, this.renderer);
-		}
+		Potree.updatePointClouds(this.scene.pointclouds, camera, this.renderer);
 	}
 	
 	render(camera)
@@ -124,5 +64,30 @@ class PotreeViewer
 
 		this.scene.camera.aspect = width / height;
 		this.scene.camera.updateProjectionMatrix();
+	}
+
+	createRenderer()
+	{
+		this.renderer = new THREE.WebGLRenderer({alpha: true, premultipliedAlpha: false});
+		this.renderer.sortObjects = true;
+		this.renderer.autoClear = false;
+
+		//Enable frag_depth extension for the interpolation shader, if available
+		var gl = this.renderer.context;
+		gl.getExtension("EXT_frag_depth");
+		gl.getExtension("WEBGL_depth_texture");
+		var extVAO = gl.getExtension("OES_vertex_array_object");
+		gl.createVertexArray = extVAO.createVertexArrayOES.bind(extVAO);
+		gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
+
+		var width = window.innerWidth;
+		var height = window.innerHeight;
+		this.renderer.setSize(width, height);
+		this.renderer.domElement.style.position = "absolute";
+		this.renderer.domElement.style.top = "0px";
+		this.renderer.domElement.style.bottom = "0px";
+		document.body.appendChild(this.renderer.domElement);
+
+		return this.renderer;
 	}
 }

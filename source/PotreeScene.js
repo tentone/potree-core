@@ -4,28 +4,21 @@ class PotreeScene
 {
 	constructor()
 	{
-		this.annotations = new Potree.Annotation();
+		this.scene = new THREE.Object3D();
 		
-		this.scene = new THREE.Scene();
-		
-		this.scenePointCloud = new THREE.Scene();
+		this.scenePointCloud = new THREE.Object3D();
 		this.scenePointCloud.rotation.set(-Math.PI / 2, 0, 0);
 		this.scenePointCloud.updateMatrixWorld(true);
 		
 		this.referenceFrame = new THREE.Object3D();
-
 		this.scenePointCloud.add(this.referenceFrame);
 
 		this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000000);
 		this.camera.position.set(1000, 1000, 1000);
 
 		this.pointclouds = [];
-		this.measurements = [];
-		this.profiles = [];
 		this.volumes = [];
 		this.polygonClipVolumes = [];
-
-		this.view = new Potree.View();
 	}
 	
 	estimateHeightAt(position)
@@ -139,48 +132,9 @@ class PotreeScene
 			this.polygonClipVolumes.splice(index, 1);
 		}
 	};
-	
-	addMeasurement(measurement)
-	{
-		measurement.lengthUnit = this.lengthUnit;
-		this.measurements.push(measurement);
-	};
-
-	removeMeasurement(measurement)
-	{
-		let index = this.measurements.indexOf(measurement);
-		if(index > -1)
-		{
-			this.measurements.splice(index, 1);
-		}
-	}
-
-	addProfile(profile)
-	{
-		this.profiles.push(profile);
-	}
-
-	removeProfile(profile)
-	{
-		let index = this.profiles.indexOf(profile);
-		if(index > -1)
-		{
-			this.profiles.splice(index, 1);
-		}
-	}
 
 	removeAllMeasurements()
 	{
-		while(this.measurements.length > 0)
-		{
-			this.removeMeasurement(this.measurements[0]);
-		}
-
-		while(this.profiles.length > 0)
-		{
-			this.removeProfile(this.profiles[0]);
-		}
-
 		while(this.volumes.length > 0)
 		{
 			this.removeVolume(this.volumes[0]);

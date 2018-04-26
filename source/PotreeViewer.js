@@ -12,7 +12,7 @@ class PotreeViewer
 		Potree.pointBudget = 10000000;
 
 		this.renderer = renderer !== undefined ? this.prepareRenderer(renderer) : this.createRenderer();
-		this.pointRenderer = new PotreeObjectRenderer(this.renderer);
+		this.pointRenderer = new PotreeRenderer(this.renderer);
 		
 		this.scene = new PotreeScene(this.renderer);
 	}

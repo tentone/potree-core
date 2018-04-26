@@ -4,7 +4,7 @@ class PotreeRenderer
 {
 	constructor(renderer)
 	{
-		this.renderer = renderer;
+		this.renderer = prepareRenderer(renderer);
 		this.gl = this.renderer.context;
 
 		this.buffers = new Map();
@@ -15,6 +15,19 @@ class PotreeRenderer
 		this.glTypeMapping.set(Float32Array, this.gl.FLOAT);
 		this.glTypeMapping.set(Uint8Array, this.gl.UNSIGNED_BYTE);
 		this.glTypeMapping.set(Uint16Array, this.gl.UNSIGNED_SHORT);
+	}
+
+	prepareRenderer(renderer)
+	{
+		//Enable frag_depth extension for the interpolation shader, if available
+		var gl = renderer.context;
+		gl.getExtension("EXT_frag_depth");
+		gl.getExtension("WEBGL_depth_texture");
+		var extVAO = gl.getExtension("OES_vertex_array_object");
+		gl.createVertexArray = extVAO.createVertexArrayOES.bind(extVAO);
+		gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
+
+		return renderer;
 	}
 
 	createBuffer(geometry)

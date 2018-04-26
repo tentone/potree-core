@@ -5,15 +5,13 @@
 		<title></title>
 	</head>
 	<body>
-		<script src="libs/threejs/three.min.js"></script>
-		<script src="libs/threejs/OrbitControls.js"></script>
+		<script src="lib/threejs/three.min.js"></script>
+		<script src="lib/threejs/OrbitControls.js"></script>
+		<script src="lib/potree/potree.nogui.min.js"></script>
+		<script src="lib/BinaryHeap.js"></script>
 
-		<script src="libs/potree/potree.nogui.js"></script>
-		<script src="libs/BinaryHeap.js"></script>
-		
-		<script src="source/PotreeRenderer.js"></script>
 		<script src="source/PotreeScene.js"></script>
-		<script src="source/PotreeViewer.js"></script>
+		
 		<script>
 			//three.js
 			var scene = new THREE.Scene();
@@ -44,12 +42,14 @@
 			var controls = new THREE.OrbitControls(camera, canvas);
 			camera.position.z = 10;
 
-			//Potree
-			var viewer = new PotreeViewer(renderer);
+			var points = new PotreeScene(renderer);
+			points.setBudget(10000000)
+			scene.add(points);
 
 			loadCloud("galp");
 			loadCloud("leixoes", -110, -40, -38, 0.4, 0.4, 0.4);
 			loadCloud("coalescedor", 11, -40, -43, 0.4, 0.4, 0.4);
+
 
 			function loadCloud(name, pX, pY, pZ, sX, sY, sZ)
 			{
@@ -66,9 +66,11 @@
 					material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
 					material.shape = Potree.PointShape.SQUARE;
 					
-					console.log(pointcloud)
+					points.add(pointcloud);
 
-					viewer.scene.addPointCloud(pointcloud);
+					var box = points.getBoundingBox();
+					var helper = new THREE.Box3Helper(box, 0xffff00);
+					scene.add(helper);
 				});
 			}
 
@@ -77,10 +79,8 @@
 				cube.rotation.y += 0.01;
 
 				controls.update();
-				viewer.update(camera);
-
+				points.update(camera, renderer);
 				renderer.render(scene, camera);
-				viewer.render(camera);
 
 				requestAnimationFrame(loop);
 			};

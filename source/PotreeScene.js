@@ -1,5 +1,10 @@
 "use strict";
 
+/*
+ * Potree object is a wrapper to use Potree alongside other THREE based frameworks.
+ * 
+ * The object can be used a normal Object3D.
+ */
 class PotreeScene extends THREE.Object3D
 {
 	constructor()
@@ -11,6 +16,11 @@ class PotreeScene extends THREE.Object3D
 
 		this.pointclouds = [];
 		this.minNodeSize = 30;
+	}
+
+	setBudget(budget)
+	{
+		Potree.pointBudget = budget;
 	}
 
 	update(camera, renderer)
@@ -27,38 +37,28 @@ class PotreeScene extends THREE.Object3D
 		Potree.updatePointClouds(this.pointclouds, camera, renderer);
 	}
 
-	raycast(raycaster, intersects) 
-	{
-		//TODO <ADD CODE HERE>
-	}
-
-	onBeforeRender(renderer, scene, camera, geometry, material, group)
-	{
-		//TODO <ADD CODE HERE>
-	}
-
-	addPointCloud(object)
+	add(object)
 	{
 		if(object instanceof Potree.PointCloudTree)
 		{
 			this.pointclouds.push(object);
 		}
 
-		this.add(object);
+		THREE.Object3D.prototype.add.call(this, object);
 	}
 
 	getBoundingBox()
 	{
-		let box = new THREE.Box3();
+		var box = new THREE.Box3();
 
 		this.updateMatrixWorld(true);
 
-		for(let pointcloud of this.pointclouds)
+		for(var pointcloud of this.pointclouds)
 		{
 			pointcloud.updateMatrixWorld(true);
 
-			let pointcloudBox = pointcloud.pcoGeometry.tightBoundingBox ? pointcloud.pcoGeometry.tightBoundingBox : pointcloud.boundingBox;
-			let boxWorld = Potree.utils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
+			var pointcloudBox = pointcloud.pcoGeometry.tightBoundingBox ? pointcloud.pcoGeometry.tightBoundingBox : pointcloud.boundingBox;
+			var boxWorld = Potree.utils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
 			box.union(boxWorld);
 		}
 
@@ -67,36 +67,36 @@ class PotreeScene extends THREE.Object3D
 
 	estimateHeightAt(position)
 	{
-		let height = null;
-		let fromSpacing = Infinity;
+		var height = null;
+		var fromSpacing = Infinity;
 
-		for(let pointcloud of this.pointclouds)
+		for(var pointcloud of this.pointclouds)
 		{
 			if(pointcloud.root.geometryNode === undefined)
 			{
 				continue;
 			}
 
-			let pHeight = null;
-			let pFromSpacing = Infinity;
+			var pHeight = null;
+			var pFromSpacing = Infinity;
 
-			let lpos = position.clone().sub(pointcloud.position);
+			var lpos = position.clone().sub(pointcloud.position);
 			lpos.z = 0;
-			let ray = new THREE.Ray(lpos, new THREE.Vector3(0, 0, 1));
+			var ray = new THREE.Ray(lpos, new THREE.Vector3(0, 0, 1));
 
-			let stack = [pointcloud.root];
+			var stack = [pointcloud.root];
 			while(stack.length > 0)
 			{
-				let node = stack.pop();
-				let box = node.getBoundingBox();
-				let inside = ray.intersectBox(box);
+				var node = stack.pop();
+				var box = node.getBoundingBox();
+				var inside = ray.intersectBox(box);
 
 				if(!inside)
 				{
 					continue;
 				}
 
-				let h = node.geometryNode.mean.z + pointcloud.position.z + node.geometryNode.boundingBox.min.z;
+				var h = node.geometryNode.mean.z + pointcloud.position.z + node.geometryNode.boundingBox.min.z;
 
 				if(node.geometryNode.spacing <= pFromSpacing)
 				{
@@ -104,9 +104,9 @@ class PotreeScene extends THREE.Object3D
 					pFromSpacing = node.geometryNode.spacing;
 				}
 
-				for(let index of Object.keys(node.children))
+				for(var index of Object.keys(node.children))
 				{
-					let child = node.children[index];
+					var child = node.children[index];
 					if(child.geometryNode)
 					{
 						stack.push(node.children[index]);

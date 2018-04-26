@@ -7,10 +7,10 @@
 	<body>
 		<script src="lib/threejs/three.min.js"></script>
 		<script src="lib/threejs/OrbitControls.js"></script>
+
 		<script src="lib/potree/potree.nogui.min.js"></script>
 		<script src="lib/BinaryHeap.js"></script>
-
-		<script src="source/PotreeScene.js"></script>
+		<script src="source/PotreeObject.js"></script>
 		
 		<script>
 			//three.js
@@ -26,13 +26,6 @@
 			document.body.appendChild(canvas);
 
 			var renderer = new THREE.WebGLRenderer({canvas:canvas});
-			var gl = renderer.context;
-			gl.getExtension("EXT_frag_depth");
-			gl.getExtension("WEBGL_depth_texture");
-			
-			var extVAO = gl.getExtension("OES_vertex_array_object");
-			gl.createVertexArray = extVAO.createVertexArrayOES.bind(extVAO);
-			gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
 
 			var geometry = new THREE.BoxGeometry(1, 1, 1);
 			var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
@@ -42,14 +35,13 @@
 			var controls = new THREE.OrbitControls(camera, canvas);
 			camera.position.z = 10;
 
-			var points = new PotreeScene(renderer);
-			points.setBudget(10000000)
+			var points = new PotreeObject(renderer);
+			points.setPointBudget(10000000)
 			scene.add(points);
 
 			loadCloud("galp");
 			loadCloud("leixoes", -110, -40, -38, 0.4, 0.4, 0.4);
 			loadCloud("coalescedor", 11, -40, -43, 0.4, 0.4, 0.4);
-
 
 			function loadCloud(name, pX, pY, pZ, sX, sY, sZ)
 			{
@@ -67,10 +59,6 @@
 					material.shape = Potree.PointShape.SQUARE;
 					
 					points.add(pointcloud);
-
-					var box = points.getBoundingBox();
-					var helper = new THREE.Box3Helper(box, 0xffff00);
-					scene.add(helper);
 				});
 			}
 
@@ -79,7 +67,6 @@
 				cube.rotation.y += 0.01;
 
 				controls.update();
-				points.update(camera, renderer);
 				renderer.render(scene, camera);
 
 				requestAnimationFrame(loop);

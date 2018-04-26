@@ -4,26 +4,40 @@
  * Potree object is a wrapper to use Potree alongside other THREE based frameworks.
  * 
  * The object can be used a normal Object3D.
+ * 
+ * It is based on THREE.Mesh and automatically updates the point cloud based on visibility.
+ * 
+ * Also takes care of geometry ajustments to allow the point clouds to be frustum culled.
  */
-class PotreeScene extends THREE.Object3D
+class PotreeObject extends THREE.Mesh
 {
 	constructor()
 	{
-		super();
+		super(new THREE.Geometry(), new THREE.MeshBasicMaterial());
 
 		this.rotation.set(-Math.PI / 2, 0, 0);
-		this.updateMatrixWorld(true);
 
+		this.frustumCulled = false;
 		this.pointclouds = [];
 		this.minNodeSize = 30;
 	}
 
-	setBudget(budget)
+	/**
+	 * Change the global point budget to be used by potree.
+	 * 
+	 * It affects all potree scenes.
+	 */
+	setPointBudget(budget)
 	{
 		Potree.pointBudget = budget;
 	}
 
-	update(camera, renderer)
+	/**
+	 * Used to update the point cloud visibility relative to a camera.
+	 * 
+	 * Called automatically before rendering.
+	 */
+	onBeforeRender(renderer, scene, camera, geometry, material, group)
 	{
 		Potree.pointLoadLimit = Potree.pointBudget * 2;
 
@@ -37,6 +51,11 @@ class PotreeScene extends THREE.Object3D
 		Potree.updatePointClouds(this.pointclouds, camera, renderer);
 	}
 
+	/**
+	 * Add an object as children of this scene.
+	 * 
+	 * Potree PointCloud objects are detected and used to recalculate the geometry box used for frustum culling.
+	 */
 	add(object)
 	{
 		if(object instanceof Potree.PointCloudTree)
@@ -47,6 +66,9 @@ class PotreeScene extends THREE.Object3D
 		THREE.Object3D.prototype.add.call(this, object);
 	}
 
+	/** 
+	 * Get the point cloud bouding box.
+	 */
 	getBoundingBox()
 	{
 		var box = new THREE.Box3();
@@ -65,6 +87,9 @@ class PotreeScene extends THREE.Object3D
 		return box;
 	}
 
+	/** 
+	 * Estimate the point cloud height at a given position.
+	 */
 	estimateHeightAt(position)
 	{
 		var height = null;

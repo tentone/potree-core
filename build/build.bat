@@ -1,1 +1,1 @@
-java -jar closure.jar --compilation_level SIMPLE --warning_level QUIET --formatting SINGLE_QUOTES --language_in ECMASCRIPT6 --language_out ECMASCRIPT5 --js potree.nogui.js --js_output_file potree.nogui.min.js
+java -jar closure.jar --compilation_level SIMPLE --warning_level QUIET --formatting SINGLE_QUOTES --language_in ECMASCRIPT6 --language_out ECMASCRIPT5 --js ../lib/potree/potree.nogui.js ../lib/BinaryHeap.js ../source/PotreeObject.js --js_output_file potree.min.js

@@ -138,6 +138,7 @@ document.body.onresize();
  - Point cloud group raycast support
  - Recaulate bouding box for frustum culling
  - Fix "THREE.Camera: .getWorldDirection() target is now required" warning
+ - Support for logarithmic depth buffer
  
 ### Building
  - The output javascript is not a module of any kind

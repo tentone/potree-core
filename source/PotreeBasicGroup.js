@@ -13,7 +13,7 @@ Potree.BasicGroup = class extends THREE.Mesh
 {
 	constructor()
 	{
-		super(new THREE.Geometry(), new THREE.MeshBasicMaterial());
+		super(new THREE.Geometry(), new THREE.MeshBasicMaterial({wireframe:true}));
 
 		this.rotation.set(-Math.PI / 2, 0, 0);
 
@@ -62,9 +62,18 @@ Potree.BasicGroup = class extends THREE.Mesh
 	recalculateBoxGeometry()
 	{
 		var box = this.getBoundingBox();
+		var size = box.getSize(new THREE.Vector3());
 
-		//console.log(box);
-		//TODO <ADD CODE HERE>
+		var geometry = new THREE.BoxBufferGeometry(size.x, size.z, size.y);
+
+		var center = box.getCenter(new THREE.Vector3());
+		console.log(center);
+
+		var matrix = new THREE.Matrix4();
+		//matrix.makeTranslation(center.x / 2, center.z / 2, center.y / 2);
+		geometry.applyMatrix(matrix);
+
+		this.geometry = geometry;
 	}
 
 	/**

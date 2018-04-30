@@ -1,6 +1,6 @@
 "use strict";
 
-/*
+/**
  * Potree object is a wrapper to use Potree alongside other THREE based frameworks.
  * 
  * The object can be used a normal Object3D.
@@ -9,7 +9,7 @@
  * 
  * Also takes care of geometry ajustments to allow the point clouds to be frustum culled.
  */
-Potree.Object = class PotreeObject extends THREE.Mesh
+Potree.Object = class extends THREE.Mesh
 {
 	constructor()
 	{

@@ -37,9 +37,10 @@
 			points.setPointBudget(10000000)
 			scene.add(points);
 
-			loadCloud("lion_takanawa");
-			//loadCloud("leixoes", -110, -40, -38, 0.4, 0.4, 0.4);
-			//loadCloud("coalescedor", 11, -40, -43, 0.4, 0.4, 0.4);
+			//loadCloud("lion_takanawa");
+			loadCloud("galp");
+			loadCloud("leixoes", -110, -40, -38, 0.4, 0.4, 0.4);
+			loadCloud("coalescedor", 11, -40, -43, 0.4, 0.4, 0.4);
 
 			function loadCloud(name, pX, pY, pZ, sX, sY, sZ)
 			{
@@ -53,9 +54,9 @@
 					var material = pointcloud.material;
 					material.size = 1;
 					material.pointColorType = Potree.PointColorType.RGB;
-					material.pointSizeType = Potree.PointSizeType.ADAPTIVE;
+					material.pointSizeType = Potree.PointSizeType.FIXED;
 					material.shape = Potree.PointShape.SQUARE;
-					
+
 					points.add(pointcloud);
 				});
 			}

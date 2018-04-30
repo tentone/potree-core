@@ -1,5 +1,19 @@
+"use strict";
+
 Potree.XHRFactory = 
 {
+	config:
+	{
+		withCredentials: false,
+		customHeaders:
+		[
+			{
+				header: null,
+				value: null
+			}
+		]
+	},
+
 	createXMLHttpRequest: function()
 	{
 		let xhr = new XMLHttpRequest();

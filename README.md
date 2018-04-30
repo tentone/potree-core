@@ -74,6 +74,51 @@ document.body.onresize = function()
 document.body.onresize();
 ```
 
+
+### Documentation
+ - The project has no generated documentation but bellow are some of the main configuration elements
+ - Potree.PointCloudMaterial
+    - Material used by threejs to draw the point clouds, based on RawShaderMaterial
+    - shape
+       - Defines the shape used to draw points
+       - Possible values are
+          - Potree.PointShape.SQUARE
+          - Potree.PointShape.CIRCLE
+          - Potree.PointShape.PARABOLOID
+    - pointSizeType
+       - Defines how the point cloud points are sized, fixed mode keeps the same size, adaptive resizes points accordingly to their distance to the camera 
+       - Possible values are
+          - Potree.PointSizeType.FIXED
+          - Potree.PointSizeType.ATTENUATED
+          - Potree.PointSizeType.ADAPTIVE
+    - pointColorType
+       - Defines how to color the drawn points
+       - Possible values are
+          - RGB
+          - COLOR
+          - DEPTH
+          - HEIGHT
+          - INTENSITY
+          - INTENSITY_GRADIENT
+          - LOD:
+          - POINT_INDEX
+          - CLASSIFICATION
+          - RETURN_NUMBER
+          - SOURCE:
+          - NORMAL
+          - PHONG
+          - RGB_HEIGHT
+    - weighted
+       - If true points are drawn as weighted splats
+    - treeType
+       - Defines the type of point cloud tree being drawn by this material
+       - This should be automatically defined by the loader
+          - Potree.TreeType.OCTREE
+          - Potree.TreeType.KDTREE
+ - Potree.PointCloudTree
+    - Base Object3D used to store and represent point cloud data.
+    
+
 ### Building
  - The output javascript is not a module of any kind
  - The project can be build using closure
@@ -83,7 +128,7 @@ document.body.onresize();
 ### Create Point Clouds
  - Use the Potree Converter tool to create point cloud data from LAS, ZLAS or BIN point cloud files
     - https://github.com/potree/PotreeConverter/releases
-
+ 
 ### Dependencies
  - Three.js
  - Closure compiler

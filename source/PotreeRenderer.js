@@ -1,6 +1,6 @@
 "use strict";
 
-Potree.Renderer = class PotreeRenderer
+Potree.Renderer = class
 {
 	constructor(renderer)
 	{

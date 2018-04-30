@@ -62,15 +62,23 @@ Potree.BasicGroup = class extends THREE.Mesh
 	recalculateBoxGeometry()
 	{
 		var box = this.getBoundingBox();
+		
 		var size = box.getSize(new THREE.Vector3());
-
-		var geometry = new THREE.BoxBufferGeometry(size.x, size.z, size.y);
-
 		var center = box.getCenter(new THREE.Vector3());
-		console.log(center);
 
 		var matrix = new THREE.Matrix4();
-		//matrix.makeTranslation(center.x / 2, center.z / 2, center.y / 2);
+		matrix.makeTranslation(center.x, -center.z, center.y);
+
+		/*
+		var indices = new Uint16Array([0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 ]);
+		var positions = [1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1];
+		var geometry = new THREE.BufferGeometry();
+		geometry.setIndex(new THREE.BufferAttribute(indices, 1));
+		geometry.addAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+		geometry.applyMatrix(matrix);
+		*/
+
+		var geometry = new THREE.BoxBufferGeometry(size.x, size.z, size.y);
 		geometry.applyMatrix(matrix);
 
 		this.geometry = geometry;

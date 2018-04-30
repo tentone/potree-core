@@ -13,7 +13,7 @@ Potree.BasicGroup = class extends THREE.Mesh
 {
 	constructor()
 	{
-		super(new THREE.Geometry(), new THREE.MeshBasicMaterial({wireframe:true}));
+		super(new THREE.Geometry(), new THREE.MeshBasicMaterial({opacity:0.0, transparent:true}));
 
 		this.rotation.set(-Math.PI / 2, 0, 0);
 
@@ -68,15 +68,6 @@ Potree.BasicGroup = class extends THREE.Mesh
 
 		var matrix = new THREE.Matrix4();
 		matrix.makeTranslation(center.x, -center.z, center.y);
-
-		/*
-		var indices = new Uint16Array([0, 1, 1, 2, 2, 3, 3, 0, 4, 5, 5, 6, 6, 7, 7, 4, 0, 4, 1, 5, 2, 6, 3, 7 ]);
-		var positions = [1, 1, 1, -1, 1, 1, -1, -1, 1, 1, -1, 1, 1, 1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1];
-		var geometry = new THREE.BufferGeometry();
-		geometry.setIndex(new THREE.BufferAttribute(indices, 1));
-		geometry.addAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-		geometry.applyMatrix(matrix);
-		*/
 
 		var geometry = new THREE.BoxBufferGeometry(size.x, size.z, size.y);
 		geometry.applyMatrix(matrix);

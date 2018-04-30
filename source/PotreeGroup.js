@@ -1,55 +1,58 @@
 "use strict";
 
-Potree.Renderer = class
+Potree.Group = class extends Potree.BasicGroup
 {
-	constructor(renderer)
+	constructor()
 	{
-		this.renderer = prepareRenderer(renderer);
-		this.gl = this.renderer.context;
+		super();
 
 		this.buffers = new Map();
 		this.shaders = new Map();
 		this.textures = new Map();
+		this.types = new Map();
 
-		this.glTypeMapping = new Map();
-		this.glTypeMapping.set(Float32Array, this.gl.FLOAT);
-		this.glTypeMapping.set(Uint8Array, this.gl.UNSIGNED_BYTE);
-		this.glTypeMapping.set(Uint16Array, this.gl.UNSIGNED_SHORT);
+		this.types.set(Float32Array, 5126);//gl.FLOAT
+		this.types.set(Uint8Array, 5121);//gl.UNSIGNED_BYTE
+		this.types.set(Uint16Array, 5123);//gl.UNSIGNED_SHORT
 	}
 
-	prepareRenderer(renderer)
+	onBeforeRender(renderer, scene, camera, geometry, material, group)
 	{
-		//Enable frag_depth extension for the interpolation shader, if available
+		super.onBeforeRender(renderer, scene, camera, geometry, material, group);
+
+		var result = this.fetchOctrees();
+		for(var octree of result.octrees)
+		{
+			var nodes = octree.visibleNodes;
+			this.renderOctree(renderer, octree, nodes, camera, {});
+		}
+
 		var gl = renderer.context;
-		gl.getExtension("EXT_frag_depth");
-		gl.getExtension("WEBGL_depth_texture");
-		var extVAO = gl.getExtension("OES_vertex_array_object");
-		gl.createVertexArray = extVAO.createVertexArrayOES.bind(extVAO);
-		gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
+		gl.activeTexture(gl.TEXTURE1);
+		gl.bindTexture(gl.TEXTURE_2D, null)
 
-		return renderer;
+		renderer.state.reset();
 	}
 
-	createBuffer(geometry)
+	createBuffer(gl, geometry)
 	{
-		let gl = this.gl;
-		let webglBuffer = new Potree.WebGLBuffer();
+		var webglBuffer = new Potree.WebGLBuffer();
 		webglBuffer.vao = gl.createVertexArray();
 		webglBuffer.numElements = geometry.attributes.position.count;
 
 		gl.bindVertexArray(webglBuffer.vao);
 
-		for(let attributeName in geometry.attributes)
+		for(var attributeName in geometry.attributes)
 		{
-			let bufferAttribute = geometry.attributes[attributeName];
+			var bufferAttribute = geometry.attributes[attributeName];
 
-			let vbo = gl.createBuffer();
+			var vbo = gl.createBuffer();
 			gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 			gl.bufferData(gl.ARRAY_BUFFER, bufferAttribute.array, gl.STATIC_DRAW);
 
-			let attributeLocation = Potree.attributeLocations[attributeName];
-			let normalized = bufferAttribute.normalized;
-			let type = this.glTypeMapping.get(bufferAttribute.array.constructor);
+			var attributeLocation = Potree.attributeLocations[attributeName];
+			var normalized = bufferAttribute.normalized;
+			var type = this.types.get(bufferAttribute.array.constructor);
 
 			gl.vertexAttribPointer(attributeLocation, bufferAttribute.itemSize, type, normalized, 0, 0);
 			gl.enableVertexAttribArray(attributeLocation);
@@ -71,23 +74,21 @@ Potree.Renderer = class
 		return webglBuffer;
 	}
 
-	updateBuffer(geometry)
+	updateBuffer(gl, geometry)
 	{
-		let gl = this.gl;
-
-		let webglBuffer = this.buffers.get(geometry);
+		var webglBuffer = this.buffers.get(geometry);
 
 		gl.bindVertexArray(webglBuffer.vao);
 
-		for(let attributeName in geometry.attributes)
+		for(var attributeName in geometry.attributes)
 		{
-			let bufferAttribute = geometry.attributes[attributeName];
+			var bufferAttribute = geometry.attributes[attributeName];
 
-			let attributeLocation = Potree.attributeLocations[attributeName];
-			let normalized = bufferAttribute.normalized;
-			let type = this.glTypeMapping.get(bufferAttribute.array.constructor);
+			var attributeLocation = Potree.attributeLocations[attributeName];
+			var normalized = bufferAttribute.normalized;
+			var type = this.types.get(bufferAttribute.array.constructor);
 
-			let vbo = null;
+			var vbo = null;
 			if(!webglBuffer.vbos.has(attributeName))
 			{
 				vbo = gl.createBuffer();
@@ -118,14 +119,14 @@ Potree.Renderer = class
 		gl.bindVertexArray(null);
 	}
 
-	traverse(scene)
+	fetchOctrees()
 	{
-		let octrees = [];
+		var octrees = [];
+		var stack = [this];
 
-		let stack = [scene];
 		while (stack.length > 0)
 		{
-			let node = stack.pop();
+			var node = stack.pop();
 
 			if(node instanceof Potree.PointCloudTree)
 			{
@@ -133,11 +134,11 @@ Potree.Renderer = class
 				continue;
 			}
 
-			let visibleChildren = node.children.filter(c => c.visible);
+			var visibleChildren = node.children.filter(c => c.visible);
 			stack.push(...visibleChildren);
 		}
 
-		let result =
+		var result =
 		{
 			octrees: octrees
 		};
@@ -145,18 +146,18 @@ Potree.Renderer = class
 		return result;
 	}
 
-	renderNodes(octree, nodes, visibilityTextureData, camera, target, shader, params)
+	renderNodes(renderer, octree, nodes, visibilityTextureData, camera, shader, params)
 	{
-		let gl = this.gl;
-		let material = params.material ? params.material : octree.material;
-		let shadowMaps = params.shadowMaps == null ? [] : params.shadowMaps;
-		let view = camera.matrixWorldInverse;
-		let worldView = new THREE.Matrix4();
-		let mat4holder = new Float32Array(16);
+		var gl = renderer.context;
+		var material = params.material ? params.material : octree.material;
+		var shadowMaps = params.shadowMaps == null ? [] : params.shadowMaps;
+		var view = camera.matrixWorldInverse;
+		var worldView = new THREE.Matrix4();
+		var mat4holder = new Float32Array(16);
 
-		let i = 0;
+		var i = 0;
 		
-		for(let node of nodes)
+		for(var node of nodes)
 		{
 			if(Potree.debug.allowedNodes !== undefined)
 			{
@@ -166,19 +167,19 @@ Potree.Renderer = class
 				}
 			}
 
-			let world = node.sceneNode.matrixWorld;
+			var world = node.sceneNode.matrixWorld;
 			worldView.multiplyMatrices(view, world);
 
 			if(visibilityTextureData)
 			{
-				let vnStart = visibilityTextureData.offsets.get(node);
+				var vnStart = visibilityTextureData.offsets.get(node);
 				shader.setUniform1f("uVNStart", vnStart);
 			}
 
-			let level = node.getLevel();
+			var level = node.getLevel();
 			shader.setUniform("uDebug", node.debug === true);
 
-			let isLeaf;
+			var isLeaf;
 			if(node instanceof Potree.PointCloudOctreeNode)
 			{
 				isLeaf = Object.keys(node.children).length === 0;
@@ -205,27 +206,27 @@ Potree.Renderer = class
 			if(material.clipPolygons && material.clipPolygons.length > 0)
 			{
 
-				let clipPolygonVCount = [];
-				let worldViewProjMatrices = [];
+				var clipPolygonVCount = [];
+				var worldViewProjMatrices = [];
 
-				for(let clipPolygon of material.clipPolygons)
+				for(var clipPolygon of material.clipPolygons)
 				{
-					let view = clipPolygon.viewMatrix;
-					let proj = clipPolygon.projMatrix;
+					var view = clipPolygon.viewMatrix;
+					var proj = clipPolygon.projMatrix;
 
-					let worldViewProj = proj.clone().multiply(view).multiply(world);
+					var worldViewProj = proj.clone().multiply(view).multiply(world);
 
 					clipPolygonVCount.push(clipPolygon.markers.length);
 					worldViewProjMatrices.push(worldViewProj);
 				}
 
-				let flattenedMatrices = [].concat(...worldViewProjMatrices.map(m => m.elements));
+				var flattenedMatrices = [].concat(...worldViewProjMatrices.map(m => m.elements));
 
-				let flattenedVertices = new Array(8 * 3 * material.clipPolygons.length);
-				for(let i = 0; i < material.clipPolygons.length; i++)
+				var flattenedVertices = new Array(8 * 3 * material.clipPolygons.length);
+				for(var i = 0; i < material.clipPolygons.length; i++)
 				{
-					let clipPolygon = material.clipPolygons[i];
-					for(let j = 0; j < clipPolygon.markers.length; j++)
+					var clipPolygon = material.clipPolygons[i];
+					for(var j = 0; j < clipPolygon.markers.length; j++)
 					{
 						flattenedVertices[i * 24 + (j * 3 + 0)] = clipPolygon.markers[j].position.x;
 						flattenedVertices[i * 24 + (j * 3 + 1)] = clipPolygon.markers[j].position.y;
@@ -253,23 +254,23 @@ Potree.Renderer = class
 
 				shader.setUniform3f("uShadowColor", material.uniforms.uShadowColor.value);
 
-				let bindingStart = 5;
-				let bindingPoints = new Array(shadowMaps.length).fill(bindingStart).map((a, i) => (a + i));
+				var bindingStart = 5;
+				var bindingPoints = new Array(shadowMaps.length).fill(bindingStart).map((a, i) => (a + i));
 				gl.uniform1iv(lShadowMap, bindingPoints);
 
-				for(let i = 0; i < shadowMaps.length; i++)
+				for(var i = 0; i < shadowMaps.length; i++)
 				{
-					let shadowMap = shadowMaps[i];
-					let bindingPoint = bindingPoints[i];
-					let glTexture = this.renderer.properties.get(shadowMap.target.texture).__webglTexture;
+					var shadowMap = shadowMaps[i];
+					var bindingPoint = bindingPoints[i];
+					var glTexture = renderer.properties.get(shadowMap.target.texture).__webglTexture;
 
 					gl.activeTexture(gl[`TEXTURE${bindingPoint}`]);
 					gl.bindTexture(gl.TEXTURE_2D, glTexture);
 				}
 
-				let worldViewMatrices = shadowMaps.map(sm => sm.camera.matrixWorldInverse).map(view => new THREE.Matrix4().multiplyMatrices(view, world))
+				var worldViewMatrices = shadowMaps.map(sm => sm.camera.matrixWorldInverse).map(view => new THREE.Matrix4().multiplyMatrices(view, world))
 
-				let flattenedMatrices = [].concat(...worldViewMatrices.map(c => c.elements));
+				var flattenedMatrices = [].concat(...worldViewMatrices.map(c => c.elements));
 				const lWorldView = shader.uniformLocations["uShadowWorldView[0]"];
 				gl.uniformMatrix4fv(lWorldView, false, flattenedMatrices);
 
@@ -278,30 +279,30 @@ Potree.Renderer = class
 				gl.uniformMatrix4fv(lProj, false, flattenedMatrices);
 			}
 
-			let geometry = node.geometryNode.geometry;
+			var geometry = node.geometryNode.geometry;
 
-			let webglBuffer = null;
+			var webglBuffer = null;
 			if(!this.buffers.has(geometry))
 			{
-				webglBuffer = this.createBuffer(geometry);
+				webglBuffer = this.createBuffer(gl, geometry);
 				this.buffers.set(geometry, webglBuffer);
 			}
 			else
 			{
 				webglBuffer = this.buffers.get(geometry);
-				for(let attributeName in geometry.attributes)
+				for(var attributeName in geometry.attributes)
 				{
-					let attribute = geometry.attributes[attributeName];
+					var attribute = geometry.attributes[attributeName];
 					if(attribute.version > webglBuffer.vbos.get(attributeName).version)
 					{
-						this.updateBuffer(geometry);
+						this.updateBuffer(gl, geometry);
 					}
 				}
 			}
 
 			gl.bindVertexArray(webglBuffer.vao);
 
-			let numPoints = webglBuffer.numElements;
+			var numPoints = webglBuffer.numElements;
 			gl.drawArrays(gl.POINTS, 0, numPoints);
 
 			i++;
@@ -310,28 +311,27 @@ Potree.Renderer = class
 		gl.bindVertexArray(null);
 	}
 
-	renderOctree(octree, nodes, camera, target, params = {})
+	renderOctree(renderer, octree, nodes, camera, params = {})
 	{
-		let gl = this.gl;
+		var gl = renderer.context;
+		var material = params.material ? params.material : octree.material;
+		var shadowMaps = params.shadowMaps == null ? [] : params.shadowMaps;
+		var view = camera.matrixWorldInverse;
+		var viewInv = camera.matrixWorld;
+		var proj = camera.projectionMatrix;
+		var projInv = new THREE.Matrix4().getInverse(proj);
+		var worldView = new THREE.Matrix4();
 
-		let material = params.material ? params.material : octree.material;
-		let shadowMaps = params.shadowMaps == null ? [] : params.shadowMaps;
-		let view = camera.matrixWorldInverse;
-		let viewInv = camera.matrixWorld;
-		let proj = camera.projectionMatrix;
-		let projInv = new THREE.Matrix4().getInverse(proj);
-		let worldView = new THREE.Matrix4();
+		var shader = null;
+		var visibilityTextureData = null;
 
-		let shader = null;
-		let visibilityTextureData = null;
-
-		let currentTextureBindingPoint = 0;
+		var currentTextureBindingPoint = 0;
 
 		if(material.pointSizeType >= 0)
 		{
 			if(material.pointSizeType === Potree.PointSizeType.ADAPTIVE || material.pointColorType === Potree.PointColorType.LOD)
 			{
-				let vnNodes = (params.vnTextureNodes != null) ? params.vnTextureNodes : nodes;
+				var vnNodes = (params.vnTextureNodes != null) ? params.vnTextureNodes : nodes;
 				visibilityTextureData = octree.computeVisibilityTextureData(vnNodes, camera);
 
 				const vnt = material.visibleNodesTexture;
@@ -343,20 +343,20 @@ Potree.Renderer = class
 
 		if(!this.shaders.has(material))
 		{
-			let [vs, fs] = [material.vertexShader, material.fragmentShader];
-			let shader = new Potree.Shader(gl, "pointcloud", vs, fs);
+			var [vs, fs] = [material.vertexShader, material.fragmentShader];
+			var shader = new Potree.Shader(gl, "pointcloud", vs, fs);
 			this.shaders.set(material, shader);
 		}
 
 		shader = this.shaders.get(material);
 
-		let [vs, fs] = [material.vertexShader, material.fragmentShader];
+		var [vs, fs] = [material.vertexShader, material.fragmentShader];
 
-		let numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
-		let numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
-		let numClipSpheres = (params.clipSpheres && params.clipSpheres.length) ? params.clipSpheres.length : 0;
-		let numClipPolygons = (material.clipPolygons && material.clipPolygons.length) ? material.clipPolygons.length : 0;
-		let defines = [
+		var numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
+		var numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
+		var numClipSpheres = (params.clipSpheres && params.clipSpheres.length) ? params.clipSpheres.length : 0;
+		var numClipPolygons = (material.clipPolygons && material.clipPolygons.length) ? material.clipPolygons.length : 0;
+		var defines = [
 			`#define num_shadowmaps ${shadowMaps.length}`,
 			`#define num_snapshots ${numSnapshots}`,
 			`#define num_clipboxes ${numClipBoxes}`,
@@ -364,7 +364,7 @@ Potree.Renderer = class
 			`#define num_clippolygons ${numClipPolygons}`,
 		];
 
-		let definesString = defines.join("\n");
+		var definesString = defines.join("\n");
 
 		vs = `${definesString}\n${vs}`;
 		fs = `${definesString}\n${fs}`;
@@ -373,13 +373,13 @@ Potree.Renderer = class
 
 		material.needsUpdate = false;
 
-		for(let uniformName of Object.keys(material.uniforms))
+		for(var uniformName of Object.keys(material.uniforms))
 		{
-			let uniform = material.uniforms[uniformName];
+			var uniform = material.uniforms[uniformName];
 
 			if(uniform.type == "t")
 			{
-				let texture = uniform.value;
+				var texture = uniform.value;
 
 				if(!texture)
 				{
@@ -388,18 +388,18 @@ Potree.Renderer = class
 
 				if(!this.textures.has(texture))
 				{
-					let webglTexture = new Potree.WebGLTexture(gl, texture);
+					var webglTexture = new Potree.WebGLTexture(gl, texture);
 					this.textures.set(texture, webglTexture);
 				}
 
-				let webGLTexture = this.textures.get(texture);
+				var webGLTexture = this.textures.get(texture);
 				webGLTexture.update();
 			}
 		}
 
 		gl.useProgram(shader.program);
 
-		let transparent = false;
+		var transparent = false;
 		if(params.transparent !== undefined)
 		{
 			transparent = params.transparent && material.opacity < 1;
@@ -452,8 +452,8 @@ Potree.Renderer = class
 		shader.setUniformMatrix4("uViewInv", viewInv);
 		shader.setUniformMatrix4("uProjInv", projInv);
 
-		let screenWidth = target ? target.width : material.screenWidth;
-		let screenHeight = target ? target.height : material.screenHeight;
+		var screenWidth = material.screenWidth;
+		var screenHeight = material.screenHeight;
 
 		shader.setUniform1f("uScreenWidth", screenWidth);
 		shader.setUniform1f("uScreenHeight", screenHeight);
@@ -493,21 +493,21 @@ Potree.Renderer = class
 		//Clispheres
 		if(params.clipSpheres && params.clipSpheres.length > 0){
 
-			let clipSpheres = params.clipSpheres;
+			var clipSpheres = params.clipSpheres;
 
-			let matrices = [];
-			for(let clipSphere of clipSpheres)
+			var matrices = [];
+			for(var clipSphere of clipSpheres)
 			{
-				let clipToWorld = clipSphere.matrixWorld;
-				let viewToWorld = camera.matrixWorld
-				let worldToClip = new THREE.Matrix4().getInverse(clipToWorld);
+				var clipToWorld = clipSphere.matrixWorld;
+				var viewToWorld = camera.matrixWorld
+				var worldToClip = new THREE.Matrix4().getInverse(clipToWorld);
 
-				let viewToClip = new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
+				var viewToClip = new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
 
 				matrices.push(viewToClip);
 			}
 
-			let flattenedMatrices = [].concat(...matrices.map(matrix => matrix.elements));
+			var flattenedMatrices = [].concat(...matrices.map(matrix => matrix.elements));
 
 			const lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
 			gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
@@ -536,19 +536,19 @@ Potree.Renderer = class
 		shader.setUniform1f("wReturnNumber", material.weightReturnNumber);
 		shader.setUniform1f("wSourceID", material.weightSourceID);
 
-		let vnWebGLTexture = this.textures.get(material.visibleNodesTexture);
+		var vnWebGLTexture = this.textures.get(material.visibleNodesTexture);
 		shader.setUniform1i("visibleNodesTexture", currentTextureBindingPoint);
 		gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
 		gl.bindTexture(vnWebGLTexture.target, vnWebGLTexture.id);
 		currentTextureBindingPoint++;
 
-		let gradientTexture = this.textures.get(material.gradientTexture);
+		var gradientTexture = this.textures.get(material.gradientTexture);
 		shader.setUniform1i("gradient", currentTextureBindingPoint);
 		gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
 		gl.bindTexture(gradientTexture.target, gradientTexture.id);
 		currentTextureBindingPoint++;
 
-		let classificationTexture = this.textures.get(material.classificationTexture);
+		var classificationTexture = this.textures.get(material.classificationTexture);
 		shader.setUniform1i("classificationLUT", currentTextureBindingPoint);
 		gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
 		gl.bindTexture(classificationTexture.target, classificationTexture.id);
@@ -559,29 +559,29 @@ Potree.Renderer = class
 			const lSnapshot = shader.uniformLocations["uSnapshot[0]"];
 			const lSnapshotDepth = shader.uniformLocations["uSnapshotDepth[0]"];
 
-			let bindingStart = currentTextureBindingPoint;
-			let lSnapshotBindingPoints = new Array(5).fill(bindingStart).map((a, i) => (a + i));
-			let lSnapshotDepthBindingPoints = new Array(5).fill(1 + Math.max(...lSnapshotBindingPoints)).map((a, i) => (a + i));
+			var bindingStart = currentTextureBindingPoint;
+			var lSnapshotBindingPoints = new Array(5).fill(bindingStart).map((a, i) => (a + i));
+			var lSnapshotDepthBindingPoints = new Array(5).fill(1 + Math.max(...lSnapshotBindingPoints)).map((a, i) => (a + i));
 			currentTextureBindingPoint = 1 + Math.max(...lSnapshotDepthBindingPoints);
 
 			gl.uniform1iv(lSnapshot, lSnapshotBindingPoints);
 			gl.uniform1iv(lSnapshotDepth, lSnapshotDepthBindingPoints);
 
-			for(let i = 0; i < 5; i++)
+			for(var i = 0; i < 5; i++)
 			{
-				let texture = material.uniforms["uSnapshot"].value[i];
-				let textureDepth = material.uniforms["uSnapshotDepth"].value[i];
+				var texture = material.uniforms["uSnapshot"].value[i];
+				var textureDepth = material.uniforms["uSnapshotDepth"].value[i];
 
 				if(!texture)
 				{
 					break;
 				}
 
-				let snapTexture = this.renderer.properties.get(texture).__webglTexture;
-				let snapTextureDepth = this.renderer.properties.get(textureDepth).__webglTexture;
+				var snapTexture = renderer.properties.get(texture).__webglTexture;
+				var snapTextureDepth = renderer.properties.get(textureDepth).__webglTexture;
 
-				let bindingPoint = lSnapshotBindingPoints[i];
-				let depthBindingPoint = lSnapshotDepthBindingPoints[i];
+				var bindingPoint = lSnapshotBindingPoints[i];
+				var depthBindingPoint = lSnapshotDepthBindingPoints[i];
 
 				gl.activeTexture(gl[`TEXTURE${bindingPoint}`]);
 				gl.bindTexture(gl.TEXTURE_2D, snapTexture);
@@ -590,7 +590,7 @@ Potree.Renderer = class
 				gl.bindTexture(gl.TEXTURE_2D, snapTextureDepth);
 			}
 
-			let flattenedMatrices = [].concat(...material.uniforms.uSnapView.value.map(c => c.elements));
+			var flattenedMatrices = [].concat(...material.uniforms.uSnapView.value.map(c => c.elements));
 			const lSnapView = shader.uniformLocations["uSnapView[0]"];
 			gl.uniformMatrix4fv(lSnapView, false, flattenedMatrices);
 
@@ -607,35 +607,10 @@ Potree.Renderer = class
 			gl.uniformMatrix4fv(lSnapViewInv, false, flattenedMatrices);
 		}
 
-		this.renderNodes(octree, nodes, visibilityTextureData, camera, target, shader, params);
+		this.renderNodes(renderer, octree, nodes, visibilityTextureData, camera, shader, params);
 
 		gl.activeTexture(gl.TEXTURE2);
 		gl.bindTexture(gl.TEXTURE_2D, null);
 		gl.activeTexture(gl.TEXTURE0);
 	}
-
-	render(scene, camera, target = null, params = {})
-	{
-		const gl = this.gl;
-
-		if(target != null)
-		{
-			this.renderer.setRenderTarget(target);
-		}
-
-		camera.updateProjectionMatrix();
-
-		const traversalResult = this.traverse(scene);
-
-		for(const octree of traversalResult.octrees)
-		{
-			let nodes = octree.visibleNodes;
-			this.renderOctree(octree, nodes, camera, target, params);
-		}
-
-		gl.activeTexture(gl.TEXTURE1);
-		gl.bindTexture(gl.TEXTURE_2D, null)
-
-		this.renderer.resetGLState();
-	}
-}
+};

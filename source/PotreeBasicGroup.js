@@ -9,7 +9,7 @@
  * 
  * Also takes care of geometry ajustments to allow the point clouds to be frustum culled.
  */
-Potree.Object = class extends THREE.Mesh
+Potree.BasicGroup = class extends THREE.Mesh
 {
 	constructor()
 	{
@@ -41,12 +41,12 @@ Potree.Object = class extends THREE.Mesh
 	{
 		Potree.pointLoadLimit = Potree.pointBudget * 2;
 
-		for(var pointcloud of this.pointclouds)
+		/*for(var pointcloud of this.pointclouds)
 		{
 			pointcloud.showBoundingBox = false;
 			pointcloud.generateDEM = false;
 			pointcloud.minimumNodePixelSize = this.minNodeSize;
-		}
+		}*/
 
 		Potree.updatePointClouds(this.pointclouds, camera, renderer);
 	}

@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title></title>
+		<title>Potree Core Example</title>
 	</head>
 	<body>
 		<script src="lib/threejs/three.min.js"></script>
@@ -36,8 +36,8 @@
 
 			var renderer = new THREE.WebGLRenderer({canvas:canvas});
 
-			var geometry = new THREE.BoxGeometry(1, 1, 1);
-			var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
+			var geometry = new THREE.BoxGeometry(5, 1, 5);
+			var material = new THREE.MeshBasicMaterial({color: 0x44AA44});
 			var cube = new THREE.Mesh(geometry, material);
 			scene.add(cube);
 
@@ -45,10 +45,11 @@
 			camera.position.z = 10;
 
 			var points = new Potree.BasicGroup();
-			points.setPointBudget(1000000000)
+			points.setPointBudget(1000000)
 			scene.add(points);
 
-			loadCloud("lion_takanawa_laz");
+			loadCloud("lion_takanawa_laz", -2, -3, 0.4);
+
 			//loadCloud("galp");
 			//loadCloud("leixoes", -110, -40, -38, 0.4, 0.4, 0.4);
 			//loadCloud("coalescedor", 11, -40, -43, 0.4, 0.4, 0.4);

@@ -9,16 +9,17 @@
 		<script src="lib/threejs/OrbitControls.js"></script>
 
 		<!--Production-->
-		<!--
 		<script src="build/potree.min.js"></script>
-		-->
 
 		<!--Development-->
+		<!--
+		<script src="lib/laslaz.js"></script>
 		<script src="lib/BinaryHeap.js"></script>
 		<script src="lib/potree/potree.clean.js"></script>
 		<script src="source/PotreeBasicGroup.js"></script>
 		<script src="source/PotreeGroup.js"></script>
 		<script src="source/PotreeXHRFactory.js"></script>
+		-->
 
 		<script>
 			//three.js
@@ -47,10 +48,10 @@
 			points.setPointBudget(1000000000)
 			scene.add(points);
 
-			//loadCloud("lion_takanawa");
-			loadCloud("galp");
-			loadCloud("leixoes", -110, -40, -38, 0.4, 0.4, 0.4);
-			loadCloud("coalescedor", 11, -40, -43, 0.4, 0.4, 0.4);
+			loadCloud("lion_takanawa_laz");
+			//loadCloud("galp");
+			//loadCloud("leixoes", -110, -40, -38, 0.4, 0.4, 0.4);
+			//loadCloud("coalescedor", 11, -40, -43, 0.4, 0.4, 0.4);
 
 			function loadCloud(name, pX, pY, pZ, sX, sY, sZ)
 			{

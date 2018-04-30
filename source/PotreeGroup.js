@@ -6,19 +6,37 @@ Potree.Group = class extends Potree.BasicGroup
 	{
 		super();
 
+		this.frustumCulled = false;
+
 		this.buffers = new Map();
 		this.shaders = new Map();
 		this.textures = new Map();
-		this.types = new Map();
 
+		this.types = new Map();
 		this.types.set(Float32Array, 5126);//gl.FLOAT
 		this.types.set(Uint8Array, 5121);//gl.UNSIGNED_BYTE
 		this.types.set(Uint16Array, 5123);//gl.UNSIGNED_SHORT
 	}
 
+	getExtensions(gl)
+	{
+		gl.getExtension("EXT_frag_depth");
+		gl.getExtension("WEBGL_depth_texture");
+
+		var extVAO = gl.getExtension("OES_vertex_array_object");
+		gl.createVertexArray = extVAO.createVertexArrayOES.bind(extVAO);
+		gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
+	}
+
 	onBeforeRender(renderer, scene, camera, geometry, material, group)
 	{
 		super.onBeforeRender(renderer, scene, camera, geometry, material, group);
+
+		var gl = renderer.context;
+		if(gl.bindVertexArray === undefined)
+		{
+			this.getExtensions(gl)
+		}
 
 		var result = this.fetchOctrees();
 		for(var octree of result.octrees)
@@ -26,12 +44,6 @@ Potree.Group = class extends Potree.BasicGroup
 			var nodes = octree.visibleNodes;
 			this.renderOctree(renderer, octree, nodes, camera, {});
 		}
-
-		var gl = renderer.context;
-		gl.activeTexture(gl.TEXTURE1);
-		gl.bindTexture(gl.TEXTURE_2D, null)
-
-		renderer.state.reset();
 	}
 
 	createBuffer(gl, geometry)
@@ -146,11 +158,11 @@ Potree.Group = class extends Potree.BasicGroup
 		return result;
 	}
 
-	renderNodes(renderer, octree, nodes, visibilityTextureData, camera, shader, params)
+	renderNodes(renderer, octree, nodes, visibilityTextureData, camera, shader)
 	{
 		var gl = renderer.context;
-		var material = params.material ? params.material : octree.material;
-		var shadowMaps = params.shadowMaps == null ? [] : params.shadowMaps;
+		var material = octree.material;
+		var shadowMaps = [];
 		var view = camera.matrixWorldInverse;
 		var worldView = new THREE.Matrix4();
 		var mat4holder = new Float32Array(16);
@@ -311,11 +323,11 @@ Potree.Group = class extends Potree.BasicGroup
 		gl.bindVertexArray(null);
 	}
 
-	renderOctree(renderer, octree, nodes, camera, params = {})
+	renderOctree(renderer, octree, nodes, camera)
 	{
 		var gl = renderer.context;
-		var material = params.material ? params.material : octree.material;
-		var shadowMaps = params.shadowMaps == null ? [] : params.shadowMaps;
+		var material = octree.material;
+		var shadowMaps = [];
 		var view = camera.matrixWorldInverse;
 		var viewInv = camera.matrixWorld;
 		var proj = camera.projectionMatrix;
@@ -331,7 +343,7 @@ Potree.Group = class extends Potree.BasicGroup
 		{
 			if(material.pointSizeType === Potree.PointSizeType.ADAPTIVE || material.pointColorType === Potree.PointColorType.LOD)
 			{
-				var vnNodes = (params.vnTextureNodes != null) ? params.vnTextureNodes : nodes;
+				var vnNodes = nodes;
 				visibilityTextureData = octree.computeVisibilityTextureData(vnNodes, camera);
 
 				const vnt = material.visibleNodesTexture;
@@ -353,9 +365,11 @@ Potree.Group = class extends Potree.BasicGroup
 		var [vs, fs] = [material.vertexShader, material.fragmentShader];
 
 		var numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
+
 		var numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
-		var numClipSpheres = (params.clipSpheres && params.clipSpheres.length) ? params.clipSpheres.length : 0;
 		var numClipPolygons = (material.clipPolygons && material.clipPolygons.length) ? material.clipPolygons.length : 0;
+		var numClipSpheres = 0;
+
 		var defines = [
 			`#define num_shadowmaps ${shadowMaps.length}`,
 			`#define num_snapshots ${numSnapshots}`,
@@ -399,15 +413,7 @@ Potree.Group = class extends Potree.BasicGroup
 
 		gl.useProgram(shader.program);
 
-		var transparent = false;
-		if(params.transparent !== undefined)
-		{
-			transparent = params.transparent && material.opacity < 1;
-		}
-		else
-		{
-			transparent = material.opacity < 1;
-		}
+		var transparent = material.opacity < 1;
 
 		if(transparent)
 		{
@@ -421,29 +427,6 @@ Potree.Group = class extends Potree.BasicGroup
 			gl.disable(gl.BLEND);
 			gl.depthMask(true);
 			gl.enable(gl.DEPTH_TEST);
-		}
-
-		if(params.blendFunc !== undefined)
-		{
-			gl.enable(gl.BLEND);
-			gl.blendFunc(...params.blendFunc);
-		}
-
-		if(params.depthTest !== undefined)
-		{
-			if(params.depthTest === true)
-			{
-				gl.enable(gl.DEPTH_TEST);
-			}
-			else
-			{
-				gl.disable(gl.DEPTH_TEST);
-			}
-		}
-
-		if(params.depthWrite !== undefined)
-		{
-			gl.depthMask(params.depthWrite === true);
 		}
 
 		//Update shader uniforms
@@ -491,10 +474,9 @@ Potree.Group = class extends Potree.BasicGroup
 		}
 
 		//Clispheres
-		if(params.clipSpheres && params.clipSpheres.length > 0){
-
+		/*if(params.clipSpheres && params.clipSpheres.length > 0)
+		{
 			var clipSpheres = params.clipSpheres;
-
 			var matrices = [];
 			for(var clipSphere of clipSpheres)
 			{
@@ -511,7 +493,7 @@ Potree.Group = class extends Potree.BasicGroup
 
 			const lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
 			gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
-		}
+		}*/
 
 		shader.setUniform1f("size", material.size);
 		shader.setUniform1f("maxSize", material.uniforms.maxSize.value);
@@ -607,7 +589,7 @@ Potree.Group = class extends Potree.BasicGroup
 			gl.uniformMatrix4fv(lSnapViewInv, false, flattenedMatrices);
 		}
 
-		this.renderNodes(renderer, octree, nodes, visibilityTextureData, camera, shader, params);
+		this.renderNodes(renderer, octree, nodes, visibilityTextureData, camera, shader);
 
 		gl.activeTexture(gl.TEXTURE2);
 		gl.bindTexture(gl.TEXTURE_2D, null);

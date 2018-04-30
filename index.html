@@ -9,7 +9,9 @@
 		<script src="lib/threejs/OrbitControls.js"></script>
 
 		<!--Production-->
-		<!--<script src="build/potree.min.js"></script>-->
+		<!--
+		<script src="build/potree.min.js"></script>
+		-->
 
 		<!--Development-->
 		<script src="lib/BinaryHeap.js"></script>
@@ -33,15 +35,6 @@
 
 			var renderer = new THREE.WebGLRenderer({canvas:canvas});
 
-			
-			var gl = renderer.context;
-			gl.getExtension("EXT_frag_depth");
-			gl.getExtension("WEBGL_depth_texture");
-			var extVAO = gl.getExtension("OES_vertex_array_object");
-			gl.createVertexArray = extVAO.createVertexArrayOES.bind(extVAO);
-			gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
-			
-
 			var geometry = new THREE.BoxGeometry(1, 1, 1);
 			var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
 			var cube = new THREE.Mesh(geometry, material);
@@ -50,8 +43,8 @@
 			var controls = new THREE.OrbitControls(camera, canvas);
 			camera.position.z = 10;
 
-			var points = new Potree.Group(renderer);
-			points.setPointBudget(100000)
+			var points = new Potree.BasicGroup();
+			points.setPointBudget(1000000000)
 			scene.add(points);
 
 			//loadCloud("lion_takanawa");

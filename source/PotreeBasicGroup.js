@@ -19,17 +19,18 @@ Potree.BasicGroup = class extends THREE.Mesh
 
 		this.frustumCulled = false;
 		this.pointclouds = [];
-		this.minNodeSize = 30;
+
+		this.pointBudget = 10000;
+		this.nodeSize = 30;
+		this.nodeLoadRate = 2;
 	}
 
 	/**
-	 * Change the global point budget to be used by potree.
-	 * 
-	 * It affects all potree scenes.
+	 * Changes the point budget to be used by potree.
 	 */
 	setPointBudget(budget)
 	{
-		Potree.pointBudget = budget;
+		this.pointBudget = budget;
 	}
 
 	/**
@@ -39,31 +40,67 @@ Potree.BasicGroup = class extends THREE.Mesh
 	 */
 	onBeforeRender(renderer, scene, camera, geometry, material, group)
 	{
-		Potree.pointLoadLimit = Potree.pointBudget * 2;
-
-		/*for(var pointcloud of this.pointclouds)
+		for(var i = 0; i < this.pointclouds.length; i++)
 		{
-			pointcloud.showBoundingBox = false;
-			pointcloud.generateDEM = false;
-			pointcloud.minimumNodePixelSize = this.minNodeSize;
-		}*/
+			var pointcloud = this.pointclouds[i];
+			pointcloud.minimumNodePixelSize = this.nodeSize;
+			//pointcloud.showBoundingBox = false;
+			//pointcloud.generateDEM = false;
+		}
 
+		Potree.pointBudget = this.pointBudget;
+		Potree.pointLoadLimit = this.pointBudget * this.nodeLoadRate;
+		
 		Potree.updatePointClouds(this.pointclouds, camera, renderer);
+	}
+
+	/**
+	 * Recalculate the box geometry attached to this group.
+	 * 
+	 * The geometry its not visible and its only used for frustum culling.
+	 */
+	recalculateBoxGeometry()
+	{
+		var box = this.getBoundingBox();
+
+		//console.log(box);
+		//TODO <ADD CODE HERE>
 	}
 
 	/**
 	 * Add an object as children of this scene.
 	 * 
-	 * Potree PointCloud objects are detected and used to recalculate the geometry box used for frustum culling.
+	 * Point cloud objects are detected and used to recalculate the geometry box used for frustum culling.
 	 */
 	add(object)
 	{
+		THREE.Object3D.prototype.add.call(this, object);
+
 		if(object instanceof Potree.PointCloudTree)
 		{
 			this.pointclouds.push(object);
+			this.recalculateBoxGeometry();
 		}
+	}
 
-		THREE.Object3D.prototype.add.call(this, object);
+	/**
+	 * Remove object from group.
+	 * 
+	 * Point cloud objects are detected and used to recalculate the geometry box used for frustum culling
+	 */
+	remove(object)
+	{
+		THREE.Object3D.prototype.remove.call(this, object);
+
+		if(object instanceof Potree.PointCloudTree)
+		{
+			var index = this.pointclouds.indexOf(object);
+			if(index !== -1)
+			{
+				this.pointclouds.splice(index, 1);
+				this.recalculateBoxGeometry();
+			}
+		}
 	}
 
 	/** 
@@ -75,10 +112,10 @@ Potree.BasicGroup = class extends THREE.Mesh
 
 		this.updateMatrixWorld(true);
 
-		for(var pointcloud of this.pointclouds)
+		for(var i = 0; i < this.pointclouds.length; i++)
 		{
+			var pointcloud = this.pointclouds[i];
 			pointcloud.updateMatrixWorld(true);
-
 			var pointcloudBox = pointcloud.pcoGeometry.tightBoundingBox ? pointcloud.pcoGeometry.tightBoundingBox : pointcloud.boundingBox;
 			var boxWorld = Potree.utils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
 			box.union(boxWorld);

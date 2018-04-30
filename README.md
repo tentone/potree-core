@@ -16,7 +16,8 @@
  - Download the custom potree build from the build folder
  - Include it alonside the worker folder in your project
  - Download threejs from github repository
- 	- https://github.com/mrdoob/three.js/tree/dev/build
+    - https://github.com/mrdoob/three.js/tree/dev/build
+ - The build provided its not a module, its a bundle, it requires ES6 feature level support
 
 ### Example
 
@@ -44,7 +45,7 @@ scene.add(cube);
 var controls = new THREE.OrbitControls(camera, canvas);
 camera.position.z = 10;
 
-var points = new Potree.Object(renderer);
+var points = new Potree.Group();
 points.setPointBudget(10000000)
 scene.add(points);
 
@@ -76,14 +77,24 @@ document.body.onresize();
 
 ### Reference
  - The project has no generated documentation but bellow are some of the main configuration elements
- - Potree
-    - loadPointCloud
-       - Method to load a point cloud database file
-       - Potree.loadPointCloud(url, name, onLoad)
+ - Potree.BasicGroup
+    - Container that stores point cloud objects and updates them on render.
+    - The container supports frustum culling using the point cloud bouding box.
+    - Automatically stops updating the point cloud if out of view.
+    - This container does not support all features but its faster.
+ - Potree.Group
+    - Complete container with support for all potree features.
+    - Some features might require support for the following GL extensions
+       - EXT_frag_depth
+       - WEBGL_depth_texture
+       - OES_vertex_array_object
+ - Potree.loadPointCloud
+    - Method to load a point cloud database file
+    - Potree.loadPointCloud(url, name, onLoad)
  - Potree.PointCloudMaterial
     - Material used by threejs to draw the point clouds, based on RawShaderMaterial
     - shape
-       - Defines the shape used to draw points
+    - Defines the shape used to draw points
        - Possible values are
           - Potree.PointShape.SQUARE
           - Potree.PointShape.CIRCLE
@@ -121,9 +132,12 @@ document.body.onresize();
  - Potree.PointCloudTree
     - Base Object3D used to store and represent point cloud data.
     - These objects are created by the loader
- - Potree.Object
-    - Container that stores PointCloudTree objects updates them and renders them.    
 
+### To do
+ - Point cloud group raycast support
+ - Recaulate bouding box for frustum culling
+ - Fix "THREE.Camera: .getWorldDirection() target is now required" warning
+ 
 ### Building
  - The output javascript is not a module of any kind
  - The project can be build using

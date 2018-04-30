@@ -1,3 +1,5 @@
 node_modules
 data/*
 package-lock.json
+
+!data/lion_takanawa/*

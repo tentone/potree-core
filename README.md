@@ -11,6 +11,7 @@
  	- Potree.MOUSE, Potree.CameraMode
  	- PotreeRenderer, RepRenderer, Potree.Renderer
 	- JQuery, TWEEN and Proj4 dependencies
+ - Live example at https://tentone.github.io/potree-core/
 
 ### How to use
  - Download the custom potree build from the build folder

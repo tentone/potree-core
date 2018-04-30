@@ -1,7 +1,8 @@
-# Potree Object
+# Potree Core
 
- - This project is based on Potree V1.6
- - The following elements were removed from the library
+ - This project is based on Potree V1.6.
+ - Potree is a project created by Markus Schütz i have only adapted some of its components.
+ - Some elements were removed from the library
  	- PotreeViewer
  	- Controls, Input, GUI, Tools
  	- Anotations, Actions, ProfileRequest
@@ -10,11 +11,9 @@
  	- Potree.MOUSE, Potree.CameraMode
  	- PotreeRenderer, RepRenderer, Potree.Renderer
 	- JQuery, TWEEN and Proj4 dependencies
- - The following classes were rewritten
-    - XHRFactory
 
 ### How to use
- - Download the custom build from the build folder
+ - Download the custom potree build from the build folder
  - Include it alonside the worker folder in your project
  - Download threejs from github repository
  	- https://github.com/mrdoob/three.js/tree/dev/build
@@ -75,8 +74,12 @@ document.body.onresize();
 ```
 
 
-### Documentation
+### Reference
  - The project has no generated documentation but bellow are some of the main configuration elements
+ - Potree
+    - loadPointCloud
+       - Method to load a point cloud database file
+       - Potree.loadPointCloud(url, name, onLoad)
  - Potree.PointCloudMaterial
     - Material used by threejs to draw the point clouds, based on RawShaderMaterial
     - shape
@@ -94,20 +97,20 @@ document.body.onresize();
     - pointColorType
        - Defines how to color the drawn points
        - Possible values are
-          - RGB
-          - COLOR
-          - DEPTH
-          - HEIGHT
-          - INTENSITY
-          - INTENSITY_GRADIENT
-          - LOD:
-          - POINT_INDEX
-          - CLASSIFICATION
-          - RETURN_NUMBER
-          - SOURCE:
-          - NORMAL
-          - PHONG
-          - RGB_HEIGHT
+          - Potree.PointColorType.RGB
+          - Potree.PointColorType.COLOR
+          - Potree.PointColorType.DEPTH
+          - Potree.PointColorType.HEIGHT
+          - Potree.PointColorType.INTENSITY
+          - Potree.PointColorType.INTENSITY_GRADIENT
+          - Potree.PointColorType.LOD
+          - Potree.PointColorType.POINT_INDEX
+          - Potree.PointColorType.CLASSIFICATION
+          - Potree.PointColorType.RETURN_NUMBER
+          - Potree.PointColorType.SOURCE
+          - Potree.PointColorType.NORMAL
+          - Potree.PointColorType.PHONG
+          - Potree.PointColorType.RGB_HEIGHT
     - weighted
        - If true points are drawn as weighted splats
     - treeType
@@ -117,11 +120,13 @@ document.body.onresize();
           - Potree.TreeType.KDTREE
  - Potree.PointCloudTree
     - Base Object3D used to store and represent point cloud data.
-    
+    - These objects are created by the loader
+ - Potree.Object
+    - Container that stores PointCloudTree objects updates them and renders them.    
 
 ### Building
  - The output javascript is not a module of any kind
- - The project can be build using closure
+ - The project can be build using
     - npm install
     - npm run build
 
@@ -130,9 +135,5 @@ document.body.onresize();
     - https://github.com/potree/PotreeConverter/releases
  
 ### Dependencies
- - Three.js
+ - three.js
  - Closure compiler
-
-### License
- - Thank you to Markus Schütz developing Potree.
- - This project is distributed under MIT license (Available on GitHub page)

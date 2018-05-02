@@ -13,7 +13,7 @@ Potree.BasicGroup = class extends THREE.Mesh
 {
 	constructor()
 	{
-		super(new THREE.Geometry(), new THREE.MeshBasicMaterial({opacity:1.0, wireframe:true, transparent:true}));
+		super(new THREE.Geometry(), new THREE.MeshBasicMaterial({opacity:0.0, wireframe:false, transparent:true}));
 
 		this.rotation.set(-Math.PI / 2, 0, 0);
 
@@ -24,6 +24,11 @@ Potree.BasicGroup = class extends THREE.Mesh
 		this.nodeSize = 30;
 		this.nodeLoadRate = 2;
 	}
+
+	/**
+	 * Empty raycast method to avoid getting valid collision detection with the box geometry attached.
+	 */
+	raycast(raycaster, intersects){}
 
 	/**
 	 * Changes the point budget to be used by potree.

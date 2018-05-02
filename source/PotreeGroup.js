@@ -9,15 +9,15 @@ Potree.Group = class extends Potree.BasicGroup
 		this.buffers = new Map();
 		this.shaders = new Map();
 		this.textures = new Map();
-
 		this.types = new Map();
-		this.types.set(Float32Array, 5126);//gl.FLOAT
-		this.types.set(Uint8Array, 5121);//gl.UNSIGNED_BYTE
-		this.types.set(Uint16Array, 5123);//gl.UNSIGNED_SHORT
 	}
 
 	getExtensions(gl)
 	{
+		this.types.set(Float32Array, gl.FLOAT);
+		this.types.set(Uint8Array, gl.UNSIGNED_BYTE);
+		this.types.set(Uint16Array, gl.UNSIGNED_SHORT);
+
 		gl.getExtension("EXT_frag_depth");
 		gl.getExtension("WEBGL_depth_texture");
 
@@ -37,11 +37,17 @@ Potree.Group = class extends Potree.BasicGroup
 		}
 
 		var result = this.fetchOctrees();
+
 		for(var octree of result.octrees)
 		{
 			var nodes = octree.visibleNodes;
 			this.renderOctree(renderer, octree, nodes, camera);
 		}
+
+		gl.activeTexture(gl.TEXTURE1);
+		gl.bindTexture(gl.TEXTURE_2D, null);
+
+		renderer.state.reset();
 	}
 
 	createBuffer(gl, geometry)
@@ -134,7 +140,7 @@ Potree.Group = class extends Potree.BasicGroup
 		var octrees = [];
 		var stack = [this];
 
-		while (stack.length > 0)
+		while(stack.length > 0)
 		{
 			var node = stack.pop();
 
@@ -162,6 +168,7 @@ Potree.Group = class extends Potree.BasicGroup
 		var material = octree.material;
 		var shadowMaps = [];
 		var view = camera.matrixWorldInverse;
+
 		var worldView = new THREE.Matrix4();
 		var mat4holder = new Float32Array(16);
 
@@ -199,21 +206,20 @@ Potree.Group = class extends Potree.BasicGroup
 			shader.setUniform("uIsLeafNode", isLeaf);
 
 			//TODO <consider passing matrices in an array to avoid uniformMatrix4fv overhead>
-			const lModel = shader.uniformLocations["modelMatrix"];
+			var lModel = shader.uniformLocations["modelMatrix"];
 			if(lModel)
 			{
 				mat4holder.set(world.elements);
 				gl.uniformMatrix4fv(lModel, false, mat4holder);
 			}
 
-			const lModelView = shader.uniformLocations["modelViewMatrix"];
+			var lModelView = shader.uniformLocations["modelViewMatrix"];
 			mat4holder.set(worldView.elements);
 			gl.uniformMatrix4fv(lModelView, false, mat4holder);
 
 			//Clip Polygons
 			if(material.clipPolygons && material.clipPolygons.length > 0)
 			{
-
 				var clipPolygonVCount = [];
 				var worldViewProjMatrices = [];
 
@@ -242,13 +248,13 @@ Potree.Group = class extends Potree.BasicGroup
 					}
 				}
 
-				const lClipPolygonVCount = shader.uniformLocations["uClipPolygonVCount[0]"];
+				var lClipPolygonVCount = shader.uniformLocations["uClipPolygonVCount[0]"];
 				gl.uniform1iv(lClipPolygonVCount, clipPolygonVCount);
 
-				const lClipPolygonVP = shader.uniformLocations["uClipPolygonWVP[0]"];
+				var lClipPolygonVP = shader.uniformLocations["uClipPolygonWVP[0]"];
 				gl.uniformMatrix4fv(lClipPolygonVP, false, flattenedMatrices);
 
-				const lClipPolygons = shader.uniformLocations["uClipPolygonVertices[0]"];
+				var lClipPolygons = shader.uniformLocations["uClipPolygonVertices[0]"];
 				gl.uniform3fv(lClipPolygons, flattenedVertices);
 			}
 
@@ -256,9 +262,10 @@ Potree.Group = class extends Potree.BasicGroup
 			shader.setUniform1f("uNodeSpacing", node.geometryNode.estimatedSpacing);
 			shader.setUniform1f("uPCIndex", i);
 
+			/*
 			if(shadowMaps.length > 0)
 			{
-				const lShadowMap = shader.uniformLocations["uShadowMap[0]"];
+				var lShadowMap = shader.uniformLocations["uShadowMap[0]"];
 
 				shader.setUniform3f("uShadowColor", material.uniforms.uShadowColor.value);
 
@@ -279,16 +286,16 @@ Potree.Group = class extends Potree.BasicGroup
 				var worldViewMatrices = shadowMaps.map(sm => sm.camera.matrixWorldInverse).map(view => new THREE.Matrix4().multiplyMatrices(view, world))
 
 				var flattenedMatrices = [].concat(...worldViewMatrices.map(c => c.elements));
-				const lWorldView = shader.uniformLocations["uShadowWorldView[0]"];
+				var lWorldView = shader.uniformLocations["uShadowWorldView[0]"];
 				gl.uniformMatrix4fv(lWorldView, false, flattenedMatrices);
 
 				flattenedMatrices = [].concat(...shadowMaps.map(sm => sm.camera.projectionMatrix.elements));
-				const lProj = shader.uniformLocations["uShadowProj[0]"];
+				var lProj = shader.uniformLocations["uShadowProj[0]"];
 				gl.uniformMatrix4fv(lProj, false, flattenedMatrices);
 			}
+			*/
 
 			var geometry = node.geometryNode.geometry;
-
 			var webglBuffer = null;
 			if(!this.buffers.has(geometry))
 			{
@@ -309,9 +316,7 @@ Potree.Group = class extends Potree.BasicGroup
 			}
 
 			gl.bindVertexArray(webglBuffer.vao);
-
-			var numPoints = webglBuffer.numElements;
-			gl.drawArrays(gl.POINTS, 0, numPoints);
+			gl.drawArrays(gl.POINTS, 0, webglBuffer.numElements);
 		}
 
 		gl.bindVertexArray(null);
@@ -329,7 +334,6 @@ Potree.Group = class extends Potree.BasicGroup
 		var worldView = new THREE.Matrix4();
 
 		var visibilityTextureData = null;
-
 		var currentTextureBindingPoint = 0;
 
 		if(material.pointSizeType >= 0)
@@ -339,8 +343,8 @@ Potree.Group = class extends Potree.BasicGroup
 				var vnNodes = nodes;
 				visibilityTextureData = octree.computeVisibilityTextureData(vnNodes, camera);
 
-				const vnt = material.visibleNodesTexture;
-				const data = vnt.image.data;
+				var vnt = material.visibleNodesTexture;
+				var data = vnt.image.data;
 				data.set(visibilityTextureData.data);
 				vnt.needsUpdate = true;
 			}
@@ -374,7 +378,6 @@ Potree.Group = class extends Potree.BasicGroup
 		];
 
 		var definesString = defines.join("\n");
-
 		var vs = definesString + "\n" + material.vertexShader;
 		var fs = definesString + "\n" + material.fragmentShader;
 
@@ -439,6 +442,7 @@ Potree.Group = class extends Potree.BasicGroup
 		shader.setUniform1f("near", camera.near);
 		shader.setUniform1f("far", camera.far);
 		
+		//Camera configuration
 		if(camera instanceof THREE.OrthographicCamera)
 		{
 			shader.setUniform("uUseOrthographicCamera", true);
@@ -450,6 +454,7 @@ Potree.Group = class extends Potree.BasicGroup
 			shader.setUniform("uUseOrthographicCamera", false);
 		}
 
+		//Clip task
 		if(material.clipBoxes.length + material.clipPolygons.length === 0)
 		{
 			shader.setUniform1i("clipTask", Potree.ClipTask.NONE);
@@ -464,14 +469,14 @@ Potree.Group = class extends Potree.BasicGroup
 		//Clipboxes
 		if(material.clipBoxes && material.clipBoxes.length > 0)
 		{
-			const lClipBoxes = shader.uniformLocations["clipBoxes[0]"];
+			var lClipBoxes = shader.uniformLocations["clipBoxes[0]"];
 			gl.uniformMatrix4fv(lClipBoxes, false, material.uniforms.clipBoxes.value);
 		}
 
 		//Clispheres
-		/*if(params.clipSpheres && params.clipSpheres.length > 0)
+		/*if(material.clipSpheres && material.clipSpheres.length > 0)
 		{
-			var clipSpheres = params.clipSpheres;
+			var clipSpheres = material.clipSpheres;
 			var matrices = [];
 			for(var clipSphere of clipSpheres)
 			{
@@ -486,7 +491,7 @@ Potree.Group = class extends Potree.BasicGroup
 
 			var flattenedMatrices = [].concat(...matrices.map(matrix => matrix.elements));
 
-			const lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
+			var lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
 			gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
 		}*/
 
@@ -533,8 +538,8 @@ Potree.Group = class extends Potree.BasicGroup
 
 		if(material.snapEnabled === true)
 		{
-			const lSnapshot = shader.uniformLocations["uSnapshot[0]"];
-			const lSnapshotDepth = shader.uniformLocations["uSnapshotDepth[0]"];
+			var lSnapshot = shader.uniformLocations["uSnapshot[0]"];
+			var lSnapshotDepth = shader.uniformLocations["uSnapshotDepth[0]"];
 
 			var bindingStart = currentTextureBindingPoint;
 			var lSnapshotBindingPoints = new Array(5).fill(bindingStart).map((a, i) => (a + i));
@@ -568,19 +573,19 @@ Potree.Group = class extends Potree.BasicGroup
 			}
 
 			var flattenedMatrices = [].concat(...material.uniforms.uSnapView.value.map(c => c.elements));
-			const lSnapView = shader.uniformLocations["uSnapView[0]"];
+			var lSnapView = shader.uniformLocations["uSnapView[0]"];
 			gl.uniformMatrix4fv(lSnapView, false, flattenedMatrices);
 
 			flattenedMatrices = [].concat(...material.uniforms.uSnapProj.value.map(c => c.elements));
-			const lSnapProj = shader.uniformLocations["uSnapProj[0]"];
+			var lSnapProj = shader.uniformLocations["uSnapProj[0]"];
 			gl.uniformMatrix4fv(lSnapProj, false, flattenedMatrices);
 
 			flattenedMatrices = [].concat(...material.uniforms.uSnapProjInv.value.map(c => c.elements));
-			const lSnapProjInv = shader.uniformLocations["uSnapProjInv[0]"];
+			var lSnapProjInv = shader.uniformLocations["uSnapProjInv[0]"];
 			gl.uniformMatrix4fv(lSnapProjInv, false, flattenedMatrices);
 
 			flattenedMatrices = [].concat(...material.uniforms.uSnapViewInv.value.map(c => c.elements));
-			const lSnapViewInv = shader.uniformLocations["uSnapViewInv[0]"];
+			var lSnapViewInv = shader.uniformLocations["uSnapViewInv[0]"];
 			gl.uniformMatrix4fv(lSnapViewInv, false, flattenedMatrices);
 		}
 

@@ -6,8 +6,6 @@ Potree.Group = class extends Potree.BasicGroup
 	{
 		super();
 
-		this.frustumCulled = false;
-
 		this.buffers = new Map();
 		this.shaders = new Map();
 		this.textures = new Map();
@@ -42,7 +40,7 @@ Potree.Group = class extends Potree.BasicGroup
 		for(var octree of result.octrees)
 		{
 			var nodes = octree.visibleNodes;
-			this.renderOctree(renderer, octree, nodes, camera, {});
+			this.renderOctree(renderer, octree, nodes, camera);
 		}
 	}
 
@@ -167,8 +165,6 @@ Potree.Group = class extends Potree.BasicGroup
 		var worldView = new THREE.Matrix4();
 		var mat4holder = new Float32Array(16);
 
-		var i = 0;
-		
 		for(var node of nodes)
 		{
 			if(Potree.debug.allowedNodes !== undefined)
@@ -316,8 +312,6 @@ Potree.Group = class extends Potree.BasicGroup
 
 			var numPoints = webglBuffer.numElements;
 			gl.drawArrays(gl.POINTS, 0, numPoints);
-
-			i++;
 		}
 
 		gl.bindVertexArray(null);
@@ -362,20 +356,20 @@ Potree.Group = class extends Potree.BasicGroup
 
 		shader = this.shaders.get(material);
 
-		var [vs, fs] = [material.vertexShader, material.fragmentShader];
+		var vs = material.vertexShader;
+		var fs = material.fragmentShader;
 
 		var numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
-
 		var numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
 		var numClipPolygons = (material.clipPolygons && material.clipPolygons.length) ? material.clipPolygons.length : 0;
 		var numClipSpheres = 0;
 
 		var defines = [
-			`#define num_shadowmaps ${shadowMaps.length}`,
-			`#define num_snapshots ${numSnapshots}`,
-			`#define num_clipboxes ${numClipBoxes}`,
-			`#define num_clipspheres ${numClipSpheres}`,
-			`#define num_clippolygons ${numClipPolygons}`,
+			"#define num_shadowmaps" + shadowMaps.length,
+			"#define num_snapshots" + numSnapshots,
+			"#define num_clipboxes" + numClipBoxes,
+			"#define num_clipspheres" + numClipSpheres,
+			"#define num_clippolygons" + numClipPolygons,
 		];
 
 		var definesString = defines.join("\n");

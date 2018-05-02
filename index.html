@@ -44,21 +44,19 @@
 			var controls = new THREE.OrbitControls(camera, canvas);
 			camera.position.z = 10;
 
-			var points = new Potree.BasicGroup();
-			points.setPointBudget(1e10)
-			scene.add(points);
 
 			loadCloud("lion_takanawa_laz", -2, -3, 0.4);
-			//loadCloud("lion_takanawa_laz", -2, -20, 0.4);
-
-			//loadCloud("galp");
-			//loadCloud("leixoes", -110, -40, -38, 0.4, 0.4, 0.4);
-			//loadCloud("coalescedor", 11, -40, -43, 0.4, 0.4, 0.4);
+			loadCloud("galp");
 
 			function loadCloud(name, pX, pY, pZ, sX, sY, sZ)
 			{
 				Potree.loadPointCloud("data/" + name + "/cloud.js", name, function(e)
 				{
+					var points = new Potree.Group();
+					points.setPointBudget(1e10)
+					points.name = name;
+					scene.add(points);
+
 					var pointcloud = e.pointcloud;
 
 					if(pX !== undefined) pointcloud.position.set(pX, pY, pZ);
@@ -66,8 +64,8 @@
 
 					var material = pointcloud.material;
 					material.size = 1;
-					material.pointColorType = Potree.PointColorType.RGB;
-					material.pointSizeType = Potree.PointSizeType.FIXED;
+					material.pointColorType = Potree.PointColorType.LOD; //RGB;
+					material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //FIXED;
 					material.shape = Potree.PointShape.SQUARE;
 
 					points.add(pointcloud);

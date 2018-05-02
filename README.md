@@ -12,6 +12,7 @@
  	- PotreeRenderer, RepRenderer, Potree.Renderer
 	- JQuery, TWEEN and Proj4 dependencies
  - Live example at https://tentone.github.io/potree-core/
+ - Point clouds are automatically updated, frustum culling is used to avoid unecessary updates.
 
 ### How to use
  - Download the custom potree build from the build folder
@@ -82,13 +83,11 @@ document.body.onresize();
     - Container that stores point cloud objects and updates them on render.
     - The container supports frustum culling using the point cloud bouding box.
     - Automatically stops updating the point cloud if out of view.
-    - This container does not support all features but its faster.
+    - This container only support pointColorType set as RGB, pointSizeType set as FIXED and shape set as SQUARE.
  - Potree.Group
     - Complete container with support for all potree features.
-    - Some features might require support for the following GL extensions
-       - EXT_frag_depth
-       - WEBGL_depth_texture
-       - OES_vertex_array_object
+    - Some features require support for the following GL extensions
+       - EXT_frag_depth, WEBGL_depth_texture, OES_vertex_array_object
  - Potree.loadPointCloud
     - Method to load a point cloud database file
     - Potree.loadPointCloud(url, name, onLoad)
@@ -136,7 +135,6 @@ document.body.onresize();
 
 ### To do
  - Point cloud group raycast support
- - Recaulate bouding box for frustum culling
  - Fix "THREE.Camera: .getWorldDirection() target is now required" warning
  - Support for logarithmic depth buffer
  

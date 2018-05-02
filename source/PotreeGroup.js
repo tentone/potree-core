@@ -328,7 +328,6 @@ Potree.Group = class extends Potree.BasicGroup
 		var projInv = new THREE.Matrix4().getInverse(proj);
 		var worldView = new THREE.Matrix4();
 
-		var shader = null;
 		var visibilityTextureData = null;
 
 		var currentTextureBindingPoint = 0;
@@ -347,17 +346,19 @@ Potree.Group = class extends Potree.BasicGroup
 			}
 		}
 
+		var shader = null;
+
 		if(!this.shaders.has(material))
 		{
-			var [vs, fs] = [material.vertexShader, material.fragmentShader];
-			var shader = new Potree.Shader(gl, "pointcloud", vs, fs);
+			shader = new Potree.Shader(gl, "pointcloud", material.vertexShader, material.fragmentShader);
 			this.shaders.set(material, shader);
 		}
-
-		shader = this.shaders.get(material);
-
-		var vs = material.vertexShader;
-		var fs = material.fragmentShader;
+		else
+		{
+			shader = this.shaders.get(material);
+			vs = material.vertexShader;
+			fs = material.fragmentShader;
+		}
 
 		var numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
 		var numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
@@ -374,8 +375,8 @@ Potree.Group = class extends Potree.BasicGroup
 
 		var definesString = defines.join("\n");
 
-		vs = `${definesString}\n${vs}`;
-		fs = `${definesString}\n${fs}`;
+		var vs = definesString + "\n" + material.vertexShader;
+		var fs = definesString + "\n" + material.fragmentShader;
 
 		shader.update(vs, fs);
 

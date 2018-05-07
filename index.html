@@ -2,9 +2,9 @@
 <html>
 	<head>
 		<meta charset="utf-8">
-		<title>Potree Core Example</title>
+		<title>Potree-Core Example</title>
 	</head>
-	<body>
+	<body style="background-color: #000000">
 		<script src="lib/threejs/three.min.js"></script>
 		<script src="lib/threejs/OrbitControls.js"></script>
 
@@ -34,7 +34,7 @@
 			canvas.style.height = "100%";
 			document.body.appendChild(canvas);
 
-			var renderer = new THREE.WebGLRenderer({canvas:canvas});
+			var renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true});
 
 			var geometry = new THREE.BoxGeometry(5, 1, 5);
 			var material = new THREE.MeshBasicMaterial({color: 0x44AA44});
@@ -44,32 +44,25 @@
 			var controls = new THREE.OrbitControls(camera, canvas);
 			camera.position.z = 10;
 
-			loadCloud("lion_takanawa_laz", true, -2, -3, 0.4);
-			loadCloud("galp", true);
-
-			function loadCloud(name, basic, pX, pY, pZ, sX, sY, sZ)
+			Potree.loadPointCloud("data/lion_takanawa_laz/cloud.js", name, function(e)
 			{
-				Potree.loadPointCloud("data/" + name + "/cloud.js", name, function(e)
-				{
-					var points = new (basic === true ? Potree.BasicGroup : Potree.Group)();
-					points.setPointBudget(1e10)
-					points.name = name;
-					scene.add(points);
+				var points = new Potree.Group();
+				points.setPointBudget(1e10)
+				points.name = name;
+				scene.add(points);
 
-					var pointcloud = e.pointcloud;
+				var pointcloud = e.pointcloud;
+				pointcloud.position.set(-2, -3, 0.4);
+				pointcloud.scale.set(1, 1, 1);
 
-					if(pX !== undefined) pointcloud.position.set(pX, pY, pZ);
-					if(sX !== undefined) pointcloud.scale.set(sX, sY, sZ);
+				var material = pointcloud.material;
+				material.size = 1;
+				material.pointColorType = Potree.PointColorType.RGB;
+				material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //FIXED
+				material.shape = Potree.PointShape.CIRCLE; //SQUARE
 
-					var material = pointcloud.material;
-					material.size = 1;
-					material.pointColorType = Potree.PointColorType.RGB;
-					material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //FIXED
-					material.shape = Potree.PointShape.CIRCLE; //SQUARE
-
-					points.add(pointcloud);
-				});
-			}
+				points.add(pointcloud);
+			});
 
 			function loop()
 			{

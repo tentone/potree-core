@@ -11,7 +11,6 @@
  	- Potree.MOUSE, Potree.CameraMode
  	- PotreeRenderer, RepRenderer, Potree.Renderer
 	- JQuery, TWEEN and Proj4 dependencies
- - Live example at https://tentone.github.io/potree-core/
  - Point clouds are automatically updated, frustum culling is used to avoid unecessary updates.
 
 ### How to use
@@ -21,8 +20,10 @@
     - https://github.com/mrdoob/three.js/tree/dev/build
  - The build provided its not a module, its a bundle, it requires ES6 feature level support
 
+### Demo
+ - Live demo at https://tentone.github.io/potree-core/
+ 
 ### Example
-
  - Bellow its a fully functional example of how to use this wrapper to load potree point clouds to a THREE.js project
 
 ```javascript
@@ -135,7 +136,6 @@ document.body.onresize();
 
 ### To do
  - Point cloud group raycast support
- - Fix "THREE.Camera: .getWorldDirection() target is now required" warning
  - Support for logarithmic depth buffer
  
 ### Building

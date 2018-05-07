@@ -23,6 +23,8 @@
 ### Demo
  - Live demo at https://tentone.github.io/potree-core/
  
+ ![alt text](https://raw.githubusercontent.com/tentone/potree-core/master/data/lion_takanawa_laz/lion_takanawa.png)
+ 
 ### Example
  - Bellow its a fully functional example of how to use this wrapper to load potree point clouds to a THREE.js project
 

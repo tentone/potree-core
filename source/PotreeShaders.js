@@ -37,7 +37,6 @@ uniform bool uUseOrthographicCamera;
 uniform float uOrthoWidth;
 uniform float uOrthoHeight;
 
-
 #define CLIPTASK_NONE 0
 #define CLIPTASK_HIGHLIGHT 1
 #define CLIPTASK_SHOW_INSIDE 2
@@ -48,6 +47,7 @@ uniform float uOrthoHeight;
 
 uniform int clipTask;
 uniform int clipMethod;
+
 #if defined(num_clipboxes) && num_clipboxes > 0
 	uniform mat4 clipBoxes[num_clipboxes];
 #endif
@@ -101,17 +101,16 @@ uniform sampler2D gradient;
 uniform sampler2D classificationLUT;
 
 #if defined(num_shadowmaps) && num_shadowmaps > 0
-uniform sampler2D uShadowMap[num_shadowmaps];
-uniform mat4 uShadowWorldView[num_shadowmaps];
-uniform mat4 uShadowProj[num_shadowmaps];
+	uniform sampler2D uShadowMap[num_shadowmaps];
+	uniform mat4 uShadowWorldView[num_shadowmaps];
+	uniform mat4 uShadowProj[num_shadowmaps];
 #endif
 
-varying vec3	vColor;
-varying float	vLogDepth;
-varying vec3	vViewPosition;
-varying float 	vRadius;
-varying float 	vPointSize;
-
+varying vec3 vColor;
+varying float vLogDepth;
+varying vec3 vViewPosition;
+varying float vRadius;
+varying float vPointSize;
 
 float round(float number)
 {
@@ -127,12 +126,9 @@ float round(float number)
 // ##     ## ##     ## ##     ## ##           ##     ##    ## ##   ##          ##    ##  ##   ##      ##       ##    ## 
 // ##     ## ########  ##     ## ##           ##    ####    ###    ########     ######  #### ######## ########  ######  
 // 																			
-
-
 // ---------------------
 // OCTREE
 // ---------------------
-
 #if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_octree)
 /**
  * number of 1-bits up to inclusive index position
@@ -143,9 +139,9 @@ int numberOfOnes(int number, int index)
 {
 	int numOnes = 0;
 	int tmp = 128;
+
 	for(int i = 7; i >= 0; i--)
 	{
-		
 		if(number >= tmp)
 		{
 			number = number - tmp;
@@ -162,34 +158,50 @@ int numberOfOnes(int number, int index)
 	return numOnes;
 }
 
-
 /**
  * checks whether the bit at index is 1
  * number is treated as if it were an integer in the range 0-255
- *
  */
-bool isBitSet(int number, int index){
+bool isBitSet(int number, int index)
+{
 
 	// weird multi else if due to lack of proper array, int and bitwise support in WebGL 1.0
 	int powi = 1;
 
-	if(index == 0){
+	if(index == 0)
+	{
 		powi = 1;
-	}else if(index == 1){
+	}
+	else if(index == 1)
+	{
 		powi = 2;
-	}else if(index == 2){
+	}
+	else if(index == 2)
+	{
 		powi = 4;
-	}else if(index == 3){
+	}
+	else if(index == 3)
+	{
 		powi = 8;
-	}else if(index == 4){
+	}
+	else if(index == 4)
+	{
 		powi = 16;
-	}else if(index == 5){
+	}
+	else if(index == 5)
+	{
 		powi = 32;
-	}else if(index == 6){
+	}
+	else if(index == 6)
+	{
 		powi = 64;
-	}else if(index == 7){
+	}
+	else if(index == 7)
+	{
 		powi = 128;
-	}else{
+	}
+	else
+	{
 		return false;
 	}
 
@@ -202,15 +214,15 @@ bool isBitSet(int number, int index){
 /**
  * find the LOD at the point position
  */
-float getLOD(){
-	
+float getLOD()
+{
 	vec3 offset = vec3(0.0, 0.0, 0.0);
 	int iOffset = int(uVNStart);
 	float depth = uLevel;
 
 	for(float i = 0.0; i <= 30.0; i++)
 	{
-		float nodeSizeAtLevel = uOctreeSize  / pow(2.0, i + uLevel + 0.0);
+		float nodeSizeAtLevel = uOctreeSize / pow(2.0, i + uLevel + 0.0);
 		
 		vec3 index3d = (position-offset) / nodeSizeAtLevel;
 		index3d = floor(index3d + 0.5);
@@ -268,7 +280,6 @@ float getSpacing()
 			spacing = spacing / (255.0 * spacingFactor);
 		}
 		
-
 		if(isBitSet(mask, index))
 		{
 			// there are more visible child nodes at this position
@@ -279,9 +290,6 @@ float getSpacing()
 
 			iOffset = iOffset + advance;
 
-			//spacing = spacing / (255.0 * spacingFactor);
-			//spacing = spacing / 3.0;
-			
 			depth++;
 		}
 		else
@@ -296,13 +304,12 @@ float getSpacing()
 	return spacing;
 }
 
-float getPointSizeAttenuation(){
+float getPointSizeAttenuation()
+{
 	return pow(2.0, getLOD());
 }
 
-
 #endif
-
 
 // ---------------------
 // KD-TREE
@@ -336,10 +343,12 @@ float getLOD()
 		if(split == 1)
 		{
 			splitv.x = 1.0;
-		}else if(split == 2)
+		}
+		else if(split == 2)
 		{
 		 	splitv.y = 1.0;
-		}else if(split == 4)
+		}
+		else if(split == 4)
 		{
 		 	splitv.z = 1.0;
 		}
@@ -359,10 +368,12 @@ float getLOD()
 		{
 			// right
 			pos = pos - size * splitv * 0.5;
-			if(children == 0 || children == 1){
+			if(children == 0 || children == 1)
+			{
 				return depth;
 			}
-			if(children == 3){
+			if(children == 3)
+			{
 				iOffset = iOffset + 1.0;
 			}
 		}
@@ -381,8 +392,6 @@ float getPointSizeAttenuation()
 
 #endif
 
-
-
 // 
 //    ###    ######## ######## ########  #### ########  ##     ## ######## ########  ######  
 //   ## ##      ##       ##    ##     ##  ##  ##     ## ##     ##    ##    ##       ##    ## 
@@ -392,9 +401,6 @@ float getPointSizeAttenuation()
 // ##     ##    ##       ##    ##    ##   ##  ##     ## ##     ##    ##    ##       ##    ## 
 // ##     ##    ##       ##    ##     ## #### ########   #######     ##    ########  ######                                                                               
 // 
-
-
-
 // formula adapted from: http://www.dfstudios.co.uk/articles/programming/image-programming-algorithms/image-processing-algorithms-part-5-contrast-adjustment/
 float getContrastFactor(float contrast)
 {
@@ -407,12 +413,7 @@ vec3 getRGB()
 	
 	rgb = pow(rgb, vec3(rgbGamma));
 	rgb = rgb + rgbBrightness;
-	//rgb = (rgb - 0.5) * getContrastFactor(rgbContrast) + 0.5;
 	rgb = clamp(rgb, 0.0, 1.0);
-
-		//rgb = indices.rgb;
-	//rgb.b = pcIndex / 255.0;
-	
 	
 	return rgb;
 }
@@ -425,10 +426,6 @@ float getIntensity()
 	w = (w - 0.5) * getContrastFactor(intensityContrast) + 0.5;
 	w = clamp(w, 0.0, 1.0);
 
-	//w = w + color.x * 0.0001;
-	
-	//float w = color.x * 0.001 + intensity / 1.0;
-
 	return w;
 }
 
@@ -436,29 +433,33 @@ vec3 getElevation()
 {
 	vec4 world = modelMatrix * vec4( position, 1.0 );
 	float w = (world.z - elevationRange.x) / (elevationRange.y - elevationRange.x);
-	vec3 cElevation = texture2D(gradient, vec2(w,1.0-w)).rgb;
-	
-	return cElevation;
+	return texture2D(gradient, vec2(w,1.0-w)).rgb;
 }
 
 vec4 getClassification()
 {
 	vec2 uv = vec2(classification / 255.0, 0.5);
-	vec4 classColor = texture2D(classificationLUT, uv);
-	
-	return classColor;
+	return texture2D(classificationLUT, uv);
 }
 
 vec3 getReturnNumber()
 {
-	if(numberOfReturns == 1.0){
+	if(numberOfReturns == 1.0)
+	{
 		return vec3(1.0, 1.0, 0.0);
-	}else{
-		if(returnNumber == 1.0){
+	}
+	else
+	{
+		if(returnNumber == 1.0)
+		{
 			return vec3(1.0, 0.0, 0.0);
-		}else if(returnNumber == numberOfReturns){
+		}
+		else if(returnNumber == numberOfReturns)
+		{
 			return vec3(0.0, 0.0, 1.0);
-		}else{
+		}
+		else
+		{
 			return vec3(0.0, 1.0, 0.0);
 		}
 	}
@@ -496,14 +497,13 @@ vec3 getCompositeColor()
 
 	c = c / w;
 	
-	if(w == 0.0){
-		//c = color;
+	if(w == 0.0)
+	{
 		gl_Position = vec4(100.0, 100.0, 100.0, 0.0);
 	}
 	
 	return c;
 }
-
 
 // 
 //  ######  ##       #### ########  ########  #### ##    ##  ######   
@@ -570,6 +570,7 @@ float getPointSize()
 	
 	float r = uOctreeSpacing * 1.7;
 	vRadius = r;
+
 	#if defined fixed_point_size
 		pointSize = size;
 	#elif defined attenuated_point_size
@@ -589,7 +590,6 @@ float getPointSize()
 		}
 		else
 		{
-
 			if(uIsLeafNode && false)
 			{
 				pointSize = size * spacing * projFactor;
@@ -611,11 +611,9 @@ float getPointSize()
 }
 
 #if defined(num_clippolygons) && num_clippolygons > 0
-bool pointInClipPolygon(vec3 point, int polyIdx) {
-
+bool pointInClipPolygon(vec3 point, int polyIdx)
+{
 	mat4 wvp = uClipPolygonWVP[polyIdx];
-	//vec4 screenClipPos = uClipPolygonVP[polyIdx] * modelMatrix * vec4(point, 1.0);
-	//screenClipPos.xy = screenClipPos.xy / screenClipPos.w * 0.5 + 0.5;
 
 	vec4 pointNDC = wvp * vec4(point, 1.0);
 	pointNDC.xy = pointNDC.xy / pointNDC.w;
@@ -632,10 +630,11 @@ bool pointInClipPolygon(vec3 point, int polyIdx) {
 		vec3 verti = uClipPolygonVertices[polyIdx * 8 + i];
 		vec3 vertj = uClipPolygonVertices[polyIdx * 8 + j];
 
-		if( ((verti.y > pointNDC.y) != (vertj.y > pointNDC.y)) && 
-			(pointNDC.x < (vertj.x-verti.x) * (pointNDC.y-verti.y) / (vertj.y-verti.y) + verti.x) ) {
+		if(((verti.y > pointNDC.y) != (vertj.y > pointNDC.y)) && (pointNDC.x < (vertj.x-verti.x) * (pointNDC.y-verti.y) / (vertj.y-verti.y) + verti.x))
+		{
 			c = !c;
 		}
+
 		j = i;
 	}
 
@@ -643,8 +642,8 @@ bool pointInClipPolygon(vec3 point, int polyIdx) {
 }
 #endif
 
-void doClipping(){
-
+void doClipping()
+{
 	#if !defined color_type_composite
 		vec4 cl = getClassification(); 
 		if(cl.a == 0.0)
@@ -716,8 +715,6 @@ void doClipping(){
 	}
 }
 
-
-
 // 
 // ##     ##    ###    #### ##    ## 
 // ###   ###   ## ##    ##  ###   ## 
@@ -727,7 +724,6 @@ void doClipping(){
 // ##     ## ##     ##  ##  ##   ### 
 // ##     ## ##     ## #### ##    ## 
 //
-
 void main()
 {
 	vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
@@ -757,17 +753,18 @@ void main()
 	doClipping();
 
 	#if defined(num_clipspheres) && num_clipspheres > 0
-		for(int i = 0; i < num_clipspheres; i++){
+		for(int i = 0; i < num_clipspheres; i++)
+		{
 			vec4 sphereLocal = uClipSpheres[i] * mvPosition;
 
 			float distance = length(sphereLocal.xyz);
 
-			if(distance < 1.0){
+			if(distance < 1.0)
+			{
 				float w = distance;
 				vec3 cGradient = texture2D(gradient, vec2(w, 1.0 - w)).rgb;
 				
 				vColor = cGradient;
-				//vColor = cGradient * 0.7 + vColor * 0.3;
 			}
 		}
 	#endif
@@ -790,12 +787,12 @@ void main()
 
 			vec2 sampleStep = vec2(1.0 / (2.0*1024.0), 1.0 / (2.0*1024.0)) * 1.5;
 			vec2 sampleLocations[9];
+
 			sampleLocations[0] = vec2(0.0, 0.0);
 			sampleLocations[1] = sampleStep;
 			sampleLocations[2] = -sampleStep;
 			sampleLocations[3] = vec2(sampleStep.x, -sampleStep.y);
 			sampleLocations[4] = vec2(-sampleStep.x, sampleStep.y);
-
 			sampleLocations[5] = vec2(0.0, sampleStep.y);
 			sampleLocations[6] = vec2(0.0, -sampleStep.y);
 			sampleLocations[7] = vec2(sampleStep.x, 0.0);
@@ -870,7 +867,6 @@ varying float	vRadius;
 varying float 	vPointSize;
 varying vec3 	vPosition;
 
-
 float specularStrength = 1.0;
 
 void main()
@@ -890,7 +886,7 @@ void main()
 			discard;
 		}
 	#endif
-		
+
 	#if defined color_type_point_index
 		gl_FragColor = vec4(color, uPCIndex / 255.0);
 	#else
@@ -921,6 +917,8 @@ void main()
 			gl_FragColor.a = vLogDepth;
 		#endif
 	#endif
+
+	//gl_FragDepthEXT = 1.0;
 
 	#if defined(weighted_splats)
 		float distance = 2.0 * length(gl_PointCoord.xy - 0.5);

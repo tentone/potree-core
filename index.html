@@ -34,7 +34,7 @@
 			canvas.style.height = "100%";
 			document.body.appendChild(canvas);
 
-			var renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true});
+			var renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, logarithmicDepthBuffer: true});
 
 			var geometry = new THREE.BoxGeometry(5, 1, 5);
 			var material = new THREE.MeshBasicMaterial({color: 0x44AA44});

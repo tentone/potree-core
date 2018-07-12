@@ -6,6 +6,13 @@ Potree.Shaders["pointcloud.vs"] = `
 precision highp float;
 precision highp int;
 
+#define USE_LOGDEPTHBUF
+
+//#ifdef USE_LOGDEPTHBUF
+//	varying float vFragDepth;
+//	uniform float logDepthBufFC;
+//#endif
+
 #define max_clip_polygons 8
 #define PI 3.141592653589793
 
@@ -834,18 +841,20 @@ void main()
 }`;
 
 Potree.Shaders["pointcloud.fs"] = `
-#if defined paraboloid_point_shape
-	#extension GL_EXT_frag_depth : enable
-#endif
 
 precision highp float;
 precision highp int;
+
+#define USE_LOGDEPTHBUF
+
+#if defined paraboloid_point_shape || defined USE_LOGDEPTHBUF
+	#extension GL_EXT_frag_depth : enable
+#endif
 
 uniform mat4 viewMatrix;
 uniform mat4 uViewInv;
 uniform mat4 uProjInv;
 uniform vec3 cameraPosition;
-
 
 uniform mat4 projectionMatrix;
 uniform float uOpacity;
@@ -860,12 +869,12 @@ uniform float uPCIndex;
 uniform float uScreenWidth;
 uniform float uScreenHeight;
 
-varying vec3	vColor;
-varying float	vLogDepth;
-varying vec3	vViewPosition;
-varying float	vRadius;
-varying float 	vPointSize;
-varying vec3 	vPosition;
+varying vec3 vColor;
+varying float vLogDepth;
+varying vec3 vViewPosition;
+varying float vRadius;
+varying float vPointSize;
+varying vec3 vPosition;
 
 float specularStrength = 1.0;
 
@@ -908,17 +917,12 @@ void main()
 			color.r = linearDepth;
 			color.g = expDepth;
 		#endif
-		
-		#if defined(use_edl)
-			gl_FragColor.a = log2(linearDepth);
-		#endif
-	#else
-		#if defined(use_edl)
-			gl_FragColor.a = vLogDepth;
-		#endif
 	#endif
 
-	//gl_FragDepthEXT = 1.0;
+	
+	#if defined USE_LOGDEPTHBUF
+		gl_FragDepthEXT = 0.0;
+	#endif
 
 	#if defined(weighted_splats)
 		float distance = 2.0 * length(gl_PointCoord.xy - 0.5);

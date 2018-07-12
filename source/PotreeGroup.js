@@ -20,7 +20,7 @@ Potree.Group = class extends Potree.BasicGroup
 
 		gl.getExtension("EXT_frag_depth");
 		gl.getExtension("WEBGL_depth_texture");
-
+		
 		var extVAO = gl.getExtension("OES_vertex_array_object");
 		gl.createVertexArray = extVAO.createVertexArrayOES.bind(extVAO);
 		gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
@@ -442,6 +442,13 @@ Potree.Group = class extends Potree.BasicGroup
 		shader.setUniform1f("near", camera.near);
 		shader.setUniform1f("far", camera.far);
 		
+
+		//CHECK IF RENDERER HAS LOG DEPTH ENALBED AND SET UNIFORM
+		if(renderer.capabilities.logarithmicDepthBuffer)
+		{
+			shader.setUniform("logDepthBufFC", 2.0 / (Math.log(camera.far + 1.0) / Math.LN2));
+		}
+
 		//Camera configuration
 		if(camera instanceof THREE.OrthographicCamera)
 		{

@@ -36,8 +36,7 @@
 			canvas.style.height = "100%";
 			document.body.appendChild(canvas);
 
-			var renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, logarithmicDepthBuffer:false});
-			console.log(renderer.extensions.get("EXT_frag_depth"));
+			var renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, logarithmicDepthBuffer:true});
 
 			var geometry = new THREE.BoxGeometry(5, 1, 5);
 			var material = new THREE.MeshBasicMaterial({color: 0x44AA44});
@@ -59,7 +58,7 @@
 				pointcloud.scale.set(1, 1, 1);
 
 				var material = pointcloud.material;
-				material.size = 1;
+				material.size = 2;
 				material.pointColorType = Potree.PointColorType.RGB;
 				material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //FIXED
 				material.shape = Potree.PointShape.CIRCLE; //SQUARE

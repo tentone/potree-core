@@ -94,21 +94,6 @@ Potree.BasicGroup = class extends THREE.Mesh
 			this.pointclouds.push(object);
 			this.recalculateBoxGeometry();
 		}
-
-		console.log(this);
-	}
-
-	test()
-	{
-		var material = new THREE.PointsMaterial({size:0.05, sizeAttenuation:true, vertexColors:true});
-
-		this.traverse(function(children)
-		{
-			if(children.type === "Points")
-			{
-				children.material = material;
-			}
-		});
 	}
 	
 	/**

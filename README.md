@@ -125,6 +125,8 @@ document.body.onresize();
           - Potree.PointColorType.NORMAL
           - Potree.PointColorType.PHONG
           - Potree.PointColorType.RGB_HEIGHT
+    - logarithmicDepthBuffer
+       - Set true to enable logarithmic depth buffer
     - weighted
        - If true points are drawn as weighted splats
     - treeType
@@ -136,7 +138,11 @@ document.body.onresize();
     - Base Object3D used to store and represent point cloud data.
     - These objects are created by the loader
 
-### To do
+
+### Notes
+ - EDL shading is not supported by potree core
+
+### Todo
  - Point cloud group raycast support
  - Support for logarithmic depth buffer
  

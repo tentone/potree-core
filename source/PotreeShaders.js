@@ -6,12 +6,10 @@ Potree.Shaders["pointcloud.vs"] = `
 precision highp float;
 precision highp int;
 
-#define USE_LOGDEPTHBUF
-
-//#ifdef USE_LOGDEPTHBUF
-//	varying float vFragDepth;
-//	uniform float logDepthBufFC;
-//#endif
+#if defined USE_LOGDEPTHBUF
+	varying float vFragDepth;
+	uniform float logDepthBufFC;
+#endif
 
 #define max_clip_polygons 8
 #define PI 3.141592653589793
@@ -845,9 +843,7 @@ Potree.Shaders["pointcloud.fs"] = `
 precision highp float;
 precision highp int;
 
-#define USE_LOGDEPTHBUF
-
-#if defined paraboloid_point_shape || defined USE_LOGDEPTHBUF
+#if defined USE_LOGDEPTHBUF || defined paraboloid_point_shape
 	#extension GL_EXT_frag_depth : enable
 #endif
 

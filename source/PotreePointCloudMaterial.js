@@ -31,22 +31,23 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this._shape = Potree.PointShape.SQUARE;
 		this._pointColorType = Potree.PointColorType.RGB;
 		this._useClipBox = false;
-		this.clipBoxes = [];
-
-		this.clipPolygons = [];
 		this._weighted = false;
 		this._gradient = Potree.Gradients.SPECTRAL;
-		this.gradientTexture = Potree.PointCloudMaterial.generateGradientTexture(this._gradient);
-		this.lights = false;
-		this.fog = false;
 		this._treeType = treeType;
 		this._useEDL = false;
 		this._snapEnabled = false;
 		this._numSnapshots = 0;
-		this.defines = new Map();
 		this._defaultIntensityRangeChanged = false;
 		this._defaultElevationRangeChanged = false;
 
+		this.clipBoxes = [];
+		this.logarithmicDepthBuffer = false;
+		this.clipPolygons = [];
+		this.gradientTexture = Potree.PointCloudMaterial.generateGradientTexture(this._gradient);
+		this.lights = false;
+		this.fog = false;
+		this.defines = new Map();
+		
 		this.attributes = {
 			position:
 			{
@@ -411,38 +412,18 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this.depthFunc = THREE.LessEqualDepth;
 		this.depthTest = true;
 		this.depthWrite = true;
-		
-		/*
-		if(this.opacity === 1.0)
-		{
-			this.blending = THREE.NoBlending;
-			this.transparent = false;
-			this.depthTest = true;
-			this.depthWrite = true;
-		}
-		else if(this.opacity < 1.0 && !this.useEDL)
-		{
-			this.blending = THREE.AdditiveBlending;
-			this.transparent = true;
-			this.depthTest = false;
-			this.depthWrite = true;
-			this.depthFunc = THREE.AlwaysDepth;
-		}
-		if(this.weighted)
-		{
-			this.blending = THREE.AdditiveBlending;
-			this.transparent = true;
-			this.depthTest = true;
-			this.depthWrite = false;
-		}
-		*/
-
 		this.needsUpdate = true;
 	}
 
 	getDefines()
 	{
 		let defines = [];
+
+		if(this.logarithmicDepthBuffer)
+		{
+			defines.push("#define USE_LOGDEPTHBUF");
+		}
+
 		if(this.pointSizeType === Potree.PointSizeType.FIXED)
 		{
 			defines.push("#define fixed_point_size");
@@ -551,6 +532,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		{
 			defines.push(value);
 		}
+
 		return defines.join("\n");
 	}
 

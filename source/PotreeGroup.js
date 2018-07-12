@@ -442,8 +442,7 @@ Potree.Group = class extends Potree.BasicGroup
 		shader.setUniform1f("near", camera.near);
 		shader.setUniform1f("far", camera.far);
 		
-
-		//CHECK IF RENDERER HAS LOG DEPTH ENALBED AND SET UNIFORM
+		//Set log
 		if(renderer.capabilities.logarithmicDepthBuffer)
 		{
 			shader.setUniform("logDepthBufFC", 2.0 / (Math.log(camera.far + 1.0) / Math.LN2));

@@ -422,6 +422,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		if(this.logarithmicDepthBuffer)
 		{
 			defines.push("#define USE_LOGDEPTHBUF");
+			defines.push("#define USE_LOGDEPTHBUF_EXT");
 		}
 
 		if(this.pointSizeType === Potree.PointSizeType.FIXED)
@@ -669,7 +670,6 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		if(this._snapEnabled !== value)
 		{
 			this._snapEnabled = value;
-			//this.uniforms.snapEnabled.value = value;
 			this.updateShaderSource();
 		}
 	}
@@ -745,7 +745,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		if(this.uniforms.fov.value !== value)
 		{
 			this.uniforms.fov.value = value;
-			// this.updateShaderSource();
+			this.updateShaderSource();
 		}
 	}
 
@@ -759,7 +759,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		if(this.uniforms.screenWidth.value !== value)
 		{
 			this.uniforms.screenWidth.value = value;
-			// this.updateShaderSource();
+			this.updateShaderSource();
 		}
 	}
 
@@ -773,7 +773,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		if(this.uniforms.screenHeight.value !== value)
 		{
 			this.uniforms.screenHeight.value = value;
-			// this.updateShaderSource();
+			this.updateShaderSource();
 		}
 	}
 
@@ -1048,13 +1048,15 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		{
 			return;
 		}
-		if(value[0] === this.uniforms.intensityRange.value[0] &&
-			value[1] === this.uniforms.intensityRange.value[1])
+
+		if(value[0] === this.uniforms.intensityRange.value[0] && value[1] === this.uniforms.intensityRange.value[1])
 		{
 			return;
 		}
+
 		this.uniforms.intensityRange.value = value;
 		this._defaultIntensityRangeChanged = true;
+
 		this.dispatchEvent(
 		{
 			type: "material_property_changed",
@@ -1282,15 +1284,15 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 	{
 		let size = 64;
 		
-		// create canvas
+		//Create canvas
 		let canvas = document.createElement("canvas");
 		canvas.width = size;
 		canvas.height = size;
 
-		// get context
+		//Get context
 		let context = canvas.getContext("2d");
 
-		// draw gradient
+		//Draw gradient
 		context.rect(0, 0, size, size);
 		let ctxGradient = context.createLinearGradient(0, 0, size, size);
 		for(let i = 0; i < gradient.length; i++)

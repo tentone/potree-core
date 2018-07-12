@@ -6,8 +6,12 @@ Potree.Shaders["pointcloud.vs"] = `
 precision highp float;
 precision highp int;
 
-#if defined USE_LOGDEPTHBUF
-	varying float vFragDepth;
+#ifdef USE_LOGDEPTHBUF
+	#define EPSILON 1e-6
+	
+	#ifdef USE_LOGDEPTHBUF_EXT
+		varying float vFragDepth;
+	#endif
 	uniform float logDepthBufFC;
 #endif
 
@@ -742,6 +746,15 @@ void main()
 	gl_PointSize = pointSize;
 	vPointSize = pointSize;
 
+	#ifdef USE_LOGDEPTHBUF
+		#ifdef USE_LOGDEPTHBUF_EXT
+			vFragDepth = 1.0 + gl_Position.w;
+		#else
+			gl_Position.z = log2(max(EPSILON, gl_Position.w + 1.0)) * logDepthBufFC - 1.0;
+			gl_Position.z *= gl_Position.w;
+		#endif
+	#endif
+
 	// COLOR
 	vColor = getColor();
 
@@ -843,8 +856,16 @@ Potree.Shaders["pointcloud.fs"] = `
 precision highp float;
 precision highp int;
 
-#if defined USE_LOGDEPTHBUF || defined paraboloid_point_shape
+#if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
 	#extension GL_EXT_frag_depth : enable
+#endif
+
+#if defined USE_LOGDEPTHBUF
+	uniform float logDepthBufFC;
+
+	#if defined USE_LOGDEPTHBUF_EXT
+		varying float vFragDepth;
+	#endif
 #endif
 
 uniform mat4 viewMatrix;
@@ -914,10 +935,9 @@ void main()
 			color.g = expDepth;
 		#endif
 	#endif
-
 	
-	#if defined USE_LOGDEPTHBUF
-		gl_FragDepthEXT = 0.0;
+	#if defined USE_LOGDEPTHBUF_EXT
+		gl_FragDepthEXT = log2(vFragDepth) * logDepthBufFC * 0.5;
 	#endif
 
 	#if defined(weighted_splats)

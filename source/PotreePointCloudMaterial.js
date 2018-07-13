@@ -45,6 +45,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this.gradientTexture = Potree.PointCloudMaterial.generateGradientTexture(this._gradient);
 		this.lights = false;
 		this.fog = false;
+		this.logarithmicDepthBuffer = false;
 		this.defines = new Map();
 		
 		this.attributes = {
@@ -377,9 +378,11 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this.defaultAttributeValues.normal = [0, 0, 0];
 		this.defaultAttributeValues.classification = [0, 0, 0];
 		this.defaultAttributeValues.indices = [0, 0, 0, 0];
-		this.vertexShader = Potree.Shaders["pointcloud.vs"];
-		this.fragmentShader = Potree.Shaders["pointcloud.fs"];
 		this.vertexColors = THREE.VertexColors;
+
+		var defines = this.getDefines();
+		this.vertexShader = defines + Potree.Shaders["pointcloud.vs"];
+		this.fragmentShader = defines + Potree.Shaders["pointcloud.fs"];
 	}
 
 	setDefine(key, value)
@@ -405,8 +408,9 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 
 	updateShaderSource()
 	{
-		this.vertexShader = Potree.Shaders["pointcloud.vs"];
-		this.fragmentShader = Potree.Shaders["pointcloud.fs"];
+		var defines = this.getDefines();
+		this.vertexShader = defines + Potree.Shaders["pointcloud.vs"];
+		this.fragmentShader = defines + Potree.Shaders["pointcloud.fs"];
 		this.depthFunc = THREE.LessEqualDepth;
 		this.depthTest = true;
 		this.depthWrite = true;
@@ -415,18 +419,23 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 
 	onBeforeCompile(shader, renderer)
 	{
-		shader.vertexShader = this.getDefines(renderer) + shader.vertexShader;
-		shader.fragmentShader = this.getDefines(renderer) + shader.fragmentShader;
+		if(renderer.capabilities.logarithmicDepthBuffer)
+		{
+			var define = "#define USE_LOGDEPTHBUF\n#define USE_LOGDEPTHBUF_EXT\n#define EPSILON 1e-6\n"
+			shader.fragmentShader = define + shader.fragmentShader;
+			shader.vertexShader = define + shader.vertexShader;
+		}
 	}
 
-	getDefines(renderer)
+	getDefines()
 	{
 		let defines = [];
 
-		if(renderer.capabilities.logarithmicDepthBuffer === true)
+		if(this.logarithmicDepthBuffer)
 		{
 			defines.push("#define USE_LOGDEPTHBUF");
 			defines.push("#define USE_LOGDEPTHBUF_EXT");
+			defines.push("#define EPSILON 1e-6");
 		}
 
 		if(this.pointSizeType === Potree.PointSizeType.FIXED)
@@ -533,6 +542,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		{
 			defines.push("#define weighted_splats");
 		}
+
 		for(let [key, value] of this.defines)
 		{
 			defines.push(value);

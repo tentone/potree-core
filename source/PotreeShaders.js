@@ -7,8 +7,6 @@ precision highp float;
 precision highp int;
 
 #ifdef USE_LOGDEPTHBUF
-	#define EPSILON 1e-6
-	
 	#ifdef USE_LOGDEPTHBUF_EXT
 		varying float vFragDepth;
 	#endif

@@ -423,10 +423,9 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 	{
 		let defines = [];
 
-		if(renderer.capabilities.logarithmicDepthBuffer)
+		if(renderer.capabilities.logarithmicDepthBuffer === true)
 		{
 			defines.push("#define USE_LOGDEPTHBUF");
-
 			defines.push("#define USE_LOGDEPTHBUF_EXT");
 		}
 

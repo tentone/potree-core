@@ -45,7 +45,6 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this.gradientTexture = Potree.PointCloudMaterial.generateGradientTexture(this._gradient);
 		this.lights = false;
 		this.fog = false;
-		this.logarithmicDepthBuffer = false;
 		this.defines = new Map();
 		
 		this.attributes = {

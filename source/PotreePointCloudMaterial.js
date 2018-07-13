@@ -41,7 +41,6 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this._defaultElevationRangeChanged = false;
 
 		this.clipBoxes = [];
-		this.logarithmicDepthBuffer = false;
 		this.clipPolygons = [];
 		this.gradientTexture = Potree.PointCloudMaterial.generateGradientTexture(this._gradient);
 		this.lights = false;
@@ -378,8 +377,8 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this.defaultAttributeValues.normal = [0, 0, 0];
 		this.defaultAttributeValues.classification = [0, 0, 0];
 		this.defaultAttributeValues.indices = [0, 0, 0, 0];
-		this.vertexShader = this.getDefines() + Potree.Shaders["pointcloud.vs"];
-		this.fragmentShader = this.getDefines() + Potree.Shaders["pointcloud.fs"];
+		this.vertexShader = Potree.Shaders["pointcloud.vs"];
+		this.fragmentShader = Potree.Shaders["pointcloud.fs"];
 		this.vertexColors = THREE.VertexColors;
 	}
 
@@ -406,22 +405,28 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 
 	updateShaderSource()
 	{
-		this.vertexShader = this.getDefines() + Potree.Shaders["pointcloud.vs"];
-		this.fragmentShader = this.getDefines() + Potree.Shaders["pointcloud.fs"];
-
+		this.vertexShader = Potree.Shaders["pointcloud.vs"];
+		this.fragmentShader = Potree.Shaders["pointcloud.fs"];
 		this.depthFunc = THREE.LessEqualDepth;
 		this.depthTest = true;
 		this.depthWrite = true;
 		this.needsUpdate = true;
 	}
 
-	getDefines()
+	onBeforeCompile(shader, renderer)
+	{
+		shader.vertexShader = this.getDefines(renderer) + shader.vertexShader;
+		shader.fragmentShader = this.getDefines(renderer) + shader.fragmentShader;
+	}
+
+	getDefines(renderer)
 	{
 		let defines = [];
 
-		if(this.logarithmicDepthBuffer)
+		if(renderer.capabilities.logarithmicDepthBuffer)
 		{
 			defines.push("#define USE_LOGDEPTHBUF");
+
 			defines.push("#define USE_LOGDEPTHBUF_EXT");
 		}
 

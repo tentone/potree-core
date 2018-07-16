@@ -16,6 +16,7 @@
 		<script src="lib/laslaz.js"></script>
 		<script src="lib/BinaryHeap.js"></script>
 		<script src="lib/potree/potree.clean.js"></script>
+		<script src="source/Potree.js"></script>
 		<script src="source/PotreeBasicGroup.js"></script>
 		<script src="source/PotreeGroup.js"></script>
 		<script src="source/PotreeXHRFactory.js"></script>
@@ -36,7 +37,7 @@
 			canvas.style.height = "100%";
 			document.body.appendChild(canvas);
 
-			var renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, logarithmicDepthBuffer:true});
+			var renderer = new THREE.WebGLRenderer({canvas:canvas, alpha:true, logarithmicDepthBuffer:false});
 
 			var geometry = new THREE.BoxGeometry(5, 1, 5);
 			var material = new THREE.MeshBasicMaterial({color: 0x44AA44});
@@ -49,7 +50,9 @@
 			var controls = new THREE.OrbitControls(camera, canvas);
 			camera.position.z = 10;
 
-			Potree.loadPointCloud("data/lion_takanawa_laz/cloud.js", name, function(e)
+			var url = "data/lion_takanawa_laz/cloud.js";
+
+			Potree.loadPointCloud(url, name, function(e)
 			{
 				var pointcloud = e.pointcloud;
 				pointcloud.position.set(-2, -3, 0.4);
@@ -57,7 +60,7 @@
 
 				var material = pointcloud.material;
 				material.size = 2;
-				material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX |CLASSIFICATION
+				material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
 				material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
 				material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE
 

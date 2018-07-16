@@ -1,42 +1,76 @@
 "use strict";
 
-function Potree()
-{}
-
-Potree.version = {
+Potree.version =
+{
 	major: 1,
 	minor: 6,
 	suffix: "-nogui"
 };
 
-Potree.pointBudget = 1e6;
-Potree.framenumber = 0;
-Potree.numNodesLoading = 0;
-Potree.maxNodesLoading = 4;
+Potree.loadPointCloud = function(path, name, callback)
+{
+	var loaded = function(pointcloud)
+	{
+		if(name !== undefined)
+		{
+			pointcloud.name = name;
+		}
+		
+		callback(
+		{
+			type: "pointcloud_loaded",
+			pointcloud: pointcloud
+		});
+	};
 
-Potree.webgl = {
-	shaders:
-	{},
-	vaos:
-	{},
-	vbos:
-	{}
+	//Greyhound pointcloud server URL.
+	if(path.indexOf("greyhound://") === 0)
+	{
+		Potree.GreyhoundLoader.load(path, function(geometry)
+		{
+			if(!geometry)
+			{
+				console.error(new Error("Failed to load point cloud from URL " + path));
+			}
+			else
+			{
+				loaded(new Potree.PointCloudOctree(geometry));
+			}
+		});
+	}
+	//Potree point cloud
+	else if(path.indexOf("cloud.js") > 0)
+	{
+		Potree.POCLoader.load(path, function(geometry)
+		{
+			if(!geometry)
+			{
+				console.error(new Error("Failed to load point cloud from URL " + path));
+			}
+			else
+			{
+				loaded(new Potree.PointCloudOctree(geometry));
+			}
+		});
+	}
+	//Arena 4D point cloud
+	else if(path.indexOf(".vpc") > 0)
+	{
+		Potree.PointCloudArena4DGeometry.load(path, function(geometry)
+		{
+			if(!geometry)
+			{
+				console.error(new Error("Failed to load point cloud from URL " + path));
+			}
+			else
+			{
+				loaded(new Potree.PointCloudArena4D(geometry));
+			}
+		});
+	}
+	else
+	{
+		console.error(new Error("Failed to load point cloud from URL " + path));
+	}
 };
 
-Potree.debug = {};
-
-Potree.scriptPath = null;
-if(document.currentScript.src)
-{
-	Potree.scriptPath = new URL(document.currentScript.src + "/..").href;
-	if(Potree.scriptPath.slice(-1) === "/")
-	{
-		Potree.scriptPath = Potree.scriptPath.slice(0, -1);
-	}
-}
-else
-{
-	console.error("Potree was unable to find its script path using document.currentScript. Is Potree included with a script tag? Does your browser support this function?");
-}
-
-Potree.resourcePath = Potree.scriptPath + "/resources";

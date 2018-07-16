@@ -19,7 +19,7 @@ Potree.XHRFactory =
 		let xhr = new XMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 
-		if (this.config.customHeaders && Array.isArray(this.config.customHeaders) && this.config.customHeaders.length > 0)
+		if(this.config.customHeaders && Array.isArray(this.config.customHeaders) && this.config.customHeaders.length > 0)
 		{
 			let baseOpen = xhr.open;
 			let customHeaders = this.config.customHeaders;
@@ -28,7 +28,7 @@ Potree.XHRFactory =
 				baseOpen.apply(this, [].slice.call(arguments));
 				customHeaders.forEach(function (customHeader)
 				{
-					if (!!customHeader.header && !!customHeader.value)
+					if(!!customHeader.header && !!customHeader.value)
 					{
 						xhr.setRequestHeader(customHeader.header, customHeader.value);
 					}

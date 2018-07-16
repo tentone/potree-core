@@ -12,6 +12,9 @@ Potree.Group = class extends Potree.BasicGroup
 		this.types = new Map();
 	}
 
+	/**
+	 * Get WebGL extensions required for the more advanced features.
+	 */
 	getExtensions(gl)
 	{
 		this.types.set(Float32Array, gl.FLOAT);
@@ -26,6 +29,9 @@ Potree.Group = class extends Potree.BasicGroup
 		gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
 	}
 
+	/**
+	 * Update the potree group before rendering.
+	 */
 	onBeforeRender(renderer, scene, camera, geometry, material, group)
 	{
 		super.onBeforeRender(renderer, scene, camera, geometry, material, group);

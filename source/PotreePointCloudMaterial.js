@@ -652,6 +652,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			this.recomputeClassification();
 		}
 	}
+	
 	recomputeClassification()
 	{
 		this.classificationTexture = Potree.PointCloudMaterial.generateClassificationTexture(this._classification);

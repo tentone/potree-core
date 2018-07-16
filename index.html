@@ -9,11 +9,10 @@
 		<script src="lib/threejs/OrbitControls.js"></script>
 
 		<!--Production-->
-		<!--
 		<script src="build/potree.min.js"></script>
-		-->
 
 		<!--Development-->
+		<!--
 		<script src="lib/laslaz.js"></script>
 		<script src="lib/BinaryHeap.js"></script>
 		<script src="lib/potree/potree.clean.js"></script>
@@ -22,6 +21,7 @@
 		<script src="source/PotreeXHRFactory.js"></script>
 		<script src="source/PotreeShaders.js"></script>
 		<script src="source/PotreePointCloudMaterial.js"></script>
+		-->
 
 		<script>
 			//three.js
@@ -43,27 +43,29 @@
 			var cube = new THREE.Mesh(geometry, material);
 			scene.add(cube);
 
+
+			scene.add(new THREE.AmbientLight(0xffffff));
+
 			var controls = new THREE.OrbitControls(camera, canvas);
 			camera.position.z = 10;
 
 			Potree.loadPointCloud("data/lion_takanawa_laz/cloud.js", name, function(e)
 			{
-				var points = new Potree.Group();
-				points.setPointBudget(1e10)
-				points.name = name;
-				scene.add(points);
-
 				var pointcloud = e.pointcloud;
 				pointcloud.position.set(-2, -3, 0.4);
 				pointcloud.scale.set(1, 1, 1);
 
 				var material = pointcloud.material;
 				material.size = 2;
-				material.pointColorType = Potree.PointColorType.RGB;
-				material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //FIXED
-				material.shape = Potree.PointShape.CIRCLE; //SQUARE
+				material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX |CLASSIFICATION
+				material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
+				material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE
 
+				var points = new Potree.Group();
+				points.setPointBudget(1e10)
+				points.name = name;
 				points.add(pointcloud);
+				scene.add(points);
 			});
 
 			function loop()

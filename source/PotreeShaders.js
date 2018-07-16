@@ -6,12 +6,7 @@ Potree.Shaders["pointcloud.vs"] = `
 precision highp float;
 precision highp int;
 
-#ifdef USE_LOGDEPTHBUF
-	#ifdef USE_LOGDEPTHBUF_EXT
-		varying float vFragDepth;
-	#endif
-	uniform float logDepthBufFC;
-#endif
+` + THREE.ShaderChunk.logdepthbuf_pars_vertex + `
 
 #define max_clip_polygons 8
 #define PI 3.141592653589793
@@ -124,291 +119,269 @@ float round(float number)
 	return floor(number + 0.5);
 }
 
-// 
-//    ###    ########     ###    ########  ######## #### ##     ## ########     ######  #### ######## ########  ######  
-//   ## ##   ##     ##   ## ##   ##     ##    ##     ##  ##     ## ##          ##    ##  ##       ##  ##       ##    ## 
-//  ##   ##  ##     ##  ##   ##  ##     ##    ##     ##  ##     ## ##          ##        ##      ##   ##       ##       
-// ##     ## ##     ## ##     ## ########     ##     ##  ##     ## ######       ######   ##     ##    ######    ######  
-// ######### ##     ## ######### ##           ##     ##   ##   ##  ##                ##  ##    ##     ##             ## 
-// ##     ## ##     ## ##     ## ##           ##     ##    ## ##   ##          ##    ##  ##   ##      ##       ##    ## 
-// ##     ## ########  ##     ## ##           ##    ####    ###    ########     ######  #### ######## ########  ######  
-// 																			
 // ---------------------
 // OCTREE
 // ---------------------
+
 #if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_octree)
-/**
- * number of 1-bits up to inclusive index position
- * number is treated as if it were an integer in the range 0-255
- *
- */
-int numberOfOnes(int number, int index)
-{
-	int numOnes = 0;
-	int tmp = 128;
 
-	for(int i = 7; i >= 0; i--)
+	/**
+	 * number of 1-bits up to inclusive index position
+	 * number is treated as if it were an integer in the range 0-255
+	 */
+	int numberOfOnes(int number, int index)
 	{
-		if(number >= tmp)
-		{
-			number = number - tmp;
+		int numOnes = 0;
+		int tmp = 128;
 
-			if(i <= index)
+		for(int i = 7; i >= 0; i--)
+		{
+			if(number >= tmp)
 			{
-				numOnes++;
+				number = number - tmp;
+
+				if(i <= index)
+				{
+					numOnes++;
+				}
 			}
-		}
-		
-		tmp = tmp / 2;
-	}
-
-	return numOnes;
-}
-
-/**
- * checks whether the bit at index is 1
- * number is treated as if it were an integer in the range 0-255
- */
-bool isBitSet(int number, int index)
-{
-
-	// weird multi else if due to lack of proper array, int and bitwise support in WebGL 1.0
-	int powi = 1;
-
-	if(index == 0)
-	{
-		powi = 1;
-	}
-	else if(index == 1)
-	{
-		powi = 2;
-	}
-	else if(index == 2)
-	{
-		powi = 4;
-	}
-	else if(index == 3)
-	{
-		powi = 8;
-	}
-	else if(index == 4)
-	{
-		powi = 16;
-	}
-	else if(index == 5)
-	{
-		powi = 32;
-	}
-	else if(index == 6)
-	{
-		powi = 64;
-	}
-	else if(index == 7)
-	{
-		powi = 128;
-	}
-	else
-	{
-		return false;
-	}
-
-	int ndp = number / powi;
-
-	return mod(float(ndp), 2.0) != 0.0;
-}
-
-
-/**
- * find the LOD at the point position
- */
-float getLOD()
-{
-	vec3 offset = vec3(0.0, 0.0, 0.0);
-	int iOffset = int(uVNStart);
-	float depth = uLevel;
-
-	for(float i = 0.0; i <= 30.0; i++)
-	{
-		float nodeSizeAtLevel = uOctreeSize / pow(2.0, i + uLevel + 0.0);
-		
-		vec3 index3d = (position-offset) / nodeSizeAtLevel;
-		index3d = floor(index3d + 0.5);
-		int index = int(round(4.0 * index3d.x + 2.0 * index3d.y + index3d.z));
-		
-		vec4 value = texture2D(visibleNodes, vec2(float(iOffset) / 2048.0, 0.0));
-		int mask = int(round(value.r * 255.0));
-
-		if(isBitSet(mask, index))
-		{
-			// there are more visible child nodes at this position
-			int advanceG = int(round(value.g * 255.0)) * 256;
-			int advanceB = int(round(value.b * 255.0));
-			int advanceChild = numberOfOnes(mask, index - 1);
-			int advance = advanceG + advanceB + advanceChild;
-
-			iOffset = iOffset + advance;
 			
-			depth++;
+			tmp = tmp / 2;
 		}
-		else
-		{
-			// no more visible child nodes at this position
-			return value.a * 255.0;
-			//return depth;
-		}
-		
-		offset = offset + (vec3(1.0, 1.0, 1.0) * nodeSizeAtLevel * 0.5) * index3d;
+
+		return numOnes;
 	}
-		
-	return depth;
-}
 
-float getSpacing()
-{
-	vec3 offset = vec3(0.0, 0.0, 0.0);
-	int iOffset = int(uVNStart);
-	float depth = uLevel;
-	float spacing = uNodeSpacing;
-
-	for(float i = 0.0; i <= 30.0; i++)
+	/**
+	 * checks whether the bit at index is 1
+	 * number is treated as if it were an integer in the range 0-255
+	 */
+	bool isBitSet(int number, int index)
 	{
-		float nodeSizeAtLevel = uOctreeSize / pow(2.0, i + uLevel + 0.0);
-		
-		vec3 index3d = (position-offset) / nodeSizeAtLevel;
-		index3d = floor(index3d + 0.5);
-		int index = int(round(4.0 * index3d.x + 2.0 * index3d.y + index3d.z));
-		
-		vec4 value = texture2D(visibleNodes, vec2(float(iOffset) / 2048.0, 0.0));
-		int mask = int(round(value.r * 255.0));
-		float spacingFactor = value.a;
+		// weird multi else if due to lack of proper array, int and bitwise support in WebGL 1.0
+		int powi = 1;
 
-		if(i > 0.0)
+		if(index == 0)
 		{
-			spacing = spacing / (255.0 * spacingFactor);
+			powi = 1;
 		}
-		
-		if(isBitSet(mask, index))
+		else if(index == 1)
 		{
-			// there are more visible child nodes at this position
-			int advanceG = int(round(value.g * 255.0)) * 256;
-			int advanceB = int(round(value.b * 255.0));
-			int advanceChild = numberOfOnes(mask, index - 1);
-			int advance = advanceG + advanceB + advanceChild;
-
-			iOffset = iOffset + advance;
-
-			depth++;
+			powi = 2;
+		}
+		else if(index == 2)
+		{
+			powi = 4;
+		}
+		else if(index == 3)
+		{
+			powi = 8;
+		}
+		else if(index == 4)
+		{
+			powi = 16;
+		}
+		else if(index == 5)
+		{
+			powi = 32;
+		}
+		else if(index == 6)
+		{
+			powi = 64;
+		}
+		else if(index == 7)
+		{
+			powi = 128;
 		}
 		else
 		{
-			// no more visible child nodes at this position
-			return spacing;
+			return false;
 		}
-		
-		offset = offset + (vec3(1.0, 1.0, 1.0) * nodeSizeAtLevel * 0.5) * index3d;
+
+		int ndp = number / powi;
+
+		return mod(float(ndp), 2.0) != 0.0;
 	}
-		
-	return spacing;
-}
 
-float getPointSizeAttenuation()
-{
-	return pow(2.0, getLOD());
-}
+	/**
+	 * find the LOD at the point position
+	 */
+	float getLOD()
+	{
+		vec3 offset = vec3(0.0, 0.0, 0.0);
+		int iOffset = int(uVNStart);
+		float depth = uLevel;
 
+		for(float i = 0.0; i <= 30.0; i++)
+		{
+			float nodeSizeAtLevel = uOctreeSize / pow(2.0, i + uLevel + 0.0);
+			
+			vec3 index3d = (position-offset) / nodeSizeAtLevel;
+			index3d = floor(index3d + 0.5);
+			int index = int(round(4.0 * index3d.x + 2.0 * index3d.y + index3d.z));
+			
+			vec4 value = texture2D(visibleNodes, vec2(float(iOffset) / 2048.0, 0.0));
+			int mask = int(round(value.r * 255.0));
+
+			if(isBitSet(mask, index))
+			{
+				// there are more visible child nodes at this position
+				int advanceG = int(round(value.g * 255.0)) * 256;
+				int advanceB = int(round(value.b * 255.0));
+				int advanceChild = numberOfOnes(mask, index - 1);
+				int advance = advanceG + advanceB + advanceChild;
+
+				iOffset = iOffset + advance;
+				
+				depth++;
+			}
+			else
+			{
+				// no more visible child nodes at this position
+				return value.a * 255.0;
+				//return depth;
+			}
+			
+			offset = offset + (vec3(1.0, 1.0, 1.0) * nodeSizeAtLevel * 0.5) * index3d;
+		}
+			
+		return depth;
+	}
+
+	float getSpacing()
+	{
+		vec3 offset = vec3(0.0, 0.0, 0.0);
+		int iOffset = int(uVNStart);
+		float depth = uLevel;
+		float spacing = uNodeSpacing;
+
+		for(float i = 0.0; i <= 30.0; i++)
+		{
+			float nodeSizeAtLevel = uOctreeSize / pow(2.0, i + uLevel + 0.0);
+			
+			vec3 index3d = (position-offset) / nodeSizeAtLevel;
+			index3d = floor(index3d + 0.5);
+			int index = int(round(4.0 * index3d.x + 2.0 * index3d.y + index3d.z));
+			
+			vec4 value = texture2D(visibleNodes, vec2(float(iOffset) / 2048.0, 0.0));
+			int mask = int(round(value.r * 255.0));
+			float spacingFactor = value.a;
+
+			if(i > 0.0)
+			{
+				spacing = spacing / (255.0 * spacingFactor);
+			}
+			
+			if(isBitSet(mask, index))
+			{
+				// there are more visible child nodes at this position
+				int advanceG = int(round(value.g * 255.0)) * 256;
+				int advanceB = int(round(value.b * 255.0));
+				int advanceChild = numberOfOnes(mask, index - 1);
+				int advance = advanceG + advanceB + advanceChild;
+
+				iOffset = iOffset + advance;
+
+				depth++;
+			}
+			else
+			{
+				// no more visible child nodes at this position
+				return spacing;
+			}
+			
+			offset = offset + (vec3(1.0, 1.0, 1.0) * nodeSizeAtLevel * 0.5) * index3d;
+		}
+			
+		return spacing;
+	}
+
+	float getPointSizeAttenuation()
+	{
+		return pow(2.0, getLOD());
+	}
 #endif
 
 // ---------------------
 // KD-TREE
 // ---------------------
-
 #if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_kdtree)
-
-float getLOD()
-{
-	vec3 offset = vec3(0.0, 0.0, 0.0);
-	float iOffset = 0.0;
-	float depth = 0.0;
-		
-	vec3 size = uBBSize;	
-	vec3 pos = position;
-		
-	for(float i = 0.0; i <= 1000.0; i++)
+	float getLOD()
 	{
-		vec4 value = texture2D(visibleNodes, vec2(iOffset / 2048.0, 0.0));
-		
-		int children = int(value.r * 255.0);
-		float next = value.g * 255.0;
-		int split = int(value.b * 255.0);
-		
-		if(next == 0.0)
+		vec3 offset = vec3(0.0, 0.0, 0.0);
+		float iOffset = 0.0;
+		float depth = 0.0;
+			
+		vec3 size = uBBSize;	
+		vec3 pos = position;
+			
+		for(float i = 0.0; i <= 1000.0; i++)
 		{
-		 	return depth;
-		}
-		
-		vec3 splitv = vec3(0.0, 0.0, 0.0);
-		if(split == 1)
-		{
-			splitv.x = 1.0;
-		}
-		else if(split == 2)
-		{
-		 	splitv.y = 1.0;
-		}
-		else if(split == 4)
-		{
-		 	splitv.z = 1.0;
-		}
-		
-		iOffset = iOffset + next;
-		
-		float factor = length(pos * splitv / size);
-		if(factor < 0.5)
-		{
-			// left
-			if(children == 0 || children == 2)
+			vec4 value = texture2D(visibleNodes, vec2(iOffset / 2048.0, 0.0));
+			
+			int children = int(value.r * 255.0);
+			float next = value.g * 255.0;
+			int split = int(value.b * 255.0);
+			
+			if(next == 0.0)
 			{
-				return depth;
+			 	return depth;
 			}
-		}
-		else
-		{
-			// right
-			pos = pos - size * splitv * 0.5;
-			if(children == 0 || children == 1)
+			
+			vec3 splitv = vec3(0.0, 0.0, 0.0);
+			if(split == 1)
 			{
-				return depth;
+				splitv.x = 1.0;
 			}
-			if(children == 3)
+			else if(split == 2)
 			{
-				iOffset = iOffset + 1.0;
+			 	splitv.y = 1.0;
 			}
+			else if(split == 4)
+			{
+			 	splitv.z = 1.0;
+			}
+			
+			iOffset = iOffset + next;
+			
+			float factor = length(pos * splitv / size);
+
+			//Left
+			if(factor < 0.5)
+			{
+				if(children == 0 || children == 2)
+				{
+					return depth;
+				}
+			}
+			//Right
+			else
+			{
+				pos = pos - size * splitv * 0.5;
+				if(children == 0 || children == 1)
+				{
+					return depth;
+				}
+				if(children == 3)
+				{
+					iOffset = iOffset + 1.0;
+				}
+			}
+
+			size = size * ((1.0 - (splitv + 1.0) / 2.0) + 0.5);
+			depth++;
 		}
-		size = size * ((1.0 - (splitv + 1.0) / 2.0) + 0.5);
-		
-		depth++;
+			
+		return depth;	
 	}
-		
-	return depth;	
-}
 
-float getPointSizeAttenuation()
-{
-	return 0.5 * pow(1.3, getLOD());
-}
-
+	float getPointSizeAttenuation()
+	{
+		return 0.5 * pow(1.3, getLOD());
+	}
 #endif
 
-// 
-//    ###    ######## ######## ########  #### ########  ##     ## ######## ########  ######  
-//   ## ##      ##       ##    ##     ##  ##  ##     ## ##     ##    ##    ##       ##    ## 
-//  ##   ##     ##       ##    ##     ##  ##  ##     ## ##     ##    ##    ##       ##       
-// ##     ##    ##       ##    ########   ##  ########  ##     ##    ##    ######    ######  
-// #########    ##       ##    ##   ##    ##  ##     ## ##     ##    ##    ##             ## 
-// ##     ##    ##       ##    ##    ##   ##  ##     ## ##     ##    ##    ##       ##    ## 
-// ##     ##    ##       ##    ##     ## #### ########   #######     ##    ########  ######                                                                               
-// 
-// formula adapted from: http://www.dfstudios.co.uk/articles/programming/image-programming-algorithms/image-processing-algorithms-part-5-contrast-adjustment/
+//formula adapted from: http://www.dfstudios.co.uk/articles/programming/image-programming-algorithms/image-processing-algorithms-part-5-contrast-adjustment/
 float getContrastFactor(float contrast)
 {
 	return (1.0158730158730156 * (contrast + 1.0)) / (1.0158730158730156 - contrast);
@@ -512,15 +485,6 @@ vec3 getCompositeColor()
 	return c;
 }
 
-// 
-//  ######  ##       #### ########  ########  #### ##    ##  ######   
-// ##    ## ##        ##  ##     ## ##     ##  ##  ###   ## ##    ##  
-// ##       ##        ##  ##     ## ##     ##  ##  ####  ## ##        
-// ##       ##        ##  ########  ########   ##  ## ## ## ##   #### 
-// ##       ##        ##  ##        ##         ##  ##  #### ##    ##  
-// ##    ## ##        ##  ##        ##         ##  ##   ### ##    ##  
-//  ######  ######## #### ##        ##        #### ##    ##  ######                                                          
-// 
 vec3 getColor()
 {
 	vec3 color;
@@ -618,35 +582,35 @@ float getPointSize()
 }
 
 #if defined(num_clippolygons) && num_clippolygons > 0
-bool pointInClipPolygon(vec3 point, int polyIdx)
-{
-	mat4 wvp = uClipPolygonWVP[polyIdx];
-
-	vec4 pointNDC = wvp * vec4(point, 1.0);
-	pointNDC.xy = pointNDC.xy / pointNDC.w;
-
-	int j = uClipPolygonVCount[polyIdx] - 1;
-	bool c = false;
-	for(int i = 0; i < 8; i++)
+	bool pointInClipPolygon(vec3 point, int polyIdx)
 	{
-		if(i == uClipPolygonVCount[polyIdx])
+		mat4 wvp = uClipPolygonWVP[polyIdx];
+
+		vec4 pointNDC = wvp * vec4(point, 1.0);
+		pointNDC.xy = pointNDC.xy / pointNDC.w;
+
+		int j = uClipPolygonVCount[polyIdx] - 1;
+		bool c = false;
+		for(int i = 0; i < 8; i++)
 		{
-			break;
+			if(i == uClipPolygonVCount[polyIdx])
+			{
+				break;
+			}
+
+			vec3 verti = uClipPolygonVertices[polyIdx * 8 + i];
+			vec3 vertj = uClipPolygonVertices[polyIdx * 8 + j];
+
+			if(((verti.y > pointNDC.y) != (vertj.y > pointNDC.y)) && (pointNDC.x < (vertj.x-verti.x) * (pointNDC.y-verti.y) / (vertj.y-verti.y) + verti.x))
+			{
+				c = !c;
+			}
+
+			j = i;
 		}
 
-		vec3 verti = uClipPolygonVertices[polyIdx * 8 + i];
-		vec3 vertj = uClipPolygonVertices[polyIdx * 8 + j];
-
-		if(((verti.y > pointNDC.y) != (vertj.y > pointNDC.y)) && (pointNDC.x < (vertj.x-verti.x) * (pointNDC.y-verti.y) / (vertj.y-verti.y) + verti.x))
-		{
-			c = !c;
-		}
-
-		j = i;
+		return c;
 	}
-
-	return c;
-}
 #endif
 
 void doClipping()
@@ -722,15 +686,6 @@ void doClipping()
 	}
 }
 
-// 
-// ##     ##    ###    #### ##    ## 
-// ###   ###   ## ##    ##  ###   ## 
-// #### ####  ##   ##   ##  ####  ## 
-// ## ### ## ##     ##  ##  ## ## ## 
-// ##     ## #########  ##  ##  #### 
-// ##     ## ##     ##  ##  ##   ### 
-// ##     ## ##     ## #### ##    ## 
-//
 void main()
 {
 	vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
@@ -744,14 +699,7 @@ void main()
 	gl_PointSize = pointSize;
 	vPointSize = pointSize;
 
-	#ifdef USE_LOGDEPTHBUF
-		#ifdef USE_LOGDEPTHBUF_EXT
-			vFragDepth = 1.0 + gl_Position.w;
-		#else
-			gl_Position.z = log2(max(EPSILON, gl_Position.w + 1.0)) * logDepthBufFC - 1.0;
-			gl_Position.z *= gl_Position.w;
-		#endif
-	#endif
+	` + THREE.ShaderChunk.logdepthbuf_vertex + `
 
 	// COLOR
 	vColor = getColor();
@@ -858,13 +806,7 @@ precision highp int;
 	#extension GL_EXT_frag_depth : enable
 #endif
 
-#if defined USE_LOGDEPTHBUF
-	uniform float logDepthBufFC;
-
-	#if defined USE_LOGDEPTHBUF_EXT
-		varying float vFragDepth;
-	#endif
-#endif
+` + THREE.ShaderChunk.logdepthbuf_pars_fragment + `
 
 uniform mat4 viewMatrix;
 uniform mat4 uViewInv;
@@ -890,8 +832,6 @@ varying vec3 vViewPosition;
 varying float vRadius;
 varying float vPointSize;
 varying vec3 vPosition;
-
-float specularStrength = 1.0;
 
 void main()
 {
@@ -934,9 +874,7 @@ void main()
 		#endif
 	#endif
 	
-	#if defined USE_LOGDEPTHBUF_EXT
-		gl_FragDepthEXT = log2(vFragDepth) * logDepthBufFC * 0.5;
-	#endif
+	` + THREE.ShaderChunk.logdepthbuf_fragment +  `
 
 	#if defined(weighted_splats)
 		float distance = 2.0 * length(gl_PointCoord.xy - 0.5);

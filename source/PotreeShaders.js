@@ -6,10 +6,10 @@ Potree.Shaders["pointcloud.vs"] = `
 precision highp float;
 precision highp int;
 
-` + THREE.ShaderChunk.logdepthbuf_pars_vertex + `
-
 #define max_clip_polygons 8
 #define PI 3.141592653589793
+
+` + THREE.ShaderChunk.logdepthbuf_pars_vertex + `
 
 attribute vec3 position;
 attribute vec3 color;
@@ -799,12 +799,12 @@ void main()
 
 Potree.Shaders["pointcloud.fs"] = `
 
-precision highp float;
-precision highp int;
-
 #if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
 	#extension GL_EXT_frag_depth : enable
 #endif
+
+precision highp float;
+precision highp int;
 
 ` + THREE.ShaderChunk.logdepthbuf_pars_fragment + `
 

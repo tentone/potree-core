@@ -20,9 +20,6 @@ Potree.Group = class extends Potree.BasicGroup
 		this.types.set(Float32Array, gl.FLOAT);
 		this.types.set(Uint8Array, gl.UNSIGNED_BYTE);
 		this.types.set(Uint16Array, gl.UNSIGNED_SHORT);
-
-		gl.getExtension("EXT_frag_depth");
-		gl.getExtension("WEBGL_depth_texture");
 		
 		var extVAO = gl.getExtension("OES_vertex_array_object");
 		gl.createVertexArray = extVAO.createVertexArrayOES.bind(extVAO);

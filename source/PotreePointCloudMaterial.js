@@ -430,13 +430,6 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 	{
 		let defines = [];
 
-		if(this.logarithmicDepthBuffer)
-		{
-			defines.push("#define USE_LOGDEPTHBUF");
-			defines.push("#define USE_LOGDEPTHBUF_EXT");
-			defines.push("#define EPSILON 1e-6");
-		}
-
 		if(this.pointSizeType === Potree.PointSizeType.FIXED)
 		{
 			defines.push("#define fixed_point_size");

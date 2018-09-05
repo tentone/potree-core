@@ -60,7 +60,7 @@
 			var controls = new THREE.OrbitControls(camera, canvas);
 			camera.position.z = 10;
 
-			var url = "data/lion_takanawa_laz/cloud.js";
+			var url = "http://192.168.10.61/models/total/cloud.js"; //"data/lion_takanawa_laz/cloud.js";
 
 			Potree.loadPointCloud(url, name, function(e)
 			{

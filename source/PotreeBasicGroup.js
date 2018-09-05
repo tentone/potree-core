@@ -28,7 +28,19 @@ Potree.BasicGroup = class extends THREE.Mesh
 	/**
 	 * Empty raycast method to avoid getting valid collision detection with the box geometry attached.
 	 */
-	raycast(raycaster, intersects){}
+	/*raycast(raycaster, intersects)
+	{
+		var ray = raycaster.ray;
+
+		for(var i = 0; i < this.pointclouds.length; i++)
+		{
+			//var results = this.pointclouds[i].pick(viewer, camera, ray);
+		}
+		
+
+		//pointcloud.pick(
+		//UNO.app.screen.selection[0].pointclouds[0].pick
+	}*/
 
 	/**
 	 * Changes the point budget to be used by potree.

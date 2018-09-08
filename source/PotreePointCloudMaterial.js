@@ -625,6 +625,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		{
 			copy[key] = value[key].clone();
 		}
+		
 		let isEqual = false;
 		if(this._classification === undefined)
 		{
@@ -639,6 +640,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 				isEqual = isEqual && copy[key].equals(this._classification[key]);
 			}
 		}
+
 		if(!isEqual)
 		{
 			this._classification = copy;

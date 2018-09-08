@@ -6,9 +6,7 @@
 	"files": "",
 	"scripts": {
 		"build": "npx google-closure-compiler --compilation_level SIMPLE --warning_level QUIET --formatting SINGLE_QUOTES --language_in ECMASCRIPT_2017 --language_out ECMASCRIPT_2017 --js ./lib/laslaz.js ./lib/BinaryHeap.js ./lib/potree/potree.clean.js  ./source/Potree.js ./source/PotreeShaders.js ./source/PotreePointCloudMaterial.js ./source/PotreeXHRFactory.js ./source/PotreeBasicGroup.js ./source/PotreeGroup.js --js_output_file ./build/potree.min.js",
-
 		"build-es5": "npx google-closure-compiler --compilation_level SIMPLE --warning_level QUIET --formatting SINGLE_QUOTES --language_in ECMASCRIPT_2017 --language_out ECMASCRIPT5 --js ./lib/laslaz.js ./lib/BinaryHeap.js ./lib/potree/potree.clean.js  ./source/Potree.js ./source/PotreeShaders.js ./source/PotreePointCloudMaterial.js ./source/PotreeXHRFactory.js ./source/PotreeBasicGroup.js ./source/PotreeGroup.js --js_output_file ./build/potree.min.es5.js",
-
 		"start": "python -m http.server"
 	},
 	"keywords": [

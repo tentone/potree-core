@@ -60,6 +60,12 @@
 			var controls = new THREE.OrbitControls(camera, canvas);
 			camera.position.z = 10;
 
+			var points = new Potree.Group();
+			points.setPointBudget(1e10);
+			points.material.opacity = 1.0;
+			points.material.wireframe = true;
+			scene.add(points);
+
 			var url = "data/lion_takanawa_laz/cloud.js";
 
 			var raycaster = new THREE.Raycaster();
@@ -73,7 +79,12 @@
 
 			canvas.onclick = function(event)
 			{
-				console.log(raycaster.intersectObject(scene, true));
+				var intesects = raycaster.intersectObject(scene, true);
+				if(intesects.length > 0)
+				{
+					console.log(intesects[0]);
+					//points.estimateHeightAt(intesects[0].point);
+				}
 			}
 
 			Potree.loadPointCloud(url, name, function(e)
@@ -88,11 +99,7 @@
 				material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
 				material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE
 
-				var points = new Potree.Group();
-				points.setPointBudget(1e10)
-				points.name = name;
 				points.add(pointcloud);
-				scene.add(points);
 			});
 
 			function loop()

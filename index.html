@@ -62,6 +62,20 @@
 
 			var url = "data/lion_takanawa_laz/cloud.js";
 
+			var raycaster = new THREE.Raycaster();
+			var normalized = new THREE.Vector2();
+
+			canvas.onmousemove = function(event)
+			{
+				normalized.set((event.clientX / canvas.width) * 2 - 1, -(event.clientY / canvas.height) * 2 + 1);
+				raycaster.setFromCamera(normalized, camera);
+			}
+
+			canvas.onclick = function(event)
+			{
+				console.log(raycaster.intersectObject(scene, true));
+			}
+
 			Potree.loadPointCloud(url, name, function(e)
 			{
 				var pointcloud = e.pointcloud;

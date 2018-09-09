@@ -17,7 +17,6 @@
 		<script src="lib/laslaz.js"></script>
 		<script src="lib/BinaryHeap.js"></script>
 		<script src="lib/potree/potree.clean.js"></script>
-		<script src="source/Points.js"></script>
 		<script src="source/Potree.js"></script>
 		<script src="source/PotreeBasicGroup.js"></script>
 		<script src="source/PotreeGroup.js"></script>
@@ -51,7 +50,7 @@
 				powerPreference: "high-performance"
 			});
 
-			var geometry = new THREE.BoxGeometry(5, 1, 5);
+			var geometry = new THREE.BoxBufferGeometry(5, 1, 5);
 			var material = new THREE.MeshBasicMaterial({color: 0x44AA44});
 			var cube = new THREE.Mesh(geometry, material);
 			scene.add(cube);
@@ -70,6 +69,7 @@
 			var url = "data/lion_takanawa_laz/cloud.js";
 
 			var raycaster = new THREE.Raycaster();
+			raycaster.params.Points.threshold = 1e-2;
 			var normalized = new THREE.Vector2();
 
 			canvas.onmousemove = function(event)
@@ -86,7 +86,11 @@
 				
 				if(intesects.length > 0)
 				{
-					console.log(points.estimateHeightAt(intesects[0].point));
+					var geometry = new THREE.SphereBufferGeometry(0.1, 32, 32);
+					var material = new THREE.MeshBasicMaterial({color: 0xAA4444});
+					var sphere = new THREE.Mesh(geometry, material);
+					sphere.position.copy(intesects[0].point);
+					scene.add(sphere);
 				}
 			}
 

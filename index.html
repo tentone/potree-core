@@ -40,9 +40,9 @@
 
 			var renderer = new THREE.WebGLRenderer(
 			{
-				canvas:canvas,
-				alpha:true,
-				logarithmicDepthBuffer:false,
+				canvas: canvas,
+				alpha: true,
+				logarithmicDepthBuffer: false,
 				context: null,
 				precision: "highp",
 				premultipliedAlpha: true,
@@ -81,10 +81,12 @@
 			canvas.onclick = function(event)
 			{
 				var intesects = raycaster.intersectObject(scene, true);
+				
+				console.log(intesects);
+				
 				if(intesects.length > 0)
 				{
-					console.log(intesects);
-					//points.estimateHeightAt(intesects[0].point);
+					console.log(points.estimateHeightAt(intesects[0].point));
 				}
 			}
 

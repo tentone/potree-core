@@ -8,8 +8,6 @@ THREE.Points.prototype.raycast = function()
 
 	return function raycast(raycaster, intersects)
 	{
-		return;
-		
 		var object = this;
 		var geometry = this.geometry;
 		var matrixWorld = this.matrixWorld;
@@ -30,6 +28,7 @@ THREE.Points.prototype.raycast = function()
 			return;
 		}
 
+		//Apply inverse transform on ray to check it againt local positions
 		inverseMatrix.getInverse(matrixWorld);
 		ray.copy(raycaster.ray).applyMatrix4(inverseMatrix);
 

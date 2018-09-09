@@ -79,7 +79,6 @@ document.body.onresize = function()
 document.body.onresize();
 ```
 
-
 ### Reference
  - The project has no generated documentation but bellow are some of the main configuration elements
  - Potree.BasicGroup
@@ -141,13 +140,11 @@ document.body.onresize();
 
 ### Notes
  - EDL shading is not supported by potree core
-
-### Todo
- - Point cloud group raycast support
- - Support for logarithmic depth buffer
  
 ### Building
  - The output javascript is not a module of any kind
+ - Download and install java runtime.
+ - Download google clousure jar and place it on potree-core/closure.jar
  - The project can be build using
     - npm install
     - npm run build

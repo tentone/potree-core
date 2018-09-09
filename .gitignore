@@ -3,3 +3,4 @@ data/*
 package-lock.json
 
 !data/lion_takanawa_laz
+*.jar

@@ -28,10 +28,7 @@ Potree.BasicGroup = class extends THREE.Mesh
 	/**
 	 * Empty raycast method to avoid getting valid collision detection with the box geometry attached.
 	 */
-	raycast(raycaster, intersects)
-	{
-		return;
-	}
+	raycast(raycaster, intersects){}
 
 	/**
 	 * Changes the point budget to be used by potree.

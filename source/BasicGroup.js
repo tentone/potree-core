@@ -20,9 +20,9 @@ Potree.BasicGroup = class extends THREE.Mesh
 		this.frustumCulled = true;
 		this.pointclouds = [];
 
-		this.pointBudget = 1e4;
 		this.nodeSize = 30;
-		this.nodeLoadRate = 2;
+		this.pointBudget = 1e10; //TODO <NOT USED>
+		this.nodeLoadRate = 2; //TODO <NOT USED>
 	}
 
 	/**
@@ -53,9 +53,6 @@ Potree.BasicGroup = class extends THREE.Mesh
 			pointcloud.generateDEM = false;
 		}
 
-		Potree.pointBudget = this.pointBudget;
-		Potree.pointLoadLimit = this.pointBudget * this.nodeLoadRate;
-		
 		Potree.updatePointClouds(this.pointclouds, camera, renderer);
 	}
 

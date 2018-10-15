@@ -9,20 +9,18 @@
 		<script src="lib/threejs/OrbitControls.js"></script>
 
 		<!--Production-->
-		<script src="build/potree.min.js"></script>
+		<!--<script src="build/potree.min.js"></script>-->
 
 		<!--Development-->
-		<!--
 		<script src="lib/laslaz.js"></script>
 		<script src="lib/BinaryHeap.js"></script>
 		<script src="lib/potree/potree.clean.js"></script>
 		<script src="source/Potree.js"></script>
-		<script src="source/PotreeBasicGroup.js"></script>
-		<script src="source/PotreeGroup.js"></script>
-		<script src="source/PotreeXHRFactory.js"></script>
-		<script src="source/PotreeShaders.js"></script>
-		<script src="source/PotreePointCloudMaterial.js"></script>
-		-->
+		<script src="source/BasicGroup.js"></script>
+		<script src="source/Group.js"></script>
+		<script src="source/XHRFactory.js"></script>
+		<script src="source/Shaders.js"></script>
+		<script src="source/PointCloudMaterial.js"></script>
 
 		<script>
 			//three.js
@@ -50,23 +48,23 @@
 				powerPreference: "high-performance"
 			});
 
-			var geometry = new THREE.BoxBufferGeometry(5, 1, 5);
-			var material = new THREE.MeshBasicMaterial({color: 0x44AA44});
-			var cube = new THREE.Mesh(geometry, material);
-			scene.add(cube);
-
-			scene.add(new THREE.AmbientLight(0xffffff));
-
-			var controls = new THREE.OrbitControls(camera, canvas);
-			camera.position.z = 10;
-
+			/*
 			var points = new Potree.Group();
 			points.setPointBudget(1e10);
 			points.material.opacity = 1.0;
 			points.material.wireframe = true;
 			scene.add(points);
+			*/
 
-			var url = "data/lion_takanawa_laz/cloud.js";
+			var geometry = new THREE.BoxBufferGeometry(5, 1, 5);
+			var material = new THREE.MeshBasicMaterial({color: 0x44AA44});
+			var cube = new THREE.Mesh(geometry, material);
+			//scene.add(cube);
+
+			scene.add(new THREE.AmbientLight(0xffffff));
+
+			var controls = new THREE.OrbitControls(camera, canvas);
+			camera.position.z = 10;
 
 			var raycaster = new THREE.Raycaster();
 			raycaster.params.Points.threshold = 1e-2;
@@ -78,7 +76,7 @@
 				raycaster.setFromCamera(normalized, camera);
 			}
 
-			canvas.onclick = function(event)
+			canvas.ondblclick = function(event)
 			{
 				var intesects = raycaster.intersectObject(scene, true);
 				
@@ -94,11 +92,13 @@
 				}
 			}
 
+			/*
+			var url = "data/lion_takanawa_laz/cloud.js";
+
 			Potree.loadPointCloud(url, name, function(e)
 			{
 				var pointcloud = e.pointcloud;
 				pointcloud.position.set(-2, -3, 0.4);
-				pointcloud.scale.set(1, 1, 1);
 
 				var material = pointcloud.material;
 				material.size = 2;
@@ -108,6 +108,31 @@
 
 				points.add(pointcloud);
 			});
+			*/
+
+			for(var k = 0; k < 6; k++)
+			{
+				var url = "data/eqs_" + k + "/cloud.js";
+
+				Potree.loadPointCloud(url, "eqs_" + k, function(e)
+				{
+					var points = new Potree.Group();
+					points.setPointBudget(1e10);
+					points.material.opacity = 1.0;
+					points.material.wireframe = true;
+					scene.add(points);
+
+					var pointcloud = e.pointcloud;
+					
+					var material = pointcloud.material;
+					material.size = 2;
+					material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
+					material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
+					material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE
+					points.add(pointcloud);
+				});
+			}
+
 
 			function loop()
 			{

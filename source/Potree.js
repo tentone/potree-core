@@ -4,7 +4,7 @@ function Potree(){}
 
 Potree.framenumber = 0;
 Potree.numNodesLoading = 0;
-Potree.maxNodesLoading = 8;
+Potree.maxNodesLoading = 100;
 Potree.debug = {};
 Potree.scriptPath = null;
 Potree.resourcePath = null;
@@ -351,7 +351,7 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 	}
 
 	//Update DEM
-	var candidates = pointclouds.filter(p => (p.generateDEM && p.dem instanceof Potree.DEM));
+	var candidates = pointclouds.filter(p => (p.generateDEM && p.dem instanceof PotreeDEM));
 	for(var pointcloud of candidates)
 	{
 		var updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= Potree.maxDEMLevel);

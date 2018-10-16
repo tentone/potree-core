@@ -28,7 +28,7 @@ Potree.PointCloudTree = class PointCloudTree extends THREE.Object3D
 	{
 		super();
 
-		this.dem = new Potree.DEM(this);
+		this.dem = new PotreeDEM(this);
 	}
 
 	initialized()

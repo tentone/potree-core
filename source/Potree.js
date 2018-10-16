@@ -1,6 +1,20 @@
 "use strict";
 
+function Potree(){}
+
+Potree.framenumber = 0;
+Potree.numNodesLoading = 0;
+Potree.maxNodesLoading = 8;
+Potree.debug = {};
+Potree.scriptPath = null;
+Potree.resourcePath = null;
+Potree.pointLoadLimit = Infinity;
+Potree.measureTimings = false;
+Potree.tempVector3 = new THREE.Vector3();
 Potree.maxNodesLoadGPUFrame = 10;
+Potree.maxDEMLevel = 4;
+Potree.workerPool = new WorkerPool();
+Potree.lru = new LRU();
 
 Potree.loadPointCloud = function(path, name, callback)
 {
@@ -219,6 +233,7 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 
 		numVisibleNodes++;
 		numVisiblePoints += node.getNumPoints();
+
 		var numVisiblePointsInPointcloud = numVisiblePointsInPointclouds.get(pointcloud);
 		numVisiblePointsInPointclouds.set(pointcloud, numVisiblePointsInPointcloud + node.getNumPoints());
 
@@ -241,7 +256,8 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 
 		if(node.isTreeNode())
 		{
-			Potree.getLRU().touch(node.geometryNode);
+			Potree.lru.touch(node.geometryNode);
+
 			node.sceneNode.visible = true;
 			node.sceneNode.material = pointcloud.material;
 
@@ -287,18 +303,12 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 			var child = children[i];
 			var weight = 0;
 
+			//Perspective camera
 			if(camera.isPerspectiveCamera)
 			{
 				var sphere = child.getBoundingSphere(new THREE.Sphere());
 				var center = sphere.center;
-				//var distance = sphere.center.distanceTo(camObjPos);
-
-				var dx = camObjPos.x - center.x;
-				var dy = camObjPos.y - center.y;
-				var dz = camObjPos.z - center.z;
-
-				var dd = dx * dx + dy * dy + dz * dz;
-				var distance = Math.sqrt(dd);
+				var distance = sphere.center.distanceTo(camObjPos);
 
 				var radius = sphere.radius;
 				var fov = (camera.fov * Math.PI) / 180;
@@ -306,10 +316,11 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 				var projFactor = (0.5 * domHeight) / (slope * distance);
 				var screenPixelRadius = radius * projFactor;
 
-				if(screenPixelRadius < pointcloud.minimumNodePixelSize)
+				//If pixel radius bellow minimum discard
+				/*if(screenPixelRadius < pointcloud.minimumNodePixelSize)
 				{
 					continue;
-				}
+				}*/
 
 				weight = screenPixelRadius;
 
@@ -319,9 +330,10 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 					weight = Number.MAX_VALUE;
 				}
 			}
+			//Orthographic camera
 			else
 			{
-				//TODO <ORTHO VISIBILITY>
+				//TODO <IMPROVE VISIBILITY>
 				var bb = child.getBoundingBox();
 				var distance = child.getBoundingSphere(new THREE.Sphere()).center.distanceTo(camObjPos);
 				var diagonal = bb.max.clone().sub(bb.min).length();
@@ -339,11 +351,10 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 	}
 
 	//Update DEM
-	var maxDEMLevel = 4;
 	var candidates = pointclouds.filter(p => (p.generateDEM && p.dem instanceof Potree.DEM));
 	for(var pointcloud of candidates)
 	{
-		var updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= maxDEMLevel);
+		var updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= Potree.maxDEMLevel);
 		pointcloud.dem.update(updatingNodes);
 	}
 	
@@ -361,11 +372,6 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 
 Potree.updatePointClouds = function(pointclouds, camera, renderer)
 {
-	if(!Potree.lru)
-	{
-		Potree.lru = new LRU();
-	}
-
 	/*
 	for(var pointcloud of pointclouds)
 	{
@@ -385,7 +391,7 @@ Potree.updatePointClouds = function(pointclouds, camera, renderer)
 		var duration = performance.now() - start;
 	}
 	*/
-	
+
 	var result = Potree.updateVisibility(pointclouds, camera, renderer);
 
 	for(var i = 0; i < pointclouds.length; i++)
@@ -394,7 +400,7 @@ Potree.updatePointClouds = function(pointclouds, camera, renderer)
 		pointclouds[i].updateVisibleBounds();
 	}
 
-	Potree.getLRU().freeMemory();
+	Potree.lru.freeMemory();
 
 	return result;
 };

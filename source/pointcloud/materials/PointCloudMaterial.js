@@ -380,8 +380,8 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this.vertexColors = THREE.VertexColors;
 
 		var defines = this.getDefines();
-		this.vertexShader = defines + Potree.Shaders["pointcloud.vs"];
-		this.fragmentShader = defines + Potree.Shaders["pointcloud.fs"];
+		this.vertexShader = defines + PotreeShaders["pointcloud.vs"];
+		this.fragmentShader = defines + PotreeShaders["pointcloud.fs"];
 	}
 
 	setDefine(key, value)
@@ -408,8 +408,8 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 	updateShaderSource()
 	{
 		var defines = this.getDefines();
-		this.vertexShader = defines + Potree.Shaders["pointcloud.vs"];
-		this.fragmentShader = defines + Potree.Shaders["pointcloud.fs"];
+		this.vertexShader = defines + PotreeShaders["pointcloud.vs"];
+		this.fragmentShader = defines + PotreeShaders["pointcloud.fs"];
 		this.depthFunc = THREE.LessEqualDepth;
 		this.depthTest = true;
 		this.depthWrite = true;

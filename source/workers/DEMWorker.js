@@ -1,5 +1,4 @@
-/* global onmessage:true postMessage:false */
-/* exported onmessage */
+
 onmessage = function (event) {
 	let boundingBox = event.data.boundingBox;
 	let position = new Float32Array(event.data.position);

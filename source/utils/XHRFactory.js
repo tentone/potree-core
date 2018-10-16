@@ -1,6 +1,6 @@
 "use strict";
 
-Potree.XHRFactory = 
+var XHRFactory = 
 {
 	config:
 	{
@@ -16,13 +16,13 @@ Potree.XHRFactory =
 
 	createXMLHttpRequest: function()
 	{
-		let xhr = new XMLHttpRequest();
+		var xhr = new XMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 
 		if(this.config.customHeaders && Array.isArray(this.config.customHeaders) && this.config.customHeaders.length > 0)
 		{
-			let baseOpen = xhr.open;
-			let customHeaders = this.config.customHeaders;
+			var baseOpen = xhr.open;
+			var customHeaders = this.config.customHeaders;
 			xhr.open = function()
 			{
 				baseOpen.apply(this, [].slice.call(arguments));

@@ -1,8 +1,8 @@
 "use strict";
 
-Potree.Shaders = {};
+function PotreeShaders(){}
 
-Potree.Shaders["pointcloud.vs"] = `
+PotreeShaders["pointcloud.vs"] = `
 precision highp float;
 precision highp int;
 
@@ -797,7 +797,7 @@ void main()
 	#endif
 }`;
 
-Potree.Shaders["pointcloud.fs"] = `
+PotreeShaders["pointcloud.fs"] = `
 
 #if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
 	#extension GL_EXT_frag_depth : enable

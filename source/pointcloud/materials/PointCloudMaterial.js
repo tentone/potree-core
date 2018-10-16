@@ -6,7 +6,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 	{
 		super();
 		
-		this.visibleNodesTexture = Potree.utils.generateDataTexture(2048, 1, new THREE.Color(0xffffff));
+		this.visibleNodesTexture = HelperUtils.generateDataTexture(2048, 1, new THREE.Color(0xffffff));
 		this.visibleNodesTexture.minFilter = THREE.NearestFilter;
 		this.visibleNodesTexture.magFilter = THREE.NearestFilter;
 

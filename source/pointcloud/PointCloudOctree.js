@@ -144,7 +144,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 				.find(v => v !== undefined);
 
 			this.updateMatrixWorld(true);
-			box = Potree.utils.computeTransformedBoundingBox(box, this.matrixWorld);
+			box = HelperUtils.computeTransformedBoundingBox(box, this.matrixWorld);
 
 			let bMin = box.min.z;
 			let bMax = box.max.z;
@@ -559,7 +559,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		this.updateMatrixWorld(true);
 		let box = this.boundingBox;
 		let transform = this.matrixWorld;
-		let tBox = Potree.utils.computeTransformedBoundingBox(box, transform);
+		let tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
 		this.position.set(0, 0, 0).sub(tBox.getCenter());
 	};
 
@@ -568,7 +568,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		this.updateMatrixWorld(true);
 		let box = this.boundingBox;
 		let transform = this.matrixWorld;
-		let tBox = Potree.utils.computeTransformedBoundingBox(box, transform);
+		let tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
 		this.position.y += -tBox.min.y;
 	};
 
@@ -577,7 +577,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		this.updateMatrixWorld(true);
 		let box = this.boundingBox;
 		let transform = this.matrixWorld;
-		let tBox = Potree.utils.computeTransformedBoundingBox(box, transform);
+		let tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
 
 		return tBox;
 	};

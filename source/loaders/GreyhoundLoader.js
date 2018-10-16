@@ -49,7 +49,7 @@ Potree.GreyhoundLoader.load = function load(url, callback)
 			}
 			*/
 			let greyhoundInfo = JSON.parse(data);
-			let version = new Potree.Version("1.4");
+			let version = new VersionUtils("1.4");
 
 			let bounds = greyhoundInfo.bounds;
 			// TODO Unused: let boundsConforming = greyhoundInfo.boundsConforming;

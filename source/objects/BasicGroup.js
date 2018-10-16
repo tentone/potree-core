@@ -126,7 +126,7 @@ Potree.BasicGroup = class extends THREE.Mesh
 			var pointcloud = this.pointclouds[i];
 			pointcloud.updateMatrixWorld(true);
 			var pointcloudBox = pointcloud.pcoGeometry.tightBoundingBox ? pointcloud.pcoGeometry.tightBoundingBox : pointcloud.boundingBox;
-			var boxWorld = Potree.utils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
+			var boxWorld = HelperUtils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
 			box.union(boxWorld);
 		}
 

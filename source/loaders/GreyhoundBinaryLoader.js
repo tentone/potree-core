@@ -7,7 +7,7 @@ Potree.GreyhoundBinaryLoader = class
 	{
 		if(typeof(version) === "string")
 		{
-			this.version = new Potree.Version(version);
+			this.version = new VersionUtils(version);
 		}
 		else
 		{

@@ -6,7 +6,7 @@ Potree.BinaryLoader = class BinaryLoader
 	{
 		if(typeof(version) === "string")
 		{
-			this.version = new Potree.Version(version);
+			this.version = new VersionUtils(version);
 		}
 		else
 		{

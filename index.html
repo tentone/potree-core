@@ -17,6 +17,8 @@
 		<script src="source/utils/WorkerPool.js"></script>
 		<script src="source/utils/LRU.js"></script>
 		<script src="source/utils/XHRFactory.js"></script>
+		<script src="source/utils/Enum.js"></script>
+		
 		<script src="source/Potree.js"></script>
 		<script src="source/Core.js"></script>
 		<script src="source/pointcloud/DEM.js"></script>
@@ -25,8 +27,13 @@
 		<script src="source/pointcloud/PointCloudArena4D.js"></script>
 		<script src="source/pointcloud/PointCloudOctree.js"></script>
 		<script src="source/pointcloud/geometries/PointCloudOctreeGeometry.js"></script>
+		<script src="source/pointcloud/geometries/PointCloudArena4DGeometry.js"></script>
+		<script src="source/pointcloud/geometries/PointCloudGreyhoundGeometry.js"></script>
 		<script src="source/pointcloud/materials/PointCloudMaterial.js"></script>
 		<script src="source/loaders/BinaryLoader.js"></script>
+		<script src="source/loaders/GreyhoundLoader.js"></script>
+		<script src="source/loaders/GreyhoundBinaryLoader.js"></script>
+		
 		<script src="source/objects/BasicGroup.js"></script>
 		<script src="source/objects/Group.js"></script>
 		<script src="source/Shaders.js"></script>
@@ -138,10 +145,10 @@
 						scene.add(points);
 						
 						var material = pointcloud.material;
-						material.size = 4;
-						material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
-						material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
-						material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE
+						//material.size = 4;
+						//material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
+						//material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
+						//material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE
 						points.add(pointcloud);
 					});
 				}

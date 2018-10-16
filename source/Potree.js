@@ -4,7 +4,7 @@ function Potree(){}
 
 Potree.framenumber = 0;
 Potree.numNodesLoading = 0;
-Potree.maxNodesLoading = 100;
+Potree.maxNodesLoading = 8;
 Potree.debug = {};
 Potree.scriptPath = null;
 Potree.resourcePath = null;
@@ -317,10 +317,10 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 				var screenPixelRadius = radius * projFactor;
 
 				//If pixel radius bellow minimum discard
-				/*if(screenPixelRadius < pointcloud.minimumNodePixelSize)
+				if(screenPixelRadius < pointcloud.minimumNodePixelSize)
 				{
 					continue;
-				}*/
+				}
 
 				weight = screenPixelRadius;
 

@@ -47,10 +47,7 @@ Potree.BasicGroup = class extends THREE.Mesh
 	{
 		for(var i = 0; i < this.pointclouds.length; i++)
 		{
-			var pointcloud = this.pointclouds[i];
-			pointcloud.minimumNodePixelSize = this.nodeSize;
-			pointcloud.showBoundingBox = false;
-			pointcloud.generateDEM = false;
+			this.pointclouds[i].minimumNodePixelSize = this.nodeSize;
 		}
 
 		Potree.updatePointClouds(this.pointclouds, camera, renderer);
@@ -88,6 +85,8 @@ Potree.BasicGroup = class extends THREE.Mesh
 
 		if(object instanceof Potree.PointCloudTree)
 		{
+			object.showBoundingBox = false;
+			object.generateDEM = false;
 			this.pointclouds.push(object);
 			this.recalculateBoxGeometry();
 		}

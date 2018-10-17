@@ -73,8 +73,11 @@ Potree.Group = class extends Potree.BasicGroup
 			var normalized = bufferAttribute.normalized;
 			var type = this.types.get(bufferAttribute.array.constructor);
 
-			gl.vertexAttribPointer(attributeLocation, bufferAttribute.itemSize, type, normalized, 0, 0);
-			gl.enableVertexAttribArray(attributeLocation);
+			if(type !== undefined)
+			{
+				gl.vertexAttribPointer(attributeLocation, bufferAttribute.itemSize, type, normalized, 0, 0);
+				gl.enableVertexAttribArray(attributeLocation);
+			}
 
 			webglBuffer.vbos.set(attributeName,
 			{

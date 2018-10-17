@@ -31,16 +31,16 @@ Potree.LasLazLoader = class LasLazLoader
 			return;
 		}
 
-		let pointAttributes = node.pcoGeometry.pointAttributes;
+		var pointAttributes = node.pcoGeometry.pointAttributes;
 
-		let url = node.getURL();
+		var url = node.getURL();
 
 		if(this.version.equalOrHigher("1.4"))
 		{
 			url += "." + pointAttributes.toLowerCase();
 		}
 
-		let xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
@@ -50,7 +50,7 @@ Potree.LasLazLoader = class LasLazLoader
 			{
 				if(xhr.status === 200)
 				{
-					let buffer = xhr.response;
+					var buffer = xhr.response;
 					this.parse(node, buffer);
 				}
 				else
@@ -65,8 +65,8 @@ Potree.LasLazLoader = class LasLazLoader
 
 	parse(node, buffer)
 	{
-		let lf = new LASFile(buffer);
-		let handler = new Potree.LasLazBatcher(node);
+		var lf = new LASFile(buffer);
+		var handler = new Potree.LasLazBatcher(node);
 
 		//
 		// DEBUG
@@ -86,8 +86,8 @@ Potree.LasLazLoader = class LasLazLoader
 		//		return [lf, h];
 		//	});
 		//}).then( v => {
-		//	let lf = v[0];
-		//	let header = v[1];
+		//	var lf = v[0];
+		//	var header = v[1];
 
 		//	lf.readData(1000000, 0, 1)
 		//	.then( v => {
@@ -116,15 +116,15 @@ Potree.LasLazLoader = class LasLazLoader
 				});
 			}).then(v =>
 			{
-				let lf = v[0];
-				let header = v[1];
+				var lf = v[0];
+				var header = v[1];
 
-				let skip = 1;
-				let totalRead = 0;
-				let totalToRead = (skip <= 1 ? header.pointsCount : header.pointsCount / skip);
-				let reader = function()
+				var skip = 1;
+				var totalRead = 0;
+				var totalToRead = (skip <= 1 ? header.pointsCount : header.pointsCount / skip);
+				var reader = function()
 				{
-					let p = lf.readData(1000000, 0, skip);
+					var p = lf.readData(1000000, 0, skip);
 					return p.then(function(data)
 					{
 						handler.push(new LASDecoder(data.buffer,
@@ -155,7 +155,7 @@ Potree.LasLazLoader = class LasLazLoader
 				return reader();
 			}).then(v =>
 			{
-				let lf = v[0];
+				var lf = v[0];
 				// we"re done loading this file
 				//
 				Potree.LasLazLoader.progressCB(1);
@@ -198,23 +198,23 @@ Potree.LasLazBatcher = class LasLazBatcher
 
 	push(lasBuffer)
 	{
-		let workerPath = Potree.scriptPath + "/workers/LASDecoderWorker.js";
-		let worker = Potree.workerPool.getWorker(workerPath);
-		let node = this.node;
+		var workerPath = Potree.scriptPath + "/workers/LASDecoderWorker.js";
+		var worker = Potree.workerPool.getWorker(workerPath);
+		var node = this.node;
 
 		worker.onmessage = (e) =>
 		{
-			let geometry = new THREE.BufferGeometry();
-			let numPoints = lasBuffer.pointsCount;
+			var geometry = new THREE.BufferGeometry();
+			var numPoints = lasBuffer.pointsCount;
 
-			let positions = new Float32Array(e.data.position);
-			let colors = new Uint8Array(e.data.color);
-			let intensities = new Float32Array(e.data.intensity);
-			let classifications = new Uint8Array(e.data.classification);
-			let returnNumbers = new Uint8Array(e.data.returnNumber);
-			let numberOfReturns = new Uint8Array(e.data.numberOfReturns);
-			let pointSourceIDs = new Uint16Array(e.data.pointSourceID);
-			let indices = new Uint8Array(e.data.indices);
+			var positions = new Float32Array(e.data.position);
+			var colors = new Uint8Array(e.data.color);
+			var intensities = new Float32Array(e.data.intensity);
+			var classifications = new Uint8Array(e.data.classification);
+			var returnNumbers = new Uint8Array(e.data.returnNumber);
+			var numberOfReturns = new Uint8Array(e.data.numberOfReturns);
+			var pointSourceIDs = new Uint16Array(e.data.pointSourceID);
+			var indices = new Uint8Array(e.data.indices);
 
 			geometry.addAttribute("position", new THREE.BufferAttribute(positions, 3));
 			geometry.addAttribute("color", new THREE.BufferAttribute(colors, 4, true));
@@ -227,7 +227,7 @@ Potree.LasLazBatcher = class LasLazBatcher
 			geometry.addAttribute("indices", new THREE.BufferAttribute(indices, 4));
 			geometry.attributes.indices.normalized = true;
 
-			let tightBoundingBox = new THREE.Box3(
+			var tightBoundingBox = new THREE.Box3(
 				new THREE.Vector3().fromArray(e.data.tightBoundingBox.min),
 				new THREE.Vector3().fromArray(e.data.tightBoundingBox.max)
 			);
@@ -247,7 +247,7 @@ Potree.LasLazBatcher = class LasLazBatcher
 			Potree.workerPool.returnWorker(workerPath, worker);
 		};
 
-		let message = {
+		var message = {
 			buffer: lasBuffer.arrayb,
 			numPoints: lasBuffer.pointsCount,
 			pointSize: lasBuffer.pointSize,

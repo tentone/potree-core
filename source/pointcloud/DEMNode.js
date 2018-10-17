@@ -23,23 +23,23 @@ class PotreeDEMNode
 	{
 		this.mipMap = [this.data];
 
-		let sourceSize = this.tileSize;
-		let mipSize = parseInt(sourceSize / 2);
-		let mipSource = this.data;
+		var sourceSize = this.tileSize;
+		var mipSize = parseInt(sourceSize / 2);
+		var mipSource = this.data;
 		while(mipSize > 1)
 		{
-			let mipData = new Float32Array(mipSize * mipSize);
+			var mipData = new Float32Array(mipSize * mipSize);
 
-			for(let i = 0; i < mipSize; i++)
+			for(var i = 0; i < mipSize; i++)
 			{
-				for(let j = 0; j < mipSize; j++)
+				for(var j = 0; j < mipSize; j++)
 				{
-					let h00 = mipSource[2 * i + 0 + 2 * j * sourceSize];
-					let h01 = mipSource[2 * i + 0 + 2 * j * sourceSize + sourceSize];
-					let h10 = mipSource[2 * i + 1 + 2 * j * sourceSize];
-					let h11 = mipSource[2 * i + 1 + 2 * j * sourceSize + sourceSize];
+					var h00 = mipSource[2 * i + 0 + 2 * j * sourceSize];
+					var h01 = mipSource[2 * i + 0 + 2 * j * sourceSize + sourceSize];
+					var h10 = mipSource[2 * i + 1 + 2 * j * sourceSize];
+					var h11 = mipSource[2 * i + 1 + 2 * j * sourceSize + sourceSize];
 
-					let [height, weight] = [0, 0];
+					var [height, weight] = [0, 0];
 
 					if(isFinite(h00))
 					{
@@ -64,8 +64,8 @@ class PotreeDEMNode
 
 					height = height / weight;
 
-					// let hs = [h00, h01, h10, h11].filter(h => isFinite(h));
-					// let height = hs.reduce( (a, v, i) => a + v, 0) / hs.length;
+					// var hs = [h00, h01, h10, h11].filter(h => isFinite(h));
+					// var height = hs.reduce( (a, v, i) => a + v, 0) / hs.length;
 
 					mipData[i + j * mipSize] = height;
 				}
@@ -83,41 +83,41 @@ class PotreeDEMNode
 
 	uv(position)
 	{
-		let boxSize = this.box.getSize(new THREE.Vector3());
+		var boxSize = this.box.getSize(new THREE.Vector3());
 
-		let u = (position.x - this.box.min.x) / boxSize.x;
-		let v = (position.y - this.box.min.y) / boxSize.y;
+		var u = (position.x - this.box.min.x) / boxSize.x;
+		var v = (position.y - this.box.min.y) / boxSize.y;
 
 		return [u, v];
 	}
 
 	heightAtMipMapLevel(position, mipMapLevel)
 	{
-		let uv = this.uv(position);
+		var uv = this.uv(position);
 
-		let tileSize = parseInt(this.tileSize / parseInt(2 ** mipMapLevel));
-		let data = this.mipMap[mipMapLevel];
+		var tileSize = parseInt(this.tileSize / parseInt(2 ** mipMapLevel));
+		var data = this.mipMap[mipMapLevel];
 
-		let i = Math.min(uv[0] * tileSize, tileSize - 1);
-		let j = Math.min(uv[1] * tileSize, tileSize - 1);
+		var i = Math.min(uv[0] * tileSize, tileSize - 1);
+		var j = Math.min(uv[1] * tileSize, tileSize - 1);
 
-		let a = i % 1;
-		let b = j % 1;
+		var a = i % 1;
+		var b = j % 1;
 
-		let [i0, i1] = [Math.floor(i), Math.ceil(i)];
-		let [j0, j1] = [Math.floor(j), Math.ceil(j)];
+		var [i0, i1] = [Math.floor(i), Math.ceil(i)];
+		var [j0, j1] = [Math.floor(j), Math.ceil(j)];
 
-		let h00 = data[i0 + tileSize * j0];
-		let h01 = data[i0 + tileSize * j1];
-		let h10 = data[i1 + tileSize * j0];
-		let h11 = data[i1 + tileSize * j1];
+		var h00 = data[i0 + tileSize * j0];
+		var h01 = data[i0 + tileSize * j1];
+		var h10 = data[i1 + tileSize * j0];
+		var h11 = data[i1 + tileSize * j1];
 
-		let wh00 = isFinite(h00) ? (1 - a) * (1 - b) : 0;
-		let wh01 = isFinite(h01) ? (1 - a) * b : 0;
-		let wh10 = isFinite(h10) ? a * (1 - b) : 0;
-		let wh11 = isFinite(h11) ? a * b : 0;
+		var wh00 = isFinite(h00) ? (1 - a) * (1 - b) : 0;
+		var wh01 = isFinite(h01) ? (1 - a) * b : 0;
+		var wh10 = isFinite(h10) ? a * (1 - b) : 0;
+		var wh11 = isFinite(h11) ? a * b : 0;
 
-		let wsum = wh00 + wh01 + wh10 + wh11;
+		var wsum = wh00 + wh01 + wh10 + wh11;
 		wh00 = wh00 / wsum;
 		wh01 = wh01 / wsum;
 		wh10 = wh10 / wsum;
@@ -128,7 +128,7 @@ class PotreeDEMNode
 			return null;
 		}
 
-		let h = 0;
+		var h = 0;
 
 		if(isFinite(h00)) h += h00 * wh00;
 		if(isFinite(h01)) h += h01 * wh01;
@@ -140,9 +140,9 @@ class PotreeDEMNode
 
 	height(position)
 	{
-		let h = null;
+		var h = null;
 
-		for(let i = 0; i < this.mipMap.length; i++)
+		for(var i = 0; i < this.mipMap.length; i++)
 		{
 			h = this.heightAtMipMapLevel(position, i);
 
@@ -159,7 +159,7 @@ class PotreeDEMNode
 	{
 		handler(this, level);
 
-		for(let child of this.children.filter(c => c !== undefined))
+		for(var child of this.children.filter(c => c !== undefined))
 		{
 			child.traverse(handler, level + 1);
 		}

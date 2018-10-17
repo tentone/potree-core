@@ -22,10 +22,10 @@ Potree.GreyhoundBinaryLoader = class
 	{
 		if(node.loaded) return;
 
-		let scope = this;
-		let url = node.getURL();
+		var scope = this;
+		var url = node.getURL();
 
-		let xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
@@ -36,7 +36,7 @@ Potree.GreyhoundBinaryLoader = class
 			{
 				if(xhr.status === 200 || xhr.status === 0)
 				{
-					let buffer = xhr.response;
+					var buffer = xhr.response;
 					scope.parse(node, buffer);
 				}
 				else
@@ -60,35 +60,35 @@ Potree.GreyhoundBinaryLoader = class
 
 	parse(node, buffer)
 	{
-		let NUM_POINTS_BYTES = 4;
+		var NUM_POINTS_BYTES = 4;
 
-		let view = new DataView(
+		var view = new DataView(
 			buffer, buffer.byteLength - NUM_POINTS_BYTES, NUM_POINTS_BYTES);
-		let numPoints = view.getUint32(0, true);
-		let pointAttributes = node.pcoGeometry.pointAttributes;
+		var numPoints = view.getUint32(0, true);
+		var pointAttributes = node.pcoGeometry.pointAttributes;
 
 		node.numPoints = numPoints;
 
-		let workerPath = Potree.scriptPath + "/workers/GreyhoundBinaryDecoderWorker.js";
-		let worker = Potree.workerPool.getWorker(workerPath);
+		var workerPath = Potree.scriptPath + "/workers/GreyhoundBinaryDecoderWorker.js";
+		var worker = Potree.workerPool.getWorker(workerPath);
 
 		worker.onmessage = function(e)
 		{
 
-			let data = e.data;
-			let buffers = data.attributeBuffers;
-			let tightBoundingBox = new THREE.Box3(
+			var data = e.data;
+			var buffers = data.attributeBuffers;
+			var tightBoundingBox = new THREE.Box3(
 				new THREE.Vector3().fromArray(data.tightBoundingBox.min),
 				new THREE.Vector3().fromArray(data.tightBoundingBox.max)
 			);
 
 			Potree.workerPool.returnWorker(workerPath, worker);
 
-			let geometry = new THREE.BufferGeometry();
+			var geometry = new THREE.BufferGeometry();
 
-			for(let property in buffers)
+			for(var property in buffers)
 			{
-				let buffer = buffers[property].buffer;
+				var buffer = buffers[property].buffer;
 
 				if(parseInt(property) === Potree.PointAttributeNames.POSITION_CARTESIAN)
 				{
@@ -120,13 +120,13 @@ Potree.GreyhoundBinaryLoader = class
 				}
 				else if(parseInt(property) === Potree.PointAttributeNames.INDICES)
 				{
-					let bufferAttribute = new THREE.BufferAttribute(new Uint8Array(buffer), 4);
+					var bufferAttribute = new THREE.BufferAttribute(new Uint8Array(buffer), 4);
 					bufferAttribute.normalized = true;
 					geometry.addAttribute("indices", bufferAttribute);
 				}
 				else if(parseInt(property) === Potree.PointAttributeNames.SPACING)
 				{
-					let bufferAttribute = new THREE.BufferAttribute(new Float32Array(buffer), 1);
+					var bufferAttribute = new THREE.BufferAttribute(new Float32Array(buffer), 1);
 					geometry.addAttribute("spacing", bufferAttribute);
 				}
 			}
@@ -143,10 +143,10 @@ Potree.GreyhoundBinaryLoader = class
 			Potree.numNodesLoading--;
 		};
 
-		let bb = node.boundingBox;
-		let nodeOffset = node.pcoGeometry.boundingBox.getCenter().sub(node.boundingBox.min);
+		var bb = node.boundingBox;
+		var nodeOffset = node.pcoGeometry.boundingBox.getCenter().sub(node.boundingBox.min);
 
-		let message = {
+		var message = {
 			buffer: buffer,
 			pointAttributes: pointAttributes,
 			version: this.version.version,

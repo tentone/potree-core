@@ -21,20 +21,20 @@ class PotreeDEM
 			return [this.root];
 		}
 
-		let result = [];
-		let stack = [this.root];
+		var result = [];
+		var stack = [this.root];
 
 		while(stack.length > 0)
 		{
-			let node = stack.pop();
-			let nodeBoxSize = node.box.getSize(new THREE.Vector3());
+			var node = stack.pop();
+			var nodeBoxSize = node.box.getSize(new THREE.Vector3());
 
 			// check which children intersect by transforming min/max to quadrants
-			let min = {
+			var min = {
 				x: (box.min.x - node.box.min.x) / nodeBoxSize.x,
 				y: (box.min.y - node.box.min.y) / nodeBoxSize.y
 			};
-			let max = {
+			var max = {
 				x: (box.max.x - node.box.max.x) / nodeBoxSize.x,
 				y: (box.max.y - node.box.max.y) / nodeBoxSize.y
 			};
@@ -44,7 +44,7 @@ class PotreeDEM
 			max.x = max.x < 0.5 ? 0 : 1;
 			max.y = max.y < 0.5 ? 0 : 1;
 
-			let childIndices;
+			var childIndices;
 			if(min.x === 0 && min.y === 0 && max.x === 1 && max.y === 1)
 			{
 				childIndices = [0, 1, 2, 3];
@@ -58,11 +58,11 @@ class PotreeDEM
 				childIndices = [(min.x << 1) | min.y, (max.x << 1) | max.y];
 			}
 
-			for(let index of childIndices)
+			for(var index of childIndices)
 			{
 				if(node.children[index] === undefined)
 				{
-					let childBox = node.box.clone();
+					var childBox = node.box.clone();
 
 					if((index & 2) > 0)
 					{
@@ -82,11 +82,11 @@ class PotreeDEM
 						childBox.max.y -= nodeBoxSize.y / 2.0;
 					}
 
-					let child = new PotreeDEMNode(node.name + index, childBox, this.tileSize);
+					var child = new PotreeDEMNode(node.name + index, childBox, this.tileSize);
 					node.children[index] = child;
 				}
 
-				let child = node.children[index];
+				var child = node.children[index];
 
 				if(child.level < level)
 				{
@@ -104,9 +104,9 @@ class PotreeDEM
 
 	childIndex(uv)
 	{
-		let [x, y] = uv.map(n => n < 0.5 ? 0 : 1);
+		var [x, y] = uv.map(n => n < 0.5 ? 0 : 1);
 
-		let index = (x << 1) | y;
+		var index = (x << 1) | y;
 
 		return index;
 	}
@@ -120,21 +120,21 @@ class PotreeDEM
 			return 0;
 		}
 
-		let height = null;
-		let list = [this.root];
+		var height = null;
+		var list = [this.root];
 		while(true)
 		{
-			let node = list[list.length - 1];
+			var node = list[list.length - 1];
 
-			let currentHeight = node.height(position);
+			var currentHeight = node.height(position);
 
 			if(currentHeight !== null)
 			{
 				height = currentHeight;
 			}
 
-			let uv = node.uv(position);
-			let childIndex = this.childIndex(uv);
+			var uv = node.uv(position);
+			var childIndex = this.childIndex(uv);
 
 			if(node.children[childIndex])
 			{
@@ -166,8 +166,8 @@ class PotreeDEM
 		}
 
 		// find node to update
-		let node = null;
-		for(let vn of visibleNodes)
+		var node = null;
+		for(var vn of visibleNodes)
 		{
 			if(vn.demVersion === undefined || vn.demVersion < this.version)
 			{
@@ -181,32 +181,32 @@ class PotreeDEM
 		}
 
 		// update node
-		let projectedBox = node.getBoundingBox().clone().applyMatrix4(this.matrix);
-		let projectedBoxSize = projectedBox.getSize(new THREE.Vector3());
+		var projectedBox = node.getBoundingBox().clone().applyMatrix4(this.matrix);
+		var projectedBoxSize = projectedBox.getSize(new THREE.Vector3());
 
-		let targetNodes = this.expandAndFindByBox(projectedBox, node.getLevel());
+		var targetNodes = this.expandAndFindByBox(projectedBox, node.getLevel());
 		node.demVersion = this.version;
 
 		Potree.getDEMWorkerInstance().onmessage = (e) =>
 		{
-			let data = new Float32Array(e.data.dem.data);
+			var data = new Float32Array(e.data.dem.data);
 
-			for(let demNode of targetNodes)
+			for(var demNode of targetNodes)
 			{
-				let boxSize = demNode.box.getSize(new THREE.Vector3());
+				var boxSize = demNode.box.getSize(new THREE.Vector3());
 
-				for(let i = 0; i < this.tileSize; i++)
+				for(var i = 0; i < this.tileSize; i++)
 				{
-					for(let j = 0; j < this.tileSize; j++)
+					for(var j = 0; j < this.tileSize; j++)
 					{
-						let u = (i / (this.tileSize - 1));
-						let v = (j / (this.tileSize - 1));
+						var u = (i / (this.tileSize - 1));
+						var v = (j / (this.tileSize - 1));
 
-						let x = demNode.box.min.x + u * boxSize.x;
-						let y = demNode.box.min.y + v * boxSize.y;
+						var x = demNode.box.min.x + u * boxSize.x;
+						var y = demNode.box.min.y + v * boxSize.y;
 
-						let ix = this.tileSize * (x - projectedBox.min.x) / projectedBoxSize.x;
-						let iy = this.tileSize * (y - projectedBox.min.y) / projectedBoxSize.y;
+						var ix = this.tileSize * (x - projectedBox.min.x) / projectedBoxSize.x;
+						var iy = this.tileSize * (y - projectedBox.min.y) / projectedBoxSize.y;
 
 						if(ix < 0 || ix > this.tileSize)
 						{
@@ -233,7 +233,7 @@ class PotreeDEM
 
 			// TODO only works somewhat if there is no rotation to the point cloud
 
-			// let target = targetNodes[0];
+			// var target = targetNodes[0];
 			// target.data = new Float32Array(data);
 			//
 			//
@@ -242,8 +242,8 @@ class PotreeDEM
 			// Potree.getDEMWorkerInstance().working = false;
 			//
 			// { // create scene objects for debugging
-			//	//for(let demNode of targetNodes){
-			//		let bb = new Potree.Box3Helper(box);
+			//	//for(var demNode of targetNodes){
+			//		var bb = new Potree.Box3Helper(box);
 			//		viewer.scene.scene.add(bb);
 			//
 			//		createDEMMesh(this, target);
@@ -252,8 +252,8 @@ class PotreeDEM
 			// }
 		};
 
-		let position = node.geometryNode.geometry.attributes.position.array;
-		let message = {
+		var position = node.geometryNode.geometry.attributes.position.array;
+		var message = {
 			boundingBox:
 			{
 				min: node.getBoundingBox().min.toArray(),
@@ -261,7 +261,7 @@ class PotreeDEM
 			},
 			position: new Float32Array(position).buffer
 		};
-		let transferables = [message.position];
+		var transferables = [message.position];
 		Potree.getDEMWorkerInstance().working = true;
 		Potree.getDEMWorkerInstance().postMessage(message, transferables);
 	}

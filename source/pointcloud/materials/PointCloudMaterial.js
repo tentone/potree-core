@@ -10,7 +10,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this.visibleNodesTexture.minFilter = THREE.NearestFilter;
 		this.visibleNodesTexture.magFilter = THREE.NearestFilter;
 
-		let getValid = function(a, b)
+		var getValid = function(a, b)
 		{
 			if(a !== undefined)
 			{
@@ -22,10 +22,10 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			}
 		};
 
-		let pointSize = getValid(parameters.size, 1.0);
-		let minSize = getValid(parameters.minSize, 2.0);
-		let maxSize = getValid(parameters.maxSize, 50.0);
-		let treeType = getValid(parameters.treeType, Potree.TreeType.OCTREE);
+		var pointSize = getValid(parameters.size, 1.0);
+		var minSize = getValid(parameters.minSize, 2.0);
+		var maxSize = getValid(parameters.maxSize, 50.0);
+		var treeType = getValid(parameters.treeType, Potree.TreeType.OCTREE);
 
 		this._pointSizeType = Potree.PointSizeType.FIXED;
 		this._shape = Potree.PointShape.SQUARE;
@@ -428,7 +428,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 
 	getDefines()
 	{
-		let defines = [];
+		var defines = [];
 
 		if(this.pointSizeType === Potree.PointSizeType.FIXED)
 		{
@@ -535,7 +535,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			defines.push("#define weighted_splats");
 		}
 
-		for(let [key, value] of this.defines)
+		for(var [key, value] of this.defines)
 		{
 			defines.push(value);
 		}
@@ -549,7 +549,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		{
 			return;
 		}
-		let doUpdate = (this.clipBoxes.length !== clipBoxes.length) && (clipBoxes.length === 0 || this.clipBoxes.length === 0);
+		var doUpdate = (this.clipBoxes.length !== clipBoxes.length) && (clipBoxes.length === 0 || this.clipBoxes.length === 0);
 		this.uniforms.clipBoxCount.value = this.clipBoxes.length;
 		this.clipBoxes = clipBoxes;
 		if(doUpdate)
@@ -557,12 +557,12 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			this.updateShaderSource();
 		}
 		this.uniforms.clipBoxes.value = new Float32Array(this.clipBoxes.length * 16);
-		for(let i = 0; i < this.clipBoxes.length; i++)
+		for(var i = 0; i < this.clipBoxes.length; i++)
 		{
-			let box = clipBoxes[i];
+			var box = clipBoxes[i];
 			this.uniforms.clipBoxes.value.set(box.inverse.elements, 16 * i);
 		}
-		for(let i = 0; i < this.uniforms.clipBoxes.value.length; i++)
+		for(var i = 0; i < this.uniforms.clipBoxes.value.length; i++)
 		{
 			if(Number.isNaN(this.uniforms.clipBoxes.value[i]))
 			{
@@ -578,7 +578,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 			return;
 		}
 		this.clipPolygons = clipPolygons;
-		let doUpdate = (this.clipPolygons.length !== clipPolygons.length);
+		var doUpdate = (this.clipPolygons.length !== clipPolygons.length);
 		if(doUpdate)
 		{
 			this.updateShaderSource();
@@ -620,13 +620,13 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 	
 	set classification(value)
 	{
-		let copy = {};
-		for(let key of Object.keys(value))
+		var copy = {};
+		for(var key of Object.keys(value))
 		{
 			copy[key] = value[key].clone();
 		}
 		
-		let isEqual = false;
+		var isEqual = false;
 		if(this._classification === undefined)
 		{
 			isEqual = false;
@@ -634,7 +634,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		else
 		{
 			isEqual = Object.keys(copy).length === Object.keys(this._classification).length;
-			for(let key of Object.keys(copy))
+			for(var key of Object.keys(copy))
 			{
 				isEqual = isEqual && this._classification[key] !== undefined;
 				isEqual = isEqual && copy[key].equals(this._classification[key]);
@@ -1002,7 +1002,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 
 	set elevationRange(value)
 	{
-		let changed = this.uniforms.elevationRange.value[0] !== value[0] ||
+		var changed = this.uniforms.elevationRange.value[0] !== value[0] ||
 			this.uniforms.elevationRange.value[1] !== value[1];
 		if(changed)
 		{
@@ -1291,28 +1291,28 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 
 	static generateGradientTexture(gradient)
 	{
-		let size = 64;
+		var size = 64;
 		
 		//Create canvas
-		let canvas = document.createElement("canvas");
+		var canvas = document.createElement("canvas");
 		canvas.width = size;
 		canvas.height = size;
 
 		//Get context
-		let context = canvas.getContext("2d");
+		var context = canvas.getContext("2d");
 
 		//Draw gradient
 		context.rect(0, 0, size, size);
-		let ctxGradient = context.createLinearGradient(0, 0, size, size);
-		for(let i = 0; i < gradient.length; i++)
+		var ctxGradient = context.createLinearGradient(0, 0, size, size);
+		for(var i = 0; i < gradient.length; i++)
 		{
-			let step = gradient[i];
+			var step = gradient[i];
 			ctxGradient.addColorStop(step[0], "#" + step[1].getHexString());
 		}
 		context.fillStyle = ctxGradient;
 		context.fill();
 
-		let texture = new THREE.CanvasTexture(canvas);
+		var texture = new THREE.CanvasTexture(canvas);
 		texture.needsUpdate = true;
 		texture.minFilter = THREE.LinearFilter;
 
@@ -1321,16 +1321,16 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 
 	static generateClassificationTexture(classification)
 	{
-		let width = 256;
-		let height = 256;
-		let size = width * height;
-		let data = new Uint8Array(4 * size);
-		for(let x = 0; x < width; x++)
+		var width = 256;
+		var height = 256;
+		var size = width * height;
+		var data = new Uint8Array(4 * size);
+		for(var x = 0; x < width; x++)
 		{
-			for(let y = 0; y < height; y++)
+			for(var y = 0; y < height; y++)
 			{
-				let i = x + width * y;
-				let color;
+				var i = x + width * y;
+				var color;
 				if(classification[x])
 				{
 					color = classification[x];
@@ -1349,7 +1349,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 				data[4 * i + 3] = 255 * color.w;
 			}
 		}
-		let texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
+		var texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
 		texture.magFilter = THREE.NearestFilter;
 		texture.needsUpdate = true;
 		return texture;
@@ -1372,7 +1372,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 
 	copyFrom(from)
 	{
-		for(let name of this.uniforms)
+		for(var name of this.uniforms)
 		{
 			this.uniforms[name].value = from.uniforms[name].value;
 		}

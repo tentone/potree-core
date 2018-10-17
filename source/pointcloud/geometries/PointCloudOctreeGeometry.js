@@ -68,9 +68,9 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 
 	getChildren()
 	{
-		let children = [];
+		var children = [];
 
-		for(let i = 0; i < 8; i++)
+		for(var i = 0; i < 8; i++)
 		{
 			if(this.children[i])
 			{
@@ -83,8 +83,8 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 
 	getURL()
 	{
-		let url = "";
-		let version = this.pcoGeometry.loader.version;
+		var url = "";
+		var version = this.pcoGeometry.loader.version;
 
 		if(version.equalOrHigher("1.5"))
 		{
@@ -104,13 +104,13 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 
 	getHierarchyPath()
 	{
-		let path = "r/";
+		var path = "r/";
 
-		let hierarchyStepSize = this.pcoGeometry.hierarchyStepSize;
-		let indices = this.name.substr(1);
+		var hierarchyStepSize = this.pcoGeometry.hierarchyStepSize;
+		var indices = this.name.substr(1);
 
-		let numParts = Math.floor(indices.length / hierarchyStepSize);
-		for(let i = 0; i < numParts; i++)
+		var numParts = Math.floor(indices.length / hierarchyStepSize);
+		for(var i = 0; i < numParts; i++)
 		{
 			path += indices.substr(i * hierarchyStepSize, hierarchyStepSize) + "/";
 		}
@@ -160,16 +160,16 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 
 	loadHierachyThenPoints()
 	{
-		let node = this;
+		var node = this;
 
 		// load hierarchy
-		let callback = function(node, hbuffer)
+		var callback = function(node, hbuffer)
 		{
-			let view = new DataView(hbuffer);
+			var view = new DataView(hbuffer);
 
-			let stack = [];
-			let children = view.getUint8(0);
-			let numPoints = view.getUint32(1, true);
+			var stack = [];
+			var children = view.getUint8(0);
+			var numPoints = view.getUint32(1, true);
 			node.numPoints = numPoints;
 			stack.push(
 			{
@@ -178,21 +178,21 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 				name: node.name
 			});
 
-			let decoded = [];
+			var decoded = [];
 
-			let offset = 5;
+			var offset = 5;
 			while(stack.length > 0)
 			{
-				let snode = stack.shift();
-				let mask = 1;
-				for(let i = 0; i < 8; i++)
+				var snode = stack.shift();
+				var mask = 1;
+				for(var i = 0; i < 8; i++)
 				{
 					if((snode.children & mask) !== 0)
 					{
-						let childName = snode.name + i;
+						var childName = snode.name + i;
 
-						let childChildren = view.getUint8(offset);
-						let childNumPoints = view.getUint32(offset + 1, true);
+						var childChildren = view.getUint8(offset);
+						var childNumPoints = view.getUint32(offset + 1, true);
 
 						stack.push(
 						{
@@ -220,21 +220,21 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 				}
 			}
 
-			let nodes = {};
+			var nodes = {};
 			nodes[node.name] = node;
-			let pco = node.pcoGeometry;
+			var pco = node.pcoGeometry;
 
-			for(let i = 0; i < decoded.length; i++)
+			for(var i = 0; i < decoded.length; i++)
 			{
-				let name = decoded[i].name;
-				let decodedNumPoints = decoded[i].numPoints;
-				let index = parseInt(name.charAt(name.length - 1));
-				let parentName = name.substring(0, name.length - 1);
-				let parentNode = nodes[parentName];
-				let level = name.length - 1;
-				let boundingBox = Potree.POCLoader.createChildAABB(parentNode.boundingBox, index);
+				var name = decoded[i].name;
+				var decodedNumPoints = decoded[i].numPoints;
+				var index = parseInt(name.charAt(name.length - 1));
+				var parentName = name.substring(0, name.length - 1);
+				var parentNode = nodes[parentName];
+				var level = name.length - 1;
+				var boundingBox = Potree.POCLoader.createChildAABB(parentNode.boundingBox, index);
 
-				let currentNode = new Potree.PointCloudOctreeGeometryNode(name, pco, boundingBox);
+				var currentNode = new Potree.PointCloudOctreeGeometryNode(name, pco, boundingBox);
 				currentNode.level = level;
 				currentNode.numPoints = decodedNumPoints;
 				currentNode.hasChildren = decoded[i].children > 0;
@@ -248,8 +248,8 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 		
 		if((node.level % node.pcoGeometry.hierarchyStepSize) === 0)
 		{
-			let hurl = node.pcoGeometry.octreeDir + "/" + node.getHierarchyPath() + "/" + node.name + ".hrc";
-			let xhr = XHRFactory.createXMLHttpRequest();
+			var hurl = node.pcoGeometry.octreeDir + "/" + node.getHierarchyPath() + "/" + node.name + ".hrc";
+			var xhr = XHRFactory.createXMLHttpRequest();
 			xhr.open("GET", hurl, true);
 			xhr.responseType = "arraybuffer";
 			xhr.overrideMimeType("text/plain; charset=x-user-defined");
@@ -259,7 +259,7 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 				{
 					if(xhr.status === 200 || xhr.status === 0)
 					{
-						let hbuffer = xhr.response;
+						var hbuffer = xhr.response;
 						callback(node, hbuffer);
 					}
 					else
@@ -293,9 +293,9 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 			this.geometry = null;
 			this.loaded = false;
 
-			for(let i = 0; i < this.oneTimeDisposeHandlers.length; i++)
+			for(var i = 0; i < this.oneTimeDisposeHandlers.length; i++)
 			{
-				let handler = this.oneTimeDisposeHandlers[i];
+				var handler = this.oneTimeDisposeHandlers[i];
 				handler();
 			}
 			this.oneTimeDisposeHandlers = [];

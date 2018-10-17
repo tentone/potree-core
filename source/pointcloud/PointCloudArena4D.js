@@ -49,7 +49,7 @@ Potree.PointCloudArena4DNode = class PointCloudArena4DNode extends Potree.PointC
 
 	toTreeNode(child)
 	{
-		let geometryNode = null;
+		var geometryNode = null;
 
 		if(this.left === child)
 		{
@@ -65,8 +65,8 @@ Potree.PointCloudArena4DNode = class PointCloudArena4DNode extends Potree.PointC
 			return;
 		}
 
-		let node = new Potree.PointCloudArena4DNode();
-		let sceneNode = THREE.PointCloud(geometryNode.geometry, this.kdtree.material);
+		var node = new Potree.PointCloudArena4DNode();
+		var sceneNode = THREE.PointCloud(geometryNode.geometry, this.kdtree.material);
 		sceneNode.visible = false;
 
 		node.kdtree = this.kdtree;
@@ -79,7 +79,7 @@ Potree.PointCloudArena4DNode = class PointCloudArena4DNode extends Potree.PointC
 
 	getChildren()
 	{
-		let children = [];
+		var children = [];
 
 		if(this.left)
 		{
@@ -145,9 +145,9 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 	getBoundingBoxWorld()
 	{
 		this.updateMatrixWorld(true);
-		let box = this.boundingBox;
-		let transform = this.matrixWorld;
-		let tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
+		var box = this.boundingBox;
+		var transform = this.matrixWorld;
+		var tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
 
 		return tBox;
 	};
@@ -178,9 +178,9 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 
 	toTreeNode(geometryNode, parent)
 	{
-		let node = new Potree.PointCloudArena4DNode();
+		var node = new Potree.PointCloudArena4DNode();
 
-		let sceneNode = new THREE.Points(geometryNode.geometry, this.material);
+		var sceneNode = new THREE.Points(geometryNode.geometry, this.material);
 		sceneNode.frustumCulled = true;
 		sceneNode.onBeforeRender = (_this, scene, camera, geometry, material, group) =>
 		{
@@ -190,21 +190,21 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 
 				if(material.program.getUniforms().map.level)
 				{
-					let level = geometryNode.getLevel();
+					var level = geometryNode.getLevel();
 					material.uniforms.level.value = level;
 					material.program.getUniforms().map.level.setValue(_this.getContext(), level);
 				}
 
 				if(this.visibleNodeTextureOffsets && material.program.getUniforms().map.vnStart)
 				{
-					let vnStart = this.visibleNodeTextureOffsets.get(node);
+					var vnStart = this.visibleNodeTextureOffsets.get(node);
 					material.uniforms.vnStart.value = vnStart;
 					material.program.getUniforms().map.vnStart.setValue(_this.getContext(), vnStart);
 				}
 
 				if(material.program.getUniforms().map.pcIndex)
 				{
-					let i = node.pcIndex ? node.pcIndex : this.visibleNodes.indexOf(node);
+					var i = node.pcIndex ? node.pcIndex : this.visibleNodes.indexOf(node);
 					material.uniforms.pcIndex.value = i;
 					material.program.getUniforms().map.pcIndex.setValue(_this.getContext(), i);
 				}
@@ -236,7 +236,7 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 			}
 		}
 
-		let disposeListener = function()
+		var disposeListener = function()
 		{
 			parent.sceneNode.remove(node.sceneNode);
 
@@ -270,7 +270,7 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 		}
 
 		// material.uniforms.octreeSize.value = this.boundingBox.size().x;
-		let bbSize = this.boundingBox.getSize(new THREE.Vector3());
+		var bbSize = this.boundingBox.getSize(new THREE.Vector3());
 		material.bbSize = [bbSize.x, bbSize.y, bbSize.z];
 	}
 
@@ -281,10 +281,10 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 
 	hideDescendants(object)
 	{
-		let stack = [];
-		for(let i = 0; i < object.children.length; i++)
+		var stack = [];
+		for(var i = 0; i < object.children.length; i++)
 		{
-			let child = object.children[i];
+			var child = object.children[i];
 			if(child.visible)
 			{
 				stack.push(child);
@@ -293,7 +293,7 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 
 		while(stack.length > 0)
 		{
-			let child = stack.shift();
+			var child = stack.shift();
 
 			child.visible = false;
 			if(child.boundingBoxNode)
@@ -301,9 +301,9 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 				child.boundingBoxNode.visible = false;
 			}
 
-			for(let i = 0; i < child.children.length; i++)
+			for(var i = 0; i < child.children.length; i++)
 			{
-				let childOfChild = child.children[i];
+				var childOfChild = child.children[i];
 				if(childOfChild.visible)
 				{
 					stack.push(childOfChild);
@@ -337,14 +337,14 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 
 	nodesOnRay(nodes, ray)
 	{
-		let nodesOnRay = [];
+		var nodesOnRay = [];
 
-		let _ray = ray.clone();
-		for(let i = 0; i < nodes.length; i++)
+		var _ray = ray.clone();
+		for(var i = 0; i < nodes.length; i++)
 		{
-			let node = nodes[i];
-			let sphere = node.getBoundingSphere(new THREE.Sphere()).clone().applyMatrix4(node.sceneNode.matrixWorld);
-			// TODO Unused: let box = node.getBoundingBox().clone().applyMatrix4(node.sceneNode.matrixWorld);
+			var node = nodes[i];
+			var sphere = node.getBoundingSphere(new THREE.Sphere()).clone().applyMatrix4(node.sceneNode.matrixWorld);
+			// TODO Unused: var box = node.getBoundingBox().clone().applyMatrix4(node.sceneNode.matrixWorld);
 
 			if(_ray.intersectsSphere(sphere))
 			{
@@ -361,25 +361,25 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 	pick(viewer, camera, ray, params = {})
 	{
 
-		let renderer = viewer.renderer;
-		let pRenderer = viewer.pRenderer;
+		var renderer = viewer.renderer;
+		var pRenderer = viewer.pRenderer;
 
 		performance.mark("pick-start");
 
-		let getVal = (a, b) => a !== undefined ? a : b;
+		var getVal = (a, b) => a !== undefined ? a : b;
 
-		let pickWindowSize = getVal(params.pickWindowSize, 17);
-		let pickOutsideClipRegion = getVal(params.pickOutsideClipRegion, false);
+		var pickWindowSize = getVal(params.pickWindowSize, 17);
+		var pickOutsideClipRegion = getVal(params.pickOutsideClipRegion, false);
 
-		let size = renderer.getSize(new THREE.Vector3());
+		var size = renderer.getSize(new THREE.Vector3());
 
-		let width = Math.ceil(getVal(params.width, size.width));
-		let height = Math.ceil(getVal(params.height, size.height));
+		var width = Math.ceil(getVal(params.width, size.width));
+		var height = Math.ceil(getVal(params.height, size.height));
 
-		let pointSizeType = getVal(params.pointSizeType, this.material.pointSizeType);
-		let pointSize = getVal(params.pointSize, this.material.size);
+		var pointSizeType = getVal(params.pointSizeType, this.material.pointSizeType);
+		var pointSize = getVal(params.pointSize, this.material.size);
 
-		let nodes = this.nodesOnRay(this.visibleNodes, ray);
+		var nodes = this.nodesOnRay(this.visibleNodes, ray);
 
 		if(nodes.length === 0)
 		{
@@ -388,12 +388,12 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 
 		if(!this.pickState)
 		{
-			let scene = new THREE.Scene();
+			var scene = new THREE.Scene();
 
-			let material = new Potree.PointCloudMaterial();
+			var material = new Potree.PointCloudMaterial();
 			material.pointColorType = Potree.PointColorType.POINT_INDEX;
 
-			let renderTarget = new THREE.WebGLRenderTarget(
+			var renderTarget = new THREE.WebGLRenderTarget(
 				1, 1,
 				{
 					minFilter: THREE.LinearFilter,
@@ -409,8 +409,8 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 			};
 		};
 
-		let pickState = this.pickState;
-		let pickMaterial = pickState.material;
+		var pickState = this.pickState;
+		var pickMaterial = pickState.material;
 
 		{ // update pick material
 			pickMaterial.pointSizeType = pointSizeType;
@@ -442,9 +442,9 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 
 		pickState.renderTarget.setSize(width, height);
 
-		let pixelPos = new THREE.Vector2(params.x, params.y);
+		var pixelPos = new THREE.Vector2(params.x, params.y);
 
-		let gl = renderer.getContext();
+		var gl = renderer.getContext();
 		gl.enable(gl.SCISSOR_TEST);
 		gl.scissor(
 			parseInt(pixelPos.x - (pickWindowSize - 1) / 2),
@@ -462,7 +462,7 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 			gl.clearColor(0, 0, 0, 0);
 			renderer.clearTarget(pickState.renderTarget, true, true, true);
 
-			let tmp = this.material;
+			var tmp = this.material;
 			this.material = pickMaterial;
 
 			pRenderer.renderOctree(this, nodes, camera, pickState.renderTarget);
@@ -470,15 +470,15 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 			this.material = tmp;
 		}
 
-		let clamp = (number, min, max) => Math.min(Math.max(min, number), max);
+		var clamp = (number, min, max) => Math.min(Math.max(min, number), max);
 
-		let x = parseInt(clamp(pixelPos.x - (pickWindowSize - 1) / 2, 0, width));
-		let y = parseInt(clamp(pixelPos.y - (pickWindowSize - 1) / 2, 0, height));
-		let w = parseInt(Math.min(x + pickWindowSize, width) - x);
-		let h = parseInt(Math.min(y + pickWindowSize, height) - y);
+		var x = parseInt(clamp(pixelPos.x - (pickWindowSize - 1) / 2, 0, width));
+		var y = parseInt(clamp(pixelPos.y - (pickWindowSize - 1) / 2, 0, height));
+		var w = parseInt(Math.min(x + pickWindowSize, width) - x);
+		var h = parseInt(Math.min(y + pickWindowSize, height) - y);
 
-		let pixelCount = w * h;
-		let buffer = new Uint8Array(4 * pixelCount);
+		var pixelCount = w * h;
+		var buffer = new Uint8Array(4 * pixelCount);
 
 		gl.readPixels(x, y, pickWindowSize, pickWindowSize, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
 
@@ -487,26 +487,26 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 		renderer.setScissorTest(false);
 		gl.disable(gl.SCISSOR_TEST);
 
-		let pixels = buffer;
-		let ibuffer = new Uint32Array(buffer.buffer);
+		var pixels = buffer;
+		var ibuffer = new Uint32Array(buffer.buffer);
 
 		// find closest hit inside pixelWindow boundaries
-		let min = Number.MAX_VALUE;
-		let hits = [];
-		for(let u = 0; u < pickWindowSize; u++)
+		var min = Number.MAX_VALUE;
+		var hits = [];
+		for(var u = 0; u < pickWindowSize; u++)
 		{
-			for(let v = 0; v < pickWindowSize; v++)
+			for(var v = 0; v < pickWindowSize; v++)
 			{
-				let offset = (u + v * pickWindowSize);
-				let distance = Math.pow(u - (pickWindowSize - 1) / 2, 2) + Math.pow(v - (pickWindowSize - 1) / 2, 2);
+				var offset = (u + v * pickWindowSize);
+				var distance = Math.pow(u - (pickWindowSize - 1) / 2, 2) + Math.pow(v - (pickWindowSize - 1) / 2, 2);
 
-				let pcIndex = pixels[4 * offset + 3];
+				var pcIndex = pixels[4 * offset + 3];
 				pixels[4 * offset + 3] = 0;
-				let pIndex = ibuffer[offset];
+				var pIndex = ibuffer[offset];
 
 				if(!(pcIndex === 0 && pIndex === 0) && (pcIndex !== undefined) && (pIndex !== undefined))
 				{
-					let hit = {
+					var hit = {
 						pIndex: pIndex,
 						pcIndex: pcIndex,
 						distanceToCenter: distance
@@ -535,30 +535,30 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 			}
 		}
 
-		for(let hit of hits)
+		for(var hit of hits)
 		{
-			let point = {};
+			var point = {};
 
 			if(!nodes[hit.pcIndex])
 			{
 				return null;
 			}
 
-			let node = nodes[hit.pcIndex];
-			let pc = node.sceneNode;
-			let geometry = node.geometryNode.geometry;
+			var node = nodes[hit.pcIndex];
+			var pc = node.sceneNode;
+			var geometry = node.geometryNode.geometry;
 
-			for(let attributeName in geometry.attributes)
+			for(var attributeName in geometry.attributes)
 			{
-				let attribute = geometry.attributes[attributeName];
+				var attribute = geometry.attributes[attributeName];
 
 				if(attributeName === "position")
 				{
-					let x = attribute.array[3 * hit.pIndex + 0];
-					let y = attribute.array[3 * hit.pIndex + 1];
-					let z = attribute.array[3 * hit.pIndex + 2];
+					var x = attribute.array[3 * hit.pIndex + 0];
+					var y = attribute.array[3 * hit.pIndex + 1];
+					var z = attribute.array[3 * hit.pIndex + 2];
 
-					let position = new THREE.Vector3(x, y, z);
+					var position = new THREE.Vector3(x, y, z);
 					position.applyMatrix4(pc.matrixWorld);
 
 					point[attributeName] = position;
@@ -594,19 +594,19 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 
 		if(Potree.measureTimings) performance.mark("computeVisibilityTextureData-start");
 
-		let data = new Uint8Array(nodes.length * 3);
-		let visibleNodeTextureOffsets = new Map();
+		var data = new Uint8Array(nodes.length * 3);
+		var visibleNodeTextureOffsets = new Map();
 
 		// copy array
 		nodes = nodes.slice();
 
 		// sort by level and number
-		let sort = function(a, b)
+		var sort = function(a, b)
 		{
-			let la = a.geometryNode.level;
-			let lb = b.geometryNode.level;
-			let na = a.geometryNode.number;
-			let nb = b.geometryNode.number;
+			var la = a.geometryNode.level;
+			var lb = b.geometryNode.level;
+			var na = a.geometryNode.number;
+			var nb = b.geometryNode.number;
 			if(la !== lb) return la - lb;
 			if(na < nb) return -1;
 			if(na > nb) return 1;
@@ -614,21 +614,21 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 		};
 		nodes.sort(sort);
 
-		let visibleNodeNames = [];
-		for(let i = 0; i < nodes.length; i++)
+		var visibleNodeNames = [];
+		for(var i = 0; i < nodes.length; i++)
 		{
 			visibleNodeNames.push(nodes[i].geometryNode.number);
 		}
 
-		for(let i = 0; i < nodes.length; i++)
+		for(var i = 0; i < nodes.length; i++)
 		{
-			let node = nodes[i];
+			var node = nodes[i];
 
 			visibleNodeTextureOffsets.set(node, i);
 
-			let b1 = 0; // children
-			let b2 = 0; // offset to first child
-			let b3 = 0; // split
+			var b1 = 0; // children
+			var b2 = 0; // offset to first child
+			var b3 = 0; // split
 
 			if(node.geometryNode.left && visibleNodeNames.indexOf(node.geometryNode.left.number) > 0)
 			{

@@ -23,8 +23,8 @@ Potree.WebGLTexture = class WebGLTexture
 			return;
 		}
 
-		let gl = this.gl;
-		let texture = this.texture;
+		var gl = this.gl;
+		var texture = this.texture;
 
 		if(this.version === texture.version)
 		{
@@ -35,14 +35,14 @@ Potree.WebGLTexture = class WebGLTexture
 
 		gl.bindTexture(this.target, this.id);
 
-		let level = 0;
-		let internalFormat = Potree.paramThreeToGL(gl, texture.format);
-		let width = texture.image.width;
-		let height = texture.image.height;
-		let border = 0;
-		let srcFormat = internalFormat;
-		let srcType = Potree.paramThreeToGL(gl, texture.type);
-		let data;
+		var level = 0;
+		var internalFormat = Potree.paramThreeToGL(gl, texture.format);
+		var width = texture.image.width;
+		var height = texture.image.height;
+		var border = 0;
+		var srcFormat = internalFormat;
+		var srcType = Potree.paramThreeToGL(gl, texture.type);
+		var data;
 
 		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
 		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);

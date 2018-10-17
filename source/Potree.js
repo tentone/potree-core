@@ -39,7 +39,7 @@ Potree.getDEMWorkerInstance = function()
 {
 	if(!PotreeDEMWorkerInstance)
 	{
-		let workerPath = Potree.scriptPath + "/workers/DEMWorker.js";
+		var workerPath = Potree.scriptPath + "/workers/DEMWorker.js";
 		PotreeDEMWorkerInstance = Potree.workerPool.getWorker(workerPath);
 	}
 
@@ -614,7 +614,7 @@ Potree.shuffleArray = function(array)
 // Copied from three.js: WebGLRenderer.js
 Potree.paramThreeToGL = function(_gl, p)
 {
-	let extension;
+	var extension;
 
 	if(p === THREE.RepeatWrapping) return _gl.REPEAT;
 	if(p === THREE.ClampToEdgeWrapping) return _gl.CLAMP_TO_EDGE;

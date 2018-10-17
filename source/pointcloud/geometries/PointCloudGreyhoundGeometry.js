@@ -45,7 +45,7 @@ Potree.PointCloudGreyhoundGeometryNode = function(
 	this.oneTimeDisposeHandlers = [];
 	this.baseLoaded = false;
 
-	let bounds = this.boundingBox.clone();
+	var bounds = this.boundingBox.clone();
 	bounds.min.sub(this.pcoGeometry.boundingBox.getCenter());
 	bounds.max.sub(this.pcoGeometry.boundingBox.getCenter());
 
@@ -103,9 +103,9 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.getLevel = function()
 
 Potree.PointCloudGreyhoundGeometryNode.prototype.getChildren = function()
 {
-	let children = [];
+	var children = [];
 
-	for(let i = 0; i < 8; ++i)
+	for(var i = 0; i < 8; ++i)
 	{
 		if(this.children[i])
 		{
@@ -118,14 +118,14 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.getChildren = function()
 
 Potree.PointCloudGreyhoundGeometryNode.prototype.getURL = function()
 {
-	let schema = this.pcoGeometry.schema;
-	let bounds = this.greyhoundBounds;
+	var schema = this.pcoGeometry.schema;
+	var bounds = this.greyhoundBounds;
 
-	let boundsString =
+	var boundsString =
 		bounds.min.x + "," + bounds.min.y + "," + bounds.min.z + "," +
 		bounds.max.x + "," + bounds.max.y + "," + bounds.max.z;
 
-	let url = "" + this.pcoGeometry.serverURL +
+	var url = "" + this.pcoGeometry.serverURL +
 		"read?depthBegin=" +
 		(this.baseLoaded ? (this.level + this.pcoGeometry.baseDepth) : 0) +
 		"&depthEnd=" + (this.level + this.pcoGeometry.baseDepth + 1) +
@@ -140,7 +140,7 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.getURL = function()
 
 	if(this.greyhoundOffset)
 	{
-		let offset = this.greyhoundOffset;
+		var offset = this.greyhoundOffset;
 		url += "&offset=[" + offset.x + "," + offset.y + "," + offset.z + "]";
 	}
 
@@ -183,11 +183,11 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.loadPoints = function()
 Potree.PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = function()
 {
 	// From Greyhound (Cartesian) ordering for the octree to Potree-default
-	let transform = [0, 2, 1, 3, 4, 6, 5, 7];
+	var transform = [0, 2, 1, 3, 4, 6, 5, 7];
 
-	let makeBitMask = function(node)
+	var makeBitMask = function(node)
 	{
-		let mask = 0;
+		var mask = 0;
 		Object.keys(node).forEach(function(key)
 		{
 			if(key === "swd") mask += 1 << transform[0];
@@ -202,11 +202,11 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = funct
 		return mask;
 	};
 
-	let parseChildrenCounts = function(base, parentName, stack)
+	var parseChildrenCounts = function(base, parentName, stack)
 	{
-		let keys = Object.keys(base);
-		let child;
-		let childName;
+		var keys = Object.keys(base);
+		var child;
+		var childName;
 
 		keys.forEach(function(key)
 		{
@@ -261,28 +261,28 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = funct
 	};
 
 	// Load hierarchy.
-	let callback = function(node, greyhoundHierarchy)
+	var callback = function(node, greyhoundHierarchy)
 	{
-		let decoded = [];
+		var decoded = [];
 		node.numPoints = greyhoundHierarchy.n;
 		parseChildrenCounts(greyhoundHierarchy, node.name, decoded);
 
-		let nodes = {};
+		var nodes = {};
 		nodes[node.name] = node;
-		let pgg = node.pcoGeometry;
+		var pgg = node.pcoGeometry;
 
-		for(let i = 0; i < decoded.length; i++)
+		for(var i = 0; i < decoded.length; i++)
 		{
-			let name = decoded[i].name;
-			let numPoints = decoded[i].numPoints;
-			let index = parseInt(name.charAt(name.length - 1));
-			let parentName = name.substring(0, name.length - 1);
-			let parentNode = nodes[parentName];
-			let level = name.length - 1;
-			let boundingBox = Potree.GreyhoundLoader.createChildAABB(
+			var name = decoded[i].name;
+			var numPoints = decoded[i].numPoints;
+			var index = parseInt(name.charAt(name.length - 1));
+			var parentName = name.substring(0, name.length - 1);
+			var parentNode = nodes[parentName];
+			var level = name.length - 1;
+			var boundingBox = Potree.GreyhoundLoader.createChildAABB(
 				parentNode.boundingBox, index);
 
-			let currentNode = new Potree.PointCloudGreyhoundGeometryNode(
+			var currentNode = new Potree.PointCloudGreyhoundGeometryNode(
 				name, pgg, boundingBox, node.scale, node.offset);
 
 			currentNode.level = level;
@@ -298,16 +298,16 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = funct
 
 	if(this.level % this.pcoGeometry.hierarchyStepSize === 0)
 	{
-		let depthBegin = this.level + this.pcoGeometry.baseDepth;
-		let depthEnd = depthBegin + this.pcoGeometry.hierarchyStepSize + 2;
+		var depthBegin = this.level + this.pcoGeometry.baseDepth;
+		var depthEnd = depthBegin + this.pcoGeometry.hierarchyStepSize + 2;
 
-		let bounds = this.greyhoundBounds;
+		var bounds = this.greyhoundBounds;
 
-		let boundsString =
+		var boundsString =
 			bounds.min.x + "," + bounds.min.y + "," + bounds.min.z + "," +
 			bounds.max.x + "," + bounds.max.y + "," + bounds.max.z;
 
-		let hurl = "" + this.pcoGeometry.serverURL +
+		var hurl = "" + this.pcoGeometry.serverURL +
 			"hierarchy?bounds=[" + boundsString + "]" +
 			"&depthBegin=" + depthBegin +
 			"&depthEnd=" + depthEnd;
@@ -319,21 +319,21 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = funct
 
 		if(this.greyhoundOffset)
 		{
-			let offset = this.greyhoundOffset;
+			var offset = this.greyhoundOffset;
 			hurl += "&offset=[" + offset.x + "," + offset.y + "," + offset.z + "]";
 		}
 
-		let xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", hurl, true);
 
-		let that = this;
+		var that = this;
 		xhr.onreadystatechange = function()
 		{
 			if(xhr.readyState === 4)
 			{
 				if(xhr.status === 200 || xhr.status === 0)
 				{
-					let greyhoundHierarchy = JSON.parse(xhr.responseText) ||
+					var greyhoundHierarchy = JSON.parse(xhr.responseText) ||
 					{};
 					callback(that, greyhoundHierarchy);
 				}
@@ -372,9 +372,9 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.dispose = function()
 		this.loaded = false;
 
 		// this.dispatchEvent( { type: "dispose" } );
-		for(let i = 0; i < this.oneTimeDisposeHandlers.length; i++)
+		for(var i = 0; i < this.oneTimeDisposeHandlers.length; i++)
 		{
-			let handler = this.oneTimeDisposeHandlers[i];
+			var handler = this.oneTimeDisposeHandlers[i];
 			handler();
 		}
 		this.oneTimeDisposeHandlers = [];

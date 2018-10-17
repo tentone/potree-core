@@ -35,7 +35,7 @@ var fd=[Ur,cj,hj,lj,qj,vj,Sh,zj,ei,pi,qi,hk,mk,Dn,In,lo,no,qo,Xn,ao,co,go,Aq,Gq,
 
 //importScripts('laz-perf.js');
 
-let instance = null; // laz-perf instance
+var instance = null; // laz-perf instance
 
 function readAs(buf, Type, offset, count) {
 	count = (count === undefined || count === 0 ? 1 : count);
@@ -121,8 +121,8 @@ function handleEvent(msg) {
 			var bufferSize = Math.ceil(pointsToRead / skip);
 			var pointsRead = 0;
 
-			let buffer = new ArrayBuffer(bufferSize * o.header.pointsStructSize);
-			let this_buf = new Uint8Array(buffer);
+			var buffer = new ArrayBuffer(bufferSize * o.header.pointsStructSize);
+			var this_buf = new Uint8Array(buffer);
 			var buf_read = Module._malloc(o.header.pointsStructSize);
 			for (var i = 0 ; i < pointsToRead ; i ++) {
 				o.getPoint(buf_read);
@@ -137,7 +137,7 @@ function handleEvent(msg) {
 			}
 			Module._free(buf_read);
 
-			let transferables = [buffer];
+			var transferables = [buffer];
 
 			postMessage({
 				type: 'header',

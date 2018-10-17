@@ -4,14 +4,14 @@
 // to get a ready to use gradient array from a chroma.js gradient:
 // http://gka.github.io/chroma.js/
 //
-// let stops = [];
-// for(let i = 0; i <= 10; i++){
-//	let range = chroma.scale(["yellow", "navy"]).mode("lch").domain([10,0])(i)._rgb
+// var stops = [];
+// for(var i = 0; i <= 10; i++){
+//	var range = chroma.scale(["yellow", "navy"]).mode("lch").domain([10,0])(i)._rgb
 //		.slice(0, 3)
 //		.map(v => (v / 255).toFixed(4))
 //		.join(", ");
 //
-//	let line = `[${i / 10}, new THREE.Color(${range})],`;
+//	var line = `[${i / 10}, new THREE.Color(${range})],`;
 //
 //	stops.push(line);
 // }

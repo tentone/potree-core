@@ -48,9 +48,9 @@ Potree.PointCloudOctreeNode = class PointCloudOctreeNode extends Potree.PointClo
 
 	getChildren()
 	{
-		let children = [];
+		var children = [];
 
-		for(let i = 0; i < 8; i++)
+		for(var i = 0; i < 8; i++)
 		{
 			if(this.children[i])
 			{
@@ -69,23 +69,23 @@ Potree.PointCloudOctreeNode = class PointCloudOctreeNode extends Potree.PointClo
 			return null;
 		}
 
-		let buffer = this.geometryNode.buffer;
+		var buffer = this.geometryNode.buffer;
 
-		let posOffset = buffer.offset("position");
-		let stride = buffer.stride;
-		let view = new DataView(buffer.data);
+		var posOffset = buffer.offset("position");
+		var stride = buffer.stride;
+		var view = new DataView(buffer.data);
 
-		let worldToBox = new THREE.Matrix4().getInverse(boxNode.matrixWorld);
-		let objectToBox = new THREE.Matrix4().multiplyMatrices(worldToBox, this.sceneNode.matrixWorld);
+		var worldToBox = new THREE.Matrix4().getInverse(boxNode.matrixWorld);
+		var objectToBox = new THREE.Matrix4().multiplyMatrices(worldToBox, this.sceneNode.matrixWorld);
 
-		let inBox = [];
+		var inBox = [];
 
-		let pos = new THREE.Vector4();
-		for(let i = 0; i < buffer.numElements; i++)
+		var pos = new THREE.Vector4();
+		for(var i = 0; i < buffer.numElements; i++)
 		{
-			let x = view.getFloat32(i * stride + posOffset + 0, true);
-			let y = view.getFloat32(i * stride + posOffset + 4, true);
-			let z = view.getFloat32(i * stride + posOffset + 8, true);
+			var x = view.getFloat32(i * stride + posOffset + 0, true);
+			var y = view.getFloat32(i * stride + posOffset + 4, true);
+			var z = view.getFloat32(i * stride + posOffset + 8, true);
 
 			pos.set(x, y, z, 1);
 			pos.applyMatrix4(objectToBox);
@@ -140,14 +140,14 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		this.name = "";
 
 		{
-			let box = [this.pcoGeometry.tightBoundingBox, this.getBoundingBoxWorld()]
+			var box = [this.pcoGeometry.tightBoundingBox, this.getBoundingBoxWorld()]
 				.find(v => v !== undefined);
 
 			this.updateMatrixWorld(true);
 			box = HelperUtils.computeTransformedBoundingBox(box, this.matrixWorld);
 
-			let bMin = box.min.z;
-			let bMax = box.max.z;
+			var bMin = box.min.z;
+			var bMax = box.max.z;
 			this.material.heightMin = bMin;
 			this.material.heightMax = bMax;
 		}
@@ -179,9 +179,9 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 	toTreeNode(geometryNode, parent)
 	{
-		let node = new Potree.PointCloudOctreeNode();
+		var node = new Potree.PointCloudOctreeNode();
 
-		let sceneNode = new THREE.Points(geometryNode.geometry, this.material);
+		var sceneNode = new THREE.Points(geometryNode.geometry, this.material);
 		sceneNode.name = geometryNode.name;
 		sceneNode.position.copy(geometryNode.boundingBox.min);
 		sceneNode.frustumCulled = true;
@@ -193,21 +193,21 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 				if(material.program.getUniforms().map.level)
 				{
-					let level = geometryNode.getLevel();
+					var level = geometryNode.getLevel();
 					material.uniforms.level.value = level;
 					material.program.getUniforms().map.level.setValue(_this.getContext(), level);
 				}
 
 				if(this.visibleNodeTextureOffsets && material.program.getUniforms().map.vnStart)
 				{
-					let vnStart = this.visibleNodeTextureOffsets.get(node);
+					var vnStart = this.visibleNodeTextureOffsets.get(node);
 					material.uniforms.vnStart.value = vnStart;
 					material.program.getUniforms().map.vnStart.setValue(_this.getContext(), vnStart);
 				}
 
 				if(material.program.getUniforms().map.pcIndex)
 				{
-					let i = node.pcIndex ? node.pcIndex : this.visibleNodes.indexOf(node);
+					var i = node.pcIndex ? node.pcIndex : this.visibleNodes.indexOf(node);
 					material.uniforms.pcIndex.value = i;
 					material.program.getUniforms().map.pcIndex.setValue(_this.getContext(), i);
 				}
@@ -218,7 +218,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		node.sceneNode = sceneNode;
 		node.pointcloud = this;
 		node.children = {};
-		for(let key in geometryNode.children)
+		for(var key in geometryNode.children)
 		{
 			node.children[key] = geometryNode.children[key];
 		}
@@ -230,14 +230,14 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		}
 		else
 		{
-			let childIndex = parseInt(geometryNode.name[geometryNode.name.length - 1]);
+			var childIndex = parseInt(geometryNode.name[geometryNode.name.length - 1]);
 			parent.sceneNode.add(sceneNode);
 			parent.children[childIndex] = node;
 		}
 
-		let disposeListener = function()
+		var disposeListener = function()
 		{
-			let childIndex = parseInt(geometryNode.name[geometryNode.name.length - 1]);
+			var childIndex = parseInt(geometryNode.name[geometryNode.name.length - 1]);
 			parent.sceneNode.remove(node.sceneNode);
 			parent.children[childIndex] = geometryNode;
 		};
@@ -248,15 +248,15 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 	updateVisibleBounds()
 	{
-		let leafNodes = [];
-		for(let i = 0; i < this.visibleNodes.length; i++)
+		var leafNodes = [];
+		for(var i = 0; i < this.visibleNodes.length; i++)
 		{
-			let node = this.visibleNodes[i];
-			let isLeaf = true;
+			var node = this.visibleNodes[i];
+			var isLeaf = true;
 
-			for(let j = 0; j < node.children.length; j++)
+			for(var j = 0; j < node.children.length; j++)
 			{
-				let child = node.children[j];
+				var child = node.children[j];
 				if(child instanceof Potree.PointCloudOctreeNode)
 				{
 					isLeaf = isLeaf && !child.sceneNode.visible;
@@ -276,9 +276,9 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		this.visibleBounds.min = new THREE.Vector3(Infinity, Infinity, Infinity);
 		this.visibleBounds.max = new THREE.Vector3(-Infinity, -Infinity, -Infinity);
 
-		for(let i = 0; i < leafNodes.length; i++)
+		for(var i = 0; i < leafNodes.length; i++)
 		{
-			let node = leafNodes[i];
+			var node = leafNodes[i];
 			this.visibleBounds.expandByPoint(node.getBoundingBox().min);
 			this.visibleBounds.expandByPoint(node.getBoundingBox().max);
 		}
@@ -300,17 +300,17 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 		if(Potree.measureTimings) performance.mark("computeVisibilityTextureData-start");
 
-		let data = new Uint8Array(nodes.length * 4);
-		let visibleNodeTextureOffsets = new Map();
+		var data = new Uint8Array(nodes.length * 4);
+		var visibleNodeTextureOffsets = new Map();
 
 		// copy array
 		nodes = nodes.slice();
 
 		// sort by level and index, e.g. r, r0, r3, r4, r01, r07, r30, ...
-		let sort = function(a, b)
+		var sort = function(a, b)
 		{
-			let na = a.geometryNode.name;
-			let nb = b.geometryNode.name;
+			var na = a.geometryNode.name;
+			var nb = b.geometryNode.name;
 			if(na.length !== nb.length) return na.length - nb.length;
 			if(na < nb) return -1;
 			if(na > nb) return 1;
@@ -319,23 +319,23 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		nodes.sort(sort);
 
 		// code sample taken from three.js src/math/Ray.js
-		let v1 = new THREE.Vector3();
-		let intersectSphereBack = (ray, sphere) =>
+		var v1 = new THREE.Vector3();
+		var intersectSphereBack = (ray, sphere) =>
 		{
 			v1.subVectors(sphere.center, ray.origin);
-			let tca = v1.dot(ray.direction);
-			let d2 = v1.dot(v1) - tca * tca;
-			let radius2 = sphere.radius * sphere.radius;
+			var tca = v1.dot(ray.direction);
+			var d2 = v1.dot(v1) - tca * tca;
+			var radius2 = sphere.radius * sphere.radius;
 
 			if(d2 > radius2)
 			{
 				return null;
 			}
 
-			let thc = Math.sqrt(radius2 - d2);
+			var thc = Math.sqrt(radius2 - d2);
 
 			// t1 = second intersect point - exit point on back of sphere
-			let t1 = tca + thc;
+			var t1 = tca + thc;
 
 			if(t1 < 0)
 			{
@@ -345,19 +345,19 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 			return t1;
 		};
 
-		let lodRanges = new Map();
-		let leafNodeLodRanges = new Map();
+		var lodRanges = new Map();
+		var leafNodeLodRanges = new Map();
 
-		for(let i = 0; i < nodes.length; i++)
+		for(var i = 0; i < nodes.length; i++)
 		{
-			let node = nodes[i];
+			var node = nodes[i];
 
 			visibleNodeTextureOffsets.set(node, i);
 
-			let children = [];
-			for(let j = 0; j < 8; j++)
+			var children = [];
+			for(var j = 0; j < 8; j++)
 			{
-				let child = node.children[j];
+				var child = node.children[j];
 
 				if(child && child.constructor === Potree.PointCloudOctreeNode && nodes.includes(child, i))
 				{
@@ -365,22 +365,22 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 				}
 			}
 
-			let spacing = node.geometryNode.estimatedSpacing;
-			let isLeafNode;
+			var spacing = node.geometryNode.estimatedSpacing;
+			var isLeafNode;
 
 			data[i * 4 + 0] = 0;
 			data[i * 4 + 1] = 0;
 			data[i * 4 + 2] = 0;
 			data[i * 4 + 3] = node.getLevel();
-			for(let j = 0; j < children.length; j++)
+			for(var j = 0; j < children.length; j++)
 			{
-				let child = children[j];
-				let index = parseInt(child.geometryNode.name.substr(-1));
+				var child = children[j];
+				var index = parseInt(child.geometryNode.name.substr(-1));
 				data[i * 4 + 0] += Math.pow(2, index);
 
 				if(j === 0)
 				{
-					let vArrayIndex = nodes.indexOf(child, i);
+					var vArrayIndex = nodes.indexOf(child, i);
 
 					data[i * 4 + 1] = (vArrayIndex - i) >> 8;
 					data[i * 4 + 2] = (vArrayIndex - i) % 256;
@@ -390,16 +390,16 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 			{
 				// TODO performance optimization
 				// for some reason, this part can be extremely slow in chrome during a debugging session, but not during profiling
-				let bBox = node.getBoundingBox().clone();
+				var bBox = node.getBoundingBox().clone();
 				//bBox.applyMatrix4(node.sceneNode.matrixWorld);
 				//bBox.applyMatrix4(camera.matrixWorldInverse);
-				let bSphere = bBox.getBoundingSphere(new THREE.Sphere());
+				var bSphere = bBox.getBoundingSphere(new THREE.Sphere());
 				bSphere.applyMatrix4(node.sceneNode.matrixWorld);
 				bSphere.applyMatrix4(camera.matrixWorldInverse);
 
-				let ray = new THREE.Ray(camera.position, camera.getWorldDirection(Potree.tempVector3));
-				let distance = intersectSphereBack(ray, bSphere);
-				let distance2 = bSphere.center.distanceTo(camera.position) + bSphere.radius;
+				var ray = new THREE.Ray(camera.position, camera.getWorldDirection(Potree.tempVector3));
+				var distance = intersectSphereBack(ray, bSphere);
+				var distance2 = bSphere.center.distanceTo(camera.position) + bSphere.radius;
 				if(distance === null)
 				{
 					distance = distance2;
@@ -412,14 +412,14 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 				}
 				else
 				{
-					let prevDistance = lodRanges.get(node.getLevel());
-					let newDistance = Math.max(prevDistance, distance);
+					var prevDistance = lodRanges.get(node.getLevel());
+					var newDistance = Math.max(prevDistance, distance);
 					lodRanges.set(node.getLevel(), newDistance);
 				}
 
 				if(!node.geometryNode.hasChildren)
 				{
-					let value = {
+					var value = {
 						distance: distance,
 						i: i
 					};
@@ -429,17 +429,17 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 			}
 		}
 
-		for(let [node, value] of leafNodeLodRanges)
+		for(var [node, value] of leafNodeLodRanges)
 		{
-			let level = node.getLevel();
-			let distance = value.distance;
-			let i = value.i;
+			var level = node.getLevel();
+			var distance = value.distance;
+			var i = value.i;
 
 			if(level < 4)
 			{
 				continue;
 			}
-			for(let [lod, range] of lodRanges)
+			for(var [lod, range] of lodRanges)
 			{
 				if(distance < range * 1.2)
 				{
@@ -462,19 +462,19 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 	nodeIntersectsProfile(node, profile)
 	{
-		let bbWorld = node.boundingBox.clone().applyMatrix4(this.matrixWorld);
-		let bsWorld = bbWorld.getBoundingSphere(new THREE.Sphere());
+		var bbWorld = node.boundingBox.clone().applyMatrix4(this.matrixWorld);
+		var bsWorld = bbWorld.getBoundingSphere(new THREE.Sphere());
 
-		let intersects = false;
+		var intersects = false;
 
-		for(let i = 0; i < profile.points.length - 1; i++)
+		for(var i = 0; i < profile.points.length - 1; i++)
 		{
 
-			let start = new THREE.Vector3(profile.points[i + 0].x, profile.points[i + 0].y, bsWorld.center.z);
-			let end = new THREE.Vector3(profile.points[i + 1].x, profile.points[i + 1].y, bsWorld.center.z);
+			var start = new THREE.Vector3(profile.points[i + 0].x, profile.points[i + 0].y, bsWorld.center.z);
+			var end = new THREE.Vector3(profile.points[i + 1].x, profile.points[i + 1].y, bsWorld.center.z);
 
-			let closest = new THREE.Line3(start, end).closestPointToPoint(bsWorld.center, true);
-			let distance = closest.distanceTo(bsWorld.center);
+			var closest = new THREE.Line3(start, end).closestPointToPoint(bsWorld.center, true);
+			var distance = closest.distanceTo(bsWorld.center);
 
 			intersects = intersects || (distance < (bsWorld.radius + profile.width));
 		}
@@ -484,15 +484,15 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 	nodesOnRay(nodes, ray)
 	{
-		let nodesOnRay = [];
+		var nodesOnRay = [];
 
-		let _ray = ray.clone();
-		for(let i = 0; i < nodes.length; i++)
+		var _ray = ray.clone();
+		for(var i = 0; i < nodes.length; i++)
 		{
-			let node = nodes[i];
-			// let inverseWorld = new THREE.Matrix4().getInverse(node.matrixWorld);
-			// let sphere = node.getBoundingSphere(new THREE.Sphere()).clone().applyMatrix4(node.sceneNode.matrixWorld);
-			let sphere = node.getBoundingSphere(new THREE.Sphere()).clone().applyMatrix4(this.matrixWorld);
+			var node = nodes[i];
+			// var inverseWorld = new THREE.Matrix4().getInverse(node.matrixWorld);
+			// var sphere = node.getBoundingSphere(new THREE.Sphere()).clone().applyMatrix4(node.sceneNode.matrixWorld);
+			var sphere = node.getBoundingSphere(new THREE.Sphere()).clone().applyMatrix4(this.matrixWorld);
 
 			if(_ray.intersectsSphere(sphere))
 			{
@@ -526,10 +526,10 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 	hideDescendants(object)
 	{
-		let stack = [];
-		for(let i = 0; i < object.children.length; i++)
+		var stack = [];
+		for(var i = 0; i < object.children.length; i++)
 		{
-			let child = object.children[i];
+			var child = object.children[i];
 			if(child.visible)
 			{
 				stack.push(child);
@@ -538,13 +538,13 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 		while(stack.length > 0)
 		{
-			let object = stack.shift();
+			var object = stack.shift();
 
 			object.visible = false;
 
-			for(let i = 0; i < object.children.length; i++)
+			for(var i = 0; i < object.children.length; i++)
 			{
-				let child = object.children[i];
+				var child = object.children[i];
 				if(child.visible)
 				{
 					stack.push(child);
@@ -557,27 +557,27 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 	{
 		this.position.set(0, 0, 0);
 		this.updateMatrixWorld(true);
-		let box = this.boundingBox;
-		let transform = this.matrixWorld;
-		let tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
+		var box = this.boundingBox;
+		var transform = this.matrixWorld;
+		var tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
 		this.position.set(0, 0, 0).sub(tBox.getCenter());
 	};
 
 	moveToGroundPlane()
 	{
 		this.updateMatrixWorld(true);
-		let box = this.boundingBox;
-		let transform = this.matrixWorld;
-		let tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
+		var box = this.boundingBox;
+		var transform = this.matrixWorld;
+		var tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
 		this.position.y += -tBox.min.y;
 	};
 
 	getBoundingBoxWorld()
 	{
 		this.updateMatrixWorld(true);
-		let box = this.boundingBox;
-		let transform = this.matrixWorld;
-		let tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
+		var box = this.boundingBox;
+		var transform = this.matrixWorld;
+		var tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
 
 		return tBox;
 	};
@@ -589,7 +589,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 	 *
 	 *
 	 * The return value is an array with all segments of the profile path
-	 *  let segment = {
+	 *  var segment = {
 	 * 		start: 	THREE.Vector3,
 	 * 		end: 	THREE.Vector3,
 	 * 		points: {}
@@ -605,26 +605,26 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 	{
 		if(callback)
 		{
-			let request = new Potree.ProfileRequest(this, profile, maxDepth, callback);
+			var request = new Potree.ProfileRequest(this, profile, maxDepth, callback);
 			this.profileRequests.push(request);
 
 			return request;
 		}
 
-		let points = {
+		var points = {
 			segments: [],
 			boundingBox: new THREE.Box3(),
 			projectedBoundingBox: new THREE.Box2()
 		};
 
 		// evaluate segments
-		for(let i = 0; i < profile.points.length - 1; i++)
+		for(var i = 0; i < profile.points.length - 1; i++)
 		{
-			let start = profile.points[i];
-			let end = profile.points[i + 1];
-			let ps = this.getProfile(start, end, profile.width, maxDepth);
+			var start = profile.points[i];
+			var end = profile.points[i + 1];
+			var ps = this.getProfile(start, end, profile.width, maxDepth);
 
-			let segment = {
+			var segment = {
 				start: start,
 				end: end,
 				points: ps,
@@ -638,25 +638,25 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		}
 
 		// add projection functions to the segments
-		let mileage = new THREE.Vector3();
-		for(let i = 0; i < points.segments.length; i++)
+		var mileage = new THREE.Vector3();
+		for(var i = 0; i < points.segments.length; i++)
 		{
-			let segment = points.segments[i];
-			let start = segment.start;
-			let end = segment.end;
+			var segment = points.segments[i];
+			var start = segment.start;
+			var end = segment.end;
 
-			let project = (function(_start, _end, _mileage, _boundingBox)
+			var project = (function(_start, _end, _mileage, _boundingBox)
 			{
-				let start = _start;
-				let end = _end;
-				let mileage = _mileage;
-				let boundingBox = _boundingBox;
+				var start = _start;
+				var end = _end;
+				var mileage = _mileage;
+				var boundingBox = _boundingBox;
 
-				let xAxis = new THREE.Vector3(1, 0, 0);
-				let dir = new THREE.Vector3().subVectors(end, start);
+				var xAxis = new THREE.Vector3(1, 0, 0);
+				var dir = new THREE.Vector3().subVectors(end, start);
 				dir.y = 0;
 				dir.normalize();
-				let alpha = Math.acos(xAxis.dot(dir));
+				var alpha = Math.acos(xAxis.dot(dir));
 				if(dir.z > 0)
 				{
 					alpha = -alpha;
@@ -664,11 +664,11 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 				return function(position)
 				{
-					let toOrigin = new THREE.Matrix4().makeTranslation(-start.x, -boundingBox.min.y, -start.z);
-					let alignWithX = new THREE.Matrix4().makeRotationY(-alpha);
-					let applyMileage = new THREE.Matrix4().makeTranslation(mileage.x, 0, 0);
+					var toOrigin = new THREE.Matrix4().makeTranslation(-start.x, -boundingBox.min.y, -start.z);
+					var alignWithX = new THREE.Matrix4().makeRotationY(-alpha);
+					var applyMileage = new THREE.Matrix4().makeTranslation(mileage.x, 0, 0);
 
-					let pos = position.clone();
+					var pos = position.clone();
 					pos.applyMatrix4(toOrigin);
 					pos.applyMatrix4(alignWithX);
 					pos.applyMatrix4(applyMileage);
@@ -704,7 +704,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 	 */
 	getProfile(start, end, width, depth, callback)
 	{
-		let request = new Potree.ProfileRequest(start, end, width, depth, callback);
+		var request = new Potree.ProfileRequest(start, end, width, depth, callback);
 		this.profileRequests.push(request);
 	};
 
@@ -727,25 +727,25 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 	pick(viewer, camera, ray, params = {})
 	{
 
-		let renderer = viewer.renderer;
-		let pRenderer = viewer.pRenderer;
+		var renderer = viewer.renderer;
+		var pRenderer = viewer.pRenderer;
 
 		performance.mark("pick-start");
 
-		let getVal = (a, b) => a !== undefined ? a : b;
+		var getVal = (a, b) => a !== undefined ? a : b;
 
-		let pickWindowSize = getVal(params.pickWindowSize, 17);
-		let pickOutsideClipRegion = getVal(params.pickOutsideClipRegion, false);
+		var pickWindowSize = getVal(params.pickWindowSize, 17);
+		var pickOutsideClipRegion = getVal(params.pickOutsideClipRegion, false);
 
-		let size = renderer.getSize(new THREE.Vector3());
+		var size = renderer.getSize(new THREE.Vector3());
 
-		let width = Math.ceil(getVal(params.width, size.width));
-		let height = Math.ceil(getVal(params.height, size.height));
+		var width = Math.ceil(getVal(params.width, size.width));
+		var height = Math.ceil(getVal(params.height, size.height));
 
-		let pointSizeType = getVal(params.pointSizeType, this.material.pointSizeType);
-		let pointSize = getVal(params.pointSize, this.material.size);
+		var pointSizeType = getVal(params.pointSizeType, this.material.pointSizeType);
+		var pointSize = getVal(params.pointSize, this.material.size);
 
-		let nodes = this.nodesOnRay(this.visibleNodes, ray);
+		var nodes = this.nodesOnRay(this.visibleNodes, ray);
 
 		if(nodes.length === 0)
 		{
@@ -754,12 +754,12 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 		if(!this.pickState)
 		{
-			let scene = new THREE.Scene();
+			var scene = new THREE.Scene();
 
-			let material = new Potree.PointCloudMaterial();
+			var material = new Potree.PointCloudMaterial();
 			material.pointColorType = Potree.PointColorType.POINT_INDEX;
 
-			let renderTarget = new THREE.WebGLRenderTarget(
+			var renderTarget = new THREE.WebGLRenderTarget(
 				1, 1,
 				{
 					minFilter: THREE.LinearFilter,
@@ -775,8 +775,8 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 			};
 		};
 
-		let pickState = this.pickState;
-		let pickMaterial = pickState.material;
+		var pickState = this.pickState;
+		var pickMaterial = pickState.material;
 
 		//Update pick material
 		pickMaterial.pointSizeType = pointSizeType;
@@ -807,9 +807,9 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 		pickState.renderTarget.setSize(width, height);
 
-		let pixelPos = new THREE.Vector2(params.x, params.y);
+		var pixelPos = new THREE.Vector2(params.x, params.y);
 
-		let gl = renderer.getContext();
+		var gl = renderer.getContext();
 		gl.enable(gl.SCISSOR_TEST);
 		gl.scissor(
 			parseInt(pixelPos.x - (pickWindowSize - 1) / 2),
@@ -825,22 +825,22 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		gl.clearColor(0, 0, 0, 0);
 		renderer.clearTarget(pickState.renderTarget, true, true, true);
 
-		let tmp = this.material;
+		var tmp = this.material;
 		this.material = pickMaterial;
 
 		pRenderer.renderOctree(this, nodes, camera, pickState.renderTarget);
 
 		this.material = tmp;
 
-		let clamp = (number, min, max) => Math.min(Math.max(min, number), max);
+		var clamp = (number, min, max) => Math.min(Math.max(min, number), max);
 
-		let x = parseInt(clamp(pixelPos.x - (pickWindowSize - 1) / 2, 0, width));
-		let y = parseInt(clamp(pixelPos.y - (pickWindowSize - 1) / 2, 0, height));
-		let w = parseInt(Math.min(x + pickWindowSize, width) - x);
-		let h = parseInt(Math.min(y + pickWindowSize, height) - y);
+		var x = parseInt(clamp(pixelPos.x - (pickWindowSize - 1) / 2, 0, width));
+		var y = parseInt(clamp(pixelPos.y - (pickWindowSize - 1) / 2, 0, height));
+		var w = parseInt(Math.min(x + pickWindowSize, width) - x);
+		var h = parseInt(Math.min(y + pickWindowSize, height) - y);
 
-		let pixelCount = w * h;
-		let buffer = new Uint8Array(4 * pixelCount);
+		var pixelCount = w * h;
+		var buffer = new Uint8Array(4 * pixelCount);
 
 		gl.readPixels(x, y, pickWindowSize, pickWindowSize, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
 
@@ -849,26 +849,26 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		renderer.setScissorTest(false);
 		gl.disable(gl.SCISSOR_TEST);
 
-		let pixels = buffer;
-		let ibuffer = new Uint32Array(buffer.buffer);
+		var pixels = buffer;
+		var ibuffer = new Uint32Array(buffer.buffer);
 
 		// find closest hit inside pixelWindow boundaries
-		let min = Number.MAX_VALUE;
-		let hits = [];
-		for(let u = 0; u < pickWindowSize; u++)
+		var min = Number.MAX_VALUE;
+		var hits = [];
+		for(var u = 0; u < pickWindowSize; u++)
 		{
-			for(let v = 0; v < pickWindowSize; v++)
+			for(var v = 0; v < pickWindowSize; v++)
 			{
-				let offset = (u + v * pickWindowSize);
-				let distance = Math.pow(u - (pickWindowSize - 1) / 2, 2) + Math.pow(v - (pickWindowSize - 1) / 2, 2);
+				var offset = (u + v * pickWindowSize);
+				var distance = Math.pow(u - (pickWindowSize - 1) / 2, 2) + Math.pow(v - (pickWindowSize - 1) / 2, 2);
 
-				let pcIndex = pixels[4 * offset + 3];
+				var pcIndex = pixels[4 * offset + 3];
 				pixels[4 * offset + 3] = 0;
-				let pIndex = ibuffer[offset];
+				var pIndex = ibuffer[offset];
 
 				if(!(pcIndex === 0 && pIndex === 0) && (pcIndex !== undefined) && (pIndex !== undefined))
 				{
-					let hit = {
+					var hit = {
 						pIndex: pIndex,
 						pcIndex: pcIndex,
 						distanceToCenter: distance
@@ -897,30 +897,30 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 			}
 		}
 
-		for(let hit of hits)
+		for(var hit of hits)
 		{
-			let point = {};
+			var point = {};
 
 			if(!nodes[hit.pcIndex])
 			{
 				return null;
 			}
 
-			let node = nodes[hit.pcIndex];
-			let pc = node.sceneNode;
-			let geometry = node.geometryNode.geometry;
+			var node = nodes[hit.pcIndex];
+			var pc = node.sceneNode;
+			var geometry = node.geometryNode.geometry;
 
-			for(let attributeName in geometry.attributes)
+			for(var attributeName in geometry.attributes)
 			{
-				let attribute = geometry.attributes[attributeName];
+				var attribute = geometry.attributes[attributeName];
 
 				if(attributeName === "position")
 				{
-					let x = attribute.array[3 * hit.pIndex + 0];
-					let y = attribute.array[3 * hit.pIndex + 1];
-					let z = attribute.array[3 * hit.pIndex + 2];
+					var x = attribute.array[3 * hit.pIndex + 0];
+					var y = attribute.array[3 * hit.pIndex + 1];
+					var z = attribute.array[3 * hit.pIndex + 2];
 
-					let position = new THREE.Vector3(x, y, z);
+					var position = new THREE.Vector3(x, y, z);
 					position.applyMatrix4(pc.matrixWorld);
 
 					point[attributeName] = position;
@@ -934,8 +934,8 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 					//if (values.itemSize === 1) {
 					//	point[attribute.name] = values.array[hit.pIndex];
 					//} else {
-					//	let value = [];
-					//	for (let j = 0; j < values.itemSize; j++) {
+					//	var value = [];
+					//	for (var j = 0; j < values.itemSize; j++) {
 					//		value.push(values.array[values.itemSize * hit.pIndex + j]);
 					//	}
 					//	point[attribute.name] = value;
@@ -963,7 +963,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 			else
 			{
 				return hits[0].point;
-				//let sorted = hits.sort( (a, b) => a.distanceToCenter - b.distanceToCenter);
+				//var sorted = hits.sort( (a, b) => a.distanceToCenter - b.distanceToCenter);
 				//return sorted[0].point;
 			}
 		}
@@ -972,32 +972,32 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 	*getFittedBoxGen(boxNode)
 	{
-		let start = performance.now();
+		var start = performance.now();
 
-		let shrinkedLocalBounds = new THREE.Box3();
-		let worldToBox = new THREE.Matrix4().getInverse(boxNode.matrixWorld);
+		var shrinkedLocalBounds = new THREE.Box3();
+		var worldToBox = new THREE.Matrix4().getInverse(boxNode.matrixWorld);
 
-		for(let node of this.visibleNodes)
+		for(var node of this.visibleNodes)
 		{
 			if(!node.sceneNode)
 			{
 				continue;
 			}
 
-			let buffer = node.geometryNode.buffer;
+			var buffer = node.geometryNode.buffer;
 
-			let posOffset = buffer.offset("position");
-			let stride = buffer.stride;
-			let view = new DataView(buffer.data);
+			var posOffset = buffer.offset("position");
+			var stride = buffer.stride;
+			var view = new DataView(buffer.data);
 
-			let objectToBox = new THREE.Matrix4().multiplyMatrices(worldToBox, node.sceneNode.matrixWorld);
+			var objectToBox = new THREE.Matrix4().multiplyMatrices(worldToBox, node.sceneNode.matrixWorld);
 
-			let pos = new THREE.Vector4();
-			for(let i = 0; i < buffer.numElements; i++)
+			var pos = new THREE.Vector4();
+			for(var i = 0; i < buffer.numElements; i++)
 			{
-				let x = view.getFloat32(i * stride + posOffset + 0, true);
-				let y = view.getFloat32(i * stride + posOffset + 4, true);
-				let z = view.getFloat32(i * stride + posOffset + 8, true);
+				var x = view.getFloat32(i * stride + posOffset + 0, true);
+				var y = view.getFloat32(i * stride + posOffset + 4, true);
+				var z = view.getFloat32(i * stride + posOffset + 8, true);
 
 				pos.set(x, y, z, 1);
 				pos.applyMatrix4(objectToBox);
@@ -1017,17 +1017,17 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 			yield;
 		}
 
-		let fittedPosition = shrinkedLocalBounds.getCenter().applyMatrix4(boxNode.matrixWorld);
+		var fittedPosition = shrinkedLocalBounds.getCenter().applyMatrix4(boxNode.matrixWorld);
 
-		let fitted = new THREE.Object3D();
+		var fitted = new THREE.Object3D();
 		fitted.position.copy(fittedPosition);
 		fitted.scale.copy(boxNode.scale);
 		fitted.rotation.copy(boxNode.rotation);
 
-		let ds = new THREE.Vector3().subVectors(shrinkedLocalBounds.max, shrinkedLocalBounds.min);
+		var ds = new THREE.Vector3().subVectors(shrinkedLocalBounds.max, shrinkedLocalBounds.min);
 		fitted.scale.multiply(ds);
 
-		let duration = performance.now() - start;
+		var duration = performance.now() - start;
 		console.log("duration: ", duration);
 
 		yield fitted;
@@ -1038,32 +1038,32 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 		maxLevel = Infinity;
 
-		let start = performance.now();
+		var start = performance.now();
 
-		let shrinkedLocalBounds = new THREE.Box3();
-		let worldToBox = new THREE.Matrix4().getInverse(boxNode.matrixWorld);
+		var shrinkedLocalBounds = new THREE.Box3();
+		var worldToBox = new THREE.Matrix4().getInverse(boxNode.matrixWorld);
 
-		for(let node of this.visibleNodes)
+		for(var node of this.visibleNodes)
 		{
 			if(!node.sceneNode || node.getLevel() > maxLevel)
 			{
 				continue;
 			}
 
-			let buffer = node.geometryNode.buffer;
+			var buffer = node.geometryNode.buffer;
 
-			let posOffset = buffer.offset("position");
-			let stride = buffer.stride;
-			let view = new DataView(buffer.data);
+			var posOffset = buffer.offset("position");
+			var stride = buffer.stride;
+			var view = new DataView(buffer.data);
 
-			let objectToBox = new THREE.Matrix4().multiplyMatrices(worldToBox, node.sceneNode.matrixWorld);
+			var objectToBox = new THREE.Matrix4().multiplyMatrices(worldToBox, node.sceneNode.matrixWorld);
 
-			let pos = new THREE.Vector4();
-			for(let i = 0; i < buffer.numElements; i++)
+			var pos = new THREE.Vector4();
+			for(var i = 0; i < buffer.numElements; i++)
 			{
-				let x = view.getFloat32(i * stride + posOffset + 0, true);
-				let y = view.getFloat32(i * stride + posOffset + 4, true);
-				let z = view.getFloat32(i * stride + posOffset + 8, true);
+				var x = view.getFloat32(i * stride + posOffset + 0, true);
+				var y = view.getFloat32(i * stride + posOffset + 4, true);
+				var z = view.getFloat32(i * stride + posOffset + 8, true);
 
 				pos.set(x, y, z, 1);
 				pos.applyMatrix4(objectToBox);
@@ -1081,17 +1081,17 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 			}
 		}
 
-		let fittedPosition = shrinkedLocalBounds.getCenter().applyMatrix4(boxNode.matrixWorld);
+		var fittedPosition = shrinkedLocalBounds.getCenter().applyMatrix4(boxNode.matrixWorld);
 
-		let fitted = new THREE.Object3D();
+		var fitted = new THREE.Object3D();
 		fitted.position.copy(fittedPosition);
 		fitted.scale.copy(boxNode.scale);
 		fitted.rotation.copy(boxNode.rotation);
 
-		let ds = new THREE.Vector3().subVectors(shrinkedLocalBounds.max, shrinkedLocalBounds.min);
+		var ds = new THREE.Vector3().subVectors(shrinkedLocalBounds.max, shrinkedLocalBounds.min);
 		fitted.scale.multiply(ds);
 
-		let duration = performance.now() - start;
+		var duration = performance.now() - start;
 		console.log("duration: ", duration);
 
 		return fitted;
@@ -1104,8 +1104,8 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 	find(name)
 	{
-		let node = null;
-		for(let char of name)
+		var node = null;
+		for(var char of name)
 		{
 			if(char === "r")
 			{

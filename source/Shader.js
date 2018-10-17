@@ -29,17 +29,17 @@ Potree.Shader = class Shader
 
 	compileShader(shader, source)
 	{
-		let gl = this.gl;
+		var gl = this.gl;
 
 		gl.shaderSource(shader, source);
 
 		gl.compileShader(shader);
 
-		let success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+		var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
 		if(!success)
 		{
-			let info = gl.getShaderInfoLog(shader);
-			let numberedSource = source.split("\n").map((a, i) => `${i + 1}`.padEnd(5) + a).join("\n");
+			var info = gl.getShaderInfoLog(shader);
+			var numberedSource = source.split("\n").map((a, i) => `${i + 1}`.padEnd(5) + a).join("\n");
 			throw `could not compile shader ${this.name}: ${info}, \n${numberedSource}`;
 		}
 	}
@@ -47,14 +47,14 @@ Potree.Shader = class Shader
 	linkProgram()
 	{
 
-		let gl = this.gl;
+		var gl = this.gl;
 
 		this.uniformLocations = {};
 		this.attributeLocations = {};
 
 		gl.useProgram(null);
 
-		let cached = this.cache.get(`${this.vsSource}, ${this.fsSource}`);
+		var cached = this.cache.get(`${this.vsSource}, ${this.fsSource}`);
 		if(cached)
 		{
 			this.program = cached.program;
@@ -71,16 +71,16 @@ Potree.Shader = class Shader
 			this.fs = gl.createShader(gl.FRAGMENT_SHADER);
 			this.program = gl.createProgram();
 
-			for(let name of Object.keys(Potree.attributeLocations))
+			for(var name of Object.keys(Potree.attributeLocations))
 			{
-				let location = Potree.attributeLocations[name];
+				var location = Potree.attributeLocations[name];
 				gl.bindAttribLocation(this.program, location, name);
 			}
 
 			this.compileShader(this.vs, this.vsSource);
 			this.compileShader(this.fs, this.fsSource);
 
-			let program = this.program;
+			var program = this.program;
 
 			gl.attachShader(program, this.vs);
 			gl.attachShader(program, this.fs);
@@ -90,38 +90,38 @@ Potree.Shader = class Shader
 			gl.detachShader(program, this.vs);
 			gl.detachShader(program, this.fs);
 
-			let success = gl.getProgramParameter(program, gl.LINK_STATUS);
+			var success = gl.getProgramParameter(program, gl.LINK_STATUS);
 			if(!success)
 			{
-				let info = gl.getProgramInfoLog(program);
+				var info = gl.getProgramInfoLog(program);
 				throw `could not link program ${this.name}: ${info}`;
 			}
 
 			// attribute locations
-			let numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+			var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
 
-			for(let i = 0; i < numAttributes; i++)
+			for(var i = 0; i < numAttributes; i++)
 			{
-				let attribute = gl.getActiveAttrib(program, i);
+				var attribute = gl.getActiveAttrib(program, i);
 
-				let location = gl.getAttribLocation(program, attribute.name);
+				var location = gl.getAttribLocation(program, attribute.name);
 
 				this.attributeLocations[attribute.name] = location;
 			}
 
 			// uniform locations
-			let numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+			var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
-			for(let i = 0; i < numUniforms; i++)
+			for(var i = 0; i < numUniforms; i++)
 			{
-				let uniform = gl.getActiveUniform(program, i);
+				var uniform = gl.getActiveUniform(program, i);
 
-				let location = gl.getUniformLocation(program, uniform.name);
+				var location = gl.getUniformLocation(program, uniform.name);
 
 				this.uniformLocations[uniform.name] = location;
 			}
 
-			let cached = {
+			var cached = {
 				program: this.program,
 				vs: this.vs,
 				fs: this.fs,
@@ -143,7 +143,7 @@ Potree.Shader = class Shader
 			return;
 		}
 
-		let tmp = new Float32Array(value.elements);
+		var tmp = new Float32Array(value.elements);
 		gl.uniformMatrix4fv(location, false, tmp);
 	}
 
@@ -251,8 +251,8 @@ Potree.Shader = class Shader
 
 	setUniform1i(name, value)
 	{
-		let gl = this.gl;
-		let location = this.uniformLocations[name];
+		var gl = this.gl;
+		var location = this.uniformLocations[name];
 
 		if(location == null)
 		{

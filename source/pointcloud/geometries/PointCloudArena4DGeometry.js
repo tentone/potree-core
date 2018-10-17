@@ -42,7 +42,7 @@ Potree.PointCloudArena4DGeometryNode = class PointCloudArena4DGeometryNode
 
 	getChildren()
 	{
-		let children = [];
+		var children = [];
 
 		if(this.left)
 		{
@@ -78,12 +78,12 @@ Potree.PointCloudArena4DGeometryNode = class PointCloudArena4DGeometryNode
 
 		Potree.numNodesLoading++;
 
-		let url = this.pcoGeometry.url + "?node=" + this.number;
-		let xhr = XHRFactory.createXMLHttpRequest();
+		var url = this.pcoGeometry.url + "?node=" + this.number;
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 
-		let node = this;
+		var node = this;
 
 		xhr.onreadystatechange = function()
 		{
@@ -92,43 +92,43 @@ Potree.PointCloudArena4DGeometryNode = class PointCloudArena4DGeometryNode
 				return;
 			}
 
-			let buffer = xhr.response;
-			let sourceView = new DataView(buffer);
-			let numPoints = buffer.byteLength / 17;
-			let bytesPerPoint = 28;
+			var buffer = xhr.response;
+			var sourceView = new DataView(buffer);
+			var numPoints = buffer.byteLength / 17;
+			var bytesPerPoint = 28;
 
-			let data = new ArrayBuffer(numPoints * bytesPerPoint);
-			let targetView = new DataView(data);
+			var data = new ArrayBuffer(numPoints * bytesPerPoint);
+			var targetView = new DataView(data);
 
-			let attributes = [
+			var attributes = [
 				Potree.PointAttribute.POSITION_CARTESIAN,
 				Potree.PointAttribute.RGBA_PACKED,
 				Potree.PointAttribute.INTENSITY,
 				Potree.PointAttribute.CLASSIFICATION,
 			];
 
-			let position = new Float32Array(numPoints * 3);
-			let color = new Uint8Array(numPoints * 4);
-			let intensities = new Float32Array(numPoints);
-			let classifications = new Uint8Array(numPoints);
-			let indices = new ArrayBuffer(numPoints * 4);
-			let u32Indices = new Uint32Array(indices);
+			var position = new Float32Array(numPoints * 3);
+			var color = new Uint8Array(numPoints * 4);
+			var intensities = new Float32Array(numPoints);
+			var classifications = new Uint8Array(numPoints);
+			var indices = new ArrayBuffer(numPoints * 4);
+			var u32Indices = new Uint32Array(indices);
 
-			let tightBoundingBox = new THREE.Box3();
+			var tightBoundingBox = new THREE.Box3();
 
-			for(let i = 0; i < numPoints; i++)
+			for(var i = 0; i < numPoints; i++)
 			{
-				let x = sourceView.getFloat32(i * 17 + 0, true) + node.boundingBox.min.x;
-				let y = sourceView.getFloat32(i * 17 + 4, true) + node.boundingBox.min.y;
-				let z = sourceView.getFloat32(i * 17 + 8, true) + node.boundingBox.min.z;
+				var x = sourceView.getFloat32(i * 17 + 0, true) + node.boundingBox.min.x;
+				var y = sourceView.getFloat32(i * 17 + 4, true) + node.boundingBox.min.y;
+				var z = sourceView.getFloat32(i * 17 + 8, true) + node.boundingBox.min.z;
 
-				let r = sourceView.getUint8(i * 17 + 12, true);
-				let g = sourceView.getUint8(i * 17 + 13, true);
-				let b = sourceView.getUint8(i * 17 + 14, true);
+				var r = sourceView.getUint8(i * 17 + 12, true);
+				var g = sourceView.getUint8(i * 17 + 13, true);
+				var b = sourceView.getUint8(i * 17 + 14, true);
 
-				let intensity = sourceView.getUint8(i * 17 + 15, true);
+				var intensity = sourceView.getUint8(i * 17 + 15, true);
 
-				let classification = sourceView.getUint8(i * 17 + 16, true);
+				var classification = sourceView.getUint8(i * 17 + 16, true);
 
 				tightBoundingBox.expandByPoint(new THREE.Vector3(x, y, z));
 
@@ -147,14 +147,14 @@ Potree.PointCloudArena4DGeometryNode = class PointCloudArena4DGeometryNode
 				u32Indices[i] = i;
 			}
 
-			let geometry = new THREE.BufferGeometry();
+			var geometry = new THREE.BufferGeometry();
 
 			geometry.addAttribute("position", new THREE.BufferAttribute(position, 3));
 			geometry.addAttribute("color", new THREE.BufferAttribute(color, 4, true));
 			geometry.addAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
 			geometry.addAttribute("classification", new THREE.BufferAttribute(classifications, 1));
 			{
-				let bufferAttribute = new THREE.BufferAttribute(new Uint8Array(indices), 4, true);
+				var bufferAttribute = new THREE.BufferAttribute(new Uint8Array(indices), 4, true);
 				//bufferAttribute.normalized = true;
 				geometry.addAttribute("indices", bufferAttribute);
 			}
@@ -178,9 +178,9 @@ Potree.PointCloudArena4DGeometryNode = class PointCloudArena4DGeometryNode
 			this.loaded = false;
 
 			// this.dispatchEvent( { type: "dispose" } );
-			for(let i = 0; i < this.oneTimeDisposeHandlers.length; i++)
+			for(var i = 0; i < this.oneTimeDisposeHandlers.length; i++)
 			{
-				let handler = this.oneTimeDisposeHandlers[i];
+				var handler = this.oneTimeDisposeHandlers[i];
 				handler();
 			}
 			this.oneTimeDisposeHandlers = [];
@@ -218,7 +218,7 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 
 	static load(url, callback)
 	{
-		let xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", url + "?info", true);
 
 		xhr.onreadystatechange = function()
@@ -227,9 +227,9 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 			{
 				if(xhr.readyState === 4 && xhr.status === 200)
 				{
-					let response = JSON.parse(xhr.responseText);
+					var response = JSON.parse(xhr.responseText);
 
-					let geometry = new Potree.PointCloudArena4DGeometry();
+					var geometry = new Potree.PointCloudArena4DGeometry();
 					geometry.url = url;
 					geometry.name = response.Name;
 					geometry.provider = response.Provider;
@@ -245,14 +245,14 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 						geometry.spacing = response.Spacing;
 					}
 
-					let offset = geometry.boundingBox.min.clone().multiplyScalar(-1);
+					var offset = geometry.boundingBox.min.clone().multiplyScalar(-1);
 
 					geometry.boundingBox.min.add(offset);
 					geometry.boundingBox.max.add(offset);
 					geometry.offset = offset;
 
-					let center = geometry.boundingBox.getCenter();
-					let radius = geometry.boundingBox.getSize(new THREE.Vector3()).length() / 2;
+					var center = geometry.boundingBox.getCenter();
+					var radius = geometry.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 					geometry.boundingSphere = new THREE.Sphere(center, radius);
 
 					geometry.loadHierarchy();
@@ -276,8 +276,8 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 
 	loadHierarchy()
 	{
-		let url = this.url + "?tree";
-		let xhr = XHRFactory.createXMLHttpRequest();
+		var url = this.url + "?tree";
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 
@@ -288,26 +288,26 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 				return;
 			}
 
-			let buffer = xhr.response;
-			let numNodes = buffer.byteLength / 3;
-			let view = new DataView(buffer);
-			let stack = [];
-			let root = null;
+			var buffer = xhr.response;
+			var numNodes = buffer.byteLength / 3;
+			var view = new DataView(buffer);
+			var stack = [];
+			var root = null;
 
-			let levels = 0;
+			var levels = 0;
 
-			// TODO Debug: let start = new Date().getTime();
+			// TODO Debug: var start = new Date().getTime();
 			// read hierarchy
-			for(let i = 0; i < numNodes; i++)
+			for(var i = 0; i < numNodes; i++)
 			{
-				let mask = view.getUint8(i * 3 + 0, true);
+				var mask = view.getUint8(i * 3 + 0, true);
 
-				let hasLeft = (mask & 1) > 0;
-				let hasRight = (mask & 2) > 0;
-				let splitX = (mask & 4) > 0;
-				let splitY = (mask & 8) > 0;
-				let splitZ = (mask & 16) > 0;
-				let split = null;
+				var hasLeft = (mask & 1) > 0;
+				var hasRight = (mask & 2) > 0;
+				var splitX = (mask & 4) > 0;
+				var splitY = (mask & 8) > 0;
+				var splitZ = (mask & 16) > 0;
+				var split = null;
 				if(splitX)
 				{
 					split = "X";
@@ -321,7 +321,7 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 					split = "Z";
 				}
 
-				let node = new Potree.PointCloudArena4DGeometryNode();
+				var node = new Potree.PointCloudArena4DGeometryNode();
 				node.hasLeft = hasLeft;
 				node.hasRight = hasRight;
 				node.split = split;
@@ -335,9 +335,9 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 
 				if(stack.length > 0)
 				{
-					let parent = stack[stack.length - 1];
+					var parent = stack[stack.length - 1];
 					node.boundingBox = parent.boundingBox.clone();
-					let parentBBSize = parent.boundingBox.getSize(new THREE.Vector3());
+					var parentBBSize = parent.boundingBox.getSize(new THREE.Vector3());
 
 					if(parent.hasLeft && !parent.left)
 					{
@@ -357,8 +357,8 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 							node.boundingBox.max.z = node.boundingBox.min.z + parentBBSize.z / 2;
 						}
 
-						let center = node.boundingBox.getCenter();
-						let radius = node.boundingBox.getSize(new THREE.Vector3()).length() / 2;
+						var center = node.boundingBox.getCenter();
+						var radius = node.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 						node.boundingSphere = new THREE.Sphere(center, radius);
 					}
 					else
@@ -379,8 +379,8 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 							node.boundingBox.min.z = node.boundingBox.min.z + parentBBSize.z / 2;
 						}
 
-						let center = node.boundingBox.getCenter();
-						let radius = node.boundingBox.getSize(new THREE.Vector3()).length() / 2;
+						var center = node.boundingBox.getCenter();
+						var radius = node.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 						node.boundingSphere = new THREE.Sphere(center, radius);
 					}
 				}
@@ -388,12 +388,12 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 				{
 					root = node;
 					root.boundingBox = this.boundingBox.clone();
-					let center = root.boundingBox.getCenter();
-					let radius = root.boundingBox.getSize(new THREE.Vector3()).length() / 2;
+					var center = root.boundingBox.getCenter();
+					var radius = root.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 					root.boundingSphere = new THREE.Sphere(center, radius);
 				}
 
-				let bbSize = node.boundingBox.getSize(new THREE.Vector3());
+				var bbSize = node.boundingBox.getSize(new THREE.Vector3());
 				node.spacing = ((bbSize.x + bbSize.y + bbSize.z) / 3) / 75;
 				node.estimatedSpacing = node.spacing;
 
@@ -401,12 +401,12 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 
 				if(node.isLeaf)
 				{
-					let done = false;
+					var done = false;
 					while(!done && stack.length > 0)
 					{
 						stack.pop();
 
-						let top = stack[stack.length - 1];
+						var top = stack[stack.length - 1];
 
 						done = stack.length > 0 && top.hasRight && top.right == null;
 					}

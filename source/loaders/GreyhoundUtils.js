@@ -13,8 +13,8 @@ class GreyhoundUtils
 	static getQueryParam(name)
 	{
 		name = name.replace(/[[\]]/g, "\\$&");
-		let regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
-		let results = regex.exec(window.location.href);
+		var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
+		var results = regex.exec(window.location.href);
 		if(!results) return null;
 		if(!results[2]) return "";
 		return decodeURIComponent(results[2].replace(/\+/g, " "));
@@ -22,7 +22,7 @@ class GreyhoundUtils
 
 	static createSchema(attributes)
 	{
-		let schema = [
+		var schema = [
 			{
 				"name": "X",
 				"size": 4,
@@ -95,7 +95,7 @@ class GreyhoundUtils
 
 	static fetch(url, cb)
 	{
-		let xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.onreadystatechange = function()
 		{
@@ -116,7 +116,7 @@ class GreyhoundUtils
 
 	static fetchBinary(url, cb)
 	{
-		let xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.onreadystatechange = function()
@@ -143,7 +143,7 @@ class GreyhoundUtils
 
 	static getNormalization(serverURL, baseDepth, cb)
 	{
-		let s = [
+		var s = [
 			{
 				"name": "X",
 				"size": 4,
@@ -181,22 +181,22 @@ class GreyhoundUtils
 			}
 		];
 
-		let url = serverURL + "read?depth=" + baseDepth +
+		var url = serverURL + "read?depth=" + baseDepth +
 			"&schema=" + JSON.stringify(s);
 
 		GreyhoundUtils.fetchBinary(url, function(err, buffer)
 		{
 			if(err) throw new Error(err);
 
-			let view = new DataView(buffer);
-			let numBytes = buffer.byteLength - 4;
-			// TODO Unused: let numPoints = view.getUint32(numBytes, true);
-			let pointSize = GreyhoundUtils.pointSizeFrom(s);
+			var view = new DataView(buffer);
+			var numBytes = buffer.byteLength - 4;
+			// TODO Unused: var numPoints = view.getUint32(numBytes, true);
+			var pointSize = GreyhoundUtils.pointSizeFrom(s);
 
-			let colorNorm = false;
-			let intensityNorm = false;
+			var colorNorm = false;
+			var intensityNorm = false;
 
-			for(let offset = 0; offset < numBytes; offset += pointSize)
+			for(var offset = 0; offset < numBytes; offset += pointSize)
 			{
 				if(view.getUint16(offset + 12, true) > 255 ||
 					view.getUint16(offset + 14, true) > 255 ||

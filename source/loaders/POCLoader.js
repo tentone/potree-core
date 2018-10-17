@@ -17,18 +17,18 @@ Potree.POCLoader.load = function(url, callback)
 {
 	try
 	{
-		let pco = new Potree.PointCloudOctreeGeometry();
+		var pco = new Potree.PointCloudOctreeGeometry();
 		pco.url = url;
-		let xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", url, true);
 
 		xhr.onreadystatechange = function()
 		{
 			if(xhr.readyState === 4 && (xhr.status === 200 || xhr.status === 0))
 			{
-				let fMno = JSON.parse(xhr.responseText);
+				var fMno = JSON.parse(xhr.responseText);
 
-				let version = new VersionUtils(fMno.version);
+				var version = new VersionUtils(fMno.version);
 
 				// assume octreeDir is absolute if it starts with http
 				if(fMno.octreeDir.indexOf("http") === 0)
@@ -45,10 +45,10 @@ Potree.POCLoader.load = function(url, callback)
 
 				pco.pointAttributes = fMno.pointAttributes;
 
-				let min = new THREE.Vector3(fMno.boundingBox.lx, fMno.boundingBox.ly, fMno.boundingBox.lz);
-				let max = new THREE.Vector3(fMno.boundingBox.ux, fMno.boundingBox.uy, fMno.boundingBox.uz);
-				let boundingBox = new THREE.Box3(min, max);
-				let tightBoundingBox = boundingBox.clone();
+				var min = new THREE.Vector3(fMno.boundingBox.lx, fMno.boundingBox.ly, fMno.boundingBox.lz);
+				var max = new THREE.Vector3(fMno.boundingBox.ux, fMno.boundingBox.uy, fMno.boundingBox.uz);
+				var boundingBox = new THREE.Box3(min, max);
+				var tightBoundingBox = boundingBox.clone();
 
 				if(fMno.tightBoundingBox)
 				{
@@ -56,7 +56,7 @@ Potree.POCLoader.load = function(url, callback)
 					tightBoundingBox.max.copy(new THREE.Vector3(fMno.tightBoundingBox.ux, fMno.tightBoundingBox.uy, fMno.tightBoundingBox.uz));
 				}
 
-				let offset = min.clone();
+				var offset = min.clone();
 
 				boundingBox.min.sub(offset);
 				boundingBox.max.sub(offset);
@@ -84,12 +84,12 @@ Potree.POCLoader.load = function(url, callback)
 					pco.pointAttributes = new Potree.PointAttributes(pco.pointAttributes);
 				}
 
-				let nodes = {};
+				var nodes = {};
 
 				{ // load root
-					let name = "r";
+					var name = "r";
 
-					let root = new Potree.PointCloudOctreeGeometryNode(name, pco, boundingBox);
+					var root = new Potree.PointCloudOctreeGeometryNode(name, pco, boundingBox);
 					root.level = 0;
 					root.hasChildren = true;
 					root.spacing = pco.spacing;
@@ -109,17 +109,17 @@ Potree.POCLoader.load = function(url, callback)
 				// load remaining hierarchy
 				if(version.upTo("1.4"))
 				{
-					for(let i = 1; i < fMno.hierarchy.length; i++)
+					for(var i = 1; i < fMno.hierarchy.length; i++)
 					{
-						let name = fMno.hierarchy[i][0];
-						let numPoints = fMno.hierarchy[i][1];
-						let index = parseInt(name.charAt(name.length - 1));
-						let parentName = name.substring(0, name.length - 1);
-						let parentNode = nodes[parentName];
-						let level = name.length - 1;
-						let boundingBox = Potree.POCLoader.createChildAABB(parentNode.boundingBox, index);
+						var name = fMno.hierarchy[i][0];
+						var numPoints = fMno.hierarchy[i][1];
+						var index = parseInt(name.charAt(name.length - 1));
+						var parentName = name.substring(0, name.length - 1);
+						var parentNode = nodes[parentName];
+						var level = name.length - 1;
+						var boundingBox = Potree.POCLoader.createChildAABB(parentNode.boundingBox, index);
 
-						let node = new Potree.PointCloudOctreeGeometryNode(name, pco, boundingBox);
+						var node = new Potree.PointCloudOctreeGeometryNode(name, pco, boundingBox);
 						node.level = level;
 						node.numPoints = numPoints;
 						node.spacing = pco.spacing / Math.pow(2, level);
@@ -147,12 +147,12 @@ Potree.POCLoader.load = function(url, callback)
 
 Potree.POCLoader.loadPointAttributes = function(mno)
 {
-	let fpa = mno.pointAttributes;
-	let pa = new Potree.PointAttributes();
+	var fpa = mno.pointAttributes;
+	var pa = new Potree.PointAttributes();
 
-	for(let i = 0; i < fpa.length; i++)
+	for(var i = 0; i < fpa.length; i++)
 	{
-		let pointAttribute = Potree.PointAttribute[fpa[i]];
+		var pointAttribute = Potree.PointAttribute[fpa[i]];
 		pa.add(pointAttribute);
 	}
 
@@ -161,9 +161,9 @@ Potree.POCLoader.loadPointAttributes = function(mno)
 
 Potree.POCLoader.createChildAABB = function(aabb, index)
 {
-	let min = aabb.min.clone();
-	let max = aabb.max.clone();
-	let size = new THREE.Vector3().subVectors(max, min);
+	var min = aabb.min.clone();
+	var max = aabb.max.clone();
+	var size = new THREE.Vector3().subVectors(max, min);
 
 	if((index & 0b0001) > 0)
 	{

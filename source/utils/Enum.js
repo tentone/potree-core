@@ -4,7 +4,7 @@ class EnumItem
 {
 	constructor(object)
 	{
-		for(let key of Object.keys(object))
+		for(var key of Object.keys(object))
 		{
 			this[key] = object[key];
 		}
@@ -22,9 +22,9 @@ class Enum
 	{
 		this.object = object;
 
-		for(let key of Object.keys(object))
+		for(var key of Object.keys(object))
 		{
-			let value = object[key];
+			var value = object[key];
 
 			if(typeof value === "object")
 			{
@@ -44,7 +44,7 @@ class Enum
 
 	fromValue(value)
 	{
-		for(let key of Object.keys(this.object))
+		for(var key of Object.keys(this.object))
 		{
 			if(this[key].value === value)
 			{

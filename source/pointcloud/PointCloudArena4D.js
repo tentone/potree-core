@@ -1,6 +1,6 @@
 "use strict";
 
-Potree.PointCloudArena4DNode = class PointCloudArena4DNode extends Potree.PointCloudTreeNode
+class PointCloudArena4DNode extends PointCloudTreeNode
 {
 	constructor()
 	{
@@ -65,7 +65,7 @@ Potree.PointCloudArena4DNode = class PointCloudArena4DNode extends Potree.PointC
 			return;
 		}
 
-		var node = new Potree.PointCloudArena4DNode();
+		var node = new PointCloudArena4DNode();
 		var sceneNode = THREE.PointCloud(geometryNode.geometry, this.kdtree.material);
 		sceneNode.visible = false;
 
@@ -95,7 +95,7 @@ Potree.PointCloudArena4DNode = class PointCloudArena4DNode extends Potree.PointC
 	}
 };
 
-Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
+class PointCloudArena4D extends PointCloudTree
 {
 	constructor(geometry)
 	{
@@ -130,7 +130,7 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 		this.pcoGeometry = geometry;
 		this.boundingBox = this.pcoGeometry.boundingBox;
 		this.boundingSphere = this.pcoGeometry.boundingSphere;
-		this.material = new Potree.PointCloudMaterial(
+		this.material = new PointCloudMaterial(
 		{
 			vertexColors: THREE.VertexColors,
 			size: 0.05,
@@ -178,7 +178,7 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 
 	toTreeNode(geometryNode, parent)
 	{
-		var node = new Potree.PointCloudArena4DNode();
+		var node = new PointCloudArena4DNode();
 
 		var sceneNode = new THREE.Points(geometryNode.geometry, this.material);
 		sceneNode.frustumCulled = true;
@@ -390,7 +390,7 @@ Potree.PointCloudArena4D = class PointCloudArena4D extends Potree.PointCloudTree
 		{
 			var scene = new THREE.Scene();
 
-			var material = new Potree.PointCloudMaterial();
+			var material = new PointCloudMaterial();
 			material.pointColorType = Potree.PointColorType.POINT_INDEX;
 
 			var renderTarget = new THREE.WebGLRenderTarget(

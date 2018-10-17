@@ -1,6 +1,6 @@
 "use strict";
 
-Potree.PointCloudOctreeGeometry = class PointCloudOctreeGeometry
+class PointCloudOctreeGeometry
 {
 	constructor()
 	{
@@ -16,13 +16,13 @@ Potree.PointCloudOctreeGeometry = class PointCloudOctreeGeometry
 	}
 };
 
-Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends Potree.PointCloudTreeNode
+class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 {
 	constructor(name, pcoGeometry, boundingBox)
 	{
 		super();
 
-		this.id = Potree.PointCloudOctreeGeometryNode.IDCount++;
+		this.id = PointCloudOctreeGeometryNode.IDCount++;
 		this.name = name;
 		this.index = parseInt(name.charAt(name.length - 1));
 		this.pcoGeometry = pcoGeometry;
@@ -234,7 +234,7 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 				var level = name.length - 1;
 				var boundingBox = Potree.POCLoader.createChildAABB(parentNode.boundingBox, index);
 
-				var currentNode = new Potree.PointCloudOctreeGeometryNode(name, pco, boundingBox);
+				var currentNode = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
 				currentNode.level = level;
 				currentNode.numPoints = decodedNumPoints;
 				currentNode.hasChildren = decoded[i].children > 0;
@@ -297,6 +297,6 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 
 }
 
-Potree.PointCloudOctreeGeometryNode.IDCount = 0;
+PointCloudOctreeGeometryNode.IDCount = 0;
 
-Object.assign(Potree.PointCloudOctreeGeometryNode.prototype, THREE.EventDispatcher.prototype);
+Object.assign(PointCloudOctreeGeometryNode.prototype, THREE.EventDispatcher.prototype);

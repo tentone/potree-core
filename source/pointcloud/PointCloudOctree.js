@@ -1,6 +1,6 @@
 "use strict";
 
-Potree.PointCloudOctreeNode = class PointCloudOctreeNode extends Potree.PointCloudTreeNode
+class PointCloudOctreeNode extends PointCloudTreeNode
 {
 	constructor()
 	{
@@ -112,7 +112,7 @@ Potree.PointCloudOctreeNode = class PointCloudOctreeNode extends Potree.PointClo
 	}
 };
 
-Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
+class PointCloudOctree extends PointCloudTree
 {
 	constructor(geometry, material)
 	{
@@ -122,7 +122,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		this.pcoGeometry = geometry;
 		this.boundingBox = this.pcoGeometry.boundingBox;
 		this.boundingSphere = this.boundingBox.getBoundingSphere(new THREE.Sphere());
-		this.material = material || new Potree.PointCloudMaterial();
+		this.material = material || new PointCloudMaterial();
 		this.visiblePointsTarget = 2 * 1000 * 1000;
 		this.minimumNodePixelSize = 150;
 		this.level = 0;
@@ -176,7 +176,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 
 	toTreeNode(geometryNode, parent)
 	{
-		var node = new Potree.PointCloudOctreeNode();
+		var node = new PointCloudOctreeNode();
 
 		var sceneNode = new THREE.Points(geometryNode.geometry, this.material);
 		sceneNode.name = geometryNode.name;
@@ -254,11 +254,11 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 			for(var j = 0; j < node.children.length; j++)
 			{
 				var child = node.children[j];
-				if(child instanceof Potree.PointCloudOctreeNode)
+				if(child instanceof PointCloudOctreeNode)
 				{
 					isLeaf = isLeaf && !child.sceneNode.visible;
 				}
-				else if(child instanceof Potree.PointCloudOctreeGeometryNode)
+				else if(child instanceof PointCloudOctreeGeometryNode)
 				{
 					isLeaf = true;
 				}
@@ -356,7 +356,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 			{
 				var child = node.children[j];
 
-				if(child && child.constructor === Potree.PointCloudOctreeNode && nodes.includes(child, i))
+				if(child && child.constructor === PointCloudOctreeNode && nodes.includes(child, i))
 				{
 					children.push(child);
 				}
@@ -750,7 +750,7 @@ Potree.PointCloudOctree = class PointCloudOctree extends Potree.PointCloudTree
 		{
 			var scene = new THREE.Scene();
 
-			var material = new Potree.PointCloudMaterial();
+			var material = new PointCloudMaterial();
 			material.pointColorType = Potree.PointColorType.POINT_INDEX;
 
 			var renderTarget = new THREE.WebGLRenderTarget(

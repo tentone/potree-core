@@ -1,6 +1,6 @@
 "use strict";
 
-Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMaterial
+class PointCloudMaterial extends THREE.RawShaderMaterial
 {
 	constructor(parameters = {})
 	{
@@ -32,7 +32,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		this._pointColorType = Potree.PointColorType.RGB;
 		this._useClipBox = false;
 		this._weighted = false;
-		this._gradient = Potree.Gradients.SPECTRAL;
+		this._gradient = PotreeGradients.SPECTRAL;
 		this._treeType = treeType;
 		this._useEDL = false;
 		this._snapEnabled = false;
@@ -42,7 +42,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 
 		this.clipBoxes = [];
 		this.clipPolygons = [];
-		this.gradientTexture = Potree.PointCloudMaterial.generateGradientTexture(this._gradient);
+		this.gradientTexture = PointCloudMaterial.generateGradientTexture(this._gradient);
 		this.lights = false;
 		this.fog = false;
 		this.defines = new Map();
@@ -595,7 +595,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 		if(this._gradient !== value)
 		{
 			this._gradient = value;
-			this.gradientTexture = Potree.PointCloudMaterial.generateGradientTexture(this._gradient);
+			this.gradientTexture = PointCloudMaterial.generateGradientTexture(this._gradient);
 			this.uniforms.gradient.value = this.gradientTexture;
 		}
 	}
@@ -650,7 +650,7 @@ Potree.PointCloudMaterial = class PointCloudMaterial extends THREE.RawShaderMate
 	
 	recomputeClassification()
 	{
-		this.classificationTexture = Potree.PointCloudMaterial.generateClassificationTexture(this._classification);
+		this.classificationTexture = PointCloudMaterial.generateClassificationTexture(this._classification);
 		this.uniforms.classificationLUT.value = this.classificationTexture;
 		this.dispatchEvent(
 		{

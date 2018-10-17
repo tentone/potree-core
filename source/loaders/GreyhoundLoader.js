@@ -109,7 +109,7 @@ Potree.GreyhoundLoader.load = function(url, callback)
 			if(red && green && blue) attributes.push("COLOR_PACKED");
 
 			//Fill in geometry fields.
-			var pgg = new Potree.PointCloudGreyhoundGeometry();
+			var pgg = new PointCloudGreyhoundGeometry();
 			pgg.serverURL = serverURL;
 			pgg.spacing = (bounds[3] - bounds[0]) / Math.pow(2, baseDepth);
 			pgg.baseDepth = baseDepth;
@@ -144,7 +144,7 @@ Potree.GreyhoundLoader.load = function(url, callback)
 			//load root
 			var name = "r";
 
-			var root = new Potree.PointCloudGreyhoundGeometryNode(
+			var root = new PointCloudGreyhoundGeometryNode(
 				name, pgg, boundingBox,
 				scale, offset
 			);

@@ -31,7 +31,7 @@
 //   rgb = "[" + str(u) + ", new THREE.Color(" +  ", ".join(rgb) + ")],"
 //   print(rgb)
 
-Potree.Gradients = {
+var PotreeGradients = {
 	RAINBOW: [
 		[0, new THREE.Color(0.278, 0, 0.714)],
 		[1 / 6, new THREE.Color(0, 0, 1)],

@@ -1,5 +1,6 @@
+"use strict";
 
-Potree.PointCloudArena4DGeometryNode = class PointCloudArena4DGeometryNode
+class PointCloudArena4DGeometryNode
 {
 	constructor()
 	{
@@ -195,9 +196,8 @@ Potree.PointCloudArena4DGeometryNode = class PointCloudArena4DGeometryNode
 	}
 };
 
-Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE.EventDispatcher
+class PointCloudArena4DGeometry extends THREE.EventDispatcher
 {
-
 	constructor()
 	{
 		super();
@@ -232,7 +232,7 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 				{
 					var response = JSON.parse(xhr.responseText);
 
-					var geometry = new Potree.PointCloudArena4DGeometry();
+					var geometry = new PointCloudArena4DGeometry();
 					geometry.url = url;
 					geometry.name = response.Name;
 					geometry.provider = response.Provider;
@@ -326,7 +326,7 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 					split = "Z";
 				}
 
-				var node = new Potree.PointCloudArena4DGeometryNode();
+				var node = new PointCloudArena4DGeometryNode();
 				node.hasLeft = hasLeft;
 				node.hasRight = hasRight;
 				node.split = split;

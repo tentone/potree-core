@@ -17,7 +17,7 @@ Potree.POCLoader.load = function(url, callback)
 {
 	try
 	{
-		var pco = new Potree.PointCloudOctreeGeometry();
+		var pco = new PointCloudOctreeGeometry();
 		pco.url = url;
 		
 		var xhr = new XMLHttpRequest();
@@ -92,7 +92,7 @@ Potree.POCLoader.load = function(url, callback)
 				//load root
 				var name = "r";
 
-				var root = new Potree.PointCloudOctreeGeometryNode(name, pco, boundingBox);
+				var root = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
 				root.level = 0;
 				root.hasChildren = true;
 				root.spacing = pco.spacing;
@@ -121,7 +121,7 @@ Potree.POCLoader.load = function(url, callback)
 						var level = name.length - 1;
 						var boundingBox = Potree.POCLoader.createChildAABB(parentNode.boundingBox, index);
 
-						var node = new Potree.PointCloudOctreeGeometryNode(name, pco, boundingBox);
+						var node = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
 						node.level = level;
 						node.numPoints = numPoints;
 						node.spacing = pco.spacing / Math.pow(2, level);

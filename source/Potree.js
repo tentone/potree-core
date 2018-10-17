@@ -159,7 +159,7 @@ Potree.loadPointCloud = function(path, name, callback)
 		{
 			if(geometry)
 			{
-				loaded(new Potree.PointCloudOctree(geometry));
+				loaded(new PointCloudOctree(geometry));
 			}
 		});
 	}
@@ -170,18 +170,18 @@ Potree.loadPointCloud = function(path, name, callback)
 		{
 			if(geometry)
 			{
-				loaded(new Potree.PointCloudOctree(geometry));
+				loaded(new PointCloudOctree(geometry));
 			}
 		});
 	}
 	//Arena 4D point cloud
 	else if(path.indexOf(".vpc") > 0)
 	{
-		Potree.PointCloudArena4DGeometry.load(path, function(geometry)
+		PointCloudArena4DGeometry.load(path, function(geometry)
 		{
 			if(geometry)
 			{
-				loaded(new Potree.PointCloudArena4D(geometry));
+				loaded(new PointCloudArena4D(geometry));
 			}
 		});
 	}

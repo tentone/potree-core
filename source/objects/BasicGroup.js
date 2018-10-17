@@ -83,7 +83,7 @@ Potree.BasicGroup = class extends THREE.Mesh
 	{
 		THREE.Object3D.prototype.add.call(this, object);
 
-		if(object instanceof Potree.PointCloudTree)
+		if(object instanceof PointCloudTree)
 		{
 			object.showBoundingBox = false;
 			object.generateDEM = false;
@@ -101,7 +101,7 @@ Potree.BasicGroup = class extends THREE.Mesh
 	{
 		THREE.Object3D.prototype.remove.call(this, object);
 
-		if(object instanceof Potree.PointCloudTree)
+		if(object instanceof PointCloudTree)
 		{
 			var index = this.pointclouds.indexOf(object);
 			if(index !== -1)

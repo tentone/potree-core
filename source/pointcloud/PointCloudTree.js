@@ -1,6 +1,6 @@
 "use strict";
 
-Potree.PointCloudTreeNode = class
+class PointCloudTreeNode
 {
 	constructor()
 	{
@@ -22,7 +22,7 @@ Potree.PointCloudTreeNode = class
 	getBoundingSphere(){}
 };
 
-Potree.PointCloudTree = class PointCloudTree extends THREE.Object3D
+class PointCloudTree extends THREE.Object3D
 {
 	constructor()
 	{

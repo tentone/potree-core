@@ -150,7 +150,7 @@ Potree.Group = class extends Potree.BasicGroup
 		{
 			var node = stack.pop();
 
-			if(node instanceof Potree.PointCloudTree)
+			if(node instanceof PointCloudTree)
 			{
 				octrees.push(node);
 				continue;
@@ -201,11 +201,11 @@ Potree.Group = class extends Potree.BasicGroup
 			shader.setUniform("uDebug", node.debug === true);
 
 			var isLeaf;
-			if(node instanceof Potree.PointCloudOctreeNode)
+			if(node instanceof PointCloudOctreeNode)
 			{
 				isLeaf = Object.keys(node.children).length === 0;
 			}
-			else if(node instanceof Potree.PointCloudArena4DNode)
+			else if(node instanceof PointCloudArena4DNode)
 			{
 				isLeaf = node.geometryNode.isLeaf;
 			}

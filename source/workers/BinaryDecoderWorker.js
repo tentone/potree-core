@@ -9,15 +9,15 @@ function CustomView (buffer) {
 	let tmpf = new Float32Array(tmp);
 	let tmpu8 = new Uint8Array(tmp);
 
-	this.getUint32 = function (i) {
+	this.getUint32 = function(i) {
 		return (this.u8[i + 3] << 24) | (this.u8[i + 2] << 16) | (this.u8[i + 1] << 8) | this.u8[i];
 	};
 
-	this.getUint16 = function (i) {
+	this.getUint16 = function(i) {
 		return (this.u8[i + 1] << 8) | this.u8[i];
 	};
 
-	this.getFloat32 = function (i) {
+	this.getFloat32 = function(i) {
 		tmpu8[0] = this.u8[i + 0];
 		tmpu8[1] = this.u8[i + 1];
 		tmpu8[2] = this.u8[i + 2];
@@ -26,14 +26,14 @@ function CustomView (buffer) {
 		return tmpf[0];
 	};
 
-	this.getUint8 = function (i) {
+	this.getUint8 = function(i) {
 		return this.u8[i];
 	};
 }
 
 Potree = {};
 
-onmessage = function (event) {
+onmessage = function(event) {
 
 	performance.mark("binary-decoder-start");
 	
@@ -387,7 +387,7 @@ onmessage = function (event) {
 };
 
 
-Potree.Version = function (version) {
+Potree.Version = function(version) {
 	this.version = version;
 	let vmLength = (version.indexOf('.') === -1) ? version.length : version.indexOf('.');
 	this.versionMajor = parseInt(version.substr(0, vmLength));
@@ -397,7 +397,7 @@ Potree.Version = function (version) {
 	}
 };
 
-Potree.Version.prototype.newerThan = function (version) {
+Potree.Version.prototype.newerThan = function(version) {
 	let v = new Potree.Version(version);
 
 	if (this.versionMajor > v.versionMajor) {
@@ -409,7 +409,7 @@ Potree.Version.prototype.newerThan = function (version) {
 	}
 };
 
-Potree.Version.prototype.equalOrHigher = function (version) {
+Potree.Version.prototype.equalOrHigher = function(version) {
 	let v = new Potree.Version(version);
 
 	if (this.versionMajor > v.versionMajor) {
@@ -421,7 +421,7 @@ Potree.Version.prototype.equalOrHigher = function (version) {
 	}
 };
 
-Potree.Version.prototype.upTo = function (version) {
+Potree.Version.prototype.upTo = function(version) {
 	return !this.newerThan(version);
 };
 
@@ -478,7 +478,7 @@ for (let obj in Potree.PointAttributeTypes) {
  * @param size
  * @returns
  */
-Potree.PointAttribute = function (name, type, numElements) {
+Potree.PointAttribute = function(name, type, numElements) {
 	this.name = name;
 	this.type = type;
 	this.numElements = numElements;
@@ -553,7 +553,7 @@ Potree.PointAttribute.SPACING = new Potree.PointAttribute(
  * @class
  *
  */
-Potree.PointAttributes = function (pointAttributes) {
+Potree.PointAttributes = function(pointAttributes) {
 	this.attributes = [];
 	this.byteSize = 0;
 	this.size = 0;
@@ -569,13 +569,13 @@ Potree.PointAttributes = function (pointAttributes) {
 	}
 };
 
-Potree.PointAttributes.prototype.add = function (pointAttribute) {
+Potree.PointAttributes.prototype.add = function(pointAttribute) {
 	this.attributes.push(pointAttribute);
 	this.byteSize += pointAttribute.byteSize;
 	this.size++;
 };
 
-Potree.PointAttributes.prototype.hasColors = function () {
+Potree.PointAttributes.prototype.hasColors = function() {
 	for (let name in this.attributes) {
 		let pointAttribute = this.attributes[name];
 		if (pointAttribute.name === Potree.PointAttributeNames.COLOR_PACKED) {
@@ -586,7 +586,7 @@ Potree.PointAttributes.prototype.hasColors = function () {
 	return false;
 };
 
-Potree.PointAttributes.prototype.hasNormals = function () {
+Potree.PointAttributes.prototype.hasNormals = function() {
 	for (let name in this.attributes) {
 		let pointAttribute = this.attributes[name];
 		if (
@@ -640,7 +640,7 @@ Potree.InterleavedBuffer = class InterleavedBuffer{
 	
 };
 
-Potree.toInterleavedBufferAttribute = function toInterleavedBufferAttribute(pointAttribute){
+Potree.toInterleavedBufferAttribute = function(pointAttribute){
 	let att = null;
 	
 	if (pointAttribute.name === Potree.PointAttribute.POSITION_CARTESIAN.name) {

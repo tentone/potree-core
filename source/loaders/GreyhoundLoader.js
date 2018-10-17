@@ -1,7 +1,7 @@
 "use strict";
 
 Potree.GreyhoundLoader = function() {};
-Potree.GreyhoundLoader.loadInfoJSON = function load(url, callback)
+Potree.GreyhoundLoader.loadInfoJSON = function(url, callback)
 {};
 
 /**
@@ -12,7 +12,7 @@ Potree.GreyhoundLoader.loadInfoJSON = function load(url, callback)
  * @param loadingFinishedListener executed after loading the binary has been
  * finished
  */
-Potree.GreyhoundLoader.load = function load(url, callback)
+Potree.GreyhoundLoader.load = function(url, callback)
 {
 	let HIERARCHY_STEP_SIZE = 5;
 

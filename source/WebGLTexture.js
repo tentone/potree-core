@@ -1,7 +1,7 @@
+"use strict";
 
 Potree.WebGLTexture = class WebGLTexture
 {
-
 	constructor(gl, texture)
 	{
 		this.gl = gl;

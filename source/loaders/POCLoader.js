@@ -13,7 +13,7 @@ Potree.POCLoader = function(){};
  * @param url
  * @param loadingFinishedListener executed after loading the binary has been finished
  */
-Potree.POCLoader.load = function load(url, callback)
+Potree.POCLoader.load = function(url, callback)
 {
 	try
 	{

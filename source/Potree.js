@@ -4,8 +4,8 @@ function Potree(){}
 
 Potree.maxNodesLoadGPUFrame = 50;
 Potree.maxDEMLevel = 4;
-Potree.maxNodesLoading = 8;
-Potree.pointLoadLimit = Infinity;
+Potree.maxNodesLoading = navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4;
+Potree.pointLoadLimit = 1e15;
 
 Potree.framenumber = 0;
 Potree.numNodesLoading = 0;

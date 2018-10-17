@@ -1,6 +1,6 @@
 /* global onmessage:true postMessage:false */
 /* exported onmessage */
-// http://jsperf.com/uint8array-vs-dataview3/3
+//http://jsperf.com/uint8array-vs-dataview3/3
 function CustomView (buffer) {
 	this.buffer = buffer;
 	this.u8 = new Uint8Array(buffer);
@@ -344,7 +344,7 @@ onmessage = function(event) {
 	}
 
 
-	{ // add indices
+	{ //add indices
 		var buff = new ArrayBuffer(numPoints * 4);
 		var indices = new Uint32Array(buff);
 
@@ -357,7 +357,7 @@ onmessage = function(event) {
 
 	performance.mark("binary-decoder-end");
 
-	//{ // print timings
+	//{ //print timings
 	//	//performance.measure("spacing", "spacing-start", "spacing-end");
 	//	performance.measure("binary-decoder", "binary-decoder-start", "binary-decoder-end");
 	//	var measure = performance.getEntriesByType("measure")[0];
@@ -428,11 +428,11 @@ Potree.Version.prototype.upTo = function(version) {
 
 Potree.PointAttributeNames = {};
 
-Potree.PointAttributeNames.POSITION_CARTESIAN = 0; // float x, y, z;
-Potree.PointAttributeNames.COLOR_PACKED = 1; // byte r, g, b, a; 	I = [0,1]
-Potree.PointAttributeNames.COLOR_FLOATS_1 = 2; // float r, g, b; 		I = [0,1]
-Potree.PointAttributeNames.COLOR_FLOATS_255	= 3; // float r, g, b; 		I = [0,255]
-Potree.PointAttributeNames.NORMAL_FLOATS = 4; // float x, y, z;
+Potree.PointAttributeNames.POSITION_CARTESIAN = 0; //float x, y, z;
+Potree.PointAttributeNames.COLOR_PACKED = 1; //byte r, g, b, a; 	I = [0,1]
+Potree.PointAttributeNames.COLOR_FLOATS_1 = 2; //float r, g, b; 		I = [0,1]
+Potree.PointAttributeNames.COLOR_FLOATS_255	= 3; //float r, g, b; 		I = [0,255]
+Potree.PointAttributeNames.NORMAL_FLOATS = 4; //float x, y, z;
 Potree.PointAttributeNames.FILLER = 5;
 Potree.PointAttributeNames.INTENSITY = 6;
 Potree.PointAttributeNames.CLASSIFICATION = 7;
@@ -609,7 +609,7 @@ Potree.InterleavedBufferAttribute = class InterleavedBufferAttribute{
 		this.bytes = bytes;
 		this.numElements = numElements;
 		this.normalized = normalized;
-		this.type = type; // gl type without prefix, e.g. "FLOAT", "UNSIGNED_INT"
+		this.type = type; //gl type without prefix, e.g. "FLOAT", "UNSIGNED_INT"
 	}
 	
 };

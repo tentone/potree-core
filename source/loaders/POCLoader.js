@@ -19,9 +19,10 @@ Potree.POCLoader.load = function(url, callback)
 	{
 		var pco = new Potree.PointCloudOctreeGeometry();
 		pco.url = url;
-		var xhr = XHRFactory.createXMLHttpRequest();
+		
+		var xhr = new XMLHttpRequest();
+		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
-
 		xhr.onreadystatechange = function()
 		{
 			if(xhr.readyState === 4 && (xhr.status === 200 || xhr.status === 0))
@@ -30,7 +31,7 @@ Potree.POCLoader.load = function(url, callback)
 
 				var version = new VersionUtils(fMno.version);
 
-				// assume octreeDir is absolute if it starts with http
+				//assume octreeDir is absolute if it starts with http
 				if(fMno.octreeDir.indexOf("http") === 0)
 				{
 					pco.octreeDir = fMno.octreeDir;
@@ -70,6 +71,8 @@ Potree.POCLoader.load = function(url, callback)
 				pco.boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
 				pco.tightBoundingSphere = tightBoundingBox.getBoundingSphere(new THREE.Sphere());
 				pco.offset = offset;
+
+				//Select the appropiate loader
 				if(fMno.pointAttributes === "LAS")
 				{
 					pco.loader = new Potree.LasLazLoader(fMno.version);
@@ -86,27 +89,26 @@ Potree.POCLoader.load = function(url, callback)
 
 				var nodes = {};
 
-				{ // load root
-					var name = "r";
+				//load root
+				var name = "r";
 
-					var root = new Potree.PointCloudOctreeGeometryNode(name, pco, boundingBox);
-					root.level = 0;
-					root.hasChildren = true;
-					root.spacing = pco.spacing;
-					if(version.upTo("1.5"))
-					{
-						root.numPoints = fMno.hierarchy[0][1];
-					}
-					else
-					{
-						root.numPoints = 0;
-					}
-					pco.root = root;
-					pco.root.load();
-					nodes[name] = root;
+				var root = new Potree.PointCloudOctreeGeometryNode(name, pco, boundingBox);
+				root.level = 0;
+				root.hasChildren = true;
+				root.spacing = pco.spacing;
+				if(version.upTo("1.5"))
+				{
+					root.numPoints = fMno.hierarchy[0][1];
 				}
+				else
+				{
+					root.numPoints = 0;
+				}
+				pco.root = root;
+				pco.root.load();
+				nodes[name] = root;
 
-				// load remaining hierarchy
+				//load remaining hierarchy
 				if(version.upTo("1.4"))
 				{
 					for(var i = 1; i < fMno.hierarchy.length; i++)

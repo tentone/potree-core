@@ -97,7 +97,7 @@ Potree.Shader = class Shader
 				throw `could not link program ${this.name}: ${info}`;
 			}
 
-			// attribute locations
+			//attribute locations
 			var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
 
 			for(var i = 0; i < numAttributes; i++)
@@ -109,7 +109,7 @@ Potree.Shader = class Shader
 				this.attributeLocations[attribute.name] = location;
 			}
 
-			// uniform locations
+			//uniform locations
 			var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
 			for(var i = 0; i < numUniforms; i++)
@@ -244,7 +244,7 @@ Potree.Shader = class Shader
 		}
 		else
 		{
-			console.error("unhandled uniform type: ", name, value);
+			console.error("Potree: Unhandled uniform type: ", name, value);
 		}
 
 	}

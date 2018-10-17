@@ -40,13 +40,13 @@ class GreyhoundUtils
 			}
 		];
 
-		// Once we include options in the UI to load a dynamic list of available
-		// attributes for visualization (f.e. Classification, Intensity etc.)
-		// we will be able to ask for that specific attribute from the server,
-		// where we are now requesting all attributes for all points all the time.
-		// If we do that though, we also need to tell Potree to redraw the points
-		// that are already loaded (with different attributes).
-		// This is not default behaviour.
+		//Once we include options in the UI to load a dynamic list of available
+		//attributes for visualization (f.e. Classification, Intensity etc.)
+		//we will be able to ask for that specific attribute from the server,
+		//where we are now requesting all attributes for all points all the time.
+		//If we do that though, we also need to tell Potree to redraw the points
+		//that are already loaded (with different attributes).
+		//This is not default behaviour.
 		attributes.forEach(function(item)
 		{
 			if(item === "COLOR_PACKED")
@@ -95,7 +95,8 @@ class GreyhoundUtils
 
 	static fetch(url, cb)
 	{
-		var xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = new XMLHttpRequest();
+		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.onreadystatechange = function()
 		{
@@ -116,7 +117,8 @@ class GreyhoundUtils
 
 	static fetchBinary(url, cb)
 	{
-		var xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = new XMLHttpRequest();
+		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.onreadystatechange = function()
@@ -181,8 +183,7 @@ class GreyhoundUtils
 			}
 		];
 
-		var url = serverURL + "read?depth=" + baseDepth +
-			"&schema=" + JSON.stringify(s);
+		var url = serverURL + "read?depth=" + baseDepth + "&schema=" + JSON.stringify(s);
 
 		GreyhoundUtils.fetchBinary(url, function(err, buffer)
 		{
@@ -190,7 +191,6 @@ class GreyhoundUtils
 
 			var view = new DataView(buffer);
 			var numBytes = buffer.byteLength - 4;
-			// TODO Unused: var numPoints = view.getUint32(numBytes, true);
 			var pointSize = GreyhoundUtils.pointSizeFrom(s);
 
 			var colorNorm = false;
@@ -212,9 +212,6 @@ class GreyhoundUtils
 
 				if(colorNorm && intensityNorm) break;
 			}
-
-			if(colorNorm) console.log("Normalizing color");
-			if(intensityNorm) console.log("Normalizing intensity");
 
 			cb(null,
 			{

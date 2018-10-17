@@ -79,7 +79,9 @@ Potree.PointCloudArena4DGeometryNode = class PointCloudArena4DGeometryNode
 		Potree.numNodesLoading++;
 
 		var url = this.pcoGeometry.url + "?node=" + this.number;
-		var xhr = XHRFactory.createXMLHttpRequest();
+		
+		var xhr = new XMLHttpRequest();
+		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 
@@ -177,7 +179,7 @@ Potree.PointCloudArena4DGeometryNode = class PointCloudArena4DGeometryNode
 			this.geometry = null;
 			this.loaded = false;
 
-			// this.dispatchEvent( { type: "dispose" } );
+			//this.dispatchEvent( { type: "dispose" } );
 			for(var i = 0; i < this.oneTimeDisposeHandlers.length; i++)
 			{
 				var handler = this.oneTimeDisposeHandlers[i];
@@ -218,7 +220,8 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 
 	static load(url, callback)
 	{
-		var xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = new XMLHttpRequest();
+		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url + "?info", true);
 
 		xhr.onreadystatechange = function()
@@ -277,7 +280,9 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 	loadHierarchy()
 	{
 		var url = this.url + "?tree";
-		var xhr = XHRFactory.createXMLHttpRequest();
+		
+		var xhr = new XMLHttpRequest();
+		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 
@@ -296,8 +301,8 @@ Potree.PointCloudArena4DGeometry = class PointCloudArena4DGeometry extends THREE
 
 			var levels = 0;
 
-			// TODO Debug: var start = new Date().getTime();
-			// read hierarchy
+			//TODO Debug: var start = new Date().getTime();
+			//read hierarchy
 			for(var i = 0; i < numNodes; i++)
 			{
 				var mask = view.getUint8(i * 3 + 0, true);

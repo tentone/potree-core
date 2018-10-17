@@ -20,13 +20,13 @@ function LRUItem(node)
  */
 function LRU()
 {
-	// the least recently used item
+	//the least recently used item
 	this.first = null;
 
-	// the most recently used item
+	//the most recently used item
 	this.last = null;
 
-	// a list of all items in the lru list
+	//a list of all items in the lru list
 	this.items = {};
 	this.elements = 0;
 	this.numPoints = 0;

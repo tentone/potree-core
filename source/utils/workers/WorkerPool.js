@@ -7,6 +7,9 @@ class WorkerPool
 		this.workers = {};
 	}
 
+	/**
+	 * Get a worker from the pool, if none available one will be created.
+	 */
 	getWorker(url)
 	{
 		if(!this.workers[url])
@@ -16,15 +19,17 @@ class WorkerPool
 
 		if(this.workers[url].length === 0)
 		{
-			var worker = new Worker(url);
-			this.workers[url].push(worker);
+			return new Worker(url);
 		}
-
-		var worker = this.workers[url].pop();
-
-		return worker;
+		else
+		{
+			return this.workers[url].pop();
+		}
 	}
 
+	/**
+	 * Return (reinsert) the worker into the pool.
+	 */
 	returnWorker(url, worker)
 	{
 		this.workers[url].push(worker);

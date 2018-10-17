@@ -25,11 +25,11 @@ Potree.GreyhoundBinaryLoader = class
 		var scope = this;
 		var url = node.getURL();
 
-		var xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = new XMLHttpRequest();
+		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
-
 		xhr.onreadystatechange = function()
 		{
 			if(xhr.readyState === 4)
@@ -41,21 +41,12 @@ Potree.GreyhoundBinaryLoader = class
 				}
 				else
 				{
-					console.log(
-						"Failed to load file! HTTP status:", xhr.status,
-						"file:", url);
+					console.log("Potree: Failed to load file.", xhr, url);
 				}
 			}
 		};
 
-		try
-		{
-			xhr.send(null);
-		}
-		catch(e)
-		{
-			console.log("error loading point cloud: " + e);
-		}
+		xhr.send(null);
 	}
 
 	parse(node, buffer)
@@ -74,7 +65,6 @@ Potree.GreyhoundBinaryLoader = class
 
 		worker.onmessage = function(e)
 		{
-
 			var data = e.data;
 			var buffers = data.attributeBuffers;
 			var tightBoundingBox = new THREE.Box3(

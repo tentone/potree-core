@@ -2,17 +2,19 @@
 
 function Potree(){}
 
+Potree.maxNodesLoadGPUFrame = 50;
+Potree.maxDEMLevel = 4;
+Potree.maxNodesLoading = 8;
+Potree.pointLoadLimit = Infinity;
+
 Potree.framenumber = 0;
 Potree.numNodesLoading = 0;
-Potree.maxNodesLoading = 8;
 Potree.debug = {};
 Potree.scriptPath = null;
 Potree.resourcePath = null;
-Potree.pointLoadLimit = Infinity;
 Potree.measureTimings = false;
 Potree.tempVector3 = new THREE.Vector3();
-Potree.maxNodesLoadGPUFrame = 10;
-Potree.maxDEMLevel = 4;
+
 Potree.workerPool = new WorkerPool();
 Potree.lru = new LRU();
 
@@ -28,7 +30,7 @@ Potree.getWorkerPath = function()
 	}
 	else
 	{
-		console.error("Potree was unable to find its script path using document.currentScript. Is Potree included with a script tag? Does your browser support this function?");
+		console.error("Potree: Was unable to find its script path using document.currentScript.");
 	}
 	Potree.resourcePath = Potree.scriptPath + "/resources";
 };
@@ -611,7 +613,7 @@ Potree.shuffleArray = function(array)
 };
 
 
-// Copied from three.js: WebGLRenderer.js
+//Copied from three.js: WebGLRenderer.js
 Potree.paramThreeToGL = function(_gl, p)
 {
 	var extension;

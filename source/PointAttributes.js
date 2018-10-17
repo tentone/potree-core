@@ -2,11 +2,11 @@
 
 Potree.PointAttributeNames = {};
 
-Potree.PointAttributeNames.POSITION_CARTESIAN = 0; // float x, y, z;
-Potree.PointAttributeNames.COLOR_PACKED = 1; // byte r, g, b, a; 	I = [0,1]
-Potree.PointAttributeNames.COLOR_FLOATS_1 = 2; // float r, g, b; 		I = [0,1]
-Potree.PointAttributeNames.COLOR_FLOATS_255 = 3; // float r, g, b; 		I = [0,255]
-Potree.PointAttributeNames.NORMAL_FLOATS = 4; // float x, y, z;
+Potree.PointAttributeNames.POSITION_CARTESIAN = 0; //float x, y, z;
+Potree.PointAttributeNames.COLOR_PACKED = 1; //byte r, g, b, a; I = [0,1]
+Potree.PointAttributeNames.COLOR_FLOATS_1 = 2; //float r, g, b; I = [0,1]
+Potree.PointAttributeNames.COLOR_FLOATS_255 = 3; //float r, g, b; I = [0,255]
+Potree.PointAttributeNames.NORMAL_FLOATS = 4; //float x, y, z;
 Potree.PointAttributeNames.FILLER = 5;
 Potree.PointAttributeNames.INTENSITY = 6;
 Potree.PointAttributeNames.CLASSIFICATION = 7;
@@ -24,7 +24,8 @@ Potree.PointAttributeNames.SPACING = 15;
  *
  * @class
  */
-Potree.PointAttributeTypes = {
+Potree.PointAttributeTypes =
+{
 	DATA_TYPE_DOUBLE:
 	{
 		ordinal: 0,
@@ -101,67 +102,22 @@ Potree.PointAttribute = function(name, type, numElements)
 	this.byteSize = this.numElements * this.type.size;
 };
 
-Potree.PointAttribute.POSITION_CARTESIAN = new Potree.PointAttribute(
-	Potree.PointAttributeNames.POSITION_CARTESIAN,
-	Potree.PointAttributeTypes.DATA_TYPE_FLOAT, 3);
-
-Potree.PointAttribute.RGBA_PACKED = new Potree.PointAttribute(
-	Potree.PointAttributeNames.COLOR_PACKED,
-	Potree.PointAttributeTypes.DATA_TYPE_INT8, 4);
-
+Potree.PointAttribute.POSITION_CARTESIAN = new Potree.PointAttribute(Potree.PointAttributeNames.POSITION_CARTESIAN, Potree.PointAttributeTypes.DATA_TYPE_FLOAT, 3);
+Potree.PointAttribute.RGBA_PACKED = new Potree.PointAttribute(Potree.PointAttributeNames.COLOR_PACKED, Potree.PointAttributeTypes.DATA_TYPE_INT8, 4);
 Potree.PointAttribute.COLOR_PACKED = Potree.PointAttribute.RGBA_PACKED;
-
-Potree.PointAttribute.RGB_PACKED = new Potree.PointAttribute(
-	Potree.PointAttributeNames.COLOR_PACKED,
-	Potree.PointAttributeTypes.DATA_TYPE_INT8, 3);
-
-Potree.PointAttribute.NORMAL_FLOATS = new Potree.PointAttribute(
-	Potree.PointAttributeNames.NORMAL_FLOATS,
-	Potree.PointAttributeTypes.DATA_TYPE_FLOAT, 3);
-
-Potree.PointAttribute.FILLER_1B = new Potree.PointAttribute(
-	Potree.PointAttributeNames.FILLER,
-	Potree.PointAttributeTypes.DATA_TYPE_UINT8, 1);
-
-Potree.PointAttribute.INTENSITY = new Potree.PointAttribute(
-	Potree.PointAttributeNames.INTENSITY,
-	Potree.PointAttributeTypes.DATA_TYPE_UINT16, 1);
-
-Potree.PointAttribute.CLASSIFICATION = new Potree.PointAttribute(
-	Potree.PointAttributeNames.CLASSIFICATION,
-	Potree.PointAttributeTypes.DATA_TYPE_UINT8, 1);
-
-Potree.PointAttribute.NORMAL_SPHEREMAPPED = new Potree.PointAttribute(
-	Potree.PointAttributeNames.NORMAL_SPHEREMAPPED,
-	Potree.PointAttributeTypes.DATA_TYPE_UINT8, 2);
-
-Potree.PointAttribute.NORMAL_OCT16 = new Potree.PointAttribute(
-	Potree.PointAttributeNames.NORMAL_OCT16,
-	Potree.PointAttributeTypes.DATA_TYPE_UINT8, 2);
-
-Potree.PointAttribute.NORMAL = new Potree.PointAttribute(
-	Potree.PointAttributeNames.NORMAL,
-	Potree.PointAttributeTypes.DATA_TYPE_FLOAT, 3);
-
-Potree.PointAttribute.RETURN_NUMBER = new Potree.PointAttribute(
-	Potree.PointAttributeNames.RETURN_NUMBER,
-	Potree.PointAttributeTypes.DATA_TYPE_UINT8, 1);
-
-Potree.PointAttribute.NUMBER_OF_RETURNS = new Potree.PointAttribute(
-	Potree.PointAttributeNames.NUMBER_OF_RETURNS,
-	Potree.PointAttributeTypes.DATA_TYPE_UINT8, 1);
-
-Potree.PointAttribute.SOURCE_ID = new Potree.PointAttribute(
-	Potree.PointAttributeNames.SOURCE_ID,
-	Potree.PointAttributeTypes.DATA_TYPE_UINT8, 1);
-
-Potree.PointAttribute.INDICES = new Potree.PointAttribute(
-	Potree.PointAttributeNames.INDICES,
-	Potree.PointAttributeTypes.DATA_TYPE_UINT32, 1);
-
-Potree.PointAttribute.SPACING = new Potree.PointAttribute(
-	Potree.PointAttributeNames.SPACING,
-	Potree.PointAttributeTypes.DATA_TYPE_FLOAT, 1);
+Potree.PointAttribute.RGB_PACKED = new Potree.PointAttribute(Potree.PointAttributeNames.COLOR_PACKED, Potree.PointAttributeTypes.DATA_TYPE_INT8, 3);
+Potree.PointAttribute.NORMAL_FLOATS = new Potree.PointAttribute(Potree.PointAttributeNames.NORMAL_FLOATS, Potree.PointAttributeTypes.DATA_TYPE_FLOAT, 3);
+Potree.PointAttribute.FILLER_1B = new Potree.PointAttribute(Potree.PointAttributeNames.FILLER, Potree.PointAttributeTypes.DATA_TYPE_UINT8, 1);
+Potree.PointAttribute.INTENSITY = new Potree.PointAttribute(Potree.PointAttributeNames.INTENSITY, Potree.PointAttributeTypes.DATA_TYPE_UINT16, 1);
+Potree.PointAttribute.CLASSIFICATION = new Potree.PointAttribute(Potree.PointAttributeNames.CLASSIFICATION, Potree.PointAttributeTypes.DATA_TYPE_UINT8, 1);
+Potree.PointAttribute.NORMAL_SPHEREMAPPED = new Potree.PointAttribute(Potree.PointAttributeNames.NORMAL_SPHEREMAPPED, Potree.PointAttributeTypes.DATA_TYPE_UINT8, 2);
+Potree.PointAttribute.NORMAL_OCT16 = new Potree.PointAttribute(Potree.PointAttributeNames.NORMAL_OCT16, Potree.PointAttributeTypes.DATA_TYPE_UINT8, 2);
+Potree.PointAttribute.NORMAL = new Potree.PointAttribute(Potree.PointAttributeNames.NORMAL, Potree.PointAttributeTypes.DATA_TYPE_FLOAT, 3);
+Potree.PointAttribute.RETURN_NUMBER = new Potree.PointAttribute(Potree.PointAttributeNames.RETURN_NUMBER, Potree.PointAttributeTypes.DATA_TYPE_UINT8, 1);
+Potree.PointAttribute.NUMBER_OF_RETURNS = new Potree.PointAttribute(Potree.PointAttributeNames.NUMBER_OF_RETURNS, Potree.PointAttributeTypes.DATA_TYPE_UINT8, 1);
+Potree.PointAttribute.SOURCE_ID = new Potree.PointAttribute(Potree.PointAttributeNames.SOURCE_ID, Potree.PointAttributeTypes.DATA_TYPE_UINT8, 1);
+Potree.PointAttribute.INDICES = new Potree.PointAttribute(Potree.PointAttributeNames.INDICES, Potree.PointAttributeTypes.DATA_TYPE_UINT32, 1);
+Potree.PointAttribute.SPACING = new Potree.PointAttribute(Potree.PointAttributeNames.SPACING, Potree.PointAttributeTypes.DATA_TYPE_FLOAT, 1);
 
 /**
  * Ordered list of PointAttributes used to identify how points are aligned in a buffer.
@@ -214,8 +170,7 @@ Potree.PointAttributes.prototype.hasNormals = function()
 	for(var name in this.attributes)
 	{
 		var pointAttribute = this.attributes[name];
-		if(
-			pointAttribute === Potree.PointAttribute.NORMAL_SPHEREMAPPED ||
+		if(		pointAttribute === Potree.PointAttribute.NORMAL_SPHEREMAPPED ||
 			pointAttribute === Potree.PointAttribute.NORMAL_FLOATS ||
 			pointAttribute === Potree.PointAttribute.NORMAL ||
 			pointAttribute === Potree.PointAttribute.NORMAL_OCT16)

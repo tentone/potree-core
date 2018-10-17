@@ -1,8 +1,8 @@
 "use strict";
 
-Potree.GreyhoundLoader = function() {};
-Potree.GreyhoundLoader.loadInfoJSON = function(url, callback)
-{};
+Potree.GreyhoundLoader = function(){};
+
+Potree.GreyhoundLoader.loadInfoJSON = function(url, callback){};
 
 /**
  * @return a point cloud octree with the root node data loaded.
@@ -18,7 +18,7 @@ Potree.GreyhoundLoader.load = function(url, callback)
 
 	try
 	{
-		// We assume everything ater the string "greyhound://" is the server url
+		//We assume everything ater the string "greyhound://" is the server url
 		var serverURL = url.split("greyhound://")[1];
 		if(serverURL.split("http://").length === 1 && serverURL.split("https://").length === 1)
 		{
@@ -52,12 +52,12 @@ Potree.GreyhoundLoader.load = function(url, callback)
 			var version = new VersionUtils("1.4");
 
 			var bounds = greyhoundInfo.bounds;
-			// TODO Unused: var boundsConforming = greyhoundInfo.boundsConforming;
+			//TODO Unused: var boundsConforming = greyhoundInfo.boundsConforming;
 
-			// TODO Unused: var width = bounds[3] - bounds[0];
-			// TODO Unused: var depth = bounds[4] - bounds[1];
-			// TODO Unused: var height = bounds[5] - bounds[2];
-			// TODO Unused: var radius = width / 2;
+			//TODO Unused: var width = bounds[3] - bounds[0];
+			//TODO Unused: var depth = bounds[4] - bounds[1];
+			//TODO Unused: var height = bounds[5] - bounds[2];
+			//TODO Unused: var radius = width / 2;
 			var scale = greyhoundInfo.scale || 0.01;
 			if(Array.isArray(scale))
 			{
@@ -71,27 +71,27 @@ Potree.GreyhoundLoader.load = function(url, callback)
 
 			var baseDepth = Math.max(8, greyhoundInfo.baseDepth);
 
-			// Ideally we want to change this bit completely, since
-			// greyhound"s options are wider than the default options for
-			// visualizing pointclouds. If someone ever has time to build a
-			// custom ui element for greyhound, the schema options from
-			// this info request should be given to the UI, so the user can
-			// choose between them. The selected option can then be
-			// directly requested from the server in the
-			// PointCloudGreyhoundGeometryNode without asking for
-			// attributes that we are not currently visualizing.  We assume
-			// XYZ are always available.
+			//Ideally we want to change this bit completely, since
+			//greyhound"s options are wider than the default options for
+			//visualizing pointclouds. If someone ever has time to build a
+			//custom ui element for greyhound, the schema options from
+			//this info request should be given to the UI, so the user can
+			//choose between them. The selected option can then be
+			//directly requested from the server in the
+			//PointCloudGreyhoundGeometryNode without asking for
+			//attributes that we are not currently visualizing.  We assume
+			//XYZ are always available.
 			var attributes = ["POSITION_CARTESIAN"];
 
-			// To be careful, we only add COLOR_PACKED as an option if all
-			// colors are actually found.
+			//To be careful, we only add COLOR_PACKED as an option if all
+			//colors are actually found.
 			var red = false;
 			var green = false;
 			var blue = false;
 
 			greyhoundInfo.schema.forEach(function(entry)
 			{
-				// Intensity and Classification are optional.
+				//Intensity and Classification are optional.
 				if(entry.name === "Intensity")
 				{
 					attributes.push("INTENSITY");
@@ -108,7 +108,7 @@ Potree.GreyhoundLoader.load = function(url, callback)
 
 			if(red && green && blue) attributes.push("COLOR_PACKED");
 
-			// Fill in geometry fields.
+			//Fill in geometry fields.
 			var pgg = new Potree.PointCloudGreyhoundGeometry();
 			pgg.serverURL = serverURL;
 			pgg.spacing = (bounds[3] - bounds[0]) / Math.pow(2, baseDepth);
@@ -137,32 +137,26 @@ Potree.GreyhoundLoader.load = function(url, callback)
 
 			pgg.scale = scale;
 			pgg.offset = offset;
-
-			console.log("Scale:", scale);
-			console.log("Offset:", offset);
-			console.log("Bounds:", boundingBox);
-
 			pgg.loader = new Potree.GreyhoundBinaryLoader(version, boundingBox, pgg.scale);
 
 			var nodes = {};
 
-			{ // load root
-				var name = "r";
+			//load root
+			var name = "r";
 
-				var root = new Potree.PointCloudGreyhoundGeometryNode(
-					name, pgg, boundingBox,
-					scale, offset
-				);
+			var root = new Potree.PointCloudGreyhoundGeometryNode(
+				name, pgg, boundingBox,
+				scale, offset
+			);
 
-				root.level = 0;
-				root.hasChildren = true;
-				root.numPoints = greyhoundInfo.numPoints;
-				root.spacing = pgg.spacing;
-				pgg.root = root;
-				pgg.root.load();
-				nodes[name] = root;
-			}
-
+			root.level = 0;
+			root.hasChildren = true;
+			root.numPoints = greyhoundInfo.numPoints;
+			root.spacing = pgg.spacing;
+			pgg.root = root;
+			pgg.root.load();
+			nodes[name] = root;
+	
 			pgg.nodes = nodes;
 
 			GreyhoundUtils.getNormalization(serverURL, greyhoundInfo.baseDepth,
@@ -178,8 +172,7 @@ Potree.GreyhoundLoader.load = function(url, callback)
 	}
 	catch(e)
 	{
-		console.log("loading failed: \"" + url + "\"");
-		console.log(e);
+		console.log("Potree: Loading failed.", url, e);
 		callback();
 	}
 };

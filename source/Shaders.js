@@ -119,9 +119,9 @@ float round(float number)
 	return floor(number + 0.5);
 }
 
-// ---------------------
-// OCTREE
-// ---------------------
+//---------------------
+//OCTREE
+//---------------------
 
 #if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_octree)
 
@@ -158,7 +158,7 @@ float round(float number)
 	 */
 	bool isBitSet(int number, int index)
 	{
-		// weird multi else if due to lack of proper array, int and bitwise support in WebGL 1.0
+		//weird multi else if due to lack of proper array, int and bitwise support in WebGL 1.0
 		int powi = 1;
 
 		if(index == 0)
@@ -225,7 +225,7 @@ float round(float number)
 
 			if(isBitSet(mask, index))
 			{
-				// there are more visible child nodes at this position
+				//there are more visible child nodes at this position
 				int advanceG = int(round(value.g * 255.0)) * 256;
 				int advanceB = int(round(value.b * 255.0));
 				int advanceChild = numberOfOnes(mask, index - 1);
@@ -237,7 +237,7 @@ float round(float number)
 			}
 			else
 			{
-				// no more visible child nodes at this position
+				//no more visible child nodes at this position
 				return value.a * 255.0;
 				//return depth;
 			}
@@ -274,7 +274,7 @@ float round(float number)
 			
 			if(isBitSet(mask, index))
 			{
-				// there are more visible child nodes at this position
+				//there are more visible child nodes at this position
 				int advanceG = int(round(value.g * 255.0)) * 256;
 				int advanceB = int(round(value.b * 255.0));
 				int advanceChild = numberOfOnes(mask, index - 1);
@@ -286,7 +286,7 @@ float round(float number)
 			}
 			else
 			{
-				// no more visible child nodes at this position
+				//no more visible child nodes at this position
 				return spacing;
 			}
 			
@@ -302,9 +302,9 @@ float round(float number)
 	}
 #endif
 
-// ---------------------
-// KD-TREE
-// ---------------------
+//---------------------
+//KD-TREE
+//---------------------
 #if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_kdtree)
 	float getLOD()
 	{
@@ -694,14 +694,14 @@ void main()
 
 	vLogDepth = log2(-mvPosition.z);
 
-	// POINT SIZE
+	//POINT SIZE
 	float pointSize = getPointSize();
 	gl_PointSize = pointSize;
 	vPointSize = pointSize;
 
 	` + THREE.ShaderChunk.logdepthbuf_vertex + `
 
-	// COLOR
+	//COLOR
 	vColor = getColor();
 
 	#if defined hq_depth_pass
@@ -713,7 +713,7 @@ void main()
 		gl_Position = projectionMatrix * mvPosition;
 	#endif
 
-	// CLIPPING
+	//CLIPPING
 	doClipping();
 
 	#if defined(num_clipspheres) && num_clipspheres > 0

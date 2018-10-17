@@ -23,7 +23,7 @@ Potree.Points = class Points
 		{
 			if(thisAttributes.includes(attribute) && otherAttributes.includes(attribute))
 			{
-				// attribute in both, merge
+				//attribute in both, merge
 				var Type = this.data[attribute].constructor;
 				var merged = new Type(this.data[attribute].length + points.data[attribute].length);
 				merged.set(this.data[attribute], 0);
@@ -32,7 +32,7 @@ Potree.Points = class Points
 			}
 			else if(thisAttributes.includes(attribute) && !otherAttributes.includes(attribute))
 			{
-				// attribute only in this; take over this and expand to new size
+				//attribute only in this; take over this and expand to new size
 				var elementsPerPoint = this.data[attribute].length / this.numPoints;
 				var Type = this.data[attribute].constructor;
 				var expanded = new Type(elementsPerPoint * newSize);
@@ -41,7 +41,7 @@ Potree.Points = class Points
 			}
 			else if(!thisAttributes.includes(attribute) && otherAttributes.includes(attribute))
 			{
-				// attribute only in points to be added; take over new points and expand to new size
+				//attribute only in points to be added; take over new points and expand to new size
 				var elementsPerPoint = points.data[attribute].length / points.numPoints;
 				var Type = points.data[attribute].constructor;
 				var expanded = new Type(elementsPerPoint * newSize);

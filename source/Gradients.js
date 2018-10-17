@@ -1,11 +1,11 @@
 "use strict";
 
 //
-// to get a ready to use gradient array from a chroma.js gradient:
-// http://gka.github.io/chroma.js/
+//to get a ready to use gradient array from a chroma.js gradient:
+//http://gka.github.io/chroma.js/
 //
-// var stops = [];
-// for(var i = 0; i <= 10; i++){
+//var stops = [];
+//for(var i = 0; i <= 10; i++){
 //	var range = chroma.scale(["yellow", "navy"]).mode("lch").domain([10,0])(i)._rgb
 //		.slice(0, 3)
 //		.map(v => (v / 255).toFixed(4))
@@ -14,22 +14,22 @@
 //	var line = `[${i / 10}, new THREE.Color(${range})],`;
 //
 //	stops.push(line);
-// }
-// stops.join("\n");
+//}
+//stops.join("\n");
 
-// to get a ready to use gradient array from matplotlib:
-// import matplotlib.pyplot as plt
-// import matplotlib.colors as colors
+//to get a ready to use gradient array from matplotlib:
+//import matplotlib.pyplot as plt
+//import matplotlib.colors as colors
 //
-// norm = colors.Normalize(vmin=0,vmax=1)
-// cmap = plt.cm.viridis
+//norm = colors.Normalize(vmin=0,vmax=1)
+//cmap = plt.cm.viridis
 //
-// for i in range(0,11):
-//    u = i / 10
-//    rgb = cmap(norm(u))[0:3]
-//    rgb = ["{0:.3f}".format(v) for v in rgb]
-//    rgb = "[" + str(u) + ", new THREE.Color(" +  ", ".join(rgb) + ")],"
-//    print(rgb)
+//for i in range(0,11):
+//   u = i / 10
+//   rgb = cmap(norm(u))[0:3]
+//   rgb = ["{0:.3f}".format(v) for v in rgb]
+//   rgb = "[" + str(u) + ", new THREE.Color(" +  ", ".join(rgb) + ")],"
+//   print(rgb)
 
 Potree.Gradients = {
 	RAINBOW: [
@@ -41,7 +41,7 @@ Potree.Gradients = {
 		[5 / 6, new THREE.Color(1, 0.64, 0)],
 		[1, new THREE.Color(1, 0, 0)]
 	],
-	// From chroma spectral http://gka.github.io/chroma.js/
+	//From chroma spectral http://gka.github.io/chroma.js/
 	SPECTRAL: [
 		[0, new THREE.Color(0.3686, 0.3098, 0.6353)],
 		[0.1, new THREE.Color(0.1961, 0.5333, 0.7412)],

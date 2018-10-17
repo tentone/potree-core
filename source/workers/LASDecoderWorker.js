@@ -1,4 +1,4 @@
-// var pointFormatReaders = {
+//var pointFormatReaders = {
 //	0: function(dv) {
 //		return {
 //			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
@@ -29,7 +29,7 @@
 //			"color": [dv.getUint16(28, true), dv.getUint16(30, true), dv.getUint16(32, true)]
 //		};
 //	}
-// };
+//};
 //
 //
 
@@ -80,7 +80,7 @@ function readUsingTempArrays(event) {
 	var pointSourceIDs = new Uint16Array(psBuff);
 	
 	for (var i = 0; i < numPoints; i++) {
-		// POSITION
+		//POSITION
 		tempUint8[0] = sourceUint8[i * sourcePointSize + 0];
 		tempUint8[1] = sourceUint8[i * sourcePointSize + 1];
 		tempUint8[2] = sourceUint8[i * sourcePointSize + 2];
@@ -119,32 +119,32 @@ function readUsingTempArrays(event) {
 		tightBoundingBox.max[1] = Math.max(tightBoundingBox.max[1], y);
 		tightBoundingBox.max[2] = Math.max(tightBoundingBox.max[2], z);
 
-		// INTENSITY
+		//INTENSITY
 		tempUint8[0] = sourceUint8[i * sourcePointSize + 12];
 		tempUint8[1] = sourceUint8[i * sourcePointSize + 13];
 		var intensity = tempUint16[0];
 		intensities[i] = intensity;
 
-		// RETURN NUMBER, stored in the first 3 bits - 00000111
+		//RETURN NUMBER, stored in the first 3 bits - 00000111
 		var returnNumber = sourceUint8[i * sourcePointSize + 14] & 0b111;
 		returnNumbers[i] = returnNumber;
 
-		// NUMBER OF RETURNS, stored in 00111000
+		//NUMBER OF RETURNS, stored in 00111000
 		numberOfReturns[i] = (sourceUint8[i * pointSize + 14] & 0b111000) >> 3;
 
 		debugger;
 
-		// CLASSIFICATION
+		//CLASSIFICATION
 		var classification = sourceUint8[i * sourcePointSize + 15];
 		classifications[i] = classification;
 
-		// POINT SOURCE ID
+		//POINT SOURCE ID
 		tempUint8[0] = sourceUint8[i * sourcePointSize + 18];
 		tempUint8[1] = sourceUint8[i * sourcePointSize + 19];
 		var pointSourceID = tempUint16[0];
 		pointSourceIDs[i] = pointSourceID;
 
-		// COLOR, if available
+		//COLOR, if available
 		if (pointFormatID === 2) {
 			tempUint8[0] = sourceUint8[i * sourcePointSize + 20];
 			tempUint8[1] = sourceUint8[i * sourcePointSize + 21];
@@ -256,7 +256,7 @@ function readUsingDataView(event) {
 	var pointSourceIDs = new Uint16Array(psBuff);
 	
 	for (var i = 0; i < numPoints; i++) {
-		// POSITION
+		//POSITION
 		var ux = sourceView.getInt32(i * sourcePointSize + 0, true);
 		var uy = sourceView.getInt32(i * sourcePointSize + 4, true);
 		var uz = sourceView.getInt32(i * sourcePointSize + 8, true);
@@ -285,27 +285,27 @@ function readUsingDataView(event) {
 		tightBoundingBox.max[1] = Math.max(tightBoundingBox.max[1], y);
 		tightBoundingBox.max[2] = Math.max(tightBoundingBox.max[2], z);
 
-		// INTENSITY
+		//INTENSITY
 		var intensity = sourceView.getUint16(i * sourcePointSize + 12, true);
 		intensities[i] = intensity;
 
-		// RETURN NUMBER, stored in the first 3 bits - 00000111
-		// number of returns stored in next 3 bits   - 00111000
+		//RETURN NUMBER, stored in the first 3 bits - 00000111
+		//number of returns stored in next 3 bits   - 00111000
 		var returnNumberAndNumberOfReturns = sourceView.getUint8(i * sourcePointSize + 14, true);
 		var returnNumber = returnNumberAndNumberOfReturns & 0b0111;
 		var numberOfReturn = (returnNumberAndNumberOfReturns & 0b00111000) >> 3;
 		returnNumbers[i] = returnNumber;
 		numberOfReturns[i] = numberOfReturn;
 
-		// CLASSIFICATION
+		//CLASSIFICATION
 		var classification = sourceView.getUint8(i * sourcePointSize + 15, true);
 		classifications[i] = classification;
 
-		// POINT SOURCE ID
+		//POINT SOURCE ID
 		var pointSourceID = sourceView.getUint16(i * sourcePointSize + 18, true);
 		pointSourceIDs[i] = pointSourceID;
 
-		// COLOR, if available
+		//COLOR, if available
 		if (pointFormatID === 2) {			
 			var r = sourceView.getUint16(i * sourcePointSize + 20, true) / 256;
 			var g = sourceView.getUint16(i * sourcePointSize + 22, true) / 256;
@@ -326,7 +326,7 @@ function readUsingDataView(event) {
 
 	performance.mark("laslaz-end");
 
-	//{ // print timings
+	//{ //print timings
 	//	performance.measure("laslaz", "laslaz-start", "laslaz-end");
 	//	var measure = performance.getEntriesByType("measure")[0];
 	//	var dpp = 1000 * measure.duration / numPoints;

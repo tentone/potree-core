@@ -17,7 +17,7 @@ Potree.PointCloudGreyhoundGeometry = function()
 
 	this.boundingSphere = null;
 
-	// the serverURL will contain the base URL of the greyhound server. f.e. http://dev.greyhound.io/resource/autzen/
+	//the serverURL will contain the base URL of the greyhound server. f.e. http://dev.greyhound.io/resource/autzen/
 	this.serverURL = null;
 
 	this.normalize = {
@@ -55,13 +55,13 @@ Potree.PointCloudGreyhoundGeometryNode = function(
 		bounds.max.multiplyScalar(1 / this.scale);
 	}
 
-	// This represents the bounds for this node in the reference frame of the
-	// global bounds from `info`, centered around the origin, and then scaled
-	// by our selected scale.
+	//This represents the bounds for this node in the reference frame of the
+	//global bounds from `info`, centered around the origin, and then scaled
+	//by our selected scale.
 	this.greyhoundBounds = bounds;
 
-	// This represents the offset between the coordinate system described above
-	// and our pcoGeometry bounds.
+	//This represents the offset between the coordinate system described above
+	//and our pcoGeometry bounds.
 	this.greyhoundOffset = this.pcoGeometry.offset.clone().add(
 		this.pcoGeometry.boundingBox.getSize(new THREE.Vector3()).multiplyScalar(0.5)
 	);
@@ -182,7 +182,7 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.loadPoints = function()
 
 Potree.PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = function()
 {
-	// From Greyhound (Cartesian) ordering for the octree to Potree-default
+	//From Greyhound (Cartesian) ordering for the octree to Potree-default
 	var transform = [0, 2, 1, 3, 4, 6, 5, 7];
 
 	var makeBitMask = function(node)
@@ -260,7 +260,7 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = funct
 		});
 	};
 
-	// Load hierarchy.
+	//Load hierarchy.
 	var callback = function(node, greyhoundHierarchy)
 	{
 		var decoded = [];
@@ -323,7 +323,8 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = funct
 			hurl += "&offset=[" + offset.x + "," + offset.y + "," + offset.z + "]";
 		}
 
-		var xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = new XMLHttpRequest();
+		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", hurl, true);
 
 		var that = this;
@@ -347,14 +348,7 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = funct
 			}
 		};
 
-		try
-		{
-			xhr.send(null);
-		}
-		catch(e)
-		{
-			console.log("fehler beim laden der punktwolke: " + e);
-		}
+		xhr.send(null);
 	}
 };
 
@@ -371,7 +365,7 @@ Potree.PointCloudGreyhoundGeometryNode.prototype.dispose = function()
 		this.geometry = null;
 		this.loaded = false;
 
-		// this.dispatchEvent( { type: "dispose" } );
+		//this.dispatchEvent( { type: "dispose" } );
 		for(var i = 0; i < this.oneTimeDisposeHandlers.length; i++)
 		{
 			var handler = this.oneTimeDisposeHandlers[i];

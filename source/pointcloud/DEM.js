@@ -12,8 +12,8 @@ class PotreeDEM
 		this.version = 0;
 	}
 
-	// expands the tree to all nodes that intersect <box> at <level>
-	// returns the intersecting nodes at <level>
+	//expands the tree to all nodes that intersect <box> at <level>
+	//returns the intersecting nodes at <level>
 	expandAndFindByBox(box, level)
 	{
 		if(level === 0)
@@ -29,7 +29,7 @@ class PotreeDEM
 			var node = stack.pop();
 			var nodeBoxSize = node.box.getSize(new THREE.Vector3());
 
-			// check which children intersect by transforming min/max to quadrants
+			//check which children intersect by transforming min/max to quadrants
 			var min = {
 				x: (box.min.x - node.box.min.x) / nodeBoxSize.x,
 				y: (box.min.y - node.box.min.y) / nodeBoxSize.y
@@ -113,7 +113,7 @@ class PotreeDEM
 
 	height(position)
 	{
-		// return this.root.height(position);
+		//return this.root.height(position);
 
 		if(!this.root)
 		{
@@ -156,7 +156,7 @@ class PotreeDEM
 			return;
 		}
 
-		// check if point cloud transformation changed
+		//check if point cloud transformation changed
 		if(this.matrix === null || !this.matrix.equals(this.pointcloud.matrixWorld))
 		{
 			this.matrix = this.pointcloud.matrixWorld.clone();
@@ -165,7 +165,7 @@ class PotreeDEM
 			this.version++;
 		}
 
-		// find node to update
+		//find node to update
 		var node = null;
 		for(var vn of visibleNodes)
 		{
@@ -180,7 +180,7 @@ class PotreeDEM
 			return;
 		}
 
-		// update node
+		//update node
 		var projectedBox = node.getBoundingBox().clone().applyMatrix4(this.matrix);
 		var projectedBoxSize = projectedBox.getSize(new THREE.Vector3());
 
@@ -231,17 +231,17 @@ class PotreeDEM
 				Potree.getDEMWorkerInstance().working = false;
 			}
 
-			// TODO only works somewhat if there is no rotation to the point cloud
+			//TODO only works somewhat if there is no rotation to the point cloud
 
-			// var target = targetNodes[0];
-			// target.data = new Float32Array(data);
+			//var target = targetNodes[0];
+			//target.data = new Float32Array(data);
 			//
 			//
-			/// /node.dem = e.data.dem;
+			////node.dem = e.data.dem;
 			//
-			// Potree.getDEMWorkerInstance().working = false;
+			//Potree.getDEMWorkerInstance().working = false;
 			//
-			// { // create scene objects for debugging
+			//{ //create scene objects for debugging
 			//	//for(var demNode of targetNodes){
 			//		var bb = new Potree.Box3Helper(box);
 			//		viewer.scene.scene.add(bb);
@@ -249,7 +249,7 @@ class PotreeDEM
 			//		createDEMMesh(this, target);
 			//	//}
 			//
-			// }
+			//}
 		};
 
 		var position = node.geometryNode.geometry.attributes.position.array;

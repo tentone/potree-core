@@ -2,8 +2,8 @@
 
 class HelperUtils
 {
-	// code taken from three.js
-	// ImageUtils - generateDataTexture()
+	//code taken from three.js
+	//ImageUtils - generateDataTexture()
 	static generateDataTexture(width, height, color)
 	{
 		var size = width * height;

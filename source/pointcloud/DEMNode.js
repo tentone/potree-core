@@ -1,7 +1,7 @@
 "use strict";
 
 //
-// index is in order xyzxyzxyz
+//index is in order xyzxyzxyz
 //
 class PotreeDEMNode
 {
@@ -64,8 +64,8 @@ class PotreeDEMNode
 
 					height = height / weight;
 
-					// var hs = [h00, h01, h10, h11].filter(h => isFinite(h));
-					// var height = hs.reduce( (a, v, i) => a + v, 0) / hs.length;
+					//var hs = [h00, h01, h10, h11].filter(h => isFinite(h));
+					//var height = hs.reduce( (a, v, i) => a + v, 0) / hs.length;
 
 					mipData[i + j * mipSize] = height;
 				}

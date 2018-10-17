@@ -32,7 +32,7 @@ Potree.BinaryLoader = class BinaryLoader
 		}
 		
 		var self = this;
-		var xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = new XMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
@@ -51,15 +51,7 @@ Potree.BinaryLoader = class BinaryLoader
 				}
 			}
 		};
-
-		try
-		{
-			xhr.send(null);
-		}
-		catch(e)
-		{
-			console.log("fehler beim laden der punktwolke: " + e);
-		}
+		xhr.send(null);
 	};
 
 	parse(node, buffer)
@@ -79,10 +71,7 @@ Potree.BinaryLoader = class BinaryLoader
 		{
 			var data = e.data;
 			var buffers = data.attributeBuffers;
-			var tightBoundingBox = new THREE.Box3(
-				new THREE.Vector3().fromArray(data.tightBoundingBox.min),
-				new THREE.Vector3().fromArray(data.tightBoundingBox.max)
-			);
+			var tightBoundingBox = new THREE.Box3(new THREE.Vector3().fromArray(data.tightBoundingBox.min), new THREE.Vector3().fromArray(data.tightBoundingBox.max));
 
 			Potree.workerPool.returnWorker(workerPath, worker);
 

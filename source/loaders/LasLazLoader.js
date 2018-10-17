@@ -40,7 +40,7 @@ Potree.LasLazLoader = class LasLazLoader
 			url += "." + pointAttributes.toLowerCase();
 		}
 
-		var xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = new XMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
@@ -69,11 +69,11 @@ Potree.LasLazLoader = class LasLazLoader
 		var handler = new Potree.LasLazBatcher(node);
 
 		//
-		// DEBUG
+		//DEBUG
 		//
-		// invoke the laz decompress worker thousands of times to check for memory leaks
-		// until 2018/03/05, it tended to run out of memory at ~6230 invocations
-		// 
+		//invoke the laz decompress worker thousands of times to check for memory leaks
+		//until 2018/03/05, it tended to run out of memory at ~6230 invocations
+		//
 		//
 		//lf.open()
 		//.then( msg => {
@@ -156,11 +156,11 @@ Potree.LasLazLoader = class LasLazLoader
 			}).then(v =>
 			{
 				var lf = v[0];
-				// we"re done loading this file
+				//we"re done loading this file
 				//
 				Potree.LasLazLoader.progressCB(1);
 
-				// Close it
+				//Close it
 				return lf.close().then(function()
 				{
 					lf.isOpen = false;
@@ -168,8 +168,8 @@ Potree.LasLazLoader = class LasLazLoader
 					return v.slice(1);
 				}).catch(e =>
 				{
-					// If there was a cancellation, make sure the file is closed, if the file is open
-					// close and then fail
+					//If there was a cancellation, make sure the file is closed, if the file is open
+					//close and then fail
 					if(lf.isOpen)
 					{
 						return lf.close().then(function()

@@ -162,7 +162,7 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 	{
 		var node = this;
 
-		// load hierarchy
+		//load hierarchy
 		var callback = function(node, hbuffer)
 		{
 			var view = new DataView(hbuffer);
@@ -249,11 +249,11 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 		if((node.level % node.pcoGeometry.hierarchyStepSize) === 0)
 		{
 			var hurl = node.pcoGeometry.octreeDir + "/" + node.getHierarchyPath() + "/" + node.name + ".hrc";
-			var xhr = XHRFactory.createXMLHttpRequest();
+			var xhr = new XMLHttpRequest();
 			xhr.open("GET", hurl, true);
 			xhr.responseType = "arraybuffer";
 			xhr.overrideMimeType("text/plain; charset=x-user-defined");
-			xhr.onreadystatechange = () =>
+			xhr.onreadystatechange = function(event)
 			{
 				if(xhr.readyState === 4)
 				{
@@ -269,14 +269,7 @@ Potree.PointCloudOctreeGeometryNode = class PointCloudOctreeGeometryNode extends
 					}
 				}
 			};
-			try
-			{
-				xhr.send(null);
-			}
-			catch(e)
-			{
-				console.log("fehler beim laden der punktwolke: " + e);
-			}
+			xhr.send(null);
 		}
 	}
 

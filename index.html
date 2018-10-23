@@ -159,9 +159,9 @@
 						
 						var material = pointcloud.material;
 						//material.size = 4;
-						//material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
-						//material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
-						//material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE
+						material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
+						material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
+						material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE | PARABOLOID
 						points.add(pointcloud);
 					});
 				}

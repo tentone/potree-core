@@ -581,7 +581,7 @@ float getPointSize()
 	return pointSize;
 }
 
-#if defined(num_clippolygons) && num_clippolygons > 0
+#if defined num_clippolygons && num_clippolygons > 0
 	bool pointInClipPolygon(vec3 point, int polyIdx)
 	{
 		mat4 wvp = uClipPolygonWVP[polyIdx];
@@ -716,7 +716,7 @@ void main()
 	//CLIPPING
 	doClipping();
 
-	#if defined(num_clipspheres) && num_clipspheres > 0
+	#if defined num_clipspheres && num_clipspheres > 0
 		for(int i = 0; i < num_clipspheres; i++)
 		{
 			vec4 sphereLocal = uClipSpheres[i] * mvPosition;
@@ -733,7 +733,7 @@ void main()
 		}
 	#endif
 
-	#if defined(num_shadowmaps) && num_shadowmaps > 0
+	#if defined num_shadowmaps && num_shadowmaps > 0
 
 		const float sm_near = 0.1;
 		const float sm_far = 10000.0;
@@ -838,13 +838,13 @@ void main()
 	vec3 color = vColor;
 	float depth = gl_FragCoord.z;
 
-	#if defined(circle_point_shape) || defined(paraboloid_point_shape) 
-		float u = 2.0 * gl_PointCoord.x - 1.0;
-		float v = 2.0 * gl_PointCoord.y - 1.0;
+	#if defined circle_point_shape || defined paraboloid_point_shape
+		float u = (2.0 * gl_PointCoord.x) - 1.0;
+		float v = (2.0 * gl_PointCoord.y) - 1.0;
 	#endif
 	
-	#if defined(circle_point_shape)
-		float cc = u*u + v*v;
+	#if defined circle_point_shape
+		float cc = (u*u) + (v*v);
 		if(cc > 1.0)
 		{
 			discard;
@@ -858,7 +858,7 @@ void main()
 	#endif
 
 	#if defined paraboloid_point_shape
-		float wi = 0.0 - ( u*u + v*v);
+		float wi = -( u*u + v*v);
 		vec4 pos = vec4(vViewPosition, 1.0);
 		pos.z += wi * vRadius;
 		float linearDepth = -pos.z;
@@ -866,9 +866,10 @@ void main()
 		pos = pos / pos.w;
 		float expDepth = pos.z;
 		depth = (pos.z + 1.0) / 2.0;
+
 		gl_FragDepthEXT = depth;
 		
-		#if defined(color_type_depth)
+		#if defined color_type_depth
 			color.r = linearDepth;
 			color.g = expDepth;
 		#endif
@@ -876,7 +877,7 @@ void main()
 	
 	` + THREE.ShaderChunk.logdepthbuf_fragment +  `
 
-	#if defined(weighted_splats)
+	#if defined weighted_splats
 		float distance = 2.0 * length(gl_PointCoord.xy - 0.5);
 		float weight = max(0.0, 1.0 - distance);
 		weight = pow(weight, 1.5);

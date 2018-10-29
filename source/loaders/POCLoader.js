@@ -31,7 +31,7 @@ Potree.POCLoader.load = function(url, callback)
 
 				var version = new VersionUtils(fMno.version);
 
-				//assume octreeDir is absolute if it starts with http
+				//Assume dir as absolute if it starts with http
 				if(fMno.octreeDir.indexOf("http") === 0)
 				{
 					pco.octreeDir = fMno.octreeDir;

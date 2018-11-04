@@ -116,6 +116,7 @@
 					}
 				}
 
+				/*
 				var url = "data/lion_takanawa_laz/cloud.js";
 
 				var points = new Potree.Group();
@@ -136,8 +137,8 @@
 
 					points.add(pointcloud);
 				});
+				*/
 
-				/*
 				var points = new Potree.Group();
 				points.material.opacity = 1.0;
 				points.material.wireframe = true;
@@ -154,13 +155,12 @@
 						
 						var material = pointcloud.material;
 						material.size = 9;
-						material.pointColorType = Potree.PointColorType.LOD; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
+						material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
 						material.pointSizeType = Potree.PointSizeType.FIXED; //ADAPTIVE | FIXED
 						material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE | PARABOLOID
 						points.add(pointcloud);
 					});
 				}
-				*/
 
 				function loop()
 				{

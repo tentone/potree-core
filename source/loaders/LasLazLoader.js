@@ -7,7 +7,7 @@
  *
  * Thanks to Uday Verma and Howard Butler
  */
-Potree.LasLazLoader = class LasLazLoader
+Potree.LASLAZLoader = class LASLAZLoader
 {
 	constructor(version)
 	{
@@ -21,8 +21,7 @@ Potree.LasLazLoader = class LasLazLoader
 		}
 	}
 
-	static progressCB()
-	{}
+	static progressCB(){}
 
 	load(node)
 	{
@@ -68,38 +67,6 @@ Potree.LasLazLoader = class LasLazLoader
 		var lf = new LASFile(buffer);
 		var handler = new Potree.LasLazBatcher(node);
 
-		//
-		//DEBUG
-		//
-		//invoke the laz decompress worker thousands of times to check for memory leaks
-		//until 2018/03/05, it tended to run out of memory at ~6230 invocations
-		//
-		//
-		//lf.open()
-		//.then( msg => {
-		//	lf.isOpen = true;
-		//	return lf;
-		//}).catch( msg => {
-		//	console.log("failed to open file. :(");	
-		//}).then( lf => {
-		//	return lf.getHeader().then(function (h) {
-		//		return [lf, h];
-		//	});
-		//}).then( v => {
-		//	var lf = v[0];
-		//	var header = v[1];
-
-		//	lf.readData(1000000, 0, 1)
-		//	.then( v => {
-		//		console.log("read");
-
-		//		this.parse(node, buffer);
-		//	}).then (v => {
-		//		lf.close();	
-		//	});
-
-		//})
-
 		lf.open()
 			.then(msg =>
 			{
@@ -136,7 +103,7 @@ Potree.LasLazLoader = class LasLazLoader
 							header.mins, header.maxs));
 
 						totalRead += data.count;
-						Potree.LasLazLoader.progressCB(totalRead / totalToRead);
+						Potree.LASLAZLoader.progressCB(totalRead / totalToRead);
 
 						if(data.hasMoreData)
 						{
@@ -158,7 +125,7 @@ Potree.LasLazLoader = class LasLazLoader
 				var lf = v[0];
 				//we"re done loading this file
 				//
-				Potree.LasLazLoader.progressCB(1);
+				Potree.LASLAZLoader.progressCB(1);
 
 				//Close it
 				return lf.close().then(function()

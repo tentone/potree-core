@@ -47,7 +47,7 @@
 		<script src="source/loaders/GreyhoundLoader.js"></script>
 		<script src="source/loaders/GreyhoundBinaryLoader.js"></script>
 		<script src="source/loaders/POCLoader.js"></script>
-		<script src="source/loaders/LasLazLoader.js"></script>
+		<script src="source/loaders/LASLAZLoader.js"></script>
 		
 		<script src="source/objects/BasicGroup.js"></script>
 		<script src="source/objects/Group.js"></script>
@@ -78,14 +78,6 @@
 					preserveDrawingBuffer: false,
 					powerPreference: "high-performance"
 				});
-
-				/*
-				var points = new Potree.Group();
-				points.setPointBudget(1e10);
-				points.material.opacity = 1.0;
-				points.material.wireframe = true;
-				scene.add(points);
-				*/
 
 				var geometry = new THREE.BoxBufferGeometry(5, 1, 5);
 				var material = new THREE.MeshBasicMaterial({color: 0x44AA44});
@@ -123,8 +115,13 @@
 					}
 				}
 
-				/*
 				var url = "data/lion_takanawa_laz/cloud.js";
+
+				var points = new Potree.Group();
+				points.setPointBudget(1e10);
+				points.material.opacity = 1.0;
+				points.material.wireframe = true;
+				scene.add(points);
 
 				Potree.loadPointCloud(url, name, function(e)
 				{
@@ -139,14 +136,14 @@
 
 					points.add(pointcloud);
 				});
-				*/
 
+				/*
 				var points = new Potree.Group();
 				points.setPointBudget(1e10);
 				points.material.opacity = 1.0;
 				points.material.wireframe = true;
 				scene.add(points);
-
+zz
 				//for(var k = 5; k >= 0; k--)
 				for(var k = 0; k < 6; k++)
 				{
@@ -164,6 +161,7 @@
 						points.add(pointcloud);
 					});
 				}
+				*/
 
 				function loop()
 				{

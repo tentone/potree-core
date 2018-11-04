@@ -75,11 +75,11 @@ Potree.POCLoader.load = function(url, callback)
 				//Select the appropiate loader
 				if(fMno.pointAttributes === "LAS")
 				{
-					pco.loader = new Potree.LasLazLoader(fMno.version);
+					pco.loader = new Potree.LASLAZLoader(fMno.version);
 				}
 				else if(fMno.pointAttributes === "LAZ")
 				{
-					pco.loader = new Potree.LasLazLoader(fMno.version);
+					pco.loader = new Potree.LASLAZLoader(fMno.version);
 				}
 				else
 				{

@@ -50,22 +50,22 @@ function readAs(buf, Type, offset, count) {
 }
 
 function parseLASHeader(arraybuffer) {
-	var o = {};
+	var data = {};
 
-	o.pointsOffset = readAs(arraybuffer, Uint32Array, 32*3);
-	o.pointsFormatId = readAs(arraybuffer, Uint8Array, 32*3+8);
-	o.pointsStructSize = readAs(arraybuffer, Uint16Array, 32*3+8+1);
-	o.pointsCount = readAs(arraybuffer, Uint32Array, 32*3 + 11);
+	data.pointsOffset = readAs(arraybuffer, Uint32Array, 32*3);
+	data.pointsFormatId = readAs(arraybuffer, Uint8Array, 32*3+8);
+	data.pointsStructSize = readAs(arraybuffer, Uint16Array, 32*3+8+1);
+	data.pointsCount = readAs(arraybuffer, Uint32Array, 32*3 + 11);
 
 	var start = 32*3 + 35;
-	o.scale = readAs(arraybuffer, Float64Array, start, 3); start += 24; // 8*3
-	o.offset = readAs(arraybuffer, Float64Array, start, 3); start += 24;
+	data.scale = readAs(arraybuffer, Float64Array, start, 3); start += 24; // 8*3
+	data.offset = readAs(arraybuffer, Float64Array, start, 3); start += 24;
 
 	var bounds = readAs(arraybuffer, Float64Array, start, 6); start += 48; // 8*6;
-	o.maxs = [bounds[0], bounds[2], bounds[4]];
-	o.mins = [bounds[1], bounds[3], bounds[5]];
+	data.maxs = [bounds[0], bounds[2], bounds[4]];
+	data.mins = [bounds[1], bounds[3], bounds[5]];
 
-	return o;
+	return data;
 }
 
 // LAS Loader
@@ -85,57 +85,57 @@ LASLoader.prototype.open = function() {
 };
 
 LASLoader.prototype.getHeader = function() {
-	var o = this;
+	var self = this;
 
 	return new Promise(function(res, rej) {
 		setTimeout(function() {
-			o.header = parseLASHeader(o.arraybuffer);
-			res(o.header);
+			self.header = parseLASHeader(self.arraybuffer);
+			res(self.header);
 		}, 0);
 	});
 };
 
 LASLoader.prototype.readData = function(count, offset, skip) {
-	var o = this;
+	var self = this;
 
 	return new Promise(function(res, rej) {
 		setTimeout(function() {
-			if (!o.header)
+			if (!self.header)
 				return rej(new Error("Cannot start reading data till a header request is issued"));
 
 			var start;
 			if (skip <= 1) {
-				count = Math.min(count, o.header.pointsCount - o.readOffset);
-				start = o.header.pointsOffset + o.readOffset * o.header.pointsStructSize;
-				var end = start + count * o.header.pointsStructSize;
+				count = Math.min(count, self.header.pointsCount - self.readOffset);
+				start = self.header.pointsOffset + self.readOffset * self.header.pointsStructSize;
+				var end = start + count * self.header.pointsStructSize;
 				res({
-					buffer: o.arraybuffer.slice(start, end),
+					buffer: self.arraybuffer.slice(start, end),
 					count: count,
-					hasMoreData: o.readOffset + count < o.header.pointsCount});
-				o.readOffset += count;
+					hasMoreData: self.readOffset + count < self.header.pointsCount});
+				self.readOffset += count;
 			}
 			else {
-				var pointsToRead = Math.min(count * skip, o.header.pointsCount - o.readOffset);
+				var pointsToRead = Math.min(count * skip, self.header.pointsCount - self.readOffset);
 				var bufferSize = Math.ceil(pointsToRead / skip);
 				var pointsRead = 0;
 
-				var buf = new Uint8Array(bufferSize * o.header.pointsStructSize);
+				var buf = new Uint8Array(bufferSize * self.header.pointsStructSize);
 				for (var i = 0 ; i < pointsToRead ; i ++) {
 					if (i % skip === 0) {
-						start = o.header.pointsOffset + o.readOffset * o.header.pointsStructSize;
-						var src = new Uint8Array(o.arraybuffer, start, o.header.pointsStructSize);
+						start = self.header.pointsOffset + self.readOffset * self.header.pointsStructSize;
+						var src = new Uint8Array(self.arraybuffer, start, self.header.pointsStructSize);
 
-						buf.set(src, pointsRead * o.header.pointsStructSize);
+						buf.set(src, pointsRead * self.header.pointsStructSize);
 						pointsRead ++;
 					}
 
-					o.readOffset ++;
+					self.readOffset ++;
 				}
 
 				res({
 					buffer: buf.buffer,
 					count: pointsRead,
-					hasMoreData: o.readOffset < o.header.pointsCount
+					hasMoreData: self.readOffset < self.header.pointsCount
 				});
 			}
 		}, 0);
@@ -143,9 +143,9 @@ LASLoader.prototype.readData = function(count, offset, skip) {
 };
 
 LASLoader.prototype.close = function() {
-	var o = this;
+	var self = this;
 	return new Promise(function(res, rej) {
-		o.arraybuffer = null;
+		self.arraybuffer = null;
 		setTimeout(res, 0);
 	});
 };
@@ -160,27 +160,27 @@ var LAZLoader = function(arraybuffer) {
 	this.ww = new Worker(workerPath);
 
 	this.nextCB = null;
-	var o = this;
+	var self = this;
 
 	this.ww.onmessage = function(e) {
-		if (o.nextCB !== null) {
-			o.nextCB(e.data);
-			o.nextCB = null;
+		if (self.nextCB !== null) {
+			self.nextCB(e.data);
+			self.nextCB = null;
 		}
 	};
 
 	this.dorr = function(req, cb) {
-		o.nextCB = cb;
-		o.ww.postMessage(req);
+		self.nextCB = cb;
+		self.ww.postMessage(req);
 	};
 };
 
 LAZLoader.prototype.open = function() {
 
 	// nothing needs to be done to open this file
-	var o = this;
+	var self = this;
 	return new Promise(function(res, rej) {
-		o.dorr({type:"open", arraybuffer: o.arraybuffer}, function(r) {
+		self.dorr({type:"open", arraybuffer: self.arraybuffer}, function(r) {
 			if (r.status !== 1)
 				return rej(new Error("Failed to open file"));
 
@@ -190,10 +190,10 @@ LAZLoader.prototype.open = function() {
 };
 
 LAZLoader.prototype.getHeader = function() {
-	var o = this;
+	var self = this;
 
 	return new Promise(function(res, rej) {
-		o.dorr({type:'header'}, function(r) {
+		self.dorr({type:'header'}, function(r) {
 			if (r.status !== 1)
 				return rej(new Error("Failed to get header"));
 
@@ -203,10 +203,10 @@ LAZLoader.prototype.getHeader = function() {
 };
 
 LAZLoader.prototype.readData = function(count, offset, skip) {
-	var o = this;
+	var self = this;
 
 	return new Promise(function(res, rej) {
-		o.dorr({type:'read', count: count, offset: offset, skip: skip}, function(r) {
+		self.dorr({type:'read', count: count, offset: offset, skip: skip}, function(r) {
 			if (r.status !== 1)
 				return rej(new Error("Failed to read data"));
 			res({
@@ -219,10 +219,10 @@ LAZLoader.prototype.readData = function(count, offset, skip) {
 };
 
 LAZLoader.prototype.close = function() {
-	var o = this;
+	var self = this;
 
 	return new Promise(function(res, rej) {
-		o.dorr({type:'close'}, function(r) {
+		self.dorr({type:'close'}, function(r) {
 
 			
 		

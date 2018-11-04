@@ -9,11 +9,10 @@
 		<script src="lib/threejs/OrbitControls.js"></script>
 
 		<!--Production-->
-		<!--<script src="build/potree.min.js"></script>-->
+		<script src="build/potree.min.js"></script>
 
 		<!--Development-->
-		<script src="lib/BinaryHeap.js"></script>
-		<script src="source/laslaz.js"></script>
+		<!--<script src="lib/BinaryHeap.js"></script>
 
 		<script src="source/utils/LRU.js"></script>
 		<script src="source/utils/Enum.js"></script>
@@ -43,6 +42,7 @@
 
 		<script src="source/pointcloud/materials/PointCloudMaterial.js"></script>
 
+		<script src="source/loaders/LASLoader.js"></script>
 		<script src="source/loaders/BinaryLoader.js"></script>
 		<script src="source/loaders/GreyhoundUtils.js"></script>
 		<script src="source/loaders/GreyhoundLoader.js"></script>
@@ -51,7 +51,7 @@
 		<script src="source/loaders/LASLAZLoader.js"></script>
 		
 		<script src="source/objects/BasicGroup.js"></script>
-		<script src="source/objects/Group.js"></script>
+		<script src="source/objects/Group.js"></script>-->
 		<script>
 			document.body.onload = function()
 			{
@@ -116,7 +116,6 @@
 					}
 				}
 
-				/*
 				var url = "data/lion_takanawa_laz/cloud.js";
 
 				var points = new Potree.Group();
@@ -137,8 +136,8 @@
 
 					points.add(pointcloud);
 				});
-				*/
 
+				/*
 				var points = new Potree.Group();
 				points.material.opacity = 1.0;
 				points.material.wireframe = true;
@@ -161,6 +160,7 @@
 						points.add(pointcloud);
 					});
 				}
+				*/
 
 				function loop()
 				{

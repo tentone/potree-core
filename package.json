@@ -5,7 +5,7 @@
 	"main": "source/PotreeObject.js",
 	"files": "",
 	"scripts": {
-		"build": "java -jar closure.jar --compilation_level SIMPLE --warning_level QUIET --formatting SINGLE_QUOTES --language_in ECMASCRIPT_2017 --language_out ECMASCRIPT_2017 --js ... --js_output_file ./build/potree.min.js",
+		"build": "java -jar closure.jar --compilation_level SIMPLE --warning_level QUIET --formatting SINGLE_QUOTES --language_in ECMASCRIPT_2017 --language_out ECMASCRIPT_2017 --js lib/BinaryHeap.js source/utils/LRU.js source/utils/Enum.js source/utils/HelperUtils.js source/utils/VersionUtils.js source/utils/workers/WorkerTask.js source/utils/workers/WorkerPool.js source/Potree.js source/PointAttributes.js source/Gradients.js source/Points.js source/Shader.js source/WebGLTexture.js source/WebGLBuffer.js source/Shaders.js source/pointcloud/DEM.js source/pointcloud/DEMNode.js source/pointcloud/PointCloudTree.js source/pointcloud/PointCloudArena4D.js source/pointcloud/PointCloudOctree.js source/pointcloud/geometries/PointCloudOctreeGeometry.js source/pointcloud/geometries/PointCloudArena4DGeometry.js source/pointcloud/geometries/PointCloudGreyhoundGeometry.js source/pointcloud/materials/PointCloudMaterial.js source/loaders/LASLoader.js source/loaders/BinaryLoader.js source/loaders/GreyhoundUtils.js source/loaders/GreyhoundLoader.js source/loaders/GreyhoundBinaryLoader.js source/loaders/POCLoader.js source/loaders/LASLAZLoader.js source/objects/BasicGroup.js source/objects/Group.js --js_output_file ./build/potree.min.js",
 		"start": "python -m http.server"
 	},
 	"keywords": [

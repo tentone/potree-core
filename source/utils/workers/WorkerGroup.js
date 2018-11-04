@@ -2,8 +2,10 @@
 
 class WorkerGroup
 {
-	constructor(weight, data, onMessage)
+	constructor(url, size)
 	{
+		this.url = "";
+		this.size = size;
 		this.workers = [];
 	}
 };

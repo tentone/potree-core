@@ -1,23 +1,24 @@
 "use strict";
 
-Potree.PointAttributeNames = {};
-
-Potree.PointAttributeNames.POSITION_CARTESIAN = 0; //float x, y, z;
-Potree.PointAttributeNames.COLOR_PACKED = 1; //byte r, g, b, a; I = [0,1]
-Potree.PointAttributeNames.COLOR_FLOATS_1 = 2; //float r, g, b; I = [0,1]
-Potree.PointAttributeNames.COLOR_FLOATS_255 = 3; //float r, g, b; I = [0,255]
-Potree.PointAttributeNames.NORMAL_FLOATS = 4; //float x, y, z;
-Potree.PointAttributeNames.FILLER = 5;
-Potree.PointAttributeNames.INTENSITY = 6;
-Potree.PointAttributeNames.CLASSIFICATION = 7;
-Potree.PointAttributeNames.NORMAL_SPHEREMAPPED = 8;
-Potree.PointAttributeNames.NORMAL_OCT16 = 9;
-Potree.PointAttributeNames.NORMAL = 10;
-Potree.PointAttributeNames.RETURN_NUMBER = 11;
-Potree.PointAttributeNames.NUMBER_OF_RETURNS = 12;
-Potree.PointAttributeNames.SOURCE_ID = 13;
-Potree.PointAttributeNames.INDICES = 14;
-Potree.PointAttributeNames.SPACING = 15;
+Potree.PointAttributeNames =
+{
+	POSITION_CARTESIAN: 0, //float x, y, z,
+	COLOR_PACKED: 1, //byte r, g, b, a, I: [0,1]
+	COLOR_FLOATS_1: 2, //float r, g, b, I: [0,1]
+	COLOR_FLOATS_255: 3, //float r, g, b, I: [0,255]
+	NORMAL_FLOATS: 4, //float x, y, z,
+	FILLER: 5,
+	INTENSITY: 6,
+	CLASSIFICATION: 7,
+	NORMAL_SPHEREMAPPED: 8,
+	NORMAL_OCT16: 9,
+	NORMAL: 10,
+	RETURN_NUMBER: 11,
+	NUMBER_OF_RETURNS: 12,
+	SOURCE_ID: 13,
+	INDICES: 14,
+	SPACING: 15
+};
 
 /**
  * Some types of possible point attribute data formats
@@ -87,12 +88,6 @@ for(var obj in Potree.PointAttributeTypes)
 
 /**
  * A single point attribute such as color/normal/.. and its data format/number of elements/...
- *
- * @class
- * @param name
- * @param type
- * @param size
- * @returns
  */
 Potree.PointAttribute = function(name, type, numElements)
 {
@@ -121,9 +116,6 @@ Potree.PointAttribute.SPACING = new Potree.PointAttribute(Potree.PointAttributeN
 
 /**
  * Ordered list of PointAttributes used to identify how points are aligned in a buffer.
- *
- * @class
- *
  */
 Potree.PointAttributes = function(pointAttributes)
 {
@@ -170,10 +162,7 @@ Potree.PointAttributes.prototype.hasNormals = function()
 	for(var name in this.attributes)
 	{
 		var pointAttribute = this.attributes[name];
-		if(		pointAttribute === Potree.PointAttribute.NORMAL_SPHEREMAPPED ||
-			pointAttribute === Potree.PointAttribute.NORMAL_FLOATS ||
-			pointAttribute === Potree.PointAttribute.NORMAL ||
-			pointAttribute === Potree.PointAttribute.NORMAL_OCT16)
+		if(pointAttribute === Potree.PointAttribute.NORMAL_SPHEREMAPPED || pointAttribute === Potree.PointAttribute.NORMAL_FLOATS || pointAttribute === Potree.PointAttribute.NORMAL || pointAttribute === Potree.PointAttribute.NORMAL_OCT16)
 		{
 			return true;
 		}

@@ -1,43 +1,7 @@
-//var pointFormatReaders = {
-//	0: function(dv) {
-//		return {
-//			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
-//			"intensity": dv.getUint16(12, true),
-//			"classification": dv.getUint8(16, true)
-//		};
-//	},
-//	1: function(dv) {
-//		return {
-//			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
-//			"intensity": dv.getUint16(12, true),
-//			"classification": dv.getUint8(16, true)
-//		};
-//	},
-//	2: function(dv) {
-//		return {
-//			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
-//			"intensity": dv.getUint16(12, true),
-//			"classification": dv.getUint8(16, true),
-//			"color": [dv.getUint16(20, true), dv.getUint16(22, true), dv.getUint16(24, true)]
-//		};
-//	},
-//	3: function(dv) {
-//		return {
-//			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
-//			"intensity": dv.getUint16(12, true),
-//			"classification": dv.getUint8(16, true),
-//			"color": [dv.getUint16(28, true), dv.getUint16(30, true), dv.getUint16(32, true)]
-//		};
-//	}
-//};
-//
-//
+"use strict";
 
-
-function readUsingTempArrays(event) {
-
-	performance.mark("laslaz-start");
-
+function readUsingTempArrays(event)
+{
 	var buffer = event.data.buffer;
 	var numPoints = event.data.numPoints;
 	var sourcePointSize = event.data.pointSize;
@@ -56,7 +20,8 @@ function readUsingTempArrays(event) {
 	var targetBuffer = new ArrayBuffer(numPoints * targetPointSize);
 	var targetView = new DataView(targetBuffer);
 
-	var tightBoundingBox = {
+	var tightBoundingBox =
+	{
 		min: [ Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY ],
 		max: [ Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY ]
 	};
@@ -79,7 +44,8 @@ function readUsingTempArrays(event) {
 	var numberOfReturns = new Uint8Array(nrBuff);
 	var pointSourceIDs = new Uint16Array(psBuff);
 	
-	for (var i = 0; i < numPoints; i++) {
+	for(var i = 0; i < numPoints; i++)
+	{
 		//POSITION
 		tempUint8[0] = sourceUint8[i * sourcePointSize + 0];
 		tempUint8[1] = sourceUint8[i * sourcePointSize + 1];
@@ -145,7 +111,8 @@ function readUsingTempArrays(event) {
 		pointSourceIDs[i] = pointSourceID;
 
 		//COLOR, if available
-		if (pointFormatID === 2) {
+		if (pointFormatID === 2)
+		{
 			tempUint8[0] = sourceUint8[i * sourcePointSize + 20];
 			tempUint8[1] = sourceUint8[i * sourcePointSize + 21];
 			var r = tempUint16[0];
@@ -164,28 +131,20 @@ function readUsingTempArrays(event) {
 			colors[4 * i + 0] = r;
 			colors[4 * i + 1] = g;
 			colors[4 * i + 2] = b;
-
 		}
 	}
 
 	var indices = new ArrayBuffer(numPoints * 4);
 	var iIndices = new Uint32Array(indices);
-	for (var i = 0; i < numPoints; i++) {
+
+	for(var i = 0; i < numPoints; i++)
+	{
 		iIndices[i] = i;
 	}
 
-	performance.mark("laslaz-end");
-	performance.measure("laslaz", "laslaz-start", "laslaz-end");
-
-	var measure = performance.getEntriesByType("measure")[0];
-	var dpp = 1000 * measure.duration / numPoints;
-	var debugMessage = `${measure.duration.toFixed(3)} ms, ${numPoints} points, ${dpp.toFixed(3)} micros / point`;
-	console.log(debugMessage);
-
-	performance.clearMarks();
-	performance.clearMeasures();
 	
-	var message = {
+	var message =
+	{
 		mean: mean,
 		position: pBuff,
 		color: cBuff,
@@ -198,7 +157,8 @@ function readUsingTempArrays(event) {
 		indices: indices
 	};
 
-	var transferables = [
+	var transferables =
+	[
 		message.position,
 		message.color,
 		message.intensity,
@@ -206,18 +166,16 @@ function readUsingTempArrays(event) {
 		message.returnNumber,
 		message.numberOfReturns,
 		message.pointSourceID,
-		message.indices];
+		message.indices
+	];
 
 	debugger;
 
 	postMessage(message, transferables);
 };
 
-
-function readUsingDataView(event) {
-
-	performance.mark("laslaz-start");
-
+function readUsingDataView(event)
+{
 	var buffer = event.data.buffer;
 	var numPoints = event.data.numPoints;
 	var sourcePointSize = event.data.pointSize;
@@ -232,7 +190,8 @@ function readUsingDataView(event) {
 	var targetBuffer = new ArrayBuffer(numPoints * targetPointSize);
 	var targetView = new DataView(targetBuffer);
 
-	var tightBoundingBox = {
+	var tightBoundingBox =
+	{
 		min: [ Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY ],
 		max: [ Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY ]
 	};
@@ -255,7 +214,8 @@ function readUsingDataView(event) {
 	var numberOfReturns = new Uint8Array(nrBuff);
 	var pointSourceIDs = new Uint16Array(psBuff);
 	
-	for (var i = 0; i < numPoints; i++) {
+	for (var i = 0; i < numPoints; i++)
+	{
 		//POSITION
 		var ux = sourceView.getInt32(i * sourcePointSize + 0, true);
 		var uy = sourceView.getInt32(i * sourcePointSize + 4, true);
@@ -264,10 +224,6 @@ function readUsingDataView(event) {
 		x = ux * scale[0] + offset[0] - event.data.mins[0];
 		y = uy * scale[1] + offset[1] - event.data.mins[1];
 		z = uz * scale[2] + offset[2] - event.data.mins[2];
-
-		//x = ux * scale[0];
-		//y = uy * scale[1];
-		//z = uz * scale[2];
 
 		positions[3 * i + 0] = x;
 		positions[3 * i + 1] = y;
@@ -320,23 +276,13 @@ function readUsingDataView(event) {
 
 	var indices = new ArrayBuffer(numPoints * 4);
 	var iIndices = new Uint32Array(indices);
-	for (var i = 0; i < numPoints; i++) {
+	for (var i = 0; i < numPoints; i++)
+	{
 		iIndices[i] = i;
 	}
 
-	performance.mark("laslaz-end");
-
-	//{ //print timings
-	//	performance.measure("laslaz", "laslaz-start", "laslaz-end");
-	//	var measure = performance.getEntriesByType("measure")[0];
-	//	var dpp = 1000 * measure.duration / numPoints;
-	//	var debugMessage = `${measure.duration.toFixed(3)} ms, ${numPoints} points, ${dpp.toFixed(3)} µs / point`;
-	//	console.log(debugMessage);
-	//}
-	performance.clearMarks();
-	performance.clearMeasures();
-
-	var message = {
+	var message =
+	{
 		mean: mean,
 		position: pBuff,
 		color: cBuff,
@@ -349,7 +295,8 @@ function readUsingDataView(event) {
 		indices: indices
 	};
 
-	var transferables = [
+	var transferables =
+	[
 		message.position,
 		message.color,
 		message.intensity,
@@ -357,12 +304,11 @@ function readUsingDataView(event) {
 		message.returnNumber,
 		message.numberOfReturns,
 		message.pointSourceID,
-		message.indices];
+		message.indices
+	];
 
 	postMessage(message, transferables);
 };
-
-
 
 onmessage = readUsingDataView;
 //onmessage = readUsingTempArrays;

@@ -33,6 +33,7 @@ Potree.getWorkerPath = function()
 	{
 		console.error("Potree: Was unable to find its script path using document.currentScript.");
 	}
+	
 	Potree.resourcePath = Potree.scriptPath + "/resources";
 };
 

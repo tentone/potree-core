@@ -15,3 +15,8 @@ class WorkerPool
 		worker.postMessage(message, data);
 	}
 };
+
+WorkerPool.BINARY = 0;
+WorkerPool.LAS_LAZ = 1;
+WorkerPool.GREYHOUND = 2;
+WorkerPool.DEM = 3;

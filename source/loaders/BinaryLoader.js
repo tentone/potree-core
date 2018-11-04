@@ -47,7 +47,7 @@ Potree.BinaryLoader = class BinaryLoader
 				}
 				else
 				{
-					throw new Error(`Failed to load file! HTTP status: ${xhr.status}, file: ${url}`);
+					throw new Error("Potree: Failed to load file, HTTP status " + xhr.status);
 				}
 			}
 		};

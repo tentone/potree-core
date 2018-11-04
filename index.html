@@ -112,7 +112,6 @@
 				{
 					var intesects = raycaster.intersectObject(scene, true);
 					
-					console.log(intesects);
 					
 					if(intesects.length > 0)
 					{
@@ -142,6 +141,12 @@
 				});
 				*/
 
+				var points = new Potree.Group();
+				points.setPointBudget(1e10);
+				points.material.opacity = 1.0;
+				points.material.wireframe = true;
+				scene.add(points);
+
 				//for(var k = 5; k >= 0; k--)
 				for(var k = 0; k < 6; k++)
 				{
@@ -150,19 +155,12 @@
 					Potree.loadPointCloud(url, "eqs_" + k, function(e)
 					{
 						var pointcloud = e.pointcloud;
-
-						var points = new Potree.Group();
-						points.setPointBudget(1e10);
-						points.material.opacity = 1.0;
-						points.material.wireframe = true;
-						points.name = pointcloud.name;
-						scene.add(points);
 						
 						var material = pointcloud.material;
-						material.size = 2;
+						material.size = 9;
 						material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
 						material.pointSizeType = Potree.PointSizeType.FIXED; //ADAPTIVE | FIXED
-						material.shape = Potree.PointShape.SQUARE; //CIRCLE | SQUARE | PARABOLOID
+						material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE | PARABOLOID
 						points.add(pointcloud);
 					});
 				}

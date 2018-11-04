@@ -39,8 +39,7 @@ Potree.Shader = class Shader
 		if(!success)
 		{
 			var info = gl.getShaderInfoLog(shader);
-			var numberedSource = source.split("\n").map((a, i) => `${i + 1}`.padEnd(5) + a).join("\n");
-			throw `could not compile shader ${this.name}: ${info}, \n${numberedSource}`;
+			throw new Error("Potree: Could not compile shader " + this.name + ", " + info);
 		}
 	}
 
@@ -94,7 +93,7 @@ Potree.Shader = class Shader
 			if(!success)
 			{
 				var info = gl.getProgramInfoLog(program);
-				throw `could not link program ${this.name}: ${info}`;
+				throw new Error("Potree: Could not link program " + this.name + ", " + info);
 			}
 
 			//attribute locations
@@ -261,5 +260,4 @@ Potree.Shader = class Shader
 
 		gl.uniform1i(location, value);
 	}
-
 };

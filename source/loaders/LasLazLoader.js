@@ -55,7 +55,7 @@ Potree.LasLazLoader = class LasLazLoader
 				}
 				else
 				{
-					console.log("Failed to load file! HTTP status: " + xhr.status + ", file: " + url);
+					console.log("Potree: Failed to load file! HTTP status: " + xhr.status + ", file: " + url);
 				}
 			}
 		};
@@ -107,7 +107,7 @@ Potree.LasLazLoader = class LasLazLoader
 				return lf;
 			}).catch(msg =>
 			{
-				console.log("failed to open file. :(");
+				console.log("Potree: Failed to open file.");
 			}).then(lf =>
 			{
 				return lf.getHeader().then(function(h)

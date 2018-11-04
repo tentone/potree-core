@@ -58,9 +58,7 @@ Potree.WebGLTexture = class WebGLTexture
 			gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
 			gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
 
-			gl.texImage2D(this.target, level, internalFormat,
-				width, height, border, srcFormat, srcType,
-				data);
+			gl.texImage2D(this.target, level, internalFormat, width, height, border, srcFormat, srcType, data);
 		}
 		else if(texture instanceof THREE.CanvasTexture)
 		{
@@ -72,8 +70,7 @@ Potree.WebGLTexture = class WebGLTexture
 			gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
 			gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
 
-			gl.texImage2D(this.target, level, internalFormat,
-				internalFormat, srcType, data);
+			gl.texImage2D(this.target, level, internalFormat, internalFormat, srcType, data);
 		}
 
 		gl.bindTexture(this.target, null);

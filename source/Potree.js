@@ -23,6 +23,7 @@ Potree.getWorkerPath = function()
 	if(document.currentScript.src)
 	{
 		Potree.scriptPath = new URL(document.currentScript.src + "/..").href;
+
 		if(Potree.scriptPath.slice(-1) === "/")
 		{
 			Potree.scriptPath = Potree.scriptPath.slice(0, -1);
@@ -472,6 +473,7 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 
 	//Update DEM
 	var candidates = pointclouds.filter(p => (p.generateDEM && p.dem instanceof PotreeDEM));
+	
 	for(var pointcloud of candidates)
 	{
 		var updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= Potree.maxDEMLevel);
@@ -492,26 +494,6 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 
 Potree.updatePointClouds = function(pointclouds, camera, renderer)
 {
-	/*
-	for(var pointcloud of pointclouds)
-	{
-		var start = performance.now();
-
-		for(var profileRequest of pointcloud.profileRequests)
-		{
-			profileRequest.update();
-
-			var duration = performance.now() - start;
-			if(duration > 5)
-			{
-				break;
-			}
-		}
-
-		var duration = performance.now() - start;
-	}
-	*/
-
 	var result = Potree.updateVisibility(pointclouds, camera, renderer);
 
 	for(var i = 0; i < pointclouds.length; i++)

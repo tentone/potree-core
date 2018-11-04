@@ -2,8 +2,9 @@
 
 class HelperUtils
 {
-	//code taken from three.js
-	//ImageUtils - generateDataTexture()
+	/**
+	 * Craete a new data texture with a solid color.
+	 */
 	static generateDataTexture(width, height, color)
 	{
 		var size = width * height;
@@ -28,7 +29,7 @@ class HelperUtils
 	};
 
 	/**
-	 * adapted from mhluska at https://github.com/mrdoob/three.js/issues/1561
+	 * Compute a transformed bouding box from an original box and a transform matrix.
 	 */
 	static computeTransformedBoundingBox(box, transform)
 	{
@@ -46,7 +47,7 @@ class HelperUtils
 
 		var boundingBox = new THREE.Box3();
 		boundingBox.setFromPoints(vertices);
-
+		
 		return boundingBox;
 	};
 };

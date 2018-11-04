@@ -6,7 +6,6 @@ class WorkerPool
 	{
 		this.workers = [];
 		this.tasks = [];
-		this.max = 4;
 	}
 
 	addTask(url, weight, onMessage, message, data)

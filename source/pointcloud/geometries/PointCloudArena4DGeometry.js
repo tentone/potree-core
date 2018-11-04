@@ -79,15 +79,13 @@ class PointCloudArena4DGeometryNode
 
 		Potree.numNodesLoading++;
 
+		var self = this;
 		var url = this.pcoGeometry.url + "?node=" + this.number;
 		
 		var xhr = new XMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
-
-		var node = this;
-
 		xhr.onreadystatechange = function()
 		{
 			if(!(xhr.readyState === 4 && xhr.status === 200))
@@ -121,9 +119,9 @@ class PointCloudArena4DGeometryNode
 
 			for(var i = 0; i < numPoints; i++)
 			{
-				var x = sourceView.getFloat32(i * 17 + 0, true) + node.boundingBox.min.x;
-				var y = sourceView.getFloat32(i * 17 + 4, true) + node.boundingBox.min.y;
-				var z = sourceView.getFloat32(i * 17 + 8, true) + node.boundingBox.min.z;
+				var x = sourceView.getFloat32(i * 17 + 0, true) + self.boundingBox.min.x;
+				var y = sourceView.getFloat32(i * 17 + 4, true) + self.boundingBox.min.y;
+				var z = sourceView.getFloat32(i * 17 + 8, true) + self.boundingBox.min.z;
 
 				var r = sourceView.getUint8(i * 17 + 12, true);
 				var g = sourceView.getUint8(i * 17 + 13, true);
@@ -162,10 +160,10 @@ class PointCloudArena4DGeometryNode
 				geometry.addAttribute("indices", bufferAttribute);
 			}
 
-			node.geometry = geometry;
-			node.numPoints = numPoints;
-			node.loaded = true;
-			node.loading = false;
+			self.geometry = geometry;
+			self.numPoints = numPoints;
+			self.loaded = true;
+			self.loading = false;
 			Potree.numNodesLoading--;
 		};
 

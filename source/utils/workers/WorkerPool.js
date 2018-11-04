@@ -4,34 +4,17 @@ class WorkerPool
 {
 	constructor()
 	{
-		this.workers = {};
+		this.workers = [];
+		this.tasks = [];
+		this.max = 4;
 	}
 
-	/**
-	 * Get a worker from the pool, if none available one will be created.
-	 */
-	getWorker(url)
+	addTask(url, weight, onMessage, message, data)
 	{
-		if(!this.workers[url])
-		{
-			this.workers[url] = [];
-		}
+		//this.tasks.push(new WorkerTask(weight, data, onMessage));
 
-		if(this.workers[url].length === 0)
-		{
-			return new Worker(url);
-		}
-		else
-		{
-			return this.workers[url].pop();
-		}
-	}
-
-	/**
-	 * Return (reinsert) the worker into the pool.
-	 */
-	returnWorker(url, worker)
-	{
-		this.workers[url].push(worker);
+		var worker = new Worker(url);
+		worker.onmessage = onMessage;
+		worker.postMessage(message, data);
 	}
 };

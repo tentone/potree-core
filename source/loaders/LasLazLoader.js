@@ -198,11 +198,21 @@ Potree.LasLazBatcher = class LasLazBatcher
 
 	push(lasBuffer)
 	{
-		var workerPath = Potree.scriptPath + "/workers/LASDecoderWorker.js";
-		var worker = Potree.workerPool.getWorker(workerPath);
-		var node = this.node;
+		var self = this;
 
-		worker.onmessage = (e) =>
+		var message =
+		{
+			buffer: lasBuffer.arrayb,
+			numPoints: lasBuffer.pointsCount,
+			pointSize: lasBuffer.pointSize,
+			pointFormatID: 2,
+			scale: lasBuffer.scale,
+			offset: lasBuffer.offset,
+			mins: lasBuffer.mins,
+			maxs: lasBuffer.maxs
+		};
+
+		Potree.workerPool.addTask(Potree.scriptPath + "/workers/LASDecoderWorker.js", 0, function(e)
 		{
 			var geometry = new THREE.BufferGeometry();
 			var numPoints = lasBuffer.pointsCount;
@@ -227,36 +237,21 @@ Potree.LasLazBatcher = class LasLazBatcher
 			geometry.addAttribute("indices", new THREE.BufferAttribute(indices, 4));
 			geometry.attributes.indices.normalized = true;
 
-			var tightBoundingBox = new THREE.Box3(
+			var tightBoundingBox = new THREE.Box3
+			(
 				new THREE.Vector3().fromArray(e.data.tightBoundingBox.min),
 				new THREE.Vector3().fromArray(e.data.tightBoundingBox.max)
 			);
 
-			geometry.boundingBox = this.node.boundingBox;
-			this.node.tightBoundingBox = tightBoundingBox;
+			geometry.boundingBox = self.node.boundingBox;
+			self.node.tightBoundingBox = tightBoundingBox;
 
-			this.node.geometry = geometry;
-			this.node.numPoints = numPoints;
-			this.node.loaded = true;
-			this.node.loading = false;
+			self.node.geometry = geometry;
+			self.node.numPoints = numPoints;
+			self.node.loaded = true;
+			self.node.loading = false;
 			Potree.numNodesLoading--;
-			this.node.mean = new THREE.Vector3(...e.data.mean);
-
-			//debugger;
-
-			Potree.workerPool.returnWorker(workerPath, worker);
-		};
-
-		var message = {
-			buffer: lasBuffer.arrayb,
-			numPoints: lasBuffer.pointsCount,
-			pointSize: lasBuffer.pointSize,
-			pointFormatID: 2,
-			scale: lasBuffer.scale,
-			offset: lasBuffer.offset,
-			mins: lasBuffer.mins,
-			maxs: lasBuffer.maxs
-		};
-		worker.postMessage(message, [message.buffer]);
+			self.node.mean = new THREE.Vector3(...e.data.mean);
+		}, message, [message.buffer]);
 	};
 };

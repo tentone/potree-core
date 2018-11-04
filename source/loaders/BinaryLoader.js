@@ -64,16 +64,24 @@ Potree.BinaryLoader = class BinaryLoader
 			node.numPoints = numPoints;
 		}
 
-		var workerPath = Potree.scriptPath + "/workers/BinaryDecoderWorker.js";
-		var worker = Potree.workerPool.getWorker(workerPath);
+		var message =
+		{
+			buffer: buffer,
+			pointAttributes: pointAttributes,
+			version: this.version.version,
+			min: [node.boundingBox.min.x, node.boundingBox.min.y, node.boundingBox.min.z],
+			offset: [node.pcoGeometry.offset.x, node.pcoGeometry.offset.y, node.pcoGeometry.offset.z],
+			scale: this.scale,
+			spacing: node.spacing,
+			hasChildren: node.hasChildren,
+			name: node.name
+		};
 
-		worker.onmessage = function(e)
+		Potree.workerPool.addTask(Potree.scriptPath + "/workers/BinaryDecoderWorker.js", 0, function(e)
 		{
 			var data = e.data;
 			var buffers = data.attributeBuffers;
 			var tightBoundingBox = new THREE.Box3(new THREE.Vector3().fromArray(data.tightBoundingBox.min), new THREE.Vector3().fromArray(data.tightBoundingBox.max));
-
-			Potree.workerPool.returnWorker(workerPath, worker);
 
 			var geometry = new THREE.BufferGeometry();
 
@@ -135,21 +143,7 @@ Potree.BinaryLoader = class BinaryLoader
 			node.loading = false;
 			node.estimatedSpacing = data.estimatedSpacing;
 			Potree.numNodesLoading--;
-		};
-
-		var message = {
-			buffer: buffer,
-			pointAttributes: pointAttributes,
-			version: this.version.version,
-			min: [node.boundingBox.min.x, node.boundingBox.min.y, node.boundingBox.min.z],
-			offset: [node.pcoGeometry.offset.x, node.pcoGeometry.offset.y, node.pcoGeometry.offset.z],
-			scale: this.scale,
-			spacing: node.spacing,
-			hasChildren: node.hasChildren,
-			name: node.name
-		};
-
-		worker.postMessage(message, [message.buffer]);
+		}, message, [message.buffer]);
 	};
 
 };

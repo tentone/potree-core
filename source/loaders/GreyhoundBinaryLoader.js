@@ -22,7 +22,7 @@ Potree.GreyhoundBinaryLoader = class
 	{
 		if(node.loaded) return;
 
-		var scope = this;
+		var self = this;
 		var url = node.getURL();
 
 		var xhr = new XMLHttpRequest();
@@ -37,7 +37,7 @@ Potree.GreyhoundBinaryLoader = class
 				if(xhr.status === 200 || xhr.status === 0)
 				{
 					var buffer = xhr.response;
-					scope.parse(node, buffer);
+					self.parse(node, buffer);
 				}
 				else
 				{
@@ -52,27 +52,38 @@ Potree.GreyhoundBinaryLoader = class
 	parse(node, buffer)
 	{
 		var NUM_POINTS_BYTES = 4;
-
-		var view = new DataView(
-			buffer, buffer.byteLength - NUM_POINTS_BYTES, NUM_POINTS_BYTES);
+		var view = new DataView(buffer, buffer.byteLength - NUM_POINTS_BYTES, NUM_POINTS_BYTES);
 		var numPoints = view.getUint32(0, true);
 		var pointAttributes = node.pcoGeometry.pointAttributes;
 
 		node.numPoints = numPoints;
 
-		var workerPath = Potree.scriptPath + "/workers/GreyhoundBinaryDecoderWorker.js";
-		var worker = Potree.workerPool.getWorker(workerPath);
+		var bb = node.boundingBox;
+		var nodeOffset = node.pcoGeometry.boundingBox.getCenter().sub(node.boundingBox.min);
 
-		worker.onmessage = function(e)
+		var message =
+		{
+			buffer: buffer,
+			pointAttributes: pointAttributes,
+			version: this.version.version,
+			schema: node.pcoGeometry.schema,
+			min: [bb.min.x, bb.min.y, bb.min.z],
+			max: [bb.max.x, bb.max.y, bb.max.z],
+			offset: nodeOffset.toArray(),
+			scale: this.scale,
+			normalize: node.pcoGeometry.normalize
+		};
+
+		Potree.workerPool.addTask(Potree.scriptPath + "/workers/GreyhoundBinaryDecoderWorker.js", 0, function(e)
 		{
 			var data = e.data;
 			var buffers = data.attributeBuffers;
-			var tightBoundingBox = new THREE.Box3(
+			
+			var tightBoundingBox = new THREE.Box3
+			(
 				new THREE.Vector3().fromArray(data.tightBoundingBox.min),
 				new THREE.Vector3().fromArray(data.tightBoundingBox.max)
 			);
-
-			Potree.workerPool.returnWorker(workerPath, worker);
 
 			var geometry = new THREE.BufferGeometry();
 
@@ -131,23 +142,6 @@ Potree.GreyhoundBinaryLoader = class
 			node.loaded = true;
 			node.loading = false;
 			Potree.numNodesLoading--;
-		};
-
-		var bb = node.boundingBox;
-		var nodeOffset = node.pcoGeometry.boundingBox.getCenter().sub(node.boundingBox.min);
-
-		var message = {
-			buffer: buffer,
-			pointAttributes: pointAttributes,
-			version: this.version.version,
-			schema: node.pcoGeometry.schema,
-			min: [bb.min.x, bb.min.y, bb.min.z],
-			max: [bb.max.x, bb.max.y, bb.max.z],
-			offset: nodeOffset.toArray(),
-			scale: this.scale,
-			normalize: node.pcoGeometry.normalize
-		};
-
-		worker.postMessage(message, [message.buffer]);
+		}, message, [message.buffer]);
 	}
 }

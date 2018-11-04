@@ -8,10 +8,8 @@ class WorkerPool
 		this.tasks = [];
 	}
 
-	addTask(url, weight, onMessage, message, data)
+	addTask(url, onMessage, message, data)
 	{
-		//this.tasks.push(new WorkerTask(weight, data, onMessage));
-
 		var worker = new Worker(url);
 		worker.onmessage = onMessage;
 		worker.postMessage(message, data);

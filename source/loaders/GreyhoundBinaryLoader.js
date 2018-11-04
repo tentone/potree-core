@@ -74,7 +74,7 @@ Potree.GreyhoundBinaryLoader = class
 			normalize: node.pcoGeometry.normalize
 		};
 
-		Potree.workerPool.addTask(Potree.scriptPath + "/workers/GreyhoundBinaryDecoderWorker.js", 0, function(e)
+		Potree.workerPool.addTask(Potree.scriptPath + "/workers/GreyhoundBinaryDecoderWorker.js", function(e)
 		{
 			var data = e.data;
 			var buffers = data.attributeBuffers;

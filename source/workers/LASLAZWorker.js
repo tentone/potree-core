@@ -22,11 +22,14 @@ function readAs(buf, Type, offset, count)
 	var sub = buf.slice(offset, offset + Type.BYTES_PER_ELEMENT * count);
 
 	var r = new Type(sub);
-	if (count === undefined || count === 1)
+	if(count === undefined || count === 1)
+	{
 		return r[0];
+	}
 
 	var ret = [];
-	for (var i = 0 ; i < count ; i ++) {
+	for (var i = 0 ; i < count ; i ++)
+	{
 		ret.push(r[i]);
 	}
 
@@ -41,7 +44,6 @@ function parseLASHeader(arraybuffer)
 	o.pointsFormatId = readAs(arraybuffer, Uint8Array, 32*3+8);
 	o.pointsStructSize = readAs(arraybuffer, Uint16Array, 32*3+8+1);
 	o.pointsCount = readAs(arraybuffer, Uint32Array, 32*3 + 11);
-
 
 	var start = 32*3 + 35;
 	o.scale = readAs(arraybuffer, Float64Array, start, 3); start += 24; // 8*3
@@ -72,12 +74,12 @@ function handleEvent(msg)
 
 				instance.readOffset = 0;
 
-				postMessage({ type: "open", status: 1});
+				postMessage({type: "open", status: 1});
 			}
 			catch(e) 
 			{
 				debugger;
-				postMessage({ type: "open", status: 0, details: e });
+				postMessage({type: "open", status: 0, details: e});
 			}
 			break;
 
@@ -108,10 +110,13 @@ function handleEvent(msg)
 			let buffer = new ArrayBuffer(bufferSize * o.header.pointsStructSize);
 			let this_buf = new Uint8Array(buffer);
 			var buf_read = Module._malloc(o.header.pointsStructSize);
-			for (var i = 0 ; i < pointsToRead ; i ++) {
+
+			for (var i = 0 ; i < pointsToRead ; i++)
+			{
 				o.getPoint(buf_read);
 
-				if (i % skip === 0) {
+				if (i % skip === 0)
+				{
 					var a = new Uint8Array(Module.HEAPU8.buffer, buf_read, o.header.pointsStructSize);
 					this_buf.set(a, pointsRead * o.header.pointsStructSize, o.header.pointsStructSize);
 					pointsRead ++;
@@ -123,8 +128,9 @@ function handleEvent(msg)
 
 			let transferables = [buffer];
 
-			postMessage({
-				type: 'header',
+			postMessage(
+			{
+				type: "header",
 				status: 1,
 				buffer: buffer,
 				count: pointsRead,
@@ -135,15 +141,18 @@ function handleEvent(msg)
 
 
 		case "close":
-			if (instance !== null) {
+			if(instance !== null)
+			{
 				Module._free(instance.buf);
 				instance.delete();
 				instance = null;
-			}else{
+			}
+			else
+			{
 				debugger;
 			}
 			
-			postMessage({ type: "close", status: 1});
+			postMessage({type: "close", status: 1});
 			break;
 	}
 }
@@ -159,5 +168,3 @@ onmessage = function(event)
 		postMessage({type: event.data.type, status: 0, details: e});
 	}
 };
-
-

@@ -183,29 +183,18 @@ var LAZLoader = function(arraybuffer)
 	this.arraybuffer = arraybuffer;
 	this.nextCB = null;
 
-	var ww = new Worker(Potree.scriptPath + "/workers/LASLAZWorker.js");
-	ww.onmessage = function(e)
-	{
-		if(self.nextCB !== null)
-		{
-			self.nextCB(e.data);
-			self.nextCB = null;
-		}
-	};
-
 	this.dorr = function(req, cb)
 	{
 		self.nextCB = cb;
-		ww.postMessage(req);
 		
-		/*Potree.workerPool.addTask(Potree.scriptPath + "/workers/LASLAZWorker.js", function(e)
+		Potree.workerPool.runTask(WorkerManager.LAS_LAZ, function(e)
 		{
 			if(self.nextCB !== null)
 			{
 				self.nextCB(e.data);
 				self.nextCB = null;
 			}
-		}, req);*/
+		}, req);
 	};
 };
 

@@ -77,7 +77,7 @@ Potree.BinaryLoader = class BinaryLoader
 			name: node.name
 		};
 
-		Potree.workerPool.addTask(Potree.scriptPath + "/workers/BinaryDecoderWorker.js", function(e)
+		Potree.workerPool.runTask(WorkerManager.BINARY_DECODER, function(e)
 		{
 			var data = e.data;
 			var buffers = data.attributeBuffers;

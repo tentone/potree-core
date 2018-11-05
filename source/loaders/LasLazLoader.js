@@ -179,7 +179,7 @@ Potree.LasLazBatcher = class LasLazBatcher
 			maxs: lasBuffer.maxs
 		};
 
-		Potree.workerPool.addTask(Potree.scriptPath + "/workers/LASDecoderWorker.js", function(e)
+		Potree.workerPool.runTask(WorkerManager.LAS_DECODER, function(e)
 		{
 			var geometry = new THREE.BufferGeometry();
 			var numPoints = lasBuffer.pointsCount;

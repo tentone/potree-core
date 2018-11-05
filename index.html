@@ -18,10 +18,10 @@
 		<script src="source/utils/Enum.js"></script>
 		<script src="source/utils/HelperUtils.js"></script>
 		<script src="source/utils/VersionUtils.js"></script>
-		<script src="source/utils/workers/WorkerTask.js"></script>
-		<script src="source/utils/workers/WorkerPool.js"></script>
+		<script src="source/utils/workers/WorkerManager.js"></script>
 		
 		<script src="source/Potree.js"></script>
+		
 		<script src="source/PointAttributes.js"></script>
 		<script src="source/Gradients.js"></script>
 		<script src="source/Points.js"></script>
@@ -117,6 +117,7 @@
 					}
 				}
 
+				/*
 				var url = "data/lion_takanawa_laz/cloud.js";
 
 				var points = new Potree.Group();
@@ -137,8 +138,8 @@
 
 					points.add(pointcloud);
 				});
+				*/
 
-				/*
 				var points = new Potree.Group();
 				points.material.opacity = 1.0;
 				points.material.wireframe = true;
@@ -161,7 +162,6 @@
 						points.add(pointcloud);
 					});
 				}
-				*/
 
 				function loop()
 				{

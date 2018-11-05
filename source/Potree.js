@@ -2,8 +2,8 @@
 
 function Potree(){}
 
-Potree.maxNodesLoadGPUFrame = 50;
-Potree.maxDEMLevel = 32;
+Potree.maxNodesLoadGPUFrame = 20;
+Potree.maxDEMLevel = 0;
 Potree.maxNodesLoading = navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4;
 Potree.pointLoadLimit = 1e10;
 
@@ -15,7 +15,8 @@ Potree.resourcePath = null;
 Potree.measureTimings = false;
 Potree.tempVector3 = new THREE.Vector3();
 
-Potree.workerPool = new WorkerPool();
+Potree.workerPool = new WorkerManager();
+
 Potree.lru = new LRU();
 
 Potree.getWorkerPath = function()
@@ -38,17 +39,6 @@ Potree.getWorkerPath = function()
 };
 
 Potree.getWorkerPath();
-
-Potree.getDEMWorkerInstance = function()
-{
-	if(!PotreeDEMWorkerInstance)
-	{
-		var workerPath = Potree.scriptPath + "/workers/DEMWorker.js";
-		PotreeDEMWorkerInstance = Potree.workerPool.getWorker(workerPath);
-	}
-
-	return PotreeDEMWorkerInstance;
-};
 
 Potree.attributeLocations =
 {

@@ -151,11 +151,6 @@ class PotreeDEM
 
 	update(visibleNodes)
 	{
-		if(Potree.getDEMWorkerInstance().working)
-		{
-			return;
-		}
-
 		//check if point cloud transformation changed
 		if(this.matrix === null || !this.matrix.equals(this.pointcloud.matrixWorld))
 		{
@@ -187,7 +182,21 @@ class PotreeDEM
 		var targetNodes = this.expandAndFindByBox(projectedBox, node.getLevel());
 		node.demVersion = this.version;
 
-		Potree.getDEMWorkerInstance().onmessage = (e) =>
+		var position = node.geometryNode.geometry.attributes.position.array;
+		var message =
+		{
+			boundingBox:
+			{
+				min: node.getBoundingBox().min.toArray(),
+				max: node.getBoundingBox().max.toArray()
+			},
+			position: new Float32Array(position).buffer
+		};
+		var transferables = [message.position];
+
+		var self = this;
+
+		Potree.workerPool.runTask(WorkerManager.DEM, function(e)
 		{
 			var data = new Float32Array(e.data.dem.data);
 
@@ -195,40 +204,38 @@ class PotreeDEM
 			{
 				var boxSize = demNode.box.getSize(new THREE.Vector3());
 
-				for(var i = 0; i < this.tileSize; i++)
+				for(var i = 0; i < self.tileSize; i++)
 				{
-					for(var j = 0; j < this.tileSize; j++)
+					for(var j = 0; j < self.tileSize; j++)
 					{
-						var u = (i / (this.tileSize - 1));
-						var v = (j / (this.tileSize - 1));
+						var u = (i / (self.tileSize - 1));
+						var v = (j / (self.tileSize - 1));
 
 						var x = demNode.box.min.x + u * boxSize.x;
 						var y = demNode.box.min.y + v * boxSize.y;
 
-						var ix = this.tileSize * (x - projectedBox.min.x) / projectedBoxSize.x;
-						var iy = this.tileSize * (y - projectedBox.min.y) / projectedBoxSize.y;
+						var ix = self.tileSize * (x - projectedBox.min.x) / projectedBoxSize.x;
+						var iy = self.tileSize * (y - projectedBox.min.y) / projectedBoxSize.y;
 
-						if(ix < 0 || ix > this.tileSize)
+						if(ix < 0 || ix > self.tileSize)
 						{
 							continue;
 						}
 
-						if(iy < 0 || iy > this.tileSize)
+						if(iy < 0 || iy > self.tileSize)
 						{
 							continue;
 						}
 
-						ix = Math.min(Math.floor(ix), this.tileSize - 1);
-						iy = Math.min(Math.floor(iy), this.tileSize - 1);
+						ix = Math.min(Math.floor(ix), self.tileSize - 1);
+						iy = Math.min(Math.floor(iy), self.tileSize - 1);
 
-						demNode.data[i + this.tileSize * j] = data[ix + this.tileSize * iy];
+						demNode.data[i + self.tileSize * j] = data[ix + self.tileSize * iy];
 					}
 				}
 
 				demNode.createMipMap();
 				demNode.mipMapNeedsUpdate = true;
-
-				Potree.getDEMWorkerInstance().working = false;
 			}
 
 			//TODO only works somewhat if there is no rotation to the point cloud
@@ -239,30 +246,15 @@ class PotreeDEM
 			//
 			////node.dem = e.data.dem;
 			//
-			//Potree.getDEMWorkerInstance().working = false;
-			//
 			//{ //create scene objects for debugging
 			//	//for(var demNode of targetNodes){
 			//		var bb = new Potree.Box3Helper(box);
 			//		viewer.scene.scene.add(bb);
 			//
-			//		createDEMMesh(this, target);
+			//		createDEMMesh(self, target);
 			//	//}
 			//
 			//}
-		};
-
-		var position = node.geometryNode.geometry.attributes.position.array;
-		var message = {
-			boundingBox:
-			{
-				min: node.getBoundingBox().min.toArray(),
-				max: node.getBoundingBox().max.toArray()
-			},
-			position: new Float32Array(position).buffer
-		};
-		var transferables = [message.position];
-		Potree.getDEMWorkerInstance().working = true;
-		Potree.getDEMWorkerInstance().postMessage(message, transferables);
+		}, message, transferables);
 	}
 };

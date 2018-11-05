@@ -25,7 +25,7 @@ class WorkerManager
 			return this.workers[type].pop();
 		}
 		
-		return new Worker(WorkerManager.URLS[type]);
+		return new Worker(Potree.workerPath + WorkerManager.URLS[type]);
 	}
 
 	/**
@@ -69,9 +69,9 @@ WorkerManager.DEM = 4;
 
 WorkerManager.URLS = 
 [
-	"source/workers/BinaryDecoderWorker.js",
-	"source/workers/LASLAZWorker.js",
-	"source/workers/LASDecoderWorker.js",
-	"source/workers/GreyhoundBinaryDecoderWorker.js",
-	"source/workers/DEMWorker.js"
+	"/workers/BinaryDecoderWorker.js",
+	"/workers/LASLAZWorker.js",
+	"/workers/LASDecoderWorker.js",
+	"/workers/GreyhoundBinaryDecoderWorker.js",
+	"/workers/DEMWorker.js"
 ];

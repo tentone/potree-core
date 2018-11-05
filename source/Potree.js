@@ -2,6 +2,28 @@
 
 function Potree(){}
 
+Potree.getBasePath = function()
+{
+	if(document.currentScript.src)
+	{
+		var scriptPath = new URL(document.currentScript.src + "/..").href;
+
+		if(scriptPath.slice(-1) === "/")
+		{
+			scriptPath = scriptPath.slice(0, -1);
+		}
+
+		return scriptPath;
+	}
+	else
+	{
+		console.error("Potree: Was unable to find its script path using document.currentScript.");
+	}
+
+	return "";
+};
+
+Potree.workerPath = Potree.getBasePath();
 Potree.maxNodesLoadGPUFrame = 20;
 Potree.maxDEMLevel = 0;
 Potree.maxNodesLoading = navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4;
@@ -10,35 +32,9 @@ Potree.pointLoadLimit = 1e10;
 Potree.framenumber = 0;
 Potree.numNodesLoading = 0;
 Potree.debug = {};
-Potree.scriptPath = null;
-Potree.resourcePath = null;
 Potree.measureTimings = false;
-Potree.tempVector3 = new THREE.Vector3();
-
 Potree.workerPool = new WorkerManager();
-
 Potree.lru = new LRU();
-
-Potree.getWorkerPath = function()
-{
-	if(document.currentScript.src)
-	{
-		Potree.scriptPath = new URL(document.currentScript.src + "/..").href;
-
-		if(Potree.scriptPath.slice(-1) === "/")
-		{
-			Potree.scriptPath = Potree.scriptPath.slice(0, -1);
-		}
-	}
-	else
-	{
-		console.error("Potree: Was unable to find its script path using document.currentScript.");
-	}
-	
-	Potree.resourcePath = Potree.scriptPath + "/resources";
-};
-
-Potree.getWorkerPath();
 
 Potree.attributeLocations =
 {
@@ -179,7 +175,7 @@ Potree.loadPointCloud = function(path, name, callback)
 	}
 	else
 	{
-		console.error(new Error("Failed to load point cloud from URL " + path));
+		throw new Error("Potree: Failed to load point cloud from URL " + path);
 	}
 };
 
@@ -530,7 +526,7 @@ Potree.updateVisibilityStructures = function(pointclouds, camera, renderer)
 
 		//Use close near plane for frustum intersection
 		var frustumCam = camera.clone();
-		frustumCam.near = Math.min(camera.near, 0.1);
+		frustumCam.near = camera.near; //Math.min(camera.near, 0.1);
 		frustumCam.updateProjectionMatrix();
 		var proj = camera.projectionMatrix;
 

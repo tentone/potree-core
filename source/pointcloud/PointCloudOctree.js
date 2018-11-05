@@ -139,6 +139,8 @@ class PointCloudOctree extends PointCloudTree
 		this.profileRequests = [];
 		this.name = "";
 
+		this.tempVector3 = new THREE.Vector3();
+
 		var box = [this.pcoGeometry.tightBoundingBox, this.getBoundingBoxWorld()].find(v => v !== undefined);
 
 		this.updateMatrixWorld(true);
@@ -294,7 +296,6 @@ class PointCloudOctree extends PointCloudTree
 
 	computeVisibilityTextureData(nodes, camera)
 	{
-
 		if(Potree.measureTimings) performance.mark("computeVisibilityTextureData-start");
 
 		var data = new Uint8Array(nodes.length * 4);
@@ -393,7 +394,7 @@ class PointCloudOctree extends PointCloudTree
 			bSphere.applyMatrix4(node.sceneNode.matrixWorld);
 			bSphere.applyMatrix4(camera.matrixWorldInverse);
 
-			var ray = new THREE.Ray(camera.position, camera.getWorldDirection(Potree.tempVector3));
+			var ray = new THREE.Ray(camera.position, camera.getWorldDirection(this.tempVector3));
 			var distance = intersectSphereBack(ray, bSphere);
 			var distance2 = bSphere.center.distanceTo(camera.position) + bSphere.radius;
 			if(distance === null)

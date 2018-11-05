@@ -9,10 +9,10 @@
 		<script src="lib/threejs/OrbitControls.js"></script>
 
 		<!--Production-->
-		<!--<script src="build/potree.min.js"></script>-->
+		<script src="build/potree.min.js"></script>
 
 		<!--Development-->
-		<script src="lib/BinaryHeap.js"></script>
+		<!--<script src="lib/BinaryHeap.js"></script>
 
 		<script src="source/utils/LRU.js"></script>
 		<script src="source/utils/Enum.js"></script>
@@ -51,7 +51,7 @@
 		<script src="source/loaders/LASLAZLoader.js"></script>
 		
 		<script src="source/objects/BasicGroup.js"></script>
-		<script src="source/objects/Group.js"></script>
+		<script src="source/objects/Group.js"></script>-->
 		
 		<script>
 			document.body.onload = function()
@@ -117,7 +117,6 @@
 					}
 				}
 
-				/*
 				var url = "data/lion_takanawa_laz/cloud.js";
 
 				var points = new Potree.Group();
@@ -138,31 +137,7 @@
 
 					points.add(pointcloud);
 				});
-				*/
-
-				var points = new Potree.Group();
-				points.material.opacity = 1.0;
-				points.material.wireframe = true;
-				scene.add(points);
-
-				//for(var k = 5; k >= 0; k--)
-				for(var k = 0; k < 6; k++)
-				{
-					var url = "data/eqs_" + k + "/cloud.js";
-
-					Potree.loadPointCloud(url, "eqs_" + k, function(e)
-					{
-						var pointcloud = e.pointcloud;
-						
-						var material = pointcloud.material;
-						material.size = 9;
-						material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
-						material.pointSizeType = Potree.PointSizeType.FIXED; //ADAPTIVE | FIXED
-						material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE | PARABOLOID
-						points.add(pointcloud);
-					});
-				}
-
+				
 				function loop()
 				{
 					cube.rotation.y += 0.01;

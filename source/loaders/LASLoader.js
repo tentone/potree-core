@@ -1,21 +1,25 @@
-	"use strict";
+"use strict";
 
-var pointFormatReaders = {
-	0: function(dv) {
+var pointFormatReaders =
+{
+	0: function(dv)
+	{
 		return {
 			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
 			"intensity": dv.getUint16(12, true),
 			"classification": dv.getUint8(16, true)
 		};
 	},
-	1: function(dv) {
+	1: function(dv)
+	{
 		return {
 			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
 			"intensity": dv.getUint16(12, true),
 			"classification": dv.getUint8(16, true)
 		};
 	},
-	2: function(dv) {
+	2: function(dv)
+	{
 		return {
 			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
 			"intensity": dv.getUint16(12, true),
@@ -23,7 +27,8 @@ var pointFormatReaders = {
 			"color": [dv.getUint16(20, true), dv.getUint16(22, true), dv.getUint16(24, true)]
 		};
 	},
-	3: function(dv) {
+	3: function(dv)
+	{
 		return {
 			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
 			"intensity": dv.getUint16(12, true),
@@ -33,23 +38,26 @@ var pointFormatReaders = {
 	}
 };
 
-function readAs(buf, Type, offset, count) {
+function readAs(buf, Type, offset, count)
+{
 	count = (count === undefined || count === 0 ? 1 : count);
 	var sub = buf.slice(offset, offset + Type.BYTES_PER_ELEMENT * count);
 
 	var r = new Type(sub);
-	if (count === undefined || count === 1)
+	if(count === undefined || count === 1)
 		return r[0];
 
 	var ret = [];
-	for (var i = 0 ; i < count ; i ++) {
+	for(var i = 0 ; i < count ; i ++)
+	{
 		ret.push(r[i]);
 	}
 
 	return ret;
 }
 
-function parseLASHeader(arraybuffer) {
+function parseLASHeader(arraybuffer)
+{
 	var data = {};
 
 	data.pointsOffset = readAs(arraybuffer, Uint32Array, 32*3);
@@ -71,40 +79,50 @@ function parseLASHeader(arraybuffer) {
 // LAS Loader
 // Loads uncompressed files
 //
-var LASLoader = function(arraybuffer) {
+var LASLoader = function(arraybuffer)
+{
 	this.arraybuffer = arraybuffer;
 };
 
-LASLoader.prototype.open = function() {
+LASLoader.prototype.open = function()
+{
 	// nothing needs to be done to open this file
 	//
 	this.readOffset = 0;
-	return new Promise(function(res, rej) {
+	return new Promise(function(res, rej)
+	{
 		setTimeout(res, 0);
 	});
 };
 
-LASLoader.prototype.getHeader = function() {
+LASLoader.prototype.getHeader = function()
+{
 	var self = this;
 
-	return new Promise(function(res, rej) {
-		setTimeout(function() {
+	return new Promise(function(res, rej)
+	{
+		setTimeout(function()
+		{
 			self.header = parseLASHeader(self.arraybuffer);
 			res(self.header);
 		}, 0);
 	});
 };
 
-LASLoader.prototype.readData = function(count, offset, skip) {
+LASLoader.prototype.readData = function(count, offset, skip)
+{
 	var self = this;
 
-	return new Promise(function(res, rej) {
-		setTimeout(function() {
-			if (!self.header)
+	return new Promise(function(res, rej)
+	{
+		setTimeout(function()
+		{
+			if(!self.header)
 				return rej(new Error("Cannot start reading data till a header request is issued"));
 
 			var start;
-			if (skip <= 1) {
+			if(skip <= 1)
+			{
 				count = Math.min(count, self.header.pointsCount - self.readOffset);
 				start = self.header.pointsOffset + self.readOffset * self.header.pointsStructSize;
 				var end = start + count * self.header.pointsStructSize;
@@ -114,14 +132,17 @@ LASLoader.prototype.readData = function(count, offset, skip) {
 					hasMoreData: self.readOffset + count < self.header.pointsCount});
 				self.readOffset += count;
 			}
-			else {
+			else
+			{
 				var pointsToRead = Math.min(count * skip, self.header.pointsCount - self.readOffset);
 				var bufferSize = Math.ceil(pointsToRead / skip);
 				var pointsRead = 0;
 
 				var buf = new Uint8Array(bufferSize * self.header.pointsStructSize);
-				for (var i = 0 ; i < pointsToRead ; i ++) {
-					if (i % skip === 0) {
+				for(var i = 0 ; i < pointsToRead ; i ++)
+				{
+					if(i % skip === 0)
+					{
 						start = self.header.pointsOffset + self.readOffset * self.header.pointsStructSize;
 						var src = new Uint8Array(self.arraybuffer, start, self.header.pointsStructSize);
 
@@ -142,9 +163,11 @@ LASLoader.prototype.readData = function(count, offset, skip) {
 	});
 };
 
-LASLoader.prototype.close = function() {
+LASLoader.prototype.close = function()
+{
 	var self = this;
-	return new Promise(function(res, rej) {
+	return new Promise(function(res, rej)
+	{
 		self.arraybuffer = null;
 		setTimeout(res, 0);
 	});
@@ -153,35 +176,49 @@ LASLoader.prototype.close = function() {
 // LAZ Loader
 // Uses NaCL module to load LAZ files
 //
-var LAZLoader = function(arraybuffer) {
-	this.arraybuffer = arraybuffer;
-	
-	let workerPath = Potree.scriptPath + "/workers/LASLAZWorker.js";
-	this.ww = new Worker(workerPath);
-
-	this.nextCB = null;
+var LAZLoader = function(arraybuffer)
+{
 	var self = this;
 
-	this.ww.onmessage = function(e) {
-		if (self.nextCB !== null) {
+	this.arraybuffer = arraybuffer;
+	this.nextCB = null;
+
+	var ww = new Worker(Potree.scriptPath + "/workers/LASLAZWorker.js");
+	ww.onmessage = function(e)
+	{
+		if(self.nextCB !== null)
+		{
 			self.nextCB(e.data);
 			self.nextCB = null;
 		}
 	};
 
-	this.dorr = function(req, cb) {
+	this.dorr = function(req, cb)
+	{
 		self.nextCB = cb;
-		self.ww.postMessage(req);
+		ww.postMessage(req);
+		
+		/*Potree.workerPool.addTask(Potree.scriptPath + "/workers/LASLAZWorker.js", function(e)
+		{
+			if(self.nextCB !== null)
+			{
+				self.nextCB(e.data);
+				self.nextCB = null;
+			}
+		}, req);*/
 	};
 };
 
-LAZLoader.prototype.open = function() {
+LAZLoader.prototype.open = function()
+{
 
 	// nothing needs to be done to open this file
 	var self = this;
-	return new Promise(function(res, rej) {
-		self.dorr({type:"open", arraybuffer: self.arraybuffer}, function(r) {
-			if (r.status !== 1)
+	return new Promise(function(res, rej)
+	{
+		self.dorr({type:"open", arraybuffer: self.arraybuffer}, function(r)
+		{
+			if(r.status !== 1)
 				return rej(new Error("Failed to open file"));
 
 			res(true);
@@ -189,12 +226,15 @@ LAZLoader.prototype.open = function() {
 	});
 };
 
-LAZLoader.prototype.getHeader = function() {
+LAZLoader.prototype.getHeader = function()
+{
 	var self = this;
 
-	return new Promise(function(res, rej) {
-		self.dorr({type:'header'}, function(r) {
-			if (r.status !== 1)
+	return new Promise(function(res, rej)
+	{
+		self.dorr({type:'header'}, function(r)
+		{
+			if(r.status !== 1)
 				return rej(new Error("Failed to get header"));
 
 			res(r.header);
@@ -202,12 +242,15 @@ LAZLoader.prototype.getHeader = function() {
 	});
 };
 
-LAZLoader.prototype.readData = function(count, offset, skip) {
+LAZLoader.prototype.readData = function(count, offset, skip)
+{
 	var self = this;
 
-	return new Promise(function(res, rej) {
-		self.dorr({type:'read', count: count, offset: offset, skip: skip}, function(r) {
-			if (r.status !== 1)
+	return new Promise(function(res, rej)
+	{
+		self.dorr({type:'read', count: count, offset: offset, skip: skip}, function(r)
+		{
+			if(r.status !== 1)
 				return rej(new Error("Failed to read data"));
 			res({
 				buffer: r.buffer,
@@ -218,15 +261,15 @@ LAZLoader.prototype.readData = function(count, offset, skip) {
 	});
 };
 
-LAZLoader.prototype.close = function() {
+LAZLoader.prototype.close = function()
+{
 	var self = this;
 
-	return new Promise(function(res, rej) {
-		self.dorr({type:'close'}, function(r) {
-
-			
-		
-			if (r.status !== 1)
+	return new Promise(function(res, rej)
+	{
+		self.dorr({type:'close'}, function(r)
+		{
+			if(r.status !== 1)
 				return rej(new Error("Failed to close file"));
 
 			res(true);
@@ -235,15 +278,16 @@ LAZLoader.prototype.close = function() {
 };
 
 // A single consistent interface for loading LAS/LAZ files
-var LASFile = function(arraybuffer) {
+var LASFile = function(arraybuffer)
+{
 	this.arraybuffer = arraybuffer;
 
 	this.determineVersion();
-	if (this.version > 12)
+	if(this.version > 12)
 		throw new Error("Only file versions <= 1.2 are supported at this time");
 
 	this.determineFormat();
-	if (pointFormatReaders[this.formatId] === undefined)
+	if(pointFormatReaders[this.formatId] === undefined)
 		throw new Error("The point format ID is not supported");
 
 	this.loader = this.isCompressed ?
@@ -251,43 +295,49 @@ var LASFile = function(arraybuffer) {
 		new LASLoader(this.arraybuffer);
 };
 
-LASFile.prototype.determineFormat = function() {
+LASFile.prototype.determineFormat = function()
+{
 	var formatId = readAs(this.arraybuffer, Uint8Array, 32*3+8);
 	var bit_7 = (formatId & 0x80) >> 7;
 	var bit_6 = (formatId & 0x40) >> 6;
 
-	if (bit_7 === 1 && bit_6 === 1)
+	if(bit_7 === 1 && bit_6 === 1)
 		throw new Error("Old style compression not supported");
 
 	this.formatId = formatId & 0x3f;
 	this.isCompressed = (bit_7 === 1 || bit_6 === 1);
 };
 
-LASFile.prototype.determineVersion = function() {
+LASFile.prototype.determineVersion = function()
+{
 	var ver = new Int8Array(this.arraybuffer, 24, 2);
 	this.version = ver[0] * 10 + ver[1];
 	this.versionAsString = ver[0] + "." + ver[1];
 };
 
-LASFile.prototype.open = function() {
+LASFile.prototype.open = function()
+{
 	return this.loader.open();
 };
 
-LASFile.prototype.getHeader = function() {
+LASFile.prototype.getHeader = function()
+{
 	return this.loader.getHeader();
 };
 
-LASFile.prototype.readData = function(count, start, skip) {
+LASFile.prototype.readData = function(count, start, skip)
+{
 	return this.loader.readData(count, start, skip);
 };
 
-LASFile.prototype.close = function() {
+LASFile.prototype.close = function()
+{
 	return this.loader.close();
 };
 
 // Decodes LAS records into points
-//
-var LASDecoder = function(buffer, pointFormatID, pointSize, pointsCount, scale, offset, mins, maxs) {
+var LASDecoder = function(buffer, pointFormatID, pointSize, pointsCount, scale, offset, mins, maxs)
+{
 	this.arrayb = buffer;
 	this.decoder = pointFormatReaders[pointFormatID];
 	this.pointsCount = pointsCount;
@@ -298,8 +348,9 @@ var LASDecoder = function(buffer, pointFormatID, pointSize, pointsCount, scale, 
 	this.maxs = maxs;
 };
 
-LASDecoder.prototype.getPoint = function(index) {
-	if (index < 0 || index >= this.pointsCount)
+LASDecoder.prototype.getPoint = function(index)
+{
+	if(index < 0 || index >= this.pointsCount)
 		throw new Error("Point index out of range");
 
 	var dv = new DataView(this.arrayb, index * this.pointSize, this.pointSize);

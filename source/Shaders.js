@@ -6,7 +6,7 @@ PotreeShaders["pointcloud.vs"] = `
 precision highp float;
 precision highp int;
 
-#define max_clip_polygons 8
+#define MAX_CLIP_POLYGONS 8
 #define PI 3.141592653589793
 
 ` + THREE.ShaderChunk.logdepthbuf_pars_vertex + `

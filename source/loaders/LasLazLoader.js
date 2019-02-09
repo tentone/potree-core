@@ -123,8 +123,8 @@ Potree.LASLAZLoader = class LASLAZLoader
 			}).then(v =>
 			{
 				var lf = v[0];
+				
 				//we"re done loading this file
-				//
 				Potree.LASLAZLoader.progressCB(1);
 
 				//Close it
@@ -135,8 +135,7 @@ Potree.LASLAZLoader = class LASLAZLoader
 					return v.slice(1);
 				}).catch(e =>
 				{
-					//If there was a cancellation, make sure the file is closed, if the file is open
-					//close and then fail
+					//If there was a cancellation, make sure the file is closed, if the file is open close and then fail
 					if(lf.isOpen)
 					{
 						return lf.close().then(function()

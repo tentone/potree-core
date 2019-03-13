@@ -214,3 +214,5 @@ LRU.prototype.toString = function()
 	string += "(" + this.size() + ")";
 	return string;
 };
+
+export {LRU, LRUItem};

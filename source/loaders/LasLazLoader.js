@@ -1,6 +1,7 @@
 "use strict";
 
 import {VersionUtils} from "../utils/VersionUtils.js";
+import {WorkerManager} from "../utils/workers/WorkerManager.js";
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz

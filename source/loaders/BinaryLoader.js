@@ -2,6 +2,7 @@
 
 import PointAttributeNames from "../PointAttributes.js";
 import {VersionUtils} from "../utils/VersionUtils.js";
+import {WorkerManager} from "../utils/workers/WorkerManager.js";
 
 class BinaryLoader
 {

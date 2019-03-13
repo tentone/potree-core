@@ -1,5 +1,7 @@
 "use strict";
 
+import {WorkerManager} from "../utils/workers/WorkerManager.js";
+
 class PotreeDEM
 {
 	constructor(pointcloud)

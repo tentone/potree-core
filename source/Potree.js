@@ -2,6 +2,8 @@
 
 import {GreyhoundLoader} from "./loaders/GreyhoundLoader.js";
 import {POCLoader} from "./loaders/POCLoader.js";
+import {LRU, LRUItem} from "./utils/LRU.js";
+import {WorkerManager} from "./utils/workers/WorkerManager.js";
 
 function Potree(){}
 

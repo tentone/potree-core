@@ -1,5 +1,7 @@
 "use strict";
 
+import {VersionUtils} from "../utils/VersionUtils.js";
+
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
  *	http://plas.io/
@@ -7,7 +9,7 @@
  *
  * Thanks to Uday Verma and Howard Butler
  */
-Potree.LASLAZLoader = class LASLAZLoader
+class LASLAZLoader
 {
 	constructor(version)
 	{
@@ -65,7 +67,7 @@ Potree.LASLAZLoader = class LASLAZLoader
 	parse(node, buffer)
 	{
 		var lf = new LASFile(buffer);
-		var handler = new Potree.LasLazBatcher(node);
+		var handler = new LasLazBatcher(node);
 
 		lf.open()
 			.then(msg =>
@@ -103,7 +105,7 @@ Potree.LASLAZLoader = class LASLAZLoader
 							header.mins, header.maxs));
 
 						totalRead += data.count;
-						Potree.LASLAZLoader.progressCB(totalRead / totalToRead);
+						LASLAZLoader.progressCB(totalRead / totalToRead);
 
 						if(data.hasMoreData)
 						{
@@ -125,7 +127,7 @@ Potree.LASLAZLoader = class LASLAZLoader
 				var lf = v[0];
 				
 				//we"re done loading this file
-				Potree.LASLAZLoader.progressCB(1);
+				LASLAZLoader.progressCB(1);
 
 				//Close it
 				return lf.close().then(function()
@@ -155,7 +157,7 @@ Potree.LASLAZLoader = class LASLAZLoader
 	}
 };
 
-Potree.LasLazBatcher = class LasLazBatcher
+class LasLazBatcher
 {
 	constructor(node)
 	{
@@ -221,3 +223,5 @@ Potree.LasLazBatcher = class LasLazBatcher
 		}, message, [message.buffer]);
 	};
 };
+
+export {LASLAZLoader, LasLazBatcher};

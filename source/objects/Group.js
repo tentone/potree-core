@@ -1,6 +1,9 @@
 "use strict";
 
-Potree.Group = class extends Potree.BasicGroup
+import {WebGLBuffer} from "../WebGLBuffer.js";
+import {BasicGroup} from "./BasicGroup.js";
+
+class Group extends BasicGroup
 {
 	constructor()
 	{
@@ -55,7 +58,7 @@ Potree.Group = class extends Potree.BasicGroup
 
 	createBuffer(gl, geometry)
 	{
-		var webglBuffer = new Potree.WebGLBuffer();
+		var webglBuffer = new WebGLBuffer();
 		webglBuffer.vao = gl.createVertexArray();
 		webglBuffer.numElements = geometry.attributes.position.count;
 
@@ -608,3 +611,5 @@ Potree.Group = class extends Potree.BasicGroup
 		gl.activeTexture(gl.TEXTURE0);
 	}
 };
+
+export {Group};

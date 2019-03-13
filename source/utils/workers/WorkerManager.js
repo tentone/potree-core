@@ -75,3 +75,5 @@ WorkerManager.URLS =
 	"/workers/GreyhoundBinaryDecoderWorker.js",
 	"/workers/DEMWorker.js"
 ];
+
+export {WorkerManager};

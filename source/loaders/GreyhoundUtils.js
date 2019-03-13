@@ -7,7 +7,6 @@
  * @author Oscar Martinez Rubi
  * @author Connor Manning
  */
-
 class GreyhoundUtils
 {
 	static getQueryParam(name)

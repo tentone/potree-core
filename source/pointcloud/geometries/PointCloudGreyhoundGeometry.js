@@ -1,5 +1,7 @@
 "use strict";
 
+import {GreyhoundLoader} from "../../loaders/GreyhoundLoader.js";
+
 function PointCloudGreyhoundGeometry()
 {
 	this.spacing = 0;
@@ -278,16 +280,14 @@ PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = function()
 			var parentName = name.substring(0, name.length - 1);
 			var parentNode = nodes[parentName];
 			var level = name.length - 1;
-			var boundingBox = Potree.GreyhoundLoader.createChildAABB(
-				parentNode.boundingBox, index);
+			var boundingBox = GreyhoundLoader.createChildAABB(parentNode.boundingBox, index);
 
-			var currentNode = new PointCloudGreyhoundGeometryNode(
-				name, pgg, boundingBox, node.scale, node.offset);
-
+			var currentNode = new PointCloudGreyhoundGeometryNode(name, pgg, boundingBox, node.scale, node.offset);
 			currentNode.level = level;
 			currentNode.numPoints = numPoints;
 			currentNode.hasChildren = decoded[i].children > 0;
 			currentNode.spacing = pgg.spacing / Math.pow(2, level);
+
 			parentNode.addChild(currentNode);
 			nodes[name] = currentNode;
 		}
@@ -375,3 +375,5 @@ PointCloudGreyhoundGeometryNode.prototype.dispose = function()
 };
 
 Object.assign(PointCloudGreyhoundGeometryNode.prototype, THREE.EventDispatcher.prototype);
+
+export {PointCloudGreyhoundGeometry, PointCloudGreyhoundGeometryNode};

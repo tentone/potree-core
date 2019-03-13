@@ -56,3 +56,5 @@ class Enum
 	}
 
 };
+
+export {Enum, EnumItem};

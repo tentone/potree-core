@@ -1,5 +1,8 @@
 "use strict";
 
+import {GreyhoundLoader} from "./loaders/GreyhoundLoader.js";
+import {POCLoader} from "./loaders/POCLoader.js";
+
 function Potree(){}
 
 Potree.getBasePath = function()
@@ -143,7 +146,7 @@ Potree.loadPointCloud = function(path, name, callback)
 	//Greyhound pointcloud server URL.
 	if(path.indexOf("greyhound://") === 0)
 	{
-		Potree.GreyhoundLoader.load(path, function(geometry)
+		GreyhoundLoader.load(path, function(geometry)
 		{
 			if(geometry)
 			{
@@ -154,7 +157,7 @@ Potree.loadPointCloud = function(path, name, callback)
 	//Potree point cloud
 	else if(path.indexOf("cloud.js") > 0)
 	{
-		Potree.POCLoader.load(path, function(geometry)
+		POCLoader.load(path, function(geometry)
 		{
 			if(geometry)
 			{
@@ -693,3 +696,5 @@ Potree.paramThreeToGL = function(_gl, p)
 
 	return 0;
 };
+
+export {Potree};

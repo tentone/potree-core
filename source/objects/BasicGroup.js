@@ -1,5 +1,7 @@
 "use strict";
 
+import {HelperUtils} from "../utils/HelperUtils.js";
+
 /**
  * Potree object is a wrapper to use Potree alongside other THREE based frameworks.
  * 
@@ -9,7 +11,7 @@
  * 
  * Also takes care of geometry ajustments to allow the point clouds to be frustum culled.
  */
-Potree.BasicGroup = class extends THREE.Mesh
+class BasicGroup extends THREE.Mesh
 {
 	constructor()
 	{
@@ -195,3 +197,5 @@ Potree.BasicGroup = class extends THREE.Mesh
 		return height;
 	}
 };
+
+export {BasicGroup};

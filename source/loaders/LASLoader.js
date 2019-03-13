@@ -273,15 +273,17 @@ var LASFile = function(arraybuffer)
 
 	this.determineVersion();
 	if(this.version > 12)
+	{
 		throw new Error("Only file versions <= 1.2 are supported at this time");
+	}
 
 	this.determineFormat();
 	if(pointFormatReaders[this.formatId] === undefined)
+	{
 		throw new Error("The point format ID is not supported");
+	}
 
-	this.loader = this.isCompressed ?
-		new LAZLoader(this.arraybuffer) :
-		new LASLoader(this.arraybuffer);
+	this.loader = this.isCompressed ? new LAZLoader(this.arraybuffer) : new LASLoader(this.arraybuffer);
 };
 
 LASFile.prototype.determineFormat = function()
@@ -291,7 +293,9 @@ LASFile.prototype.determineFormat = function()
 	var bit_6 = (formatId & 0x40) >> 6;
 
 	if(bit_7 === 1 && bit_6 === 1)
+	{
 		throw new Error("Old style compression not supported");
+	}
 
 	this.formatId = formatId & 0x3f;
 	this.isCompressed = (bit_7 === 1 || bit_6 === 1);
@@ -340,8 +344,11 @@ var LASDecoder = function(buffer, pointFormatID, pointSize, pointsCount, scale, 
 LASDecoder.prototype.getPoint = function(index)
 {
 	if(index < 0 || index >= this.pointsCount)
+	{
 		throw new Error("Point index out of range");
+	}
 
-	var dv = new DataView(this.arrayb, index * this.pointSize, this.pointSize);
-	return this.decoder(dv);
+	return this.decoder(new DataView(this.arrayb, index * this.pointSize, this.pointSize));
 };
+
+export {LASLoader, LAZLoader, LASFile, LASDecoder};

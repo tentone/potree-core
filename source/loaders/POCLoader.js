@@ -1,10 +1,18 @@
+"use strict";
+
+import BinaryLoader from "./BinaryLoader.js";
+import LASLAZLoader from "./LASLAZLoader.js";
+import {PointAttributes, PointAttribute} from "../PointAttributes.js";
+import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "../pointcloud/geometries/PointCloudOctreeGeometry.js";
+import {VersionUtils} from "../utils/VersionUtils.js";
+
 /**
  * @class Loads mno files and returns a PointcloudOctree
  * for a description of the mno binary file format, read mnoFileFormat.txt
  *
  * @author Markus Schuetz
  */
-Potree.POCLoader = function(){};
+function POCLoader(){};
 
 /**
  * @return a point cloud octree with the root node data loaded.
@@ -13,7 +21,7 @@ Potree.POCLoader = function(){};
  * @param url
  * @param loadingFinishedListener executed after loading the binary has been finished
  */
-Potree.POCLoader.load = function(url, callback)
+POCLoader.load = function(url, callback)
 {
 	try
 	{
@@ -75,16 +83,16 @@ Potree.POCLoader.load = function(url, callback)
 				//Select the appropiate loader
 				if(fMno.pointAttributes === "LAS")
 				{
-					pco.loader = new Potree.LASLAZLoader(fMno.version);
+					pco.loader = new LASLAZLoader(fMno.version);
 				}
 				else if(fMno.pointAttributes === "LAZ")
 				{
-					pco.loader = new Potree.LASLAZLoader(fMno.version);
+					pco.loader = new LASLAZLoader(fMno.version);
 				}
 				else
 				{
-					pco.loader = new Potree.BinaryLoader(fMno.version, boundingBox, fMno.scale);
-					pco.pointAttributes = new Potree.PointAttributes(pco.pointAttributes);
+					pco.loader = new BinaryLoader(fMno.version, boundingBox, fMno.scale);
+					pco.pointAttributes = new PointAttributes(pco.pointAttributes);
 				}
 
 				var nodes = {};
@@ -119,7 +127,7 @@ Potree.POCLoader.load = function(url, callback)
 						var parentName = name.substring(0, name.length - 1);
 						var parentNode = nodes[parentName];
 						var level = name.length - 1;
-						var boundingBox = Potree.POCLoader.createChildAABB(parentNode.boundingBox, index);
+						var boundingBox = POCLoader.createChildAABB(parentNode.boundingBox, index);
 
 						var node = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
 						node.level = level;
@@ -147,21 +155,21 @@ Potree.POCLoader.load = function(url, callback)
 	}
 };
 
-Potree.POCLoader.loadPointAttributes = function(mno)
+POCLoader.loadPointAttributes = function(mno)
 {
 	var fpa = mno.pointAttributes;
-	var pa = new Potree.PointAttributes();
+	var pa = new PointAttributes();
 
 	for(var i = 0; i < fpa.length; i++)
 	{
-		var pointAttribute = Potree.PointAttribute[fpa[i]];
+		var pointAttribute = PointAttribute[fpa[i]];
 		pa.add(pointAttribute);
 	}
 
 	return pa;
 };
 
-Potree.POCLoader.createChildAABB = function(aabb, index)
+POCLoader.createChildAABB = function(aabb, index)
 {
 	var min = aabb.min.clone();
 	var max = aabb.max.clone();
@@ -196,3 +204,5 @@ Potree.POCLoader.createChildAABB = function(aabb, index)
 
 	return new THREE.Box3(min, max);
 };
+
+export {POCLoader};

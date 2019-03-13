@@ -1,6 +1,6 @@
 "use strict";
 
-Potree.Points = class Points
+class Points
 {
 	constructor()
 	{
@@ -55,3 +55,5 @@ Potree.Points = class Points
 		this.boundingBox.union(points.boundingBox);
 	}
 };
+
+export {Points};

@@ -51,3 +51,5 @@ class HelperUtils
 		return boundingBox;
 	};
 };
+
+export {HelperUtils};

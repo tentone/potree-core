@@ -1,5 +1,7 @@
 "use strict";
 
+import {HelperUtils} from "../../utils/HelperUtils.js";
+
 class PointCloudMaterial extends THREE.RawShaderMaterial
 {
 	constructor(parameters = {})

@@ -1,8 +1,13 @@
 "use strict";
 
-Potree.GreyhoundLoader = function(){};
+import {PointAttributes, PointAttribute} from "../PointAttributes.js";
+import {PointCloudGreyhoundGeometry, PointCloudGreyhoundGeometryNode} from "../pointcloud/geometries/PointCloudGreyhoundGeometry.js";
+import {GreyhoundBinaryLoader} from "./GreyhoundBinaryLoader.js";
+import {VersionUtils} from "../utils/VersionUtils.js";
 
-Potree.GreyhoundLoader.loadInfoJSON = function(url, callback){};
+function GreyhoundLoader(){}
+
+GreyhoundLoader.loadInfoJSON = function(url, callback){};
 
 /**
  * @return a point cloud octree with the root node data loaded.
@@ -12,7 +17,7 @@ Potree.GreyhoundLoader.loadInfoJSON = function(url, callback){};
  * @param loadingFinishedListener executed after loading the binary has been
  * finished
  */
-Potree.GreyhoundLoader.load = function(url, callback)
+GreyhoundLoader.load = function(url, callback)
 {
 	var HIERARCHY_STEP_SIZE = 5;
 
@@ -118,7 +123,7 @@ Potree.GreyhoundLoader.load = function(url, callback)
 			pgg.schema = GreyhoundUtils.createSchema(attributes);
 			var pointSize = GreyhoundUtils.pointSizeFrom(pgg.schema);
 
-			pgg.pointAttributes = new Potree.PointAttributes(attributes);
+			pgg.pointAttributes = new PointAttributes(attributes);
 			pgg.pointAttributes.byteSize = pointSize;
 
 			var boundingBox = new THREE.Box3(
@@ -137,18 +142,14 @@ Potree.GreyhoundLoader.load = function(url, callback)
 
 			pgg.scale = scale;
 			pgg.offset = offset;
-			pgg.loader = new Potree.GreyhoundBinaryLoader(version, boundingBox, pgg.scale);
+			pgg.loader = new GreyhoundBinaryLoader(version, boundingBox, pgg.scale);
 
 			var nodes = {};
 
 			//load root
 			var name = "r";
 
-			var root = new PointCloudGreyhoundGeometryNode(
-				name, pgg, boundingBox,
-				scale, offset
-			);
-
+			var root = new PointCloudGreyhoundGeometryNode(name, pgg, boundingBox, scale, offset);
 			root.level = 0;
 			root.hasChildren = true;
 			root.numPoints = greyhoundInfo.numPoints;
@@ -177,21 +178,21 @@ Potree.GreyhoundLoader.load = function(url, callback)
 	}
 };
 
-Potree.GreyhoundLoader.loadPointAttributes = function(mno)
+GreyhoundLoader.loadPointAttributes = function(mno)
 {
 	var fpa = mno.pointAttributes;
-	var pa = new Potree.PointAttributes();
+	var pa = new PointAttributes();
 
 	for(var i = 0; i < fpa.length; i++)
 	{
-		var pointAttribute = Potree.PointAttribute[fpa[i]];
+		var pointAttribute = PointAttribute[fpa[i]];
 		pa.add(pointAttribute);
 	}
 
 	return pa;
 };
 
-Potree.GreyhoundLoader.createChildAABB = function(aabb, childIndex)
+GreyhoundLoader.createChildAABB = function(aabb, childIndex)
 {
 	var min = aabb.min;
 	var max = aabb.max;
@@ -246,3 +247,5 @@ Potree.GreyhoundLoader.createChildAABB = function(aabb, childIndex)
 
 	return new THREE.Box3(min, max);
 };
+
+export {GreyhoundLoader};

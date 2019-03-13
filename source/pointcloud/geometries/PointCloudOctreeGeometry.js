@@ -1,5 +1,7 @@
 "use strict";
 
+import {POCLoader} from "../../loaders/POCLoader.js";
+
 class PointCloudOctreeGeometry
 {
 	constructor()
@@ -232,7 +234,7 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 				var parentName = name.substring(0, name.length - 1);
 				var parentNode = nodes[parentName];
 				var level = name.length - 1;
-				var boundingBox = Potree.POCLoader.createChildAABB(parentNode.boundingBox, index);
+				var boundingBox = POCLoader.createChildAABB(parentNode.boundingBox, index);
 
 				var currentNode = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
 				currentNode.level = level;
@@ -300,3 +302,5 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 PointCloudOctreeGeometryNode.IDCount = 0;
 
 Object.assign(PointCloudOctreeGeometryNode.prototype, THREE.EventDispatcher.prototype);
+
+export {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode};

@@ -1,5 +1,7 @@
 "use strict";
 
+import {PointAttributes, PointAttribute} from "../../PointAttributes.js";
+
 class PointCloudArena4DGeometryNode
 {
 	constructor()
@@ -102,10 +104,10 @@ class PointCloudArena4DGeometryNode
 			var targetView = new DataView(data);
 
 			var attributes = [
-				Potree.PointAttribute.POSITION_CARTESIAN,
-				Potree.PointAttribute.RGBA_PACKED,
-				Potree.PointAttribute.INTENSITY,
-				Potree.PointAttribute.CLASSIFICATION,
+				PointAttribute.POSITION_CARTESIAN,
+				PointAttribute.RGBA_PACKED,
+				PointAttribute.INTENSITY,
+				PointAttribute.CLASSIFICATION,
 			];
 
 			var position = new Float32Array(numPoints * 3);
@@ -208,7 +210,7 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 		this.root = null;
 		this.levels = 0;
 		this._spacing = null;
-		this.pointAttributes = new Potree.PointAttributes([
+		this.pointAttributes = new PointAttributes([
 			"POSITION_CARTESIAN",
 			"COLOR_PACKED"
 		]);
@@ -442,5 +444,6 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 	{
 		this._spacing = value;
 	}
-
 };
+
+export {PointCloudArena4DGeometryNode};

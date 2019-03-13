@@ -14,3 +14,5 @@ class WorkerTask
 		this.transfer = transfer;
 	}
 };
+
+export {WorkerTask};

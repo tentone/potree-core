@@ -1,6 +1,6 @@
 "use strict";
 
-Potree.WebGLBuffer = class WebGLBuffer
+class WebGLBuffer
 {
 	constructor()
 	{
@@ -9,3 +9,5 @@ Potree.WebGLBuffer = class WebGLBuffer
 		this.vbos = new Map();
 	}
 };
+
+export {WebGLBuffer};

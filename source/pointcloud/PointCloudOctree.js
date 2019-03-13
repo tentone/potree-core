@@ -1,5 +1,8 @@
 "use strict";
 
+import {PointCloudOctreeGeometryNode} from "./geometries/PointCloudOctreeGeometry.js";
+import {HelperUtils} from "../utils/HelperUtils.js";
+
 class PointCloudOctreeNode extends PointCloudTreeNode
 {
 	constructor()

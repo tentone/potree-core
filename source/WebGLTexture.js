@@ -1,6 +1,6 @@
 "use strict";
 
-Potree.WebGLTexture = class WebGLTexture
+class WebGLTexture
 {
 	constructor(gl, texture)
 	{
@@ -77,5 +77,6 @@ Potree.WebGLTexture = class WebGLTexture
 
 		this.version = texture.version;
 	}
-
 };
+
+export {WebGLTexture};

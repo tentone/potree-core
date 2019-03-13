@@ -41,3 +41,5 @@ VersionUtils.prototype.upTo = function(version)
 {
 	return !this.newerThan(version);
 };
+
+export {VersionUtils};

@@ -446,4 +446,4 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 	}
 };
 
-export {PointCloudArena4DGeometryNode};
+export {PointCloudArena4DGeometry, PointCloudArena4DGeometryNode};

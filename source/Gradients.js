@@ -31,7 +31,7 @@
 //   rgb = "[" + str(u) + ", new THREE.Color(" +  ", ".join(rgb) + ")],"
 //   print(rgb)
 
-var PotreeGradients = {
+var Gradients = {
 	RAINBOW: [
 		[0, new THREE.Color(0.278, 0, 0.714)],
 		[1 / 6, new THREE.Color(0, 0, 1)],
@@ -112,3 +112,5 @@ var PotreeGradients = {
 		[1, new THREE.Color(1, 1, 1)]
 	]
 };
+
+export {Gradients};

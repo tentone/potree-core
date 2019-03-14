@@ -2,6 +2,7 @@
 
 import {PointCloudOctreeGeometryNode} from "./geometries/PointCloudOctreeGeometry.js";
 import {HelperUtils} from "../utils/HelperUtils.js";
+import {PointCloudTreeNode} from "./PointCloudTree.js";
 
 class PointCloudOctreeNode extends PointCloudTreeNode
 {

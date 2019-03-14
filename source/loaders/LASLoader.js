@@ -1,6 +1,6 @@
 "use strict";
 
-import {WorkerManager} from "../utils/workers/WorkerManager.js";
+import {WorkerManager} from "../utils/WorkerManager.js";
 
 var pointFormatReaders =
 {

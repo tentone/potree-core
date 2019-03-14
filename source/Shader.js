@@ -1,4 +1,8 @@
-Potree.Shader = class Shader
+"use strict";
+
+import {WebGLTexture} from "WebGLTexture.js";
+
+class Shader
 {
 	constructor(gl, name, vsSource, fsSource)
 	{
@@ -226,7 +230,7 @@ Potree.Shader = class Shader
 		{
 			this.setUniformBoolean(name, value);
 		}
-		else if(value instanceof Potree.WebGLTexture)
+		else if(value instanceof WebGLTexture)
 		{
 			this.setUniformTexture(name, value);
 		}
@@ -261,3 +265,5 @@ Potree.Shader = class Shader
 		gl.uniform1i(location, value);
 	}
 };
+
+export {Shader};

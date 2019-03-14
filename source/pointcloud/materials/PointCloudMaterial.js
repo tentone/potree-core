@@ -1,6 +1,8 @@
 "use strict";
 
 import {HelperUtils} from "../../utils/HelperUtils.js";
+import {Gradients} from "../../Gradients.js";
+import {Shaders} from "../../Shaders.js";
 
 class PointCloudMaterial extends THREE.RawShaderMaterial
 {
@@ -34,7 +36,7 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		this._pointColorType = Potree.PointColorType.RGB;
 		this._useClipBox = false;
 		this._weighted = false;
-		this._gradient = PotreeGradients.SPECTRAL;
+		this._gradient = Gradients.SPECTRAL;
 		this._treeType = treeType;
 		this._useEDL = false;
 		this._snapEnabled = false;
@@ -382,8 +384,8 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		this.vertexColors = THREE.VertexColors;
 
 		var defines = this.getDefines();
-		this.vertexShader = defines + PotreeShaders["pointcloud.vs"];
-		this.fragmentShader = defines + PotreeShaders["pointcloud.fs"];
+		this.vertexShader = defines + Shaders["pointcloud.vs"];
+		this.fragmentShader = defines + Shaders["pointcloud.fs"];
 	}
 
 	setDefine(key, value)
@@ -410,8 +412,8 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 	updateShaderSource()
 	{
 		var defines = this.getDefines();
-		this.vertexShader = defines + PotreeShaders["pointcloud.vs"];
-		this.fragmentShader = defines + PotreeShaders["pointcloud.fs"];
+		this.vertexShader = defines + Shaders["pointcloud.vs"];
+		this.fragmentShader = defines + Shaders["pointcloud.fs"];
 		this.depthFunc = THREE.LessEqualDepth;
 		this.depthTest = true;
 		this.depthWrite = true;

@@ -165,3 +165,5 @@ class DEMNode
 		}
 	}
 };
+
+export {DEMNode}

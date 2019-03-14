@@ -1,8 +1,8 @@
 "use strict";
 
-import PointAttributeNames from "../PointAttributes.js";
+import {PointAttributeNames} from "../PointAttributes.js";
 import {VersionUtils} from "../utils/VersionUtils.js";
-import {WorkerManager} from "../utils/workers/WorkerManager.js";
+import {WorkerManager} from "../utils/WorkerManager.js";
 
 class GreyhoundBinaryLoader
 {

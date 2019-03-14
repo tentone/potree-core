@@ -2,6 +2,11 @@
 
 import {WebGLBuffer} from "../WebGLBuffer.js";
 import {BasicGroup} from "./BasicGroup.js";
+import {PointCloudOctreeNode} from "../pointcloud/PointCloudOctree.js";
+import {PointCloudArena4DNode} from "../pointcloud/PointCloudArena4D.js";
+import {Potree} from "../Potree.js";
+import {Shader} from "../Shader.js";
+import {WebGLTexture} from "../WebGLTexture.js";
 
 class Group extends BasicGroup
 {
@@ -363,7 +368,7 @@ class Group extends BasicGroup
 
 		if(!this.shaders.has(material))
 		{
-			shader = new Potree.Shader(gl, "pointcloud", material.vertexShader, material.fragmentShader);
+			shader = new Shader(gl, "pointcloud", material.vertexShader, material.fragmentShader);
 			this.shaders.set(material, shader);
 		}
 		else
@@ -409,7 +414,7 @@ class Group extends BasicGroup
 
 				if(!this.textures.has(texture))
 				{
-					var webglTexture = new Potree.WebGLTexture(gl, texture);
+					var webglTexture = new WebGLTexture(gl, texture);
 					this.textures.set(texture, webglTexture);
 				}
 

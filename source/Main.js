@@ -8,7 +8,7 @@
 <script src="source/utils/Enum.js"></script>
 <script src="source/utils/HelperUtils.js"></script>
 <script src="source/utils/VersionUtils.js"></script>
-<script src="source/utils/workers/WorkerManager.js"></script>
+<script src="source/utils/WorkerManager.js"></script>
 
 <script src="source/Potree.js"></script>
 

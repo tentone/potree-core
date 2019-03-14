@@ -1,8 +1,8 @@
 "use strict";
 
-function PotreeShaders(){}
+var Shaders = {};
 
-PotreeShaders["pointcloud.vs"] = `
+Shaders["pointcloud.vs"] = `
 precision highp float;
 precision highp int;
 
@@ -797,7 +797,7 @@ void main()
 	#endif
 }`;
 
-PotreeShaders["pointcloud.fs"] = `
+Shaders["pointcloud.fs"] = `
 
 #if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
 	#extension GL_EXT_frag_depth : enable
@@ -886,3 +886,5 @@ void main()
 		gl_FragColor.xyz = gl_FragColor.xyz * weight;
 	#endif
 }`;
+
+export {Shaders};

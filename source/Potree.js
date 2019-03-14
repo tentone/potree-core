@@ -3,7 +3,9 @@
 import {GreyhoundLoader} from "./loaders/GreyhoundLoader.js";
 import {POCLoader} from "./loaders/POCLoader.js";
 import {LRU, LRUItem} from "./utils/LRU.js";
-import {WorkerManager} from "./utils/workers/WorkerManager.js";
+import {WorkerManager} from "./utils/WorkerManager.js";
+import {PointCloudArena4D} from "./pointcloud/PointCloudArena4D.js";
+import {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
 
 function Potree(){}
 

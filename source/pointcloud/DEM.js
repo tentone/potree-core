@@ -1,7 +1,8 @@
 "use strict";
 
-import {WorkerManager} from "../utils/workers/WorkerManager.js";
+import {WorkerManager} from "../utils/WorkerManager.js";
 import {Potree} from "../Potree.js";
+import {DEMNode} from "./DEMNode.js";
 
 class DEM
 {

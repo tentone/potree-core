@@ -28,7 +28,7 @@ class PointCloudTree extends THREE.Object3D
 	{
 		super();
 
-		this.dem = new PotreeDEM(this);
+		this.dem = new DEM(this);
 	}
 
 	initialized()
@@ -36,3 +36,5 @@ class PointCloudTree extends THREE.Object3D
 		return this.root !== null;
 	}
 };
+
+export {PointCloudTree, PointCloudTreeNode};

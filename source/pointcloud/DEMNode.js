@@ -3,7 +3,7 @@
 //
 //index is in order xyzxyzxyz
 //
-class PotreeDEMNode
+class DEMNode
 {
 	constructor(name, box, tileSize)
 	{

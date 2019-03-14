@@ -464,7 +464,7 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 	}
 
 	//Update DEM
-	var candidates = pointclouds.filter(p => (p.generateDEM && p.dem instanceof PotreeDEM));
+	var candidates = pointclouds.filter(p => (p.generateDEM && p.dem instanceof DEM));
 	
 	for(var pointcloud of candidates)
 	{

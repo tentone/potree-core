@@ -1,8 +1,9 @@
 "use strict";
 
 import {WorkerManager} from "../utils/workers/WorkerManager.js";
+import {Potree} from "../Potree.js";
 
-class PotreeDEM
+class DEM
 {
 	constructor(pointcloud)
 	{
@@ -84,7 +85,7 @@ class PotreeDEM
 						childBox.max.y -= nodeBoxSize.y / 2.0;
 					}
 
-					var child = new PotreeDEMNode(node.name + index, childBox, this.tileSize);
+					var child = new DEMNode(node.name + index, childBox, this.tileSize);
 					node.children[index] = child;
 				}
 
@@ -158,7 +159,7 @@ class PotreeDEM
 		{
 			this.matrix = this.pointcloud.matrixWorld.clone();
 			this.boundingBox = this.pointcloud.boundingBox.clone().applyMatrix4(this.matrix);
-			this.root = new PotreeDEMNode("r", this.boundingBox, this.tileSize);
+			this.root = new DEMNode("r", this.boundingBox, this.tileSize);
 			this.version++;
 		}
 
@@ -260,3 +261,5 @@ class PotreeDEM
 		}, message, transferables);
 	}
 };
+
+export {DEM};

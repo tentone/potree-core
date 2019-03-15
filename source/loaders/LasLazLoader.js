@@ -2,6 +2,7 @@
 
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
+import {Potree} from "../Potree.js";
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz

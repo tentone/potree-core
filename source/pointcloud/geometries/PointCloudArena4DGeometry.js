@@ -1,6 +1,7 @@
 "use strict";
 
 import {PointAttributes, PointAttribute} from "../../PointAttributes.js";
+import {Potree} from "../../Potree.js";
 
 class PointCloudArena4DGeometryNode
 {

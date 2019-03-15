@@ -1,6 +1,7 @@
 "use strict";
 
 import {POCLoader} from "../../loaders/POCLoader.js";
+import {Potree} from "../../Potree.js";
 
 class PointCloudOctreeGeometry
 {

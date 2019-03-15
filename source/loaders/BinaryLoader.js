@@ -1,8 +1,9 @@
 "use strict";
 
-import PointAttributeNames from "../PointAttributes.js";
+import {PointAttributeNames} from "../PointAttributes.js";
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
+import {Potree} from "../Potree.js";
 
 class BinaryLoader
 {

@@ -1,6 +1,7 @@
 "use strict";
 
 import {HelperUtils} from "../utils/HelperUtils.js";
+import {Potree} from "../Potree.js";
 
 /**
  * Potree object is a wrapper to use Potree alongside other THREE based frameworks.

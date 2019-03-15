@@ -6,6 +6,7 @@ import {LRU, LRUItem} from "./utils/LRU.js";
 import {WorkerManager} from "./utils/WorkerManager.js";
 import {PointCloudArena4D} from "./pointcloud/PointCloudArena4D.js";
 import {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
+import {BinaryHeap} from "./lib/BinaryHeap.js";
 
 function Potree(){}
 
@@ -35,7 +36,6 @@ Potree.maxNodesLoadGPUFrame = 20;
 Potree.maxDEMLevel = 0;
 Potree.maxNodesLoading = navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4;
 Potree.pointLoadLimit = 1e10;
-
 Potree.framenumber = 0;
 Potree.numNodesLoading = 0;
 Potree.debug = {};

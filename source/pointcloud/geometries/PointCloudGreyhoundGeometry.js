@@ -1,6 +1,7 @@
 "use strict";
 
 import {GreyhoundLoader} from "../../loaders/GreyhoundLoader.js";
+import {Potree} from "../../Potree.js";
 
 function PointCloudGreyhoundGeometry()
 {

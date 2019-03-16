@@ -15,7 +15,7 @@
 
 				//three.js
 				var scene = new THREE.Scene();
-				var camera = new THREE.PerspectiveCamera(60, 1, 0.1, 10000);
+				var camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
 
 				var canvas = document.createElement("canvas");
 				canvas.style.position = "absolute";
@@ -74,14 +74,14 @@
 					}
 				}
 
-				var url = "data/lion_takanawa_laz/cloud.js";
+				var url = "data/lion_takanawa/cloud.js";
 
 				var points = new Potree.Group();
 				points.material.opacity = 1.0;
 				points.material.wireframe = true;
 				scene.add(points);
 
-				Potree.Global.workerPath = "build/workers";
+				Potree.Global.workerPath = "./build";
 
 				Potree.loadPointCloud(url, name, function(e)
 				{

@@ -5,7 +5,7 @@ import {BasicGroup} from "./BasicGroup.js";
 import {PointCloudTree} from "../pointcloud/PointCloudTree.js";
 import {PointCloudOctreeNode} from "../pointcloud/PointCloudOctree.js";
 import {PointCloudArena4DNode} from "../pointcloud/PointCloudArena4D.js";
-import {PointSizeType, PointColorType, ClipTask} from "../Potree.js";
+import {AttributeLocations, PointSizeType, PointColorType, ClipTask} from "../Potree.js";
 import {Global} from "../Global.js";
 import {Shader} from "../Shader.js";
 import {WebGLTexture} from "../WebGLTexture.js";
@@ -79,7 +79,7 @@ class Group extends BasicGroup
 			gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 			gl.bufferData(gl.ARRAY_BUFFER, bufferAttribute.array, gl.STATIC_DRAW);
 
-			var attributeLocation = attributeLocations[attributeName];
+			var attributeLocation = AttributeLocations[attributeName];
 			var normalized = bufferAttribute.normalized;
 			var type = this.types.get(bufferAttribute.array.constructor);
 
@@ -116,7 +116,7 @@ class Group extends BasicGroup
 		{
 			var bufferAttribute = geometry.attributes[attributeName];
 
-			var attributeLocation = attributeLocations[attributeName];
+			var attributeLocation = AttributeLocations[attributeName];
 			var normalized = bufferAttribute.normalized;
 			var type = this.types.get(bufferAttribute.array.constructor);
 

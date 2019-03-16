@@ -217,4 +217,4 @@ LRU.prototype.toString = function()
 	return string;
 };
 
-export {LRU, LRUItem};
+export {LRU};

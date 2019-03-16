@@ -1,5 +1,8 @@
 "use strict";
 
+import {LRU} from "./utils/LRU.js";
+import {WorkerManager} from "./utils/WorkerManager.js";
+
 function getBasePath()
 {
 	if(document.currentScript.src)

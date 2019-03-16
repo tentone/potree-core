@@ -56,12 +56,13 @@ GreyhoundLoader.load = function(url, callback)
 			var version = new VersionUtils("1.4");
 
 			var bounds = greyhoundInfo.bounds;
-			//TODO Unused: var boundsConforming = greyhoundInfo.boundsConforming;
 
+			//TODO Unused: var boundsConforming = greyhoundInfo.boundsConforming;
 			//TODO Unused: var width = bounds[3] - bounds[0];
 			//TODO Unused: var depth = bounds[4] - bounds[1];
 			//TODO Unused: var height = bounds[5] - bounds[2];
 			//TODO Unused: var radius = width / 2;
+			
 			var scale = greyhoundInfo.scale || 0.01;
 			if(Array.isArray(scale))
 			{

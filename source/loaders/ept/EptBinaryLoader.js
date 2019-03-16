@@ -1,6 +1,7 @@
 "use strict";
 
 import {Global} from "../../Global.js";
+import {WorkerManager} from "../../utils/WorkerManager.js";
 
 class EptBinaryLoader
 {
@@ -10,7 +11,7 @@ class EptBinaryLoader
 
 		var url = node.url() + ".bin";
 
-		var xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = new XMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
@@ -42,8 +43,7 @@ class EptBinaryLoader
 
 	parse(node, buffer)
 	{
-		var workerPath = Global.scriptPath + "/workers/EptBinaryDecoderWorker.js";
-		var worker = Global.workerPool.getWorker(workerPath);
+		var worker = Global.workerPool.getWorker(WorkerManager.EPT_BINARY_DECODER);
 
 		worker.onmessage = function(e)
 		{
@@ -96,7 +96,7 @@ class EptBinaryLoader
 
 			node.doneLoading(g, tightBoundingBox, numPoints, new THREE.Vector3(...e.data.mean));
 
-			Global.workerPool.returnWorker(workerPath, worker);
+			Global.workerPool.returnWorker(WorkerManager.EPT_BINARY_DECODER, worker);
 		};
 
 		var toArray = (v) => [v.x, v.y, v.z];

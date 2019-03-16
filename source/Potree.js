@@ -2,6 +2,7 @@
 
 import {GreyhoundLoader} from "./loaders/GreyhoundLoader.js";
 import {POCLoader} from "./loaders/POCLoader.js";
+import {EptLoader} from "./loaders/EptLoader.js";
 import {PointCloudArena4D} from "./pointcloud/PointCloudArena4D.js";
 import {PointCloudOctree} from "./pointcloud/PointCloudOctree.js";
 import {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
@@ -117,7 +118,7 @@ function loadPointCloud(path, name, callback)
 	{
 		GreyhoundLoader.load(path, function(geometry)
 		{
-			if(geometry)
+			if(geometry !== undefined)
 			{
 				loaded(new PointCloudOctree(geometry));
 			}
@@ -128,7 +129,17 @@ function loadPointCloud(path, name, callback)
 	{
 		POCLoader.load(path, function(geometry)
 		{
-			if(geometry)
+			if(geometry !== undefined)
+			{
+				loaded(new PointCloudOctree(geometry));
+			}
+		});
+	}
+	else if (path.indexOf('ept.json') > 0)
+	{
+		EptLoader.load(path, function(geometry)
+		{
+			if(geometry !== undefined)
 			{
 				loaded(new PointCloudOctree(geometry));
 			}
@@ -139,7 +150,7 @@ function loadPointCloud(path, name, callback)
 	{
 		PointCloudArena4DGeometry.load(path, function(geometry)
 		{
-			if(geometry)
+			if(geometry !== undefined)
 			{
 				loaded(new PointCloudArena4D(geometry));
 			}

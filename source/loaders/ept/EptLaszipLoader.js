@@ -2,6 +2,7 @@
 
 import {Global} from "../../Global.js";
 import {LASFile, LASDecoder} from "../LASLoader.js";
+import {WorkerManager} from "../../utils/WorkerManager.js";
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
@@ -15,11 +16,14 @@ class EptLaszipLoader
 {
 	load(node)
 	{
-		if(node.loaded) return;
+		if(node.loaded)
+		{
+			return;
+		}
 
 		var url = node.url() + ".laz";
 
-		var xhr = XHRFactory.createXMLHttpRequest();
+		var xhr = new XMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
@@ -125,8 +129,7 @@ class EptLazBatcher
 
 	push(las)
 	{
-		var workerPath = Global.scriptPath + "/workers/EptLaszipDecoderWorker.js";
-		var worker = Global.workerPool.getWorker(workerPath);
+		var worker = Global.workerPool.getWorker(WorkerManager.EPT_LAS_ZIP_DECODER);
 
 		worker.onmessage = (e) =>
 		{
@@ -160,7 +163,7 @@ class EptLazBatcher
 
 			this.node.doneLoading(g, tightBoundingBox, numPoints, new THREE.Vector3(...e.data.mean));
 
-			Global.workerPool.returnWorker(workerPath, worker);
+			Global.workerPool.returnWorker(WorkerManager.EPT_LAS_ZIP_DECODER, worker);
 		};
 
 		var message = {

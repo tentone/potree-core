@@ -11,7 +11,7 @@ class WorkerManager
 	{
 		this.workers = [];
 
-		for(var i = 0; i < 5; i++)
+		for(var i = 0; i < WorkerManager.URLS.length; i++)
 		{
 			this.workers.push([]);
 		}
@@ -68,6 +68,8 @@ WorkerManager.LAS_LAZ = 1;
 WorkerManager.LAS_DECODER = 2;
 WorkerManager.GREYHOUND = 3;
 WorkerManager.DEM = 4;
+WorkerManager.EPT_LAS_ZIP_DECODER = 5;
+WorkerManager.EPT_BINARY_DECODER = 6;
 
 WorkerManager.URLS = 
 [
@@ -75,7 +77,9 @@ WorkerManager.URLS =
 	"/workers/LASLAZWorker.js",
 	"/workers/LASDecoderWorker.js",
 	"/workers/GreyhoundBinaryDecoderWorker.js",
-	"/workers/DEMWorker.js"
+	"/workers/DEMWorker.js",
+	"/workers/EptLaszipDecoderWorker.js",
+	"/workers/EptBinaryDecoderWorker.js"
 ];
 
 export {WorkerManager};

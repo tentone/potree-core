@@ -1,30 +1,30 @@
 # Potree Core
 
  - This project is based on Potree V1.6.
- - Potree is a project created by Markus Schütz i have only adapted some of its components.
- - Some elements were removed from the library
- 	- PotreeViewer
- 	- Controls, Input, GUI, Tools
- 	- Anotations, Actions, ProfileRequest
- 	- Potree.startQuery, Potree.endQuery and Potree.resolveQueries
- 	- Potree.timerQueries
- 	- Potree.MOUSE, Potree.CameraMode
- 	- PotreeRenderer, RepRenderer, Potree.Renderer
-	- JQuery, TWEEN and Proj4 dependencies
- - Point clouds are automatically updated, frustum culling is used to avoid unecessary updates.
+ - Potree is a web based pouint cloud visualizer project created by Markus Schütz.
+ - This project contains only the main parts of the potree project adapted to be more easily used as a independent library (I have only adapted code from the original repository).
+
+ - Point clouds are automatically updated, frustum culling is used to avoid unnecessary updates.
+ - Support for pointclouds from LAS, LAZ, Binary files and Grehound server.
+
+
 
 ### How to use
- - Download the custom potree build from the build folder
- - Include it alonside the worker folder in your project
- - Download threejs from github repository
+ - Download the custom potree build from the build folder.
+ - Include it alonside the worker folder in your project (can be found on the source folder).
+ - Download threejs from github repository.
     - https://github.com/mrdoob/three.js/tree/dev/build
- - The build provided its not a module, its a bundle, it requires ES6 feature level support
+ - The build is a ES module, that can be imported to other projects, it assumes the existence of THREE namespace for threejs dependencies.
+
+
 
 ### Demo
  - Live demo at https://tentone.github.io/potree-core/
- 
+
  ![alt text](https://raw.githubusercontent.com/tentone/potree-core/master/data/lion_takanawa_laz/lion_takanawa.png)
- 
+
+
+
 ### Example
  - Bellow its a fully functional example of how to use this wrapper to load potree point clouds to a THREE.js project
 
@@ -79,80 +79,117 @@ document.body.onresize = function()
 document.body.onresize();
 ```
 
-### Reference
- - The project has no generated documentation but bellow are some of the main configuration elements
- - Potree.BasicGroup
-    - Container that stores point cloud objects and updates them on render.
-    - The container supports frustum culling using the point cloud bouding box.
-    - Automatically stops updating the point cloud if out of view.
-    - This container only support pointColorType set as RGB, pointSizeType set as FIXED and shape set as SQUARE.
- - Potree.Group
-    - Complete container with support for all potree features.
-    - Some features require support for the following GL extensions
-       - EXT_frag_depth, WEBGL_depth_texture, OES_vertex_array_object
- - Potree.loadPointCloud
-    - Method to load a point cloud database file
-    - Potree.loadPointCloud(url, name, onLoad)
- - Potree.PointCloudMaterial
-    - Material used by threejs to draw the point clouds, based on RawShaderMaterial
-    - shape
-    - Defines the shape used to draw points
-       - Possible values are
-          - Potree.PointShape.SQUARE
-          - Potree.PointShape.CIRCLE
-          - Potree.PointShape.PARABOLOID
-    - pointSizeType
-       - Defines how the point cloud points are sized, fixed mode keeps the same size, adaptive resizes points accordingly to their distance to the camera 
-       - Possible values are
-          - Potree.PointSizeType.FIXED
-          - Potree.PointSizeType.ATTENUATED
-          - Potree.PointSizeType.ADAPTIVE
-    - pointColorType
-       - Defines how to color the drawn points
-       - Possible values are
-          - Potree.PointColorType.RGB
-          - Potree.PointColorType.COLOR
-          - Potree.PointColorType.DEPTH
-          - Potree.PointColorType.HEIGHT
-          - Potree.PointColorType.INTENSITY
-          - Potree.PointColorType.INTENSITY_GRADIENT
-          - Potree.PointColorType.LOD
-          - Potree.PointColorType.POINT_INDEX
-          - Potree.PointColorType.CLASSIFICATION
-          - Potree.PointColorType.RETURN_NUMBER
-          - Potree.PointColorType.SOURCE
-          - Potree.PointColorType.NORMAL
-          - Potree.PointColorType.PHONG
-          - Potree.PointColorType.RGB_HEIGHT
-    - logarithmicDepthBuffer
-       - Set true to enable logarithmic depth buffer
-    - weighted
-       - If true points are drawn as weighted splats
-    - treeType
-       - Defines the type of point cloud tree being drawn by this material
-       - This should be automatically defined by the loader
-          - Potree.TreeType.OCTREE
-          - Potree.TreeType.KDTREE
+
+
+### API Reference
+
+ - The project has no generated documentation but bellow are some of the main configuration elements.
+ - A example can be found in the repository `index.html` file.
+
+
+
+##### Potree.BasicGroup
+
+- Container that stores point cloud objects and updates them on render.
+- The container supports frustum culling using the point cloud bouding box.
+- Automatically stops updating the point cloud if out of view.
+- This container only support pointColorType set as RGB, pointSizeType set as FIXED and shape set as SQUARE.
+
+
+
+##### Potree.Group
+
+- Complete container with support for all potree features.
+- Some features require support for the following GL extensions
+
+   - EXT_frag_depth, WEBGL_depth_texture, OES_vertex_array_object
+
+   
+
+##### Potree.loadPointCloud
+
+- Method to load a point cloud database file
+- `Potree.loadPointCloud(url, name, onLoad)`
+
+
+
+##### Potree.PointCloudMaterial
+
+- Material used by threejs to draw the point clouds, based on RawShaderMaterial
+- shape
+   - Defines the shape used to draw points
+      - Potree.PointShape.SQUARE
+      - Potree.PointShape.CIRCLE
+      - Potree.PointShape.PARABOLOID
+- pointSizeType
+   - Defines how the point cloud points are sized, fixed mode keeps the same size, adaptive resizes points accordingly to their distance to the camera 
+   - Possible values are
+      - Potree.PointSizeType.FIXED
+      - Potree.PointSizeType.ATTENUATED
+      - Potree.PointSizeType.ADAPTIVE
+- pointColorType
+   - Defines how to color the drawn points
+   - Possible values are
+      - Potree.PointColorType.RGB
+      - Potree.PointColorType.COLOR
+      - Potree.PointColorType.DEPTH
+      - Potree.PointColorType.HEIGHT
+      - Potree.PointColorType.INTENSITY
+      - Potree.PointColorType.INTENSITY_GRADIENT
+      - Potree.PointColorType.LOD
+      - Potree.PointColorType.POINT_INDEX
+      - Potree.PointColorType.CLASSIFICATION
+      - Potree.PointColorType.RETURN_NUMBER
+      - Potree.PointColorType.SOURCE
+      - Potree.PointColorType.NORMAL
+      - Potree.PointColorType.PHONG
+      - Potree.PointColorType.RGB_HEIGHT
+- logarithmicDepthBuffer
+   - Set true to enable logarithmic depth buffer
+- weighted
+   - If true points are drawn as weighted splats
+- treeType
+   - Defines the type of point cloud tree being drawn by this material
+   - This should be automatically defined by the loader
+      - Potree.TreeType.OCTREE
+      - Potree.TreeType.KDTREE
+
  - Potree.PointCloudTree
     - Base Object3D used to store and represent point cloud data.
     - These objects are created by the loader
 
 
-### Notes
- - EDL shading is not supported by potree core
- 
-### Building
- - The output javascript is not a module of any kind
- - Download and install java runtime.
- - Download google clousure jar and place it on potree-core/closure.jar
- - The project can be build using
-    - npm install
-    - npm run build
 
-### Create Point Clouds
+
+### Notes
+ - Since potree-core is mean to be used as library and not as a full software as potree some features are not available.
+ - EDL shading is not supported by potree core (might be added later).
+
+- GUI elements were removed from the library
+  - PotreeViewer
+  - Controls, Input, GUI, Tools
+  - Anotations, Actions, ProfileRequest
+  - Potree.startQuery, Potree.endQuery and Potree.resolveQueries
+  - Potree.timerQueries
+  - Potree.MOUSE, Potree.CameraMode
+  - PotreeRenderer, RepRenderer, Potree.Renderer
+    - JQuery, TWEEN and Proj4 dependencies
+
+
+
+### Building
+ - The output javascript is a module built using rollup.
+ - The project can be build running the commands `npm install` and `npm run build`.
+
+
+
+### Point Clouds
  - Use the Potree Converter tool to create point cloud data from LAS, ZLAS or BIN point cloud files
     - https://github.com/potree/PotreeConverter/releases
- 
-### Dependencies
- - three.js
- - Closure compiler
+
+
+
+
+
+
+

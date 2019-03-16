@@ -34,8 +34,7 @@ GreyhoundLoader.load = function(url, callback)
 		{
 			if(err) throw new Error(err);
 
-			/* We parse the result of the info query, which should be a JSON
-			 * datastructure somewhat like:
+			/* We parse the result of the info query, which should be a JSON datastructure somewhat like:
 			{
 			  "bounds": [635577, 848882, -1000, 639004, 853538, 2000],
 			  "numPoints": 10653336,

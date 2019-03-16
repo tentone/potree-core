@@ -5,7 +5,7 @@ import {LASFile, LASDecoder} from "../LASLoader.js";
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
- *	  http://plas.io/
+ *	http://plas.io/
  *	https://github.com/verma/plasio
  *
  * Thanks to Uday Verma and Howard Butler

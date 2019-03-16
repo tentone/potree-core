@@ -1,7 +1,7 @@
 "use strict";
 
 import {WebGLTexture} from "WebGLTexture.js";
-import {Potree} from "Potree.js";
+import {AttributeLocations} from "Potree.js";
 
 class Shader
 {
@@ -75,9 +75,9 @@ class Shader
 			this.fs = gl.createShader(gl.FRAGMENT_SHADER);
 			this.program = gl.createProgram();
 
-			for(var name of Object.keys(Potree.attributeLocations))
+			for(var name of Object.keys(AttributeLocations))
 			{
-				var location = Potree.attributeLocations[name];
+				var location = AttributeLocations[name];
 				gl.bindAttribLocation(this.program, location, name);
 			}
 

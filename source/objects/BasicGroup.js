@@ -1,7 +1,7 @@
 "use strict";
 
 import {HelperUtils} from "../utils/HelperUtils.js";
-import {Potree} from "../Potree.js";
+import {updatePointClouds} from "../Potree.js";
 import {PointCloudTree} from "../pointcloud/PointCloudTree.js";
 
 /**
@@ -54,7 +54,7 @@ class BasicGroup extends THREE.Mesh
 			this.pointclouds[i].minimumNodePixelSize = this.nodeSize;
 		}
 
-		Potree.updatePointClouds(this.pointclouds, camera, renderer);
+		updatePointClouds(this.pointclouds, camera, renderer);
 	}
 
 	/**

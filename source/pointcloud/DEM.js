@@ -1,7 +1,7 @@
 "use strict";
 
 import {WorkerManager} from "../utils/WorkerManager.js";
-import {Potree} from "../Potree.js";
+import {workerPool} from "../Potree.js";
 import {DEMNode} from "./DEMNode.js";
 
 class DEM
@@ -200,7 +200,7 @@ class DEM
 
 		var self = this;
 
-		Potree.workerPool.runTask(WorkerManager.DEM, function(e)
+		workerPool.runTask(WorkerManager.DEM, function(e)
 		{
 			var data = new Float32Array(e.data.dem.data);
 
@@ -241,24 +241,6 @@ class DEM
 				demNode.createMipMap();
 				demNode.mipMapNeedsUpdate = true;
 			}
-
-			//TODO only works somewhat if there is no rotation to the point cloud
-
-			//var target = targetNodes[0];
-			//target.data = new Float32Array(data);
-			//
-			//
-			////node.dem = e.data.dem;
-			//
-			//{ //create scene objects for debugging
-			//	//for(var demNode of targetNodes){
-			//		var bb = new Potree.Box3Helper(box);
-			//		viewer.scene.scene.add(bb);
-			//
-			//		createDEMMesh(self, target);
-			//	//}
-			//
-			//}
 		}, message, transferables);
 	}
 };

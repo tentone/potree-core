@@ -3,7 +3,7 @@
 import {PointAttributeNames} from "../PointAttributes.js";
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
-import {Potree} from "../Potree.js";
+import {workerPool, numNodesLoading} from "../Potree.js";
 
 class BinaryLoader
 {
@@ -82,7 +82,7 @@ class BinaryLoader
 			name: node.name
 		};
 
-		Potree.workerPool.runTask(WorkerManager.BINARY_DECODER, function(e)
+		workerPool.runTask(WorkerManager.BINARY_DECODER, function(e)
 		{
 			var data = e.data;
 			var buffers = data.attributeBuffers;
@@ -147,7 +147,7 @@ class BinaryLoader
 			node.loaded = true;
 			node.loading = false;
 			node.estimatedSpacing = data.estimatedSpacing;
-			Potree.numNodesLoading--;
+			numNodesLoading--;
 		}, message, [message.buffer]);
 	};
 };

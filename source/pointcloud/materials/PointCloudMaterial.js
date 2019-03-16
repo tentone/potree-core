@@ -3,7 +3,7 @@
 import {HelperUtils} from "../../utils/HelperUtils.js";
 import {Gradients} from "../../Gradients.js";
 import {Shaders} from "../../Shaders.js";
-import {Potree} from "../../Potree.js";
+import {TreeType, PointColorType, PointSizeType, PointShape} from "../../Potree.js";
 
 class PointCloudMaterial extends THREE.RawShaderMaterial
 {
@@ -30,11 +30,11 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		var pointSize = getValid(parameters.size, 1.0);
 		var minSize = getValid(parameters.minSize, 2.0);
 		var maxSize = getValid(parameters.maxSize, 50.0);
-		var treeType = getValid(parameters.treeType, Potree.TreeType.OCTREE);
+		var treeType = getValid(parameters.treeType, TreeType.OCTREE);
 
-		this._pointSizeType = Potree.PointSizeType.FIXED;
-		this._shape = Potree.PointShape.SQUARE;
-		this._pointColorType = Potree.PointColorType.RGB;
+		this._pointSizeType = PointSizeType.FIXED;
+		this._shape = PointShape.SQUARE;
+		this._pointColorType = PointColorType.RGB;
 		this._useClipBox = false;
 		this._weighted = false;
 		this._gradient = Gradients.SPECTRAL;
@@ -378,7 +378,7 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 			}
 		};
 		
-		this.classification = Potree.Classification.DEFAULT;
+		this.classification = Classification.DEFAULT;
 		this.defaultAttributeValues.normal = [0, 0, 0];
 		this.defaultAttributeValues.classification = [0, 0, 0];
 		this.defaultAttributeValues.indices = [0, 0, 0, 0];
@@ -435,27 +435,27 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 	{
 		var defines = [];
 
-		if(this.pointSizeType === Potree.PointSizeType.FIXED)
+		if(this.pointSizeType === PointSizeType.FIXED)
 		{
 			defines.push("#define fixed_point_size");
 		}
-		else if(this.pointSizeType === Potree.PointSizeType.ATTENUATED)
+		else if(this.pointSizeType === PointSizeType.ATTENUATED)
 		{
 			defines.push("#define attenuated_point_size");
 		}
-		else if(this.pointSizeType === Potree.PointSizeType.ADAPTIVE)
+		else if(this.pointSizeType === PointSizeType.ADAPTIVE)
 		{
 			defines.push("#define adaptive_point_size");
 		}
-		if(this.shape === Potree.PointShape.SQUARE)
+		if(this.shape === PointShape.SQUARE)
 		{
 			defines.push("#define square_point_shape");
 		}
-		else if(this.shape === Potree.PointShape.CIRCLE)
+		else if(this.shape === PointShape.CIRCLE)
 		{
 			defines.push("#define circle_point_shape");
 		}
-		else if(this.shape === Potree.PointShape.PARABOLOID)
+		else if(this.shape === PointShape.PARABOLOID)
 		{
 			defines.push("#define paraboloid_point_shape");
 		}
@@ -467,71 +467,71 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		{
 			defines.push("#define snap_enabled");
 		}
-		if(this._pointColorType === Potree.PointColorType.RGB)
+		if(this._pointColorType === PointColorType.RGB)
 		{
 			defines.push("#define color_type_rgb");
 		}
-		else if(this._pointColorType === Potree.PointColorType.COLOR)
+		else if(this._pointColorType === PointColorType.COLOR)
 		{
 			defines.push("#define color_type_color");
 		}
-		else if(this._pointColorType === Potree.PointColorType.DEPTH)
+		else if(this._pointColorType === PointColorType.DEPTH)
 		{
 			defines.push("#define color_type_depth");
 		}
-		else if(this._pointColorType === Potree.PointColorType.HEIGHT)
+		else if(this._pointColorType === PointColorType.HEIGHT)
 		{
 			defines.push("#define color_type_height");
 		}
-		else if(this._pointColorType === Potree.PointColorType.INTENSITY)
+		else if(this._pointColorType === PointColorType.INTENSITY)
 		{
 			defines.push("#define color_type_intensity");
 		}
-		else if(this._pointColorType === Potree.PointColorType.INTENSITY_GRADIENT)
+		else if(this._pointColorType === PointColorType.INTENSITY_GRADIENT)
 		{
 			defines.push("#define color_type_intensity_gradient");
 		}
-		else if(this._pointColorType === Potree.PointColorType.LOD)
+		else if(this._pointColorType === PointColorType.LOD)
 		{
 			defines.push("#define color_type_lod");
 		}
-		else if(this._pointColorType === Potree.PointColorType.POINT_INDEX)
+		else if(this._pointColorType === PointColorType.POINT_INDEX)
 		{
 			defines.push("#define color_type_point_index");
 		}
-		else if(this._pointColorType === Potree.PointColorType.CLASSIFICATION)
+		else if(this._pointColorType === PointColorType.CLASSIFICATION)
 		{
 			defines.push("#define color_type_classification");
 		}
-		else if(this._pointColorType === Potree.PointColorType.RETURN_NUMBER)
+		else if(this._pointColorType === PointColorType.RETURN_NUMBER)
 		{
 			defines.push("#define color_type_return_number");
 		}
-		else if(this._pointColorType === Potree.PointColorType.SOURCE)
+		else if(this._pointColorType === PointColorType.SOURCE)
 		{
 			defines.push("#define color_type_source");
 		}
-		else if(this._pointColorType === Potree.PointColorType.NORMAL)
+		else if(this._pointColorType === PointColorType.NORMAL)
 		{
 			defines.push("#define color_type_normal");
 		}
-		else if(this._pointColorType === Potree.PointColorType.PHONG)
+		else if(this._pointColorType === PointColorType.PHONG)
 		{
 			defines.push("#define color_type_phong");
 		}
-		else if(this._pointColorType === Potree.PointColorType.RGB_HEIGHT)
+		else if(this._pointColorType === PointColorType.RGB_HEIGHT)
 		{
 			defines.push("#define color_type_rgb_height");
 		}
-		else if(this._pointColorType === Potree.PointColorType.COMPOSITE)
+		else if(this._pointColorType === PointColorType.COMPOSITE)
 		{
 			defines.push("#define color_type_composite");
 		}
-		if(this._treeType === Potree.TreeType.OCTREE)
+		if(this._treeType === TreeType.OCTREE)
 		{
 			defines.push("#define tree_type_octree");
 		}
-		else if(this._treeType === Potree.TreeType.KDTREE)
+		else if(this._treeType === TreeType.KDTREE)
 		{
 			defines.push("#define tree_type_kdtree");
 		}

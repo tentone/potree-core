@@ -5,7 +5,7 @@ import {BasicGroup} from "./BasicGroup.js";
 import {PointCloudTree} from "../pointcloud/PointCloudTree.js";
 import {PointCloudOctreeNode} from "../pointcloud/PointCloudOctree.js";
 import {PointCloudArena4DNode} from "../pointcloud/PointCloudArena4D.js";
-import {Potree} from "../Potree.js";
+import {attributeLocations, debug, PointSizeType, PointColorType, ClipTask} from "../Potree.js";
 import {Shader} from "../Shader.js";
 import {WebGLTexture} from "../WebGLTexture.js";
 
@@ -78,7 +78,7 @@ class Group extends BasicGroup
 			gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 			gl.bufferData(gl.ARRAY_BUFFER, bufferAttribute.array, gl.STATIC_DRAW);
 
-			var attributeLocation = Potree.attributeLocations[attributeName];
+			var attributeLocation = attributeLocations[attributeName];
 			var normalized = bufferAttribute.normalized;
 			var type = this.types.get(bufferAttribute.array.constructor);
 
@@ -115,7 +115,7 @@ class Group extends BasicGroup
 		{
 			var bufferAttribute = geometry.attributes[attributeName];
 
-			var attributeLocation = Potree.attributeLocations[attributeName];
+			var attributeLocation = attributeLocations[attributeName];
 			var normalized = bufferAttribute.normalized;
 			var type = this.types.get(bufferAttribute.array.constructor);
 
@@ -189,9 +189,9 @@ class Group extends BasicGroup
 
 		for(var node of nodes)
 		{
-			if(Potree.debug.allowedNodes !== undefined)
+			if(debug.allowedNodes !== undefined)
 			{
-				if(!Potree.debug.allowedNodes.includes(node.name))
+				if(!debug.allowedNodes.includes(node.name))
 				{
 					continue;
 				}
@@ -353,7 +353,7 @@ class Group extends BasicGroup
 
 		if(material.pointSizeType >= 0)
 		{
-			if(material.pointSizeType === Potree.PointSizeType.ADAPTIVE || material.pointColorType === Potree.PointColorType.LOD)
+			if(material.pointSizeType === PointSizeType.ADAPTIVE || material.pointColorType === PointColorType.LOD)
 			{
 				var vnNodes = nodes;
 				visibilityTextureData = octree.computeVisibilityTextureData(vnNodes, camera);
@@ -478,7 +478,7 @@ class Group extends BasicGroup
 		//Clip task
 		if(material.clipBoxes.length + material.clipPolygons.length === 0)
 		{
-			shader.setUniform1i("clipTask", Potree.ClipTask.NONE);
+			shader.setUniform1i("clipTask", ClipTask.NONE);
 		}
 		else
 		{

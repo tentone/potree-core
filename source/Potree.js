@@ -9,9 +9,7 @@ import {PointCloudOctree} from "./pointcloud/PointCloudOctree.js";
 import {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
 import {BinaryHeap} from "./lib/BinaryHeap.js";
 
-function Potree(){}
-
-Potree.getBasePath = function()
+function getBasePath()
 {
 	if(document.currentScript.src)
 	{
@@ -32,19 +30,20 @@ Potree.getBasePath = function()
 	return "";
 };
 
-Potree.workerPath = Potree.getBasePath();
-Potree.maxNodesLoadGPUFrame = 20;
-Potree.maxDEMLevel = 0;
-Potree.maxNodesLoading = navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4;
-Potree.pointLoadLimit = 1e10;
-Potree.framenumber = 0;
-Potree.numNodesLoading = 0;
-Potree.debug = {};
-Potree.measureTimings = false;
-Potree.workerPool = new WorkerManager();
-Potree.lru = new LRU();
+var workerPath = getBasePath();
+var maxNodesLoadGPUFrame = 20;
+var maxDEMLevel = 0;
+var maxNodesLoading = navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4;
+var pointLoadLimit = 1e10;
+var framenumber = 0;
+var numNodesLoading = 0;
+var debug = {};
+var measureTimings = false;
+var workerPool = new WorkerManager();
+var lru = new LRU();
+var _pointcloudTransformVersion = undefined;
 
-Potree.attributeLocations =
+var AttributeLocations =
 {
 	position: 0,
 	color: 1,
@@ -58,7 +57,7 @@ Potree.attributeLocations =
 	spacing: 9,
 };
 
-Potree.Classification =
+var Classification =
 {
 	DEFAULT:
 	{
@@ -77,7 +76,7 @@ Potree.Classification =
 	}
 };
 
-Potree.ClipTask =
+var ClipTask =
 {
 	NONE: 0,
 	HIGHLIGHT: 1,
@@ -85,27 +84,27 @@ Potree.ClipTask =
 	SHOW_OUTSIDE: 3
 };
 
-Potree.ClipMethod =
+var ClipMethod =
 {
 	INSIDE_ANY: 0,
 	INSIDE_ALL: 1
 };
 
-Potree.PointSizeType =
+var PointSizeType =
 {
 	FIXED: 0,
 	ATTENUATED: 1,
 	ADAPTIVE: 2
 };
 
-Potree.PointShape =
+var PointShape =
 {
 	SQUARE: 0,
 	CIRCLE: 1,
 	PARABOLOID: 2
 };
 
-Potree.PointColorType =
+var PointColorType =
 {
 	RGB: 0,
 	COLOR: 1,
@@ -126,13 +125,13 @@ Potree.PointColorType =
 	COMPOSITE: 50
 };
 
-Potree.TreeType =
+var TreeType =
 {
 	OCTREE: 0,
 	KDTREE: 1
 };
 
-Potree.loadPointCloud = function(path, name, callback)
+function loadPointCloud(path, name, callback)
 {
 	var loaded = function(pointcloud)
 	{
@@ -187,7 +186,7 @@ Potree.loadPointCloud = function(path, name, callback)
 	}
 };
 
-Potree.updateVisibility = function(pointclouds, camera, renderer)
+function updateVisibility(pointclouds, camera, renderer)
 {
 	var numVisibleNodes = 0;
 	var numVisiblePoints = 0;
@@ -198,7 +197,7 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 	var lowestSpacing = Infinity;
 
 	//Calculate object space frustum and cam pos and setup priority queue
-	var structures = Potree.updateVisibilityStructures(pointclouds, camera, renderer);
+	var structures = updateVisibilityStructures(pointclouds, camera, renderer);
 	var frustums = structures.frustums;
 	var camObjPositions = structures.camObjPositions;
 	var priorityQueue = structures.priorityQueue;
@@ -208,12 +207,12 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 	var domHeight = renderer.domElement.clientHeight;
 
 	//Check if pointcloud has been transformed, some code will only be executed if changes have been detected
-	if(!Potree._pointcloudTransformVersion)
+	if(!_pointcloudTransformVersion)
 	{
-		Potree._pointcloudTransformVersion = new Map();
+		_pointcloudTransformVersion = new Map();
 	}
 
-	var pointcloudTransformVersion = Potree._pointcloudTransformVersion;
+	var pointcloudTransformVersion = _pointcloudTransformVersion;
 	for(var i = 0; i < pointclouds.length; i++)
 	{
 		var pointcloud = pointclouds[i];
@@ -315,13 +314,13 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 			var insideAny = numIntersecting > 0;
 			var insideAll = numIntersecting === numIntersectionVolumes;
 
-			if(pointcloud.material.clipTask === Potree.ClipTask.SHOW_INSIDE)
+			if(pointcloud.material.clipTask === ClipTask.SHOW_INSIDE)
 			{
-				if(pointcloud.material.clipMethod === Potree.ClipMethod.INSIDE_ANY && insideAny)
+				if(pointcloud.material.clipMethod === ClipMethod.INSIDE_ANY && insideAny)
 				{
 					//node.debug = true
 				}
-				else if(pointcloud.material.clipMethod === Potree.ClipMethod.INSIDE_ALL && insideAll)
+				else if(pointcloud.material.clipMethod === ClipMethod.INSIDE_ALL && insideAll)
 				{
 					//node.debug = true;
 				}
@@ -358,7 +357,7 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 
 		if(node.isGeometryNode() && (!parent || parent.isTreeNode()))
 		{
-			if(node.isLoaded() && loadedToGPUThisFrame < Potree.maxNodesLoadGPUFrame)
+			if(node.isLoaded() && loadedToGPUThisFrame < maxNodesLoadGPUFrame)
 			{
 				node = pointcloud.toTreeNode(node, parent);
 				loadedToGPUThisFrame++;
@@ -372,7 +371,7 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 
 		if(node.isTreeNode())
 		{
-			Potree.lru.touch(node.geometryNode);
+			lru.touch(node.geometryNode);
 
 			node.sceneNode.visible = true;
 			node.sceneNode.material = pointcloud.material;
@@ -471,11 +470,11 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 	
 	for(var pointcloud of candidates)
 	{
-		var updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= Potree.maxDEMLevel);
+		var updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= maxDEMLevel);
 		pointcloud.dem.update(updatingNodes);
 	}
 	
-	for(var i = 0; i < Math.min(Potree.maxNodesLoading, unloadedGeometry.length); i++)
+	for(var i = 0; i < Math.min(maxNodesLoading, unloadedGeometry.length); i++)
 	{
 		unloadedGeometry[i].load();
 	}
@@ -487,9 +486,9 @@ Potree.updateVisibility = function(pointclouds, camera, renderer)
 	};
 };
 
-Potree.updatePointClouds = function(pointclouds, camera, renderer)
+function updatePointClouds(pointclouds, camera, renderer)
 {
-	var result = Potree.updateVisibility(pointclouds, camera, renderer);
+	var result = updateVisibility(pointclouds, camera, renderer);
 
 	for(var i = 0; i < pointclouds.length; i++)
 	{
@@ -497,12 +496,12 @@ Potree.updatePointClouds = function(pointclouds, camera, renderer)
 		pointclouds[i].updateVisibleBounds();
 	}
 
-	Potree.lru.freeMemory();
+	lru.freeMemory();
 
 	return result;
 };
 
-Potree.updateVisibilityStructures = function(pointclouds, camera, renderer)
+function updateVisibilityStructures(pointclouds, camera, renderer)
 {
 	var frustums = [];
 	var camObjPositions = [];
@@ -578,7 +577,7 @@ Potree.updateVisibilityStructures = function(pointclouds, camera, renderer)
 	};
 };
 
-Potree.shuffleArray = function(array)
+function shuffleArray(array)
 {
 	for(var i = array.length - 1; i > 0; i--)
 	{
@@ -591,7 +590,7 @@ Potree.shuffleArray = function(array)
 
 
 //Copied from three.js: WebGLRenderer.js
-Potree.paramThreeToGL = function(_gl, p)
+function paramThreeToGL(_gl, p)
 {
 	var extension;
 
@@ -702,9 +701,6 @@ Potree.paramThreeToGL = function(_gl, p)
 	return 0;
 };
 
-export {Potree};
-
-/*
 export {
 	getBasePath,
 	workerPath,
@@ -718,7 +714,7 @@ export {
 	measureTimings,
 	workerPool,
 	lru,
-	attributeLocations,
+	AttributeLocations,
 	Classification,
 	ClipTask,
 	ClipMethod,
@@ -733,4 +729,3 @@ export {
 	shuffleArray,
 	paramThreeToGL
 };
-*/

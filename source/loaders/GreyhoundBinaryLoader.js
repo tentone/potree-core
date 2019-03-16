@@ -3,7 +3,7 @@
 import {PointAttributeNames} from "../PointAttributes.js";
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
-import {workerPool, numNodesLoading} from "../Potree.js";
+import {Global} from "../Potree.js";
 
 class GreyhoundBinaryLoader
 {
@@ -78,7 +78,7 @@ class GreyhoundBinaryLoader
 			normalize: node.pcoGeometry.normalize
 		};
 
-		workerPool.runTask(WorkerManager.GREYHOUND, function(e)
+		Global.workerPool.runTask(WorkerManager.GREYHOUND, function(e)
 		{
 			var data = e.data;
 			var buffers = data.attributeBuffers;
@@ -145,7 +145,7 @@ class GreyhoundBinaryLoader
 			node.tightBoundingBox = tightBoundingBox;
 			node.loaded = true;
 			node.loading = false;
-			numNodesLoading--;
+			Global.numNodesLoading--;
 		}, message, [message.buffer]);
 	}
 }

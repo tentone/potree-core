@@ -3,7 +3,7 @@
 import {HelperUtils} from "../../utils/HelperUtils.js";
 import {Gradients} from "../../Gradients.js";
 import {Shaders} from "../../Shaders.js";
-import {TreeType, PointColorType, PointSizeType, PointShape} from "../../Potree.js";
+import {TreeType, PointColorType, PointSizeType, PointShape, Classification} from "../../Potree.js";
 
 class PointCloudMaterial extends THREE.RawShaderMaterial
 {

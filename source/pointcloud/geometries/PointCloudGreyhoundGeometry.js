@@ -1,7 +1,7 @@
 "use strict";
 
 import {GreyhoundLoader} from "../../loaders/GreyhoundLoader.js";
-import {maxNodesLoading, numNodesLoading} from "../../Potree.js";
+import {Global} from "../../Potree.js";
 import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";
 
 function PointCloudGreyhoundGeometry()
@@ -160,13 +160,13 @@ PointCloudGreyhoundGeometryNode.prototype.addChild = function(child)
 
 PointCloudGreyhoundGeometryNode.prototype.load = function()
 {
-	if(this.loading === true || this.loaded === true || numNodesLoading >= maxNodesLoading)
+	if(this.loading === true || this.loaded === true || Global.numNodesLoading >= Global.maxNodesLoading)
 	{
 		return;
 	}
 
 	this.loading = true;
-	numNodesLoading++;
+	Global.numNodesLoading++;
 
 	if(this.level % this.pcoGeometry.hierarchyStepSize === 0 && this.hasChildren)
 	{

@@ -189,7 +189,7 @@ var LAZLoader = function(arraybuffer)
 	{
 		self.nextCB = cb;
 		
-		Potree.workerPool.runTask(WorkerManager.LAS_LAZ, function(e)
+		Potree.Global.workerPool.runTask(WorkerManager.LAS_LAZ, function(e)
 		{
 			if(self.nextCB !== null)
 			{

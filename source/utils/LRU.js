@@ -1,5 +1,7 @@
 "use strict";
 
+import {Global} from "../Potree.js";
+
 /**
  * An item in the lru list.
  *
@@ -165,7 +167,7 @@ LRU.prototype.freeMemory = function()
 		return;
 	}
 
-	while(this.numPoints > Potree.pointLoadLimit)
+	while(this.numPoints > Global.pointLoadLimit)
 	{
 		var element = this.first;
 		var node = element.node;

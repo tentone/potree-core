@@ -1,7 +1,7 @@
 "use strict";
 
 import {PointAttributes, PointAttribute} from "../../PointAttributes.js";
-import {maxNodesLoading, numNodesLoading} from "../../Potree.js";
+import {Global} from "../../Potree.js";
 import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";
 
 class PointCloudArena4DGeometryNode
@@ -74,14 +74,14 @@ class PointCloudArena4DGeometryNode
 			return;
 		}
 
-		if(numNodesLoading >= maxNodesLoading)
+		if(Global.numNodesLoading >= Global.maxNodesLoading)
 		{
 			return;
 		}
 
 		this.loading = true;
 
-		numNodesLoading++;
+		Global.numNodesLoading++;
 
 		var self = this;
 		var url = this.pcoGeometry.url + "?node=" + this.number;
@@ -166,7 +166,7 @@ class PointCloudArena4DGeometryNode
 			self.numPoints = numPoints;
 			self.loaded = true;
 			self.loading = false;
-			numNodesLoading--;
+			Global.numNodesLoading--;
 		};
 
 		xhr.send(null);

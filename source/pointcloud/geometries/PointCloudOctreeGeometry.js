@@ -1,7 +1,7 @@
 "use strict";
 
 import {POCLoader} from "../../loaders/POCLoader.js";
-import {numNodesLoading, maxNodesLoading} from "../../Potree.js";
+import {Global} from "../../Potree.js";
 import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";
 
 class PointCloudOctreeGeometry
@@ -132,13 +132,13 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 
 	load()
 	{
-		if(this.loading === true || this.loaded === true || numNodesLoading >= maxNodesLoading)
+		if(this.loading === true || this.loaded === true || Global.numNodesLoading >= Global.maxNodesLoading)
 		{
 			return;
 		}
 
 		this.loading = true;
-		numNodesLoading++;
+		Global.numNodesLoading++;
 
 		if(this.pcoGeometry.loader.version.equalOrHigher("1.5"))
 		{
@@ -269,7 +269,7 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 					else
 					{
 						console.log("Failed to load file! HTTP status: " + xhr.status + ", file: " + hurl);
-						numNodesLoading--;
+						Global.numNodesLoading--;
 					}
 				}
 			};

@@ -1,7 +1,7 @@
 "use strict";
 
 import {WorkerManager} from "../utils/WorkerManager.js";
-import {workerPool} from "../Potree.js";
+import {Global} from "../Potree.js";
 import {DEMNode} from "./DEMNode.js";
 
 class DEM
@@ -200,7 +200,7 @@ class DEM
 
 		var self = this;
 
-		workerPool.runTask(WorkerManager.DEM, function(e)
+		Global.workerPool.runTask(WorkerManager.DEM, function(e)
 		{
 			var data = new Float32Array(e.data.dem.data);
 

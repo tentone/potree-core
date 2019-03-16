@@ -5,7 +5,7 @@ import {BasicGroup} from "./BasicGroup.js";
 import {PointCloudTree} from "../pointcloud/PointCloudTree.js";
 import {PointCloudOctreeNode} from "../pointcloud/PointCloudOctree.js";
 import {PointCloudArena4DNode} from "../pointcloud/PointCloudArena4D.js";
-import {attributeLocations, debug, PointSizeType, PointColorType, ClipTask} from "../Potree.js";
+import {Global, PointSizeType, PointColorType, ClipTask} from "../Potree.js";
 import {Shader} from "../Shader.js";
 import {WebGLTexture} from "../WebGLTexture.js";
 
@@ -189,9 +189,9 @@ class Group extends BasicGroup
 
 		for(var node of nodes)
 		{
-			if(debug.allowedNodes !== undefined)
+			if(Global.debug.allowedNodes !== undefined)
 			{
-				if(!debug.allowedNodes.includes(node.name))
+				if(!Global.debug.allowedNodes.includes(node.name))
 				{
 					continue;
 				}

@@ -3,7 +3,7 @@
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
 import {LASFile} from "./LASLoader.js";
-import {workerPool, numNodesLoading} from "../Potree.js";
+import {Global} from "../Potree.js";
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
@@ -180,7 +180,7 @@ class LASLAZBatcher
 			maxs: lasBuffer.maxs
 		};
 
-		workerPool.runTask(WorkerManager.LAS_DECODER, function(e)
+		Global.workerPool.runTask(WorkerManager.LAS_DECODER, function(e)
 		{
 			var geometry = new THREE.BufferGeometry();
 			var numPoints = lasBuffer.pointsCount;
@@ -218,7 +218,7 @@ class LASLAZBatcher
 			self.node.numPoints = numPoints;
 			self.node.loaded = true;
 			self.node.loading = false;
-			numNodesLoading--;
+			Global.numNodesLoading--;
 			self.node.mean = new THREE.Vector3(...e.data.mean);
 		}, message, [message.buffer]);
 	};

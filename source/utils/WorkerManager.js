@@ -1,5 +1,7 @@
 "use strict";
 
+import {Global} from "../Potree.js";
+
 /**
  * The worker manager is responsible for creating and managing worker instances.
  */
@@ -25,7 +27,7 @@ class WorkerManager
 			return this.workers[type].pop();
 		}
 		
-		return new Worker(Potree.workerPath + WorkerManager.URLS[type]);
+		return new Worker(Global.workerPath + WorkerManager.URLS[type]);
 	}
 
 	/**

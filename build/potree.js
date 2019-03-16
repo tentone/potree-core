@@ -4,514 +4,6 @@
 	(global = global || self, factory(global.Potree = {}, global.WebGLTexture_js, global.Potree_js));
 }(this, function (exports, WebGLTexture_js, Potree_js) { 'use strict';
 
-	/*
-	** Binary Heap implementation in Javascript
-	** From: http://eloquentjavascript.net/1st_edition/appendix2.htmlt
-	**
-	** Copyright (c) 2007 Marijn Haverbeke, last modified on November 28 2013.
-	**
-	** Licensed under a Creative Commons attribution-noncommercial license. 
-	** All code in this book may also be considered licensed under an MIT license.
-	*/
-
-
-
-	function BinaryHeap(scoreFunction){
-	  this.content = [];
-	  this.scoreFunction = scoreFunction;
-	}
-
-	BinaryHeap.prototype = {
-	  push: function(element) {
-	    // Add the new element to the end of the array.
-	    this.content.push(element);
-	    // Allow it to bubble up.
-	    this.bubbleUp(this.content.length - 1);
-	  },
-
-	  pop: function() {
-	    // Store the first element so we can return it later.
-	    var result = this.content[0];
-	    // Get the element at the end of the array.
-	    var end = this.content.pop();
-	    // If there are any elements left, put the end element at the
-	    // start, and let it sink down.
-	    if (this.content.length > 0) {
-	      this.content[0] = end;
-	      this.sinkDown(0);
-	    }
-	    return result;
-	  },
-
-	  remove: function(node) {
-	    var length = this.content.length;
-	    // To remove a value, we must search through the array to find
-	    // it.
-	    for (var i = 0; i < length; i++) {
-	      if (this.content[i] != node) continue;
-	      // When it is found, the process seen in 'pop' is repeated
-	      // to fill up the hole.
-	      var end = this.content.pop();
-	      // If the element we popped was the one we needed to remove,
-	      // we're done.
-	      if (i == length - 1) break;
-	      // Otherwise, we replace the removed element with the popped
-	      // one, and allow it to float up or sink down as appropriate.
-	      this.content[i] = end;
-	      this.bubbleUp(i);
-	      this.sinkDown(i);
-	      break;
-	    }
-	  },
-
-	  size: function() {
-	    return this.content.length;
-	  },
-
-	  bubbleUp: function(n) {
-	    // Fetch the element that has to be moved.
-	    var element = this.content[n], score = this.scoreFunction(element);
-	    // When at 0, an element can not go up any further.
-	    while (n > 0) {
-	      // Compute the parent element's index, and fetch it.
-	      var parentN = Math.floor((n + 1) / 2) - 1,
-	      parent = this.content[parentN];
-	      // If the parent has a lesser score, things are in order and we
-	      // are done.
-	      if (score >= this.scoreFunction(parent))
-	        break;
-
-	      // Otherwise, swap the parent with the current element and
-	      // continue.
-	      this.content[parentN] = element;
-	      this.content[n] = parent;
-	      n = parentN;
-	    }
-	  },
-
-	  sinkDown: function(n) {
-	    // Look up the target element and its score.
-	    var length = this.content.length,
-	    element = this.content[n],
-	    elemScore = this.scoreFunction(element);
-
-	    while(true) {
-	      // Compute the indices of the child elements.
-	      var child2N = (n + 1) * 2, child1N = child2N - 1;
-	      // This is used to store the new position of the element,
-	      // if any.
-	      var swap = null;
-	      // If the first child exists (is inside the array)...
-	      if (child1N < length) {
-	        // Look it up and compute its score.
-	        var child1 = this.content[child1N],
-	        child1Score = this.scoreFunction(child1);
-	        // If the score is less than our element's, we need to swap.
-	        if (child1Score < elemScore)
-	          swap = child1N;
-	      }
-	      // Do the same checks for the other child.
-	      if (child2N < length) {
-	        var child2 = this.content[child2N],
-	        child2Score = this.scoreFunction(child2);
-	        if (child2Score < (swap == null ? elemScore : child1Score))
-	          swap = child2N;
-	      }
-
-	      // No need to swap further, we are done.
-	      if (swap == null) break;
-
-	      // Otherwise, swap and continue.
-	      this.content[n] = this.content[swap];
-	      this.content[swap] = element;
-	      n = swap;
-	    }
-	  }
-	};
-
-	/**
-	 * An item in the lru list.
-	 *
-	 * @param node
-	 * @class LRUItem
-	 */
-	function LRUItem(node)
-	{
-		this.previous = null;
-		this.next = null;
-		this.node = node;
-	}
-
-	/**
-	 * A doubly-linked-list of the least recently used elements.
-	 *
-	 * @class LRU
-	 */
-	function LRU()
-	{
-		//the least recently used item
-		this.first = null;
-
-		//the most recently used item
-		this.last = null;
-
-		//a list of all items in the lru list
-		this.items = {};
-		this.elements = 0;
-		this.numPoints = 0;
-	}
-
-	/**
-	 * Number of elements in the list
-	 *
-	 * @returns {Number}
-	 */
-	LRU.prototype.size = function()
-	{
-		return this.elements;
-	};
-
-	LRU.prototype.contains = function(node)
-	{
-		return this.items[node.id] == null;
-	};
-
-	/**
-	 * Makes node the most recently used item. if the list does not contain node, it will be added.
-	 *
-	 * @param node
-	 */
-	LRU.prototype.touch = function(node)
-	{
-		if(!node.loaded)
-		{
-			return;
-		}
-
-		//If item not found add item
-		if(this.items[node.id] == null)
-		{
-			var item = new LRUItem(node);
-			item.previous = this.last;
-			this.last = item;
-			if(item.previous !== null)
-			{
-				item.previous.next = item;
-			}
-
-			this.items[node.id] = item;
-			this.elements++;
-
-			if(this.first === null)
-			{
-				this.first = item;
-			}
-			this.numPoints += node.numPoints;
-		}
-		//Update in the list
-		else
-		{
-			var item = this.items[node.id];
-
-			//Handle first element
-			if(item.previous === null)
-			{
-				if(item.next !== null)
-				{
-					this.first = item.next;
-					this.first.previous = null;
-					item.previous = this.last;
-					item.next = null;
-					this.last = item;
-					item.previous.next = item;
-				}
-			}
-			//Handle last element
-			else if(item.next === null);
-			//Handle any other element
-			else
-			{
-				item.previous.next = item.next;
-				item.next.previous = item.previous;
-				item.previous = this.last;
-				item.next = null;
-				this.last = item;
-				item.previous.next = item;
-			}
-		}
-	};
-
-	LRU.prototype.remove = function(node)
-	{
-		var lruItem = this.items[node.id];
-
-		if(lruItem)
-		{
-			if(this.elements === 1)
-			{
-				this.first = null;
-				this.last = null;
-			}
-			else
-			{
-				if(!lruItem.previous)
-				{
-					this.first = lruItem.next;
-					this.first.previous = null;
-				}
-				if(!lruItem.next)
-				{
-					this.last = lruItem.previous;
-					this.last.next = null;
-				}
-				if(lruItem.previous && lruItem.next)
-				{
-					lruItem.previous.next = lruItem.next;
-					lruItem.next.previous = lruItem.previous;
-				}
-			}
-
-			delete this.items[node.id];
-			this.elements--;
-			this.numPoints -= node.numPoints;
-		}
-	};
-
-	LRU.prototype.getLRUItem = function()
-	{
-		if(this.first === null)
-		{
-			return null;
-		}
-
-		return this.first.node;
-	};
-
-	LRU.prototype.freeMemory = function()
-	{
-		if(this.elements <= 1)
-		{
-			return;
-		}
-
-		while(this.numPoints > Potree.pointLoadLimit)
-		{
-			var element = this.first;
-			var node = element.node;
-			this.disposeDescendants(node);
-		}
-	};
-
-	LRU.prototype.disposeDescendants = function(node)
-	{
-		var stack = [node];
-
-		while(stack.length > 0)
-		{
-			var current = stack.pop();
-			current.dispose();
-			this.remove(current);
-
-			for(var key in current.children)
-			{
-				if(current.children.hasOwnProperty(key))
-				{
-					var child = current.children[key];
-					if(child.loaded)
-					{
-						stack.push(current.children[key]);
-					}
-				}
-			}
-		}
-	};
-
-	LRU.prototype.toString = function()
-	{
-		var string = "{ ";
-		var curr = this.first;
-		while(curr !== null)
-		{
-			string += curr.node.id;
-			if(curr.next !== null)
-			{
-				string += ", ";
-			}
-			curr = curr.next;
-		}
-		string += "}";
-		string += "(" + this.size() + ")";
-		return string;
-	};
-
-	class HelperUtils
-	{
-		/**
-		 * Craete a new data texture with a solid color.
-		 */
-		static generateDataTexture(width, height, color)
-		{
-			var size = width * height;
-			var data = new Uint8Array(4 * width * height);
-
-			var r = Math.floor(color.r * 255);
-			var g = Math.floor(color.g * 255);
-			var b = Math.floor(color.b * 255);
-
-			for(var i = 0; i < size; i++)
-			{
-				data[i * 3] = r;
-				data[i * 3 + 1] = g;
-				data[i * 3 + 2] = b;
-			}
-
-			var texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
-			texture.needsUpdate = true;
-			texture.magFilter = THREE.NearestFilter;
-
-			return texture;
-		};
-
-		/**
-		 * Compute a transformed bouding box from an original box and a transform matrix.
-		 */
-		static computeTransformedBoundingBox(box, transform)
-		{
-			var vertices = [
-				new THREE.Vector3(box.min.x, box.min.y, box.min.z).applyMatrix4(transform),
-				new THREE.Vector3(box.min.x, box.min.y, box.min.z).applyMatrix4(transform),
-				new THREE.Vector3(box.max.x, box.min.y, box.min.z).applyMatrix4(transform),
-				new THREE.Vector3(box.min.x, box.max.y, box.min.z).applyMatrix4(transform),
-				new THREE.Vector3(box.min.x, box.min.y, box.max.z).applyMatrix4(transform),
-				new THREE.Vector3(box.min.x, box.max.y, box.max.z).applyMatrix4(transform),
-				new THREE.Vector3(box.max.x, box.max.y, box.min.z).applyMatrix4(transform),
-				new THREE.Vector3(box.max.x, box.min.y, box.max.z).applyMatrix4(transform),
-				new THREE.Vector3(box.max.x, box.max.y, box.max.z).applyMatrix4(transform)
-			];
-
-			var boundingBox = new THREE.Box3();
-			boundingBox.setFromPoints(vertices);
-			
-			return boundingBox;
-		};
-	}
-
-	function VersionUtils(version)
-	{
-		this.version = version;
-		var vmLength = (version.indexOf(".") === -1) ? version.length : version.indexOf(".");
-		this.versionMajor = parseInt(version.substr(0, vmLength));
-		this.versionMinor = parseInt(version.substr(vmLength + 1));
-		
-		if(this.versionMinor.length === 0)
-		{
-			this.versionMinor = 0;
-		}
-	}
-	VersionUtils.prototype.newerThan = function(version)
-	{
-		var v = new VersionUtils(version);
-
-		if((this.versionMajor > v.versionMajor) || (this.versionMajor === v.versionMajor && this.versionMinor > v.versionMinor))
-		{
-			return true;
-		}
-		
-		return false;
-	};
-
-	VersionUtils.prototype.equalOrHigher = function(version)
-	{
-		var v = new VersionUtils(version);
-
-		if((this.versionMajor > v.versionMajor) || (this.versionMajor === v.versionMajor && this.versionMinor >= v.versionMinor))
-		{
-			return true;
-		}
-
-		return false;
-	};
-
-	VersionUtils.prototype.upTo = function(version)
-	{
-		return !this.newerThan(version);
-	};
-
-	/**
-	 * The worker manager is responsible for creating and managing worker instances.
-	 */
-	class WorkerManager
-	{
-		constructor()
-		{
-			this.workers = [];
-
-			for(var i = 0; i < 5; i++)
-			{
-				this.workers.push([]);
-			}
-		}
-
-		/**
-		 * Get a worker from the pool, if none available one will be created.
-		 */
-		getWorker(type)
-		{
-			if(this.workers[type].length > 0)
-			{
-				return this.workers[type].pop();
-			}
-			
-			return new Worker(Potree.workerPath + WorkerManager.URLS[type]);
-		}
-
-		/**
-		 * Return (reinsert) the worker into the pool.
-		 */
-		returnWorker(type, worker)
-		{
-			this.workers[type].push(worker);
-		}
-
-		/**
-		 * Run a task immediatly.
-		 */
-		runTask(type, onMessage, message, transfer)
-		{
-			var self = this;
-
-			var worker = this.getWorker(type);
-			worker.onmessage = function(event)
-			{
-				onMessage(event);
-				self.returnWorker(type, worker);
-			};
-
-			if(transfer !== undefined)
-			{
-				worker.postMessage(message, transfer);
-			}
-			else
-			{
-				worker.postMessage(message);
-			}
-		}
-	}
-	WorkerManager.BINARY_DECODER = 0;
-	WorkerManager.LAS_LAZ = 1;
-	WorkerManager.LAS_DECODER = 2;
-	WorkerManager.GREYHOUND = 3;
-	WorkerManager.DEM = 4;
-
-	WorkerManager.URLS = 
-	[
-		"/workers/BinaryDecoderWorker.js",
-		"/workers/LASLAZWorker.js",
-		"/workers/LASDecoderWorker.js",
-		"/workers/GreyhoundBinaryDecoderWorker.js",
-		"/workers/DEMWorker.js"
-	];
-
 	var PointAttributeNames =
 	{
 		POSITION_CARTESIAN: 0, //float x, y, z,
@@ -680,6 +172,81 @@
 
 		return false;
 	};
+
+	/**
+	 * The worker manager is responsible for creating and managing worker instances.
+	 */
+	class WorkerManager
+	{
+		constructor()
+		{
+			this.workers = [];
+
+			for(var i = 0; i < 5; i++)
+			{
+				this.workers.push([]);
+			}
+		}
+
+		/**
+		 * Get a worker from the pool, if none available one will be created.
+		 */
+		getWorker(type)
+		{
+			if(this.workers[type].length > 0)
+			{
+				return this.workers[type].pop();
+			}
+			
+			return new Worker(Global.workerPath + WorkerManager.URLS[type]);
+		}
+
+		/**
+		 * Return (reinsert) the worker into the pool.
+		 */
+		returnWorker(type, worker)
+		{
+			this.workers[type].push(worker);
+		}
+
+		/**
+		 * Run a task immediatly.
+		 */
+		runTask(type, onMessage, message, transfer)
+		{
+			var self = this;
+
+			var worker = this.getWorker(type);
+			worker.onmessage = function(event)
+			{
+				onMessage(event);
+				self.returnWorker(type, worker);
+			};
+
+			if(transfer !== undefined)
+			{
+				worker.postMessage(message, transfer);
+			}
+			else
+			{
+				worker.postMessage(message);
+			}
+		}
+	}
+	WorkerManager.BINARY_DECODER = 0;
+	WorkerManager.LAS_LAZ = 1;
+	WorkerManager.LAS_DECODER = 2;
+	WorkerManager.GREYHOUND = 3;
+	WorkerManager.DEM = 4;
+
+	WorkerManager.URLS = 
+	[
+		"/workers/BinaryDecoderWorker.js",
+		"/workers/LASLAZWorker.js",
+		"/workers/LASDecoderWorker.js",
+		"/workers/GreyhoundBinaryDecoderWorker.js",
+		"/workers/DEMWorker.js"
+	];
 
 	//
 	//index is in order xyzxyzxyz
@@ -1039,7 +606,7 @@
 
 			var self = this;
 
-			Potree$1.workerPool.runTask(WorkerManager.DEM, function(e)
+			Global.workerPool.runTask(WorkerManager.DEM, function(e)
 			{
 				var data = new Float32Array(e.data.dem.data);
 
@@ -1080,24 +647,6 @@
 					demNode.createMipMap();
 					demNode.mipMapNeedsUpdate = true;
 				}
-
-				//TODO only works somewhat if there is no rotation to the point cloud
-
-				//var target = targetNodes[0];
-				//target.data = new Float32Array(data);
-				//
-				//
-				////node.dem = e.data.dem;
-				//
-				//{ //create scene objects for debugging
-				//	//for(var demNode of targetNodes){
-				//		var bb = new Potree.Box3Helper(box);
-				//		viewer.scene.scene.add(bb);
-				//
-				//		createDEMMesh(self, target);
-				//	//}
-				//
-				//}
 			}, message, transferables);
 		}
 	}
@@ -1292,13 +841,13 @@
 
 	PointCloudGreyhoundGeometryNode.prototype.load = function()
 	{
-		if(this.loading === true || this.loaded === true || Potree$1.numNodesLoading >= Potree$1.maxNodesLoading)
+		if(this.loading === true || this.loaded === true || Global.numNodesLoading >= Global.maxNodesLoading)
 		{
 			return;
 		}
 
 		this.loading = true;
-		Potree$1.numNodesLoading++;
+		Global.numNodesLoading++;
 
 		if(this.level % this.pcoGeometry.hierarchyStepSize === 0 && this.hasChildren)
 		{
@@ -1503,6 +1052,47 @@
 
 	Object.assign(PointCloudGreyhoundGeometryNode.prototype, THREE.EventDispatcher.prototype);
 
+	function VersionUtils(version)
+	{
+		this.version = version;
+		var vmLength = (version.indexOf(".") === -1) ? version.length : version.indexOf(".");
+		this.versionMajor = parseInt(version.substr(0, vmLength));
+		this.versionMinor = parseInt(version.substr(vmLength + 1));
+		
+		if(this.versionMinor.length === 0)
+		{
+			this.versionMinor = 0;
+		}
+	}
+	VersionUtils.prototype.newerThan = function(version)
+	{
+		var v = new VersionUtils(version);
+
+		if((this.versionMajor > v.versionMajor) || (this.versionMajor === v.versionMajor && this.versionMinor > v.versionMinor))
+		{
+			return true;
+		}
+		
+		return false;
+	};
+
+	VersionUtils.prototype.equalOrHigher = function(version)
+	{
+		var v = new VersionUtils(version);
+
+		if((this.versionMajor > v.versionMajor) || (this.versionMajor === v.versionMajor && this.versionMinor >= v.versionMinor))
+		{
+			return true;
+		}
+
+		return false;
+	};
+
+	VersionUtils.prototype.upTo = function(version)
+	{
+		return !this.newerThan(version);
+	};
+
 	class GreyhoundBinaryLoader
 	{
 		constructor(version, boundingBox, scale)
@@ -1572,7 +1162,7 @@
 				normalize: node.pcoGeometry.normalize
 			};
 
-			Potree$1.workerPool.runTask(WorkerManager.GREYHOUND, function(e)
+			Global.workerPool.runTask(WorkerManager.GREYHOUND, function(e)
 			{
 				var data = e.data;
 				var buffers = data.attributeBuffers;
@@ -1639,7 +1229,7 @@
 				node.tightBoundingBox = tightBoundingBox;
 				node.loaded = true;
 				node.loading = false;
-				Potree$1.numNodesLoading--;
+				Global.numNodesLoading--;
 			}, message, [message.buffer]);
 		}
 	}
@@ -1963,7 +1553,7 @@
 				name: node.name
 			};
 
-			Potree$1.workerPool.runTask(WorkerManager.BINARY_DECODER, function(e)
+			Global.workerPool.runTask(WorkerManager.BINARY_DECODER, function(e)
 			{
 				var data = e.data;
 				var buffers = data.attributeBuffers;
@@ -2028,7 +1618,7 @@
 				node.loaded = true;
 				node.loading = false;
 				node.estimatedSpacing = data.estimatedSpacing;
-				Potree$1.numNodesLoading--;
+				Global.numNodesLoading--;
 			}, message, [message.buffer]);
 		};
 	}
@@ -2220,7 +1810,7 @@
 		{
 			self.nextCB = cb;
 			
-			Potree.workerPool.runTask(WorkerManager.LAS_LAZ, function(e)
+			Potree.Global.workerPool.runTask(WorkerManager.LAS_LAZ, function(e)
 			{
 				if(self.nextCB !== null)
 				{
@@ -2530,7 +2120,7 @@
 				maxs: lasBuffer.maxs
 			};
 
-			Potree$1.workerPool.runTask(WorkerManager.LAS_DECODER, function(e)
+			Global.workerPool.runTask(WorkerManager.LAS_DECODER, function(e)
 			{
 				var geometry = new THREE.BufferGeometry();
 				var numPoints = lasBuffer.pointsCount;
@@ -2568,7 +2158,7 @@
 				self.node.numPoints = numPoints;
 				self.node.loaded = true;
 				self.node.loading = false;
-				Potree$1.numNodesLoading--;
+				Global.numNodesLoading--;
 				self.node.mean = new THREE.Vector3(...e.data.mean);
 			}, message, [message.buffer]);
 		};
@@ -2701,13 +2291,13 @@
 
 		load()
 		{
-			if(this.loading === true || this.loaded === true || Potree$1.numNodesLoading >= Potree$1.maxNodesLoading)
+			if(this.loading === true || this.loaded === true || Global.numNodesLoading >= Global.maxNodesLoading)
 			{
 				return;
 			}
 
 			this.loading = true;
-			Potree$1.numNodesLoading++;
+			Global.numNodesLoading++;
 
 			if(this.pcoGeometry.loader.version.equalOrHigher("1.5"))
 			{
@@ -2837,7 +2427,7 @@
 						}
 						else
 						{
-							Potree$1.numNodesLoading--;
+							Global.numNodesLoading--;
 						}
 					}
 				};
@@ -3068,6 +2658,273 @@
 
 		return new THREE.Box3(min, max);
 	};
+
+	/**
+	 * An item in the lru list.
+	 *
+	 * @param node
+	 * @class LRUItem
+	 */
+	function LRUItem(node)
+	{
+		this.previous = null;
+		this.next = null;
+		this.node = node;
+	}
+
+	/**
+	 * A doubly-linked-list of the least recently used elements.
+	 *
+	 * @class LRU
+	 */
+	function LRU()
+	{
+		//the least recently used item
+		this.first = null;
+
+		//the most recently used item
+		this.last = null;
+
+		//a list of all items in the lru list
+		this.items = {};
+		this.elements = 0;
+		this.numPoints = 0;
+	}
+
+	/**
+	 * Number of elements in the list
+	 *
+	 * @returns {Number}
+	 */
+	LRU.prototype.size = function()
+	{
+		return this.elements;
+	};
+
+	LRU.prototype.contains = function(node)
+	{
+		return this.items[node.id] == null;
+	};
+
+	/**
+	 * Makes node the most recently used item. if the list does not contain node, it will be added.
+	 *
+	 * @param node
+	 */
+	LRU.prototype.touch = function(node)
+	{
+		if(!node.loaded)
+		{
+			return;
+		}
+
+		//If item not found add item
+		if(this.items[node.id] == null)
+		{
+			var item = new LRUItem(node);
+			item.previous = this.last;
+			this.last = item;
+			if(item.previous !== null)
+			{
+				item.previous.next = item;
+			}
+
+			this.items[node.id] = item;
+			this.elements++;
+
+			if(this.first === null)
+			{
+				this.first = item;
+			}
+			this.numPoints += node.numPoints;
+		}
+		//Update in the list
+		else
+		{
+			var item = this.items[node.id];
+
+			//Handle first element
+			if(item.previous === null)
+			{
+				if(item.next !== null)
+				{
+					this.first = item.next;
+					this.first.previous = null;
+					item.previous = this.last;
+					item.next = null;
+					this.last = item;
+					item.previous.next = item;
+				}
+			}
+			//Handle last element
+			else if(item.next === null);
+			//Handle any other element
+			else
+			{
+				item.previous.next = item.next;
+				item.next.previous = item.previous;
+				item.previous = this.last;
+				item.next = null;
+				this.last = item;
+				item.previous.next = item;
+			}
+		}
+	};
+
+	LRU.prototype.remove = function(node)
+	{
+		var lruItem = this.items[node.id];
+
+		if(lruItem)
+		{
+			if(this.elements === 1)
+			{
+				this.first = null;
+				this.last = null;
+			}
+			else
+			{
+				if(!lruItem.previous)
+				{
+					this.first = lruItem.next;
+					this.first.previous = null;
+				}
+				if(!lruItem.next)
+				{
+					this.last = lruItem.previous;
+					this.last.next = null;
+				}
+				if(lruItem.previous && lruItem.next)
+				{
+					lruItem.previous.next = lruItem.next;
+					lruItem.next.previous = lruItem.previous;
+				}
+			}
+
+			delete this.items[node.id];
+			this.elements--;
+			this.numPoints -= node.numPoints;
+		}
+	};
+
+	LRU.prototype.getLRUItem = function()
+	{
+		if(this.first === null)
+		{
+			return null;
+		}
+
+		return this.first.node;
+	};
+
+	LRU.prototype.freeMemory = function()
+	{
+		if(this.elements <= 1)
+		{
+			return;
+		}
+
+		while(this.numPoints > Global.pointLoadLimit)
+		{
+			var element = this.first;
+			var node = element.node;
+			this.disposeDescendants(node);
+		}
+	};
+
+	LRU.prototype.disposeDescendants = function(node)
+	{
+		var stack = [node];
+
+		while(stack.length > 0)
+		{
+			var current = stack.pop();
+			current.dispose();
+			this.remove(current);
+
+			for(var key in current.children)
+			{
+				if(current.children.hasOwnProperty(key))
+				{
+					var child = current.children[key];
+					if(child.loaded)
+					{
+						stack.push(current.children[key]);
+					}
+				}
+			}
+		}
+	};
+
+	LRU.prototype.toString = function()
+	{
+		var string = "{ ";
+		var curr = this.first;
+		while(curr !== null)
+		{
+			string += curr.node.id;
+			if(curr.next !== null)
+			{
+				string += ", ";
+			}
+			curr = curr.next;
+		}
+		string += "}";
+		string += "(" + this.size() + ")";
+		return string;
+	};
+
+	class HelperUtils
+	{
+		/**
+		 * Craete a new data texture with a solid color.
+		 */
+		static generateDataTexture(width, height, color)
+		{
+			var size = width * height;
+			var data = new Uint8Array(4 * width * height);
+
+			var r = Math.floor(color.r * 255);
+			var g = Math.floor(color.g * 255);
+			var b = Math.floor(color.b * 255);
+
+			for(var i = 0; i < size; i++)
+			{
+				data[i * 3] = r;
+				data[i * 3 + 1] = g;
+				data[i * 3 + 2] = b;
+			}
+
+			var texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
+			texture.needsUpdate = true;
+			texture.magFilter = THREE.NearestFilter;
+
+			return texture;
+		};
+
+		/**
+		 * Compute a transformed bouding box from an original box and a transform matrix.
+		 */
+		static computeTransformedBoundingBox(box, transform)
+		{
+			var vertices = [
+				new THREE.Vector3(box.min.x, box.min.y, box.min.z).applyMatrix4(transform),
+				new THREE.Vector3(box.min.x, box.min.y, box.min.z).applyMatrix4(transform),
+				new THREE.Vector3(box.max.x, box.min.y, box.min.z).applyMatrix4(transform),
+				new THREE.Vector3(box.min.x, box.max.y, box.min.z).applyMatrix4(transform),
+				new THREE.Vector3(box.min.x, box.min.y, box.max.z).applyMatrix4(transform),
+				new THREE.Vector3(box.min.x, box.max.y, box.max.z).applyMatrix4(transform),
+				new THREE.Vector3(box.max.x, box.max.y, box.min.z).applyMatrix4(transform),
+				new THREE.Vector3(box.max.x, box.min.y, box.max.z).applyMatrix4(transform),
+				new THREE.Vector3(box.max.x, box.max.y, box.max.z).applyMatrix4(transform)
+			];
+
+			var boundingBox = new THREE.Box3();
+			boundingBox.setFromPoints(vertices);
+			
+			return boundingBox;
+		};
+	}
 
 	class PointCloudArena4DNode extends PointCloudTreeNode
 	{
@@ -3655,8 +3512,10 @@
 
 		computeVisibilityTextureData(nodes)
 		{
-
-			if(Potree.measureTimings) performance.mark("computeVisibilityTextureData-start");
+			if(Global.measureTimings)
+			{
+				performance.mark("computeVisibilityTextureData-start");
+			}
 
 			var data = new Uint8Array(nodes.length * 3);
 			var visibleNodeTextureOffsets = new Map();
@@ -3723,7 +3582,7 @@
 				data[i * 3 + 2] = b3;
 			}
 
-			if(Potree.measureTimings)
+			if(Global.measureTimings)
 			{
 				performance.mark("computeVisibilityTextureData-end");
 				performance.measure("render.computeVisibilityTextureData", "computeVisibilityTextureData-start", "computeVisibilityTextureData-end");
@@ -3739,7 +3598,7 @@
 		{
 			if(this.pcoGeometry.root)
 			{
-				return Potree.numNodesLoading > 0 ? 0 : 1;
+				return Potree.Global.numNodesLoading > 0 ? 0 : 1;
 			}
 			else
 			{
@@ -4773,11 +4632,11 @@ void main()
 			var pointSize = getValid(parameters.size, 1.0);
 			var minSize = getValid(parameters.minSize, 2.0);
 			var maxSize = getValid(parameters.maxSize, 50.0);
-			var treeType = getValid(parameters.treeType, Potree$1.TreeType.OCTREE);
+			var treeType = getValid(parameters.treeType, TreeType.OCTREE);
 
-			this._pointSizeType = Potree$1.PointSizeType.FIXED;
-			this._shape = Potree$1.PointShape.SQUARE;
-			this._pointColorType = Potree$1.PointColorType.RGB;
+			this._pointSizeType = PointSizeType.FIXED;
+			this._shape = PointShape.SQUARE;
+			this._pointColorType = PointColorType.RGB;
 			this._useClipBox = false;
 			this._weighted = false;
 			this._gradient = Gradients.SPECTRAL;
@@ -5121,7 +4980,7 @@ void main()
 				}
 			};
 			
-			this.classification = Potree$1.Classification.DEFAULT;
+			this.classification = Classification.DEFAULT;
 			this.defaultAttributeValues.normal = [0, 0, 0];
 			this.defaultAttributeValues.classification = [0, 0, 0];
 			this.defaultAttributeValues.indices = [0, 0, 0, 0];
@@ -5178,27 +5037,27 @@ void main()
 		{
 			var defines = [];
 
-			if(this.pointSizeType === Potree$1.PointSizeType.FIXED)
+			if(this.pointSizeType === PointSizeType.FIXED)
 			{
 				defines.push("#define fixed_point_size");
 			}
-			else if(this.pointSizeType === Potree$1.PointSizeType.ATTENUATED)
+			else if(this.pointSizeType === PointSizeType.ATTENUATED)
 			{
 				defines.push("#define attenuated_point_size");
 			}
-			else if(this.pointSizeType === Potree$1.PointSizeType.ADAPTIVE)
+			else if(this.pointSizeType === PointSizeType.ADAPTIVE)
 			{
 				defines.push("#define adaptive_point_size");
 			}
-			if(this.shape === Potree$1.PointShape.SQUARE)
+			if(this.shape === PointShape.SQUARE)
 			{
 				defines.push("#define square_point_shape");
 			}
-			else if(this.shape === Potree$1.PointShape.CIRCLE)
+			else if(this.shape === PointShape.CIRCLE)
 			{
 				defines.push("#define circle_point_shape");
 			}
-			else if(this.shape === Potree$1.PointShape.PARABOLOID)
+			else if(this.shape === PointShape.PARABOLOID)
 			{
 				defines.push("#define paraboloid_point_shape");
 			}
@@ -5210,71 +5069,71 @@ void main()
 			{
 				defines.push("#define snap_enabled");
 			}
-			if(this._pointColorType === Potree$1.PointColorType.RGB)
+			if(this._pointColorType === PointColorType.RGB)
 			{
 				defines.push("#define color_type_rgb");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.COLOR)
+			else if(this._pointColorType === PointColorType.COLOR)
 			{
 				defines.push("#define color_type_color");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.DEPTH)
+			else if(this._pointColorType === PointColorType.DEPTH)
 			{
 				defines.push("#define color_type_depth");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.HEIGHT)
+			else if(this._pointColorType === PointColorType.HEIGHT)
 			{
 				defines.push("#define color_type_height");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.INTENSITY)
+			else if(this._pointColorType === PointColorType.INTENSITY)
 			{
 				defines.push("#define color_type_intensity");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.INTENSITY_GRADIENT)
+			else if(this._pointColorType === PointColorType.INTENSITY_GRADIENT)
 			{
 				defines.push("#define color_type_intensity_gradient");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.LOD)
+			else if(this._pointColorType === PointColorType.LOD)
 			{
 				defines.push("#define color_type_lod");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.POINT_INDEX)
+			else if(this._pointColorType === PointColorType.POINT_INDEX)
 			{
 				defines.push("#define color_type_point_index");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.CLASSIFICATION)
+			else if(this._pointColorType === PointColorType.CLASSIFICATION)
 			{
 				defines.push("#define color_type_classification");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.RETURN_NUMBER)
+			else if(this._pointColorType === PointColorType.RETURN_NUMBER)
 			{
 				defines.push("#define color_type_return_number");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.SOURCE)
+			else if(this._pointColorType === PointColorType.SOURCE)
 			{
 				defines.push("#define color_type_source");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.NORMAL)
+			else if(this._pointColorType === PointColorType.NORMAL)
 			{
 				defines.push("#define color_type_normal");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.PHONG)
+			else if(this._pointColorType === PointColorType.PHONG)
 			{
 				defines.push("#define color_type_phong");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.RGB_HEIGHT)
+			else if(this._pointColorType === PointColorType.RGB_HEIGHT)
 			{
 				defines.push("#define color_type_rgb_height");
 			}
-			else if(this._pointColorType === Potree$1.PointColorType.COMPOSITE)
+			else if(this._pointColorType === PointColorType.COMPOSITE)
 			{
 				defines.push("#define color_type_composite");
 			}
-			if(this._treeType === Potree$1.TreeType.OCTREE)
+			if(this._treeType === TreeType.OCTREE)
 			{
 				defines.push("#define tree_type_octree");
 			}
-			else if(this._treeType === Potree$1.TreeType.KDTREE)
+			else if(this._treeType === TreeType.KDTREE)
 			{
 				defines.push("#define tree_type_kdtree");
 			}
@@ -6422,7 +6281,10 @@ void main()
 
 		computeVisibilityTextureData(nodes, camera)
 		{
-			if(Potree.measureTimings) performance.mark("computeVisibilityTextureData-start");
+			if(Global.measureTimings)
+			{
+				performance.mark("computeVisibilityTextureData-start");
+			}
 
 			var data = new Uint8Array(nodes.length * 4);
 			var visibleNodeTextureOffsets = new Map();
@@ -6568,7 +6430,7 @@ void main()
 				}
 			}
 
-			if(Potree.measureTimings)
+			if(Global.measureTimings)
 			{
 				performance.mark("computeVisibilityTextureData-end");
 				performance.measure("render.computeVisibilityTextureData", "computeVisibilityTextureData-start", "computeVisibilityTextureData-end");
@@ -7278,14 +7140,14 @@ void main()
 				return;
 			}
 
-			if(Potree$1.numNodesLoading >= Potree$1.maxNodesLoading)
+			if(Global.numNodesLoading >= Global.maxNodesLoading)
 			{
 				return;
 			}
 
 			this.loading = true;
 
-			Potree$1.numNodesLoading++;
+			Global.numNodesLoading++;
 
 			var self = this;
 			var url = this.pcoGeometry.url + "?node=" + this.number;
@@ -7359,7 +7221,7 @@ void main()
 				self.numPoints = numPoints;
 				self.loaded = true;
 				self.loading = false;
-				Potree$1.numNodesLoading--;
+				Global.numNodesLoading--;
 			};
 
 			xhr.send(null);
@@ -7639,38 +7501,147 @@ void main()
 		}
 	}
 
-	function Potree$1(){}
+	/*
+	** Binary Heap implementation in Javascript
+	** From: http://eloquentjavascript.net/1st_edition/appendix2.htmlt
+	**
+	** Copyright (c) 2007 Marijn Haverbeke, last modified on November 28 2013.
+	**
+	** Licensed under a Creative Commons attribution-noncommercial license. 
+	** All code in this book may also be considered licensed under an MIT license.
+	*/
 
-	Potree$1.getBasePath = function()
-	{
-		if(document.currentScript.src)
-		{
-			var scriptPath = new URL(document.currentScript.src + "/..").href;
 
-			if(scriptPath.slice(-1) === "/")
-			{
-				scriptPath = scriptPath.slice(0, -1);
-			}
 
-			return scriptPath;
-		}
+	function BinaryHeap(scoreFunction){
+	  this.content = [];
+	  this.scoreFunction = scoreFunction;
+	}
 
-		return "";
+	BinaryHeap.prototype = {
+	  push: function(element) {
+	    // Add the new element to the end of the array.
+	    this.content.push(element);
+	    // Allow it to bubble up.
+	    this.bubbleUp(this.content.length - 1);
+	  },
+
+	  pop: function() {
+	    // Store the first element so we can return it later.
+	    var result = this.content[0];
+	    // Get the element at the end of the array.
+	    var end = this.content.pop();
+	    // If there are any elements left, put the end element at the
+	    // start, and let it sink down.
+	    if (this.content.length > 0) {
+	      this.content[0] = end;
+	      this.sinkDown(0);
+	    }
+	    return result;
+	  },
+
+	  remove: function(node) {
+	    var length = this.content.length;
+	    // To remove a value, we must search through the array to find
+	    // it.
+	    for (var i = 0; i < length; i++) {
+	      if (this.content[i] != node) continue;
+	      // When it is found, the process seen in 'pop' is repeated
+	      // to fill up the hole.
+	      var end = this.content.pop();
+	      // If the element we popped was the one we needed to remove,
+	      // we're done.
+	      if (i == length - 1) break;
+	      // Otherwise, we replace the removed element with the popped
+	      // one, and allow it to float up or sink down as appropriate.
+	      this.content[i] = end;
+	      this.bubbleUp(i);
+	      this.sinkDown(i);
+	      break;
+	    }
+	  },
+
+	  size: function() {
+	    return this.content.length;
+	  },
+
+	  bubbleUp: function(n) {
+	    // Fetch the element that has to be moved.
+	    var element = this.content[n], score = this.scoreFunction(element);
+	    // When at 0, an element can not go up any further.
+	    while (n > 0) {
+	      // Compute the parent element's index, and fetch it.
+	      var parentN = Math.floor((n + 1) / 2) - 1,
+	      parent = this.content[parentN];
+	      // If the parent has a lesser score, things are in order and we
+	      // are done.
+	      if (score >= this.scoreFunction(parent))
+	        break;
+
+	      // Otherwise, swap the parent with the current element and
+	      // continue.
+	      this.content[parentN] = element;
+	      this.content[n] = parent;
+	      n = parentN;
+	    }
+	  },
+
+	  sinkDown: function(n) {
+	    // Look up the target element and its score.
+	    var length = this.content.length,
+	    element = this.content[n],
+	    elemScore = this.scoreFunction(element);
+
+	    while(true) {
+	      // Compute the indices of the child elements.
+	      var child2N = (n + 1) * 2, child1N = child2N - 1;
+	      // This is used to store the new position of the element,
+	      // if any.
+	      var swap = null;
+	      // If the first child exists (is inside the array)...
+	      if (child1N < length) {
+	        // Look it up and compute its score.
+	        var child1 = this.content[child1N],
+	        child1Score = this.scoreFunction(child1);
+	        // If the score is less than our element's, we need to swap.
+	        if (child1Score < elemScore)
+	          swap = child1N;
+	      }
+	      // Do the same checks for the other child.
+	      if (child2N < length) {
+	        var child2 = this.content[child2N],
+	        child2Score = this.scoreFunction(child2);
+	        if (child2Score < (swap == null ? elemScore : child1Score))
+	          swap = child2N;
+	      }
+
+	      // No need to swap further, we are done.
+	      if (swap == null) break;
+
+	      // Otherwise, swap and continue.
+	      this.content[n] = this.content[swap];
+	      this.content[swap] = element;
+	      n = swap;
+	    }
+	  }
 	};
 
-	Potree$1.workerPath = Potree$1.getBasePath();
-	Potree$1.maxNodesLoadGPUFrame = 20;
-	Potree$1.maxDEMLevel = 0;
-	Potree$1.maxNodesLoading = navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4;
-	Potree$1.pointLoadLimit = 1e10;
-	Potree$1.framenumber = 0;
-	Potree$1.numNodesLoading = 0;
-	Potree$1.debug = {};
-	Potree$1.measureTimings = false;
-	Potree$1.workerPool = new WorkerManager();
-	Potree$1.lru = new LRU();
+	var Global = 
+	{
+		debug: {},
+		workerPath: getBasePath(),
+		maxNodesLoadGPUFrame: 20,
+		maxDEMLevel: 0,
+		maxNodesLoading: navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4,
+		pointLoadLimit: 1e10,
+		numNodesLoading: 0,
+		measureTimings: false,
+		workerPool: new WorkerManager(),
+		lru: new LRU(),
+		pointcloudTransformVersion: undefined
+	};
 
-	Potree$1.attributeLocations =
+	var AttributeLocations =
 	{
 		position: 0,
 		color: 1,
@@ -7684,7 +7655,7 @@ void main()
 		spacing: 9,
 	};
 
-	Potree$1.Classification =
+	var Classification =
 	{
 		DEFAULT:
 		{
@@ -7703,7 +7674,7 @@ void main()
 		}
 	};
 
-	Potree$1.ClipTask =
+	var ClipTask =
 	{
 		NONE: 0,
 		HIGHLIGHT: 1,
@@ -7711,27 +7682,27 @@ void main()
 		SHOW_OUTSIDE: 3
 	};
 
-	Potree$1.ClipMethod =
+	var ClipMethod =
 	{
 		INSIDE_ANY: 0,
 		INSIDE_ALL: 1
 	};
 
-	Potree$1.PointSizeType =
+	var PointSizeType =
 	{
 		FIXED: 0,
 		ATTENUATED: 1,
 		ADAPTIVE: 2
 	};
 
-	Potree$1.PointShape =
+	var PointShape =
 	{
 		SQUARE: 0,
 		CIRCLE: 1,
 		PARABOLOID: 2
 	};
 
-	Potree$1.PointColorType =
+	var PointColorType =
 	{
 		RGB: 0,
 		COLOR: 1,
@@ -7752,13 +7723,29 @@ void main()
 		COMPOSITE: 50
 	};
 
-	Potree$1.TreeType =
+	var TreeType =
 	{
 		OCTREE: 0,
 		KDTREE: 1
 	};
 
-	Potree$1.loadPointCloud = function(path, name, callback)
+	function getBasePath()
+	{
+		if(document.currentScript.src)
+		{
+			var scriptPath = new URL(document.currentScript.src + "/..").href;
+
+			if(scriptPath.slice(-1) === "/")
+			{
+				scriptPath = scriptPath.slice(0, -1);
+			}
+
+			return scriptPath;
+		}
+
+		return "";
+	}
+	function loadPointCloud(path, name, callback)
 	{
 		var loaded = function(pointcloud)
 		{
@@ -7811,9 +7798,8 @@ void main()
 		{
 			throw new Error("Potree: Failed to load point cloud from URL " + path);
 		}
-	};
-
-	Potree$1.updateVisibility = function(pointclouds, camera, renderer)
+	}
+	function updateVisibility(pointclouds, camera, renderer)
 	{
 		var numVisiblePoints = 0;
 		var numVisiblePointsInPointclouds = new Map(pointclouds.map(pc => [pc, 0]));
@@ -7822,7 +7808,7 @@ void main()
 		var lowestSpacing = Infinity;
 
 		//Calculate object space frustum and cam pos and setup priority queue
-		var structures = Potree$1.updateVisibilityStructures(pointclouds, camera, renderer);
+		var structures = updateVisibilityStructures(pointclouds, camera, renderer);
 		var frustums = structures.frustums;
 		var camObjPositions = structures.camObjPositions;
 		var priorityQueue = structures.priorityQueue;
@@ -7832,12 +7818,13 @@ void main()
 		var domHeight = renderer.domElement.clientHeight;
 
 		//Check if pointcloud has been transformed, some code will only be executed if changes have been detected
-		if(!Potree$1._pointcloudTransformVersion)
+		if(!Global.pointcloudTransformVersion)
 		{
-			Potree$1._pointcloudTransformVersion = new Map();
+			Global.pointcloudTransformVersion = new Map();
 		}
 
-		var pointcloudTransformVersion = Potree$1._pointcloudTransformVersion;
+		var pointcloudTransformVersion = Global.pointcloudTransformVersion;
+
 		for(var i = 0; i < pointclouds.length; i++)
 		{
 			var pointcloud = pointclouds[i];
@@ -7939,13 +7926,13 @@ void main()
 				var insideAny = numIntersecting > 0;
 				var insideAll = numIntersecting === numIntersectionVolumes;
 
-				if(pointcloud.material.clipTask === Potree.ClipTask.SHOW_INSIDE)
+				if(pointcloud.material.clipTask === ClipTask.SHOW_INSIDE)
 				{
-					if(pointcloud.material.clipMethod === Potree.ClipMethod.INSIDE_ANY && insideAny)
+					if(pointcloud.material.clipMethod === ClipMethod.INSIDE_ANY && insideAny)
 					{
 						//node.debug = true
 					}
-					else if(pointcloud.material.clipMethod === Potree.ClipMethod.INSIDE_ALL && insideAll)
+					else if(pointcloud.material.clipMethod === ClipMethod.INSIDE_ALL && insideAll)
 					{
 						//node.debug = true;
 					}
@@ -7980,7 +7967,7 @@ void main()
 
 			if(node.isGeometryNode() && (!parent || parent.isTreeNode()))
 			{
-				if(node.isLoaded() && loadedToGPUThisFrame < Potree$1.maxNodesLoadGPUFrame)
+				if(node.isLoaded() && loadedToGPUThisFrame < Global.maxNodesLoadGPUFrame)
 				{
 					node = pointcloud.toTreeNode(node, parent);
 					loadedToGPUThisFrame++;
@@ -7993,7 +7980,7 @@ void main()
 
 			if(node.isTreeNode())
 			{
-				Potree$1.lru.touch(node.geometryNode);
+				Global.lru.touch(node.geometryNode);
 
 				node.sceneNode.visible = true;
 				node.sceneNode.material = pointcloud.material;
@@ -8092,11 +8079,11 @@ void main()
 		
 		for(var pointcloud of candidates)
 		{
-			var updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= Potree$1.maxDEMLevel);
+			var updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= Global.maxDEMLevel);
 			pointcloud.dem.update(updatingNodes);
 		}
 		
-		for(var i = 0; i < Math.min(Potree$1.maxNodesLoading, unloadedGeometry.length); i++)
+		for(var i = 0; i < Math.min(Global.maxNodesLoading, unloadedGeometry.length); i++)
 		{
 			unloadedGeometry[i].load();
 		}
@@ -8106,11 +8093,10 @@ void main()
 			numVisiblePoints: numVisiblePoints,
 			lowestSpacing: lowestSpacing
 		};
-	};
-
-	Potree$1.updatePointClouds = function(pointclouds, camera, renderer)
+	}
+	function updatePointClouds(pointclouds, camera, renderer)
 	{
-		var result = Potree$1.updateVisibility(pointclouds, camera, renderer);
+		var result = updateVisibility(pointclouds, camera, renderer);
 
 		for(var i = 0; i < pointclouds.length; i++)
 		{
@@ -8118,12 +8104,11 @@ void main()
 			pointclouds[i].updateVisibleBounds();
 		}
 
-		Potree$1.lru.freeMemory();
+		Global.lru.freeMemory();
 
 		return result;
-	};
-
-	Potree$1.updateVisibilityStructures = function(pointclouds, camera, renderer)
+	}
+	function updateVisibilityStructures(pointclouds, camera, renderer)
 	{
 		var frustums = [];
 		var camObjPositions = [];
@@ -8197,9 +8182,8 @@ void main()
 			camObjPositions: camObjPositions,
 			priorityQueue: priorityQueue
 		};
-	};
-
-	Potree$1.shuffleArray = function(array)
+	}
+	function shuffleArray(array)
 	{
 		for(var i = array.length - 1; i > 0; i--)
 		{
@@ -8208,37 +8192,36 @@ void main()
 			array[i] = array[j];
 			array[j] = temp;
 		}
-	};
-
+	}
 
 	//Copied from three.js: WebGLRenderer.js
-	Potree$1.paramThreeToGL = function(_gl, p)
+	function paramThreeToGL(gl, p)
 	{
 		var extension;
 
-		if(p === THREE.RepeatWrapping) return _gl.REPEAT;
-		if(p === THREE.ClampToEdgeWrapping) return _gl.CLAMP_TO_EDGE;
-		if(p === THREE.MirroredRepeatWrapping) return _gl.MIRRORED_REPEAT;
+		if(p === THREE.RepeatWrapping) return gl.REPEAT;
+		if(p === THREE.ClampToEdgeWrapping) return gl.CLAMP_TO_EDGE;
+		if(p === THREE.MirroredRepeatWrapping) return gl.MIRRORED_REPEAT;
 
-		if(p === THREE.NearestFilter) return _gl.NEAREST;
-		if(p === THREE.NearestMipMapNearestFilter) return _gl.NEAREST_MIPMAP_NEAREST;
-		if(p === THREE.NearestMipMapLinearFilter) return _gl.NEAREST_MIPMAP_LINEAR;
+		if(p === THREE.NearestFilter) return gl.NEAREST;
+		if(p === THREE.NearestMipMapNearestFilter) return gl.NEAREST_MIPMAP_NEAREST;
+		if(p === THREE.NearestMipMapLinearFilter) return gl.NEAREST_MIPMAP_LINEAR;
 
-		if(p === THREE.LinearFilter) return _gl.LINEAR;
-		if(p === THREE.LinearMipMapNearestFilter) return _gl.LINEAR_MIPMAP_NEAREST;
-		if(p === THREE.LinearMipMapLinearFilter) return _gl.LINEAR_MIPMAP_LINEAR;
+		if(p === THREE.LinearFilter) return gl.LINEAR;
+		if(p === THREE.LinearMipMapNearestFilter) return gl.LINEAR_MIPMAP_NEAREST;
+		if(p === THREE.LinearMipMapLinearFilter) return gl.LINEAR_MIPMAP_LINEAR;
 
-		if(p === THREE.UnsignedByteType) return _gl.UNSIGNED_BYTE;
-		if(p === THREE.UnsignedShort4444Type) return _gl.UNSIGNED_SHORT_4_4_4_4;
-		if(p === THREE.UnsignedShort5551Type) return _gl.UNSIGNED_SHORT_5_5_5_1;
-		if(p === THREE.UnsignedShort565Type) return _gl.UNSIGNED_SHORT_5_6_5;
+		if(p === THREE.UnsignedByteType) return gl.UNSIGNED_BYTE;
+		if(p === THREE.UnsignedShort4444Type) return gl.UNSIGNED_SHORT_4_4_4_4;
+		if(p === THREE.UnsignedShort5551Type) return gl.UNSIGNED_SHORT_5_5_5_1;
+		if(p === THREE.UnsignedShort565Type) return gl.UNSIGNED_SHORT_5_6_5;
 
-		if(p === THREE.ByteType) return _gl.BYTE;
-		if(p === THREE.ShortType) return _gl.SHORT;
-		if(p === THREE.UnsignedShortType) return _gl.UNSIGNED_SHORT;
-		if(p === THREE.IntType) return _gl.INT;
-		if(p === THREE.UnsignedIntType) return _gl.UNSIGNED_INT;
-		if(p === THREE.FloatType) return _gl.FLOAT;
+		if(p === THREE.ByteType) return gl.BYTE;
+		if(p === THREE.ShortType) return gl.SHORT;
+		if(p === THREE.UnsignedShortType) return gl.UNSIGNED_SHORT;
+		if(p === THREE.IntType) return gl.INT;
+		if(p === THREE.UnsignedIntType) return gl.UNSIGNED_INT;
+		if(p === THREE.FloatType) return gl.FLOAT;
 
 		if(p === THREE.HalfFloatType)
 		{
@@ -8246,30 +8229,30 @@ void main()
 			if(extension !== null) return extension.HALF_FLOAT_OES;
 		}
 
-		if(p === THREE.AlphaFormat) return _gl.ALPHA;
-		if(p === THREE.RGBFormat) return _gl.RGB;
-		if(p === THREE.RGBAFormat) return _gl.RGBA;
-		if(p === THREE.LuminanceFormat) return _gl.LUMINANCE;
-		if(p === THREE.LuminanceAlphaFormat) return _gl.LUMINANCE_ALPHA;
-		if(p === THREE.DepthFormat) return _gl.DEPTH_COMPONENT;
-		if(p === THREE.DepthStencilFormat) return _gl.DEPTH_STENCIL;
+		if(p === THREE.AlphaFormat) return gl.ALPHA;
+		if(p === THREE.RGBFormat) return gl.RGB;
+		if(p === THREE.RGBAFormat) return gl.RGBA;
+		if(p === THREE.LuminanceFormat) return gl.LUMINANCE;
+		if(p === THREE.LuminanceAlphaFormat) return gl.LUMINANCE_ALPHA;
+		if(p === THREE.DepthFormat) return gl.DEPTH_COMPONENT;
+		if(p === THREE.DepthStencilFormat) return gl.DEPTH_STENCIL;
 
-		if(p === THREE.AddEquation) return _gl.FUNC_ADD;
-		if(p === THREE.SubtractEquation) return _gl.FUNC_SUBTRACT;
-		if(p === THREE.ReverseSubtractEquation) return _gl.FUNC_REVERSE_SUBTRACT;
+		if(p === THREE.AddEquation) return gl.FUNC_ADD;
+		if(p === THREE.SubtractEquation) return gl.FUNC_SUBTRACT;
+		if(p === THREE.ReverseSubtractEquation) return gl.FUNC_REVERSE_SUBTRACT;
 
-		if(p === THREE.ZeroFactor) return _gl.ZERO;
-		if(p === THREE.OneFactor) return _gl.ONE;
-		if(p === THREE.SrcColorFactor) return _gl.SRC_COLOR;
-		if(p === THREE.OneMinusSrcColorFactor) return _gl.ONE_MINUS_SRC_COLOR;
-		if(p === THREE.SrcAlphaFactor) return _gl.SRC_ALPHA;
-		if(p === THREE.OneMinusSrcAlphaFactor) return _gl.ONE_MINUS_SRC_ALPHA;
-		if(p === THREE.DstAlphaFactor) return _gl.DST_ALPHA;
-		if(p === THREE.OneMinusDstAlphaFactor) return _gl.ONE_MINUS_DST_ALPHA;
+		if(p === THREE.ZeroFactor) return gl.ZERO;
+		if(p === THREE.OneFactor) return gl.ONE;
+		if(p === THREE.SrcColorFactor) return gl.SRC_COLOR;
+		if(p === THREE.OneMinusSrcColorFactor) return gl.ONE_MINUS_SRC_COLOR;
+		if(p === THREE.SrcAlphaFactor) return gl.SRC_ALPHA;
+		if(p === THREE.OneMinusSrcAlphaFactor) return gl.ONE_MINUS_SRC_ALPHA;
+		if(p === THREE.DstAlphaFactor) return gl.DST_ALPHA;
+		if(p === THREE.OneMinusDstAlphaFactor) return gl.ONE_MINUS_DST_ALPHA;
 
-		if(p === THREE.DstColorFactor) return _gl.DST_COLOR;
-		if(p === THREE.OneMinusDstColorFactor) return _gl.ONE_MINUS_DST_COLOR;
-		if(p === THREE.SrcAlphaSaturateFactor) return _gl.SRC_ALPHA_SATURATE;
+		if(p === THREE.DstColorFactor) return gl.DST_COLOR;
+		if(p === THREE.OneMinusDstColorFactor) return gl.ONE_MINUS_DST_COLOR;
+		if(p === THREE.SrcAlphaSaturateFactor) return gl.SRC_ALPHA_SATURATE;
 
 		if(p === THREE.RGB_S3TC_DXT1_Format || p === RGBA_S3TC_DXT1_Format || p === THREE.RGBA_S3TC_DXT3_Format || p === RGBA_S3TC_DXT5_Format)
 		{
@@ -8321,38 +8304,7 @@ void main()
 		}
 
 		return 0;
-	};
-
-	/*
-	export {
-		getBasePath,
-		workerPath,
-		maxNodesLoadGPUFrame,
-		maxDEMLevel,
-		maxNodesLoading,
-		pointLoadLimit,
-		framenumber,
-		numNodesLoading,
-		debug,
-		measureTimings,
-		workerPool,
-		lru,
-		attributeLocations,
-		Classification,
-		ClipTask,
-		ClipMethod,
-		PointSizeType,
-		PointShape,
-		PointColorType,
-		TreeType,
-		loadPointCloud,
-		updateVisibility,
-		updatePointClouds,
-		updateVisibilityStructures,
-		shuffleArray,
-		paramThreeToGL
-	};
-	*/
+	}
 
 	class Points
 	{
@@ -8482,9 +8434,9 @@ void main()
 				this.fs = gl.createShader(gl.FRAGMENT_SHADER);
 				this.program = gl.createProgram();
 
-				for(var name of Object.keys(Potree_js.Potree.attributeLocations))
+				for(var name of Object.keys(Potree_js.AttributeLocations))
 				{
-					var location = Potree_js.Potree.attributeLocations[name];
+					var location = Potree_js.AttributeLocations[name];
 					gl.bindAttribLocation(this.program, location, name);
 				}
 
@@ -9030,7 +8982,7 @@ void main()
 				this.pointclouds[i].minimumNodePixelSize = this.nodeSize;
 			}
 
-			Potree$1.updatePointClouds(this.pointclouds, camera, renderer);
+			updatePointClouds(this.pointclouds, camera, renderer);
 		}
 
 		/**
@@ -9245,7 +9197,7 @@ void main()
 				gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
 				gl.bufferData(gl.ARRAY_BUFFER, bufferAttribute.array, gl.STATIC_DRAW);
 
-				var attributeLocation = Potree$1.attributeLocations[attributeName];
+				var attributeLocation = attributeLocations[attributeName];
 				var normalized = bufferAttribute.normalized;
 				var type = this.types.get(bufferAttribute.array.constructor);
 
@@ -9282,7 +9234,7 @@ void main()
 			{
 				var bufferAttribute = geometry.attributes[attributeName];
 
-				var attributeLocation = Potree$1.attributeLocations[attributeName];
+				var attributeLocation = attributeLocations[attributeName];
 				var normalized = bufferAttribute.normalized;
 				var type = this.types.get(bufferAttribute.array.constructor);
 
@@ -9355,9 +9307,9 @@ void main()
 
 			for(var node of nodes)
 			{
-				if(Potree$1.debug.allowedNodes !== undefined)
+				if(Global.debug.allowedNodes !== undefined)
 				{
-					if(!Potree$1.debug.allowedNodes.includes(node.name))
+					if(!Global.debug.allowedNodes.includes(node.name))
 					{
 						continue;
 					}
@@ -9519,7 +9471,7 @@ void main()
 
 			if(material.pointSizeType >= 0)
 			{
-				if(material.pointSizeType === Potree$1.PointSizeType.ADAPTIVE || material.pointColorType === Potree$1.PointColorType.LOD)
+				if(material.pointSizeType === PointSizeType.ADAPTIVE || material.pointColorType === PointColorType.LOD)
 				{
 					var vnNodes = nodes;
 					visibilityTextureData = octree.computeVisibilityTextureData(vnNodes, camera);
@@ -9644,7 +9596,7 @@ void main()
 			//Clip task
 			if(material.clipBoxes.length + material.clipPolygons.length === 0)
 			{
-				shader.setUniform1i("clipTask", Potree$1.ClipTask.NONE);
+				shader.setUniform1i("clipTask", ClipTask.NONE);
 			}
 			else
 			{
@@ -9784,12 +9736,27 @@ void main()
 		}
 	}
 
+	exports.Global = Global;
+	exports.AttributeLocations = AttributeLocations;
+	exports.Classification = Classification;
+	exports.ClipTask = ClipTask;
+	exports.ClipMethod = ClipMethod;
+	exports.PointSizeType = PointSizeType;
+	exports.PointShape = PointShape;
+	exports.PointColorType = PointColorType;
+	exports.TreeType = TreeType;
+	exports.getBasePath = getBasePath;
+	exports.loadPointCloud = loadPointCloud;
+	exports.updateVisibility = updateVisibility;
+	exports.updatePointClouds = updatePointClouds;
+	exports.updateVisibilityStructures = updateVisibilityStructures;
+	exports.shuffleArray = shuffleArray;
+	exports.paramThreeToGL = paramThreeToGL;
 	exports.BinaryHeap = BinaryHeap;
 	exports.LRU = LRU;
 	exports.HelperUtils = HelperUtils;
 	exports.VersionUtils = VersionUtils;
 	exports.WorkerManager = WorkerManager;
-	exports.Potree = Potree$1;
 	exports.PointAttribute = PointAttribute;
 	exports.PointAttributes = PointAttributes;
 	exports.PointAttributeNames = PointAttributeNames;

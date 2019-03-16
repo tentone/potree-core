@@ -1,5 +1,24 @@
 "use strict";
 
+export {
+	Global,
+	AttributeLocations,
+	Classification,
+	ClipTask,
+	ClipMethod,
+	PointSizeType,
+	PointShape,
+	PointColorType,
+	TreeType,
+	getBasePath,
+	loadPointCloud,
+	updateVisibility,
+	updatePointClouds,
+	updateVisibilityStructures,
+	shuffleArray,
+	paramThreeToGL
+} from "./Potree.js";
+
 export {BinaryHeap} from "./lib/BinaryHeap.js";
 
 export {LRU} from "./utils/LRU.js";
@@ -7,8 +26,13 @@ export {HelperUtils} from "./utils/HelperUtils.js";
 export {VersionUtils} from "./utils/VersionUtils.js";
 export {WorkerManager} from "./utils/WorkerManager.js";
 
-export {Potree} from "./Potree.js";
-export {PointAttribute, PointAttributes, PointAttributeNames, PointAttributeTypes} from "./PointAttributes.js";
+export {
+	PointAttribute,
+	PointAttributes,
+	PointAttributeNames,
+	PointAttributeTypes
+} from "./PointAttributes.js";
+
 export {Gradients} from "./Gradients.js";
 export {Points} from "./Points.js";
 export {Shader} from "./Shader.js";

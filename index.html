@@ -12,6 +12,7 @@
 		<script>
 			document.body.onload = function()
 			{
+
 				//three.js
 				var scene = new THREE.Scene();
 				var camera = new THREE.PerspectiveCamera(60, 1, 0.1, 10000);
@@ -79,6 +80,8 @@
 				points.material.opacity = 1.0;
 				points.material.wireframe = true;
 				scene.add(points);
+
+				Potree.Global.workerPath = "build/workers";
 
 				Potree.loadPointCloud(url, name, function(e)
 				{

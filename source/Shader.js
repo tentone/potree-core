@@ -1,7 +1,7 @@
 "use strict";
 
-import {WebGLTexture} from "WebGLTexture.js";
-import {AttributeLocations} from "Potree.js";
+import {WebGLTexture} from "./WebGLTexture.js";
+import {AttributeLocations} from "./Potree.js";
 
 class Shader
 {

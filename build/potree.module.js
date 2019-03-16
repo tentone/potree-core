@@ -1,6 +1,3 @@
-import { WebGLTexture as WebGLTexture$1 } from 'WebGLTexture.js';
-import { AttributeLocations as AttributeLocations$1 } from 'Potree.js';
-
 var PointAttributeNames =
 {
 	POSITION_CARTESIAN: 0, //float x, y, z,
@@ -8180,18 +8177,6 @@ function updateVisibilityStructures(pointclouds, camera, renderer)
 		priorityQueue: priorityQueue
 	};
 }
-function shuffleArray(array)
-{
-	for(var i = array.length - 1; i > 0; i--)
-	{
-		var j = Math.floor(Math.random() * (i + 1));
-		var temp = array[i];
-		array[i] = array[j];
-		array[j] = temp;
-	}
-}
-
-//Copied from three.js: WebGLRenderer.js
 function paramThreeToGL(gl, p)
 {
 	var extension;
@@ -8359,6 +8344,85 @@ class Points
 	}
 }
 
+class WebGLTexture
+{
+	constructor(gl, texture)
+	{
+		this.gl = gl;
+
+		this.texture = texture;
+		this.id = gl.createTexture();
+
+		this.target = gl.TEXTURE_2D;
+		this.version = -1;
+
+		this.update(texture);
+	}
+
+	update()
+	{
+		if(!this.texture.image)
+		{
+			this.version = this.texture.version;
+			return;
+		}
+
+		var gl = this.gl;
+		var texture = this.texture;
+
+		if(this.version === texture.version)
+		{
+			return;
+		}
+
+		this.target = gl.TEXTURE_2D;
+
+		gl.bindTexture(this.target, this.id);
+
+		var level = 0;
+		var internalFormat = Potree.paramThreeToGL(gl, texture.format);
+		var width = texture.image.width;
+		var height = texture.image.height;
+		var border = 0;
+		var srcFormat = internalFormat;
+		var srcType = Potree.paramThreeToGL(gl, texture.type);
+		var data;
+
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
+		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
+		gl.pixelStorei(gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
+
+		if(texture instanceof THREE.DataTexture)
+		{
+			data = texture.image.data;
+
+			gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+			gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
+			gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
+
+			gl.texImage2D(this.target, level, internalFormat, width, height, border, srcFormat, srcType, data);
+		}
+		else if(texture instanceof THREE.CanvasTexture)
+		{
+			data = texture.image;
+
+			gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, Potree.paramThreeToGL(gl, texture.wrapS));
+			gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, Potree.paramThreeToGL(gl, texture.wrapT));
+
+			gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
+			gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
+
+			gl.texImage2D(this.target, level, internalFormat, internalFormat, srcType, data);
+		}
+
+		gl.bindTexture(this.target, null);
+
+		this.version = texture.version;
+	}
+}
+
 class Shader
 {
 	constructor(gl, name, vsSource, fsSource)
@@ -8431,9 +8495,9 @@ class Shader
 			this.fs = gl.createShader(gl.FRAGMENT_SHADER);
 			this.program = gl.createProgram();
 
-			for(var name of Object.keys(AttributeLocations$1))
+			for(var name of Object.keys(AttributeLocations))
 			{
-				var location = AttributeLocations$1[name];
+				var location = AttributeLocations[name];
 				gl.bindAttribLocation(this.program, location, name);
 			}
 
@@ -8587,7 +8651,7 @@ class Shader
 		{
 			this.setUniformBoolean(name, value);
 		}
-		else if(value instanceof WebGLTexture$1)
+		else if(value instanceof WebGLTexture)
 		{
 			this.setUniformTexture(name, value);
 		}
@@ -8616,85 +8680,6 @@ class Shader
 		}
 
 		gl.uniform1i(location, value);
-	}
-}
-
-class WebGLTexture
-{
-	constructor(gl, texture)
-	{
-		this.gl = gl;
-
-		this.texture = texture;
-		this.id = gl.createTexture();
-
-		this.target = gl.TEXTURE_2D;
-		this.version = -1;
-
-		this.update(texture);
-	}
-
-	update()
-	{
-		if(!this.texture.image)
-		{
-			this.version = this.texture.version;
-			return;
-		}
-
-		var gl = this.gl;
-		var texture = this.texture;
-
-		if(this.version === texture.version)
-		{
-			return;
-		}
-
-		this.target = gl.TEXTURE_2D;
-
-		gl.bindTexture(this.target, this.id);
-
-		var level = 0;
-		var internalFormat = Potree.paramThreeToGL(gl, texture.format);
-		var width = texture.image.width;
-		var height = texture.image.height;
-		var border = 0;
-		var srcFormat = internalFormat;
-		var srcType = Potree.paramThreeToGL(gl, texture.type);
-		var data;
-
-		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
-		gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
-		gl.pixelStorei(gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
-
-		if(texture instanceof THREE.DataTexture)
-		{
-			data = texture.image.data;
-
-			gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-			gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-			gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
-			gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
-
-			gl.texImage2D(this.target, level, internalFormat, width, height, border, srcFormat, srcType, data);
-		}
-		else if(texture instanceof THREE.CanvasTexture)
-		{
-			data = texture.image;
-
-			gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, Potree.paramThreeToGL(gl, texture.wrapS));
-			gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, Potree.paramThreeToGL(gl, texture.wrapT));
-
-			gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
-			gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
-
-			gl.texImage2D(this.target, level, internalFormat, internalFormat, srcType, data);
-		}
-
-		gl.bindTexture(this.target, null);
-
-		this.version = texture.version;
 	}
 }
 
@@ -9733,4 +9718,4 @@ class Group extends BasicGroup
 	}
 }
 
-export { Global, AttributeLocations, Classification, ClipTask, ClipMethod, PointSizeType, PointShape, PointColorType, TreeType, getBasePath, loadPointCloud, updateVisibility, updatePointClouds, updateVisibilityStructures, shuffleArray, paramThreeToGL, BinaryHeap, LRU, HelperUtils, VersionUtils, WorkerManager, PointAttribute, PointAttributes, PointAttributeNames, PointAttributeTypes, Gradients, Points, Shader, WebGLTexture, WebGLBuffer, Shaders, DEM$1 as DEM, DEMNode, PointCloudTree, PointCloudArena4D, PointCloudOctree, PointCloudOctreeGeometry, PointCloudArena4DGeometry, PointCloudGreyhoundGeometry, PointCloudMaterial$1 as PointCloudMaterial, LASLoader, BinaryLoader, GreyhoundUtils$1 as GreyhoundUtils, GreyhoundLoader, GreyhoundBinaryLoader, POCLoader, LASLAZLoader, BasicGroup, Group };
+export { Global, AttributeLocations, Classification, ClipTask, ClipMethod, PointSizeType, PointShape, PointColorType, TreeType, getBasePath, loadPointCloud, updateVisibility, updatePointClouds, updateVisibilityStructures, paramThreeToGL, BinaryHeap, LRU, HelperUtils, VersionUtils, WorkerManager, PointAttribute, PointAttributes, PointAttributeNames, PointAttributeTypes, Gradients, Points, Shader, WebGLTexture, WebGLBuffer, Shaders, DEM$1 as DEM, DEMNode, PointCloudTree, PointCloudArena4D, PointCloudOctree, PointCloudOctreeGeometry, PointCloudArena4DGeometry, PointCloudGreyhoundGeometry, PointCloudMaterial$1 as PointCloudMaterial, LASLoader, BinaryLoader, GreyhoundUtils$1 as GreyhoundUtils, GreyhoundLoader, GreyhoundBinaryLoader, POCLoader, LASLAZLoader, BasicGroup, Group };

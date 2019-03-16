@@ -15,7 +15,6 @@ export {
 	updateVisibility,
 	updatePointClouds,
 	updateVisibilityStructures,
-	shuffleArray,
 	paramThreeToGL
 } from "./Potree.js";
 

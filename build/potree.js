@@ -1,8 +1,8 @@
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('WebGLTexture.js'), require('Potree.js')) :
-	typeof define === 'function' && define.amd ? define(['exports', 'WebGLTexture.js', 'Potree.js'], factory) :
-	(global = global || self, factory(global.Potree = {}, global.WebGLTexture_js, global.Potree_js));
-}(this, function (exports, WebGLTexture_js, Potree_js) { 'use strict';
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(global = global || self, factory(global.Potree = {}));
+}(this, function (exports) { 'use strict';
 
 	var PointAttributeNames =
 	{
@@ -8183,18 +8183,6 @@ void main()
 			priorityQueue: priorityQueue
 		};
 	}
-	function shuffleArray(array)
-	{
-		for(var i = array.length - 1; i > 0; i--)
-		{
-			var j = Math.floor(Math.random() * (i + 1));
-			var temp = array[i];
-			array[i] = array[j];
-			array[j] = temp;
-		}
-	}
-
-	//Copied from three.js: WebGLRenderer.js
 	function paramThreeToGL(gl, p)
 	{
 		var extension;
@@ -8362,6 +8350,85 @@ void main()
 		}
 	}
 
+	class WebGLTexture
+	{
+		constructor(gl, texture)
+		{
+			this.gl = gl;
+
+			this.texture = texture;
+			this.id = gl.createTexture();
+
+			this.target = gl.TEXTURE_2D;
+			this.version = -1;
+
+			this.update(texture);
+		}
+
+		update()
+		{
+			if(!this.texture.image)
+			{
+				this.version = this.texture.version;
+				return;
+			}
+
+			var gl = this.gl;
+			var texture = this.texture;
+
+			if(this.version === texture.version)
+			{
+				return;
+			}
+
+			this.target = gl.TEXTURE_2D;
+
+			gl.bindTexture(this.target, this.id);
+
+			var level = 0;
+			var internalFormat = Potree.paramThreeToGL(gl, texture.format);
+			var width = texture.image.width;
+			var height = texture.image.height;
+			var border = 0;
+			var srcFormat = internalFormat;
+			var srcType = Potree.paramThreeToGL(gl, texture.type);
+			var data;
+
+			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
+			gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
+			gl.pixelStorei(gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
+
+			if(texture instanceof THREE.DataTexture)
+			{
+				data = texture.image.data;
+
+				gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+				gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+				gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
+				gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
+
+				gl.texImage2D(this.target, level, internalFormat, width, height, border, srcFormat, srcType, data);
+			}
+			else if(texture instanceof THREE.CanvasTexture)
+			{
+				data = texture.image;
+
+				gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, Potree.paramThreeToGL(gl, texture.wrapS));
+				gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, Potree.paramThreeToGL(gl, texture.wrapT));
+
+				gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
+				gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
+
+				gl.texImage2D(this.target, level, internalFormat, internalFormat, srcType, data);
+			}
+
+			gl.bindTexture(this.target, null);
+
+			this.version = texture.version;
+		}
+	}
+
 	class Shader
 	{
 		constructor(gl, name, vsSource, fsSource)
@@ -8434,9 +8501,9 @@ void main()
 				this.fs = gl.createShader(gl.FRAGMENT_SHADER);
 				this.program = gl.createProgram();
 
-				for(var name of Object.keys(Potree_js.AttributeLocations))
+				for(var name of Object.keys(AttributeLocations))
 				{
-					var location = Potree_js.AttributeLocations[name];
+					var location = AttributeLocations[name];
 					gl.bindAttribLocation(this.program, location, name);
 				}
 
@@ -8590,7 +8657,7 @@ void main()
 			{
 				this.setUniformBoolean(name, value);
 			}
-			else if(value instanceof WebGLTexture_js.WebGLTexture)
+			else if(value instanceof WebGLTexture)
 			{
 				this.setUniformTexture(name, value);
 			}
@@ -8619,85 +8686,6 @@ void main()
 			}
 
 			gl.uniform1i(location, value);
-		}
-	}
-
-	class WebGLTexture
-	{
-		constructor(gl, texture)
-		{
-			this.gl = gl;
-
-			this.texture = texture;
-			this.id = gl.createTexture();
-
-			this.target = gl.TEXTURE_2D;
-			this.version = -1;
-
-			this.update(texture);
-		}
-
-		update()
-		{
-			if(!this.texture.image)
-			{
-				this.version = this.texture.version;
-				return;
-			}
-
-			var gl = this.gl;
-			var texture = this.texture;
-
-			if(this.version === texture.version)
-			{
-				return;
-			}
-
-			this.target = gl.TEXTURE_2D;
-
-			gl.bindTexture(this.target, this.id);
-
-			var level = 0;
-			var internalFormat = Potree.paramThreeToGL(gl, texture.format);
-			var width = texture.image.width;
-			var height = texture.image.height;
-			var border = 0;
-			var srcFormat = internalFormat;
-			var srcType = Potree.paramThreeToGL(gl, texture.type);
-			var data;
-
-			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
-			gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, texture.premultiplyAlpha);
-			gl.pixelStorei(gl.UNPACK_ALIGNMENT, texture.unpackAlignment);
-
-			if(texture instanceof THREE.DataTexture)
-			{
-				data = texture.image.data;
-
-				gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-				gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
-				gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
-				gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
-
-				gl.texImage2D(this.target, level, internalFormat, width, height, border, srcFormat, srcType, data);
-			}
-			else if(texture instanceof THREE.CanvasTexture)
-			{
-				data = texture.image;
-
-				gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, Potree.paramThreeToGL(gl, texture.wrapS));
-				gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, Potree.paramThreeToGL(gl, texture.wrapT));
-
-				gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
-				gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
-
-				gl.texImage2D(this.target, level, internalFormat, internalFormat, srcType, data);
-			}
-
-			gl.bindTexture(this.target, null);
-
-			this.version = texture.version;
 		}
 	}
 
@@ -9750,7 +9738,6 @@ void main()
 	exports.updateVisibility = updateVisibility;
 	exports.updatePointClouds = updatePointClouds;
 	exports.updateVisibilityStructures = updateVisibilityStructures;
-	exports.shuffleArray = shuffleArray;
 	exports.paramThreeToGL = paramThreeToGL;
 	exports.BinaryHeap = BinaryHeap;
 	exports.LRU = LRU;

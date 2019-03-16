@@ -580,19 +580,6 @@ function updateVisibilityStructures(pointclouds, camera, renderer)
 	};
 };
 
-function shuffleArray(array)
-{
-	for(var i = array.length - 1; i > 0; i--)
-	{
-		var j = Math.floor(Math.random() * (i + 1));
-		var temp = array[i];
-		array[i] = array[j];
-		array[j] = temp;
-	}
-};
-
-
-//Copied from three.js: WebGLRenderer.js
 function paramThreeToGL(gl, p)
 {
 	var extension;
@@ -714,12 +701,10 @@ export {
 	PointShape,
 	PointColorType,
 	TreeType,
-
 	getBasePath,
 	loadPointCloud,
 	updateVisibility,
 	updatePointClouds,
 	updateVisibilityStructures,
-	shuffleArray,
 	paramThreeToGL
 };

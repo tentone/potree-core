@@ -1,11 +1,11 @@
 "use strict";
 
-import {PointCloudEptGeometry, PointCloudEptGeometryNode} from "../pointcloud/PointCloudEptGeometry.js";
+import {PointCloudEptGeometry, PointCloudEptGeometryNode} from "../pointcloud/geometries/PointCloudEptGeometry.js";
 
 /**
  * @author Connor Manning
  */
-export class EptLoader
+class EptLoader
 {
 	static async load(file, callback)
 	{
@@ -22,3 +22,4 @@ export class EptLoader
 	}
 };
 
+export {EptLoader};

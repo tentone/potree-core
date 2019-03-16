@@ -2006,10 +2006,12 @@ LASLoader.prototype.readData = function(count, offset, skip)
 				count = Math.min(count, self.header.pointsCount - self.readOffset);
 				start = self.header.pointsOffset + self.readOffset * self.header.pointsStructSize;
 				var end = start + count * self.header.pointsStructSize;
-				res({
+				res(
+				{
 					buffer: self.arraybuffer.slice(start, end),
 					count: count,
-					hasMoreData: self.readOffset + count < self.header.pointsCount});
+					hasMoreData: self.readOffset + count < self.header.pointsCount
+				});
 				self.readOffset += count;
 			}
 			else
@@ -2019,7 +2021,8 @@ LASLoader.prototype.readData = function(count, offset, skip)
 				var pointsRead = 0;
 
 				var buf = new Uint8Array(bufferSize * self.header.pointsStructSize);
-				for(var i = 0 ; i < pointsToRead ; i ++)
+
+				for(var i = 0 ; i < pointsToRead ; i++)
 				{
 					if(i % skip === 0)
 					{
@@ -2033,7 +2036,8 @@ LASLoader.prototype.readData = function(count, offset, skip)
 					self.readOffset ++;
 				}
 
-				res({
+				res(
+				{
 					buffer: buf.buffer,
 					count: pointsRead,
 					hasMoreData: self.readOffset < self.header.pointsCount
@@ -2080,7 +2084,6 @@ var LAZLoader = function(arraybuffer)
 
 LAZLoader.prototype.open = function()
 {
-
 	// nothing needs to be done to open this file
 	var self = this;
 	return new Promise(function(res, rej)
@@ -2088,7 +2091,9 @@ LAZLoader.prototype.open = function()
 		self.dorr({type:"open", arraybuffer: self.arraybuffer}, function(r)
 		{
 			if(r.status !== 1)
+			{
 				return rej(new Error("Failed to open file"));
+			}
 
 			res(true);
 		});
@@ -2104,7 +2109,9 @@ LAZLoader.prototype.getHeader = function()
 		self.dorr({type:'header'}, function(r)
 		{
 			if(r.status !== 1)
+			{
 				return rej(new Error("Failed to get header"));
+			}
 
 			res(r.header);
 		});
@@ -2139,7 +2146,9 @@ LAZLoader.prototype.close = function()
 		self.dorr({type:'close'}, function(r)
 		{
 			if(r.status !== 1)
+			{
 				return rej(new Error("Failed to close file"));
+			}
 
 			res(true);
 		});
@@ -2206,6 +2215,29 @@ LASFile.prototype.readData = function(count, start, skip)
 LASFile.prototype.close = function()
 {
 	return this.loader.close();
+};
+
+// Decodes LAS records into points
+var LASDecoder$1 = function(buffer, pointFormatID, pointSize, pointsCount, scale, offset, mins, maxs)
+{
+	this.arrayb = buffer;
+	this.decoder = pointFormatReaders[pointFormatID];
+	this.pointsCount = pointsCount;
+	this.pointSize = pointSize;
+	this.scale = scale;
+	this.offset = offset;
+	this.mins = mins;
+	this.maxs = maxs;
+};
+
+LASDecoder$1.prototype.getPoint = function(index)
+{
+	if(index < 0 || index >= this.pointsCount)
+	{
+		throw new Error("Point index out of range");
+	}
+
+	return this.decoder(new DataView(this.arrayb, index * this.pointSize, this.pointSize));
 };
 
 /**
@@ -8954,6 +8986,637 @@ class GreyhoundUtils$1
 }
 
 /**
+ * laslaz code taken and adapted from plas.io js-laslaz
+ *	  http://plas.io/
+ *	https://github.com/verma/plasio
+ *
+ * Thanks to Uday Verma and Howard Butler
+ *
+ */
+class EptLaszipLoader
+{
+	load(node)
+	{
+		if(node.loaded) return;
+
+		var url = node.url() + ".laz";
+
+		var xhr = XHRFactory.createXMLHttpRequest();
+		xhr.open("GET", url, true);
+		xhr.responseType = "arraybuffer";
+		xhr.overrideMimeType("text/plain; charset=x-user-defined");
+		xhr.onreadystatechange = () =>
+		{
+			if(xhr.readyState === 4)
+			{
+				if(xhr.status === 200)
+				{
+					var buffer = xhr.response;
+					this.parse(node, buffer);
+				}
+				else
+				{
+					console.log("Failed " + url + ": " + xhr.status);
+				}
+			}
+		};
+
+		xhr.send(null);
+	}
+
+	parse(node, buffer)
+	{
+		var lf = new LASFile(buffer);
+		var handler = new EptLazBatcher(node);
+
+		lf.open()
+		.then(() =>
+		{
+			lf.isOpen = true;
+			return lf.getHeader();
+		})
+		.then((header) =>
+		{
+			var i = 0;
+			var np = header.pointsCount;
+
+			var toArray = (v) => [v.x, v.y, v.z];
+			var mins = toArray(node.key.b.min);
+			var maxs = toArray(node.key.b.max);
+
+			var read = () =>
+			{
+				var p = lf.readData(1000000, 0, 1);
+				return p.then(function (data)
+				{
+					var d = new LASDecoder$1(
+							data.buffer,
+							header.pointsFormatId,
+							header.pointsStructSize,
+							data.count,
+							header.scale,
+							header.offset,
+							mins,
+							maxs);
+					d.extraBytes = header.extraBytes;
+					d.pointsFormatId = header.pointsFormatId;
+					handler.push(d);
+
+					i += data.count;
+
+					if(data.hasMoreData)
+					{
+						return read();
+					}
+					else
+					{
+						header.totalRead = i;
+						header.versionAsString = lf.versionAsString;
+						header.isCompressed = lf.isCompressed;
+						return null;
+					}
+				});
+			};
+
+			return read();
+		})
+		.then(() => lf.close())
+		.then(() => lf.isOpen = false)
+		.catch((err) =>
+		{
+			console.log("Error reading LAZ:", err);
+			if(lf.isOpen)
+			{
+				lf.close().then(() =>
+				{
+					lf.isOpen = false;
+					throw err;
+				});
+			}
+			else throw err;
+		});
+	}
+}
+class EptLazBatcher
+{
+	constructor(node)
+	{
+		this.node = node;
+	}
+
+	push(las)
+	{
+		var workerPath = Global.scriptPath + "/workers/EptLaszipDecoderWorker.js";
+		var worker = Global.workerPool.getWorker(workerPath);
+
+		worker.onmessage = (e) =>
+		{
+			var g = new THREE.BufferGeometry();
+			var numPoints = las.pointsCount;
+
+			var positions = new Float32Array(e.data.position);
+			var colors = new Uint8Array(e.data.color);
+
+			var intensities = new Float32Array(e.data.intensity);
+			var classifications = new Uint8Array(e.data.classification);
+			var returnNumbers = new Uint8Array(e.data.returnNumber);
+			var numberOfReturns = new Uint8Array(e.data.numberOfReturns);
+			var pointSourceIDs = new Uint16Array(e.data.pointSourceID);
+			var indices = new Uint8Array(e.data.indices);
+
+			g.addAttribute("position", new THREE.BufferAttribute(positions, 3));
+			g.addAttribute("color", new THREE.BufferAttribute(colors, 4, true));
+			g.addAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
+			g.addAttribute("classification", new THREE.BufferAttribute(classifications, 1));
+			g.addAttribute("returnNumber", new THREE.BufferAttribute(returnNumbers, 1));
+			g.addAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
+			g.addAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
+			g.addAttribute("indices", new THREE.BufferAttribute(indices, 4));
+			g.attributes.indices.normalized = true;
+
+			var tightBoundingBox = new THREE.Box3(
+				new THREE.Vector3().fromArray(e.data.tightBoundingBox.min),
+				new THREE.Vector3().fromArray(e.data.tightBoundingBox.max)
+			);
+
+			this.node.doneLoading(g, tightBoundingBox, numPoints, new THREE.Vector3(...e.data.mean));
+
+			Global.workerPool.returnWorker(workerPath, worker);
+		};
+
+		var message = {
+			buffer: las.arrayb,
+			numPoints: las.pointsCount,
+			pointSize: las.pointSize,
+			pointFormatID: las.pointsFormatId,
+			scale: las.scale,
+			offset: las.offset,
+			mins: las.mins,
+			maxs: las.maxs
+		};
+
+		worker.postMessage(message, [message.buffer]);
+	};
+}
+
+class EptBinaryLoader
+{
+	load(node)
+	{
+		if(node.loaded) return;
+
+		var url = node.url() + ".bin";
+
+		var xhr = XHRFactory.createXMLHttpRequest();
+		xhr.open("GET", url, true);
+		xhr.responseType = "arraybuffer";
+		xhr.overrideMimeType("text/plain; charset=x-user-defined");
+		xhr.onreadystatechange = () =>
+		{
+			if(xhr.readyState === 4)
+			{
+				if(xhr.status === 200)
+				{
+					var buffer = xhr.response;
+					this.parse(node, buffer);
+				}
+				else
+				{
+					console.log("Failed " + url + ": " + xhr.status);
+				}
+			}
+		};
+
+		try
+		{
+			xhr.send(null);
+		}
+		catch (e)
+		{
+			console.log("Failed request: " + e);
+		}
+	}
+
+	parse(node, buffer)
+	{
+		var workerPath = Global.scriptPath + "/workers/EptBinaryDecoderWorker.js";
+		var worker = Global.workerPool.getWorker(workerPath);
+
+		worker.onmessage = function(e)
+		{
+			var g = new THREE.BufferGeometry();
+			var numPoints = e.data.numPoints;
+
+			var position = new Float32Array(e.data.position);
+			g.addAttribute("position", new THREE.BufferAttribute(position, 3));
+
+			var indices = new Uint8Array(e.data.indices);
+			g.addAttribute("indices", new THREE.BufferAttribute(indices, 4));
+
+			if(e.data.color)
+			{
+				var color = new Uint8Array(e.data.color);
+				g.addAttribute("color", new THREE.BufferAttribute(color, 4, true));
+			}
+			if(e.data.intensity)
+			{
+				var intensity = new Float32Array(e.data.intensity);
+				g.addAttribute("intensity", new THREE.BufferAttribute(intensity, 1));
+			}
+			if(e.data.classification)
+			{
+				var classification = new Uint8Array(e.data.classification);
+				g.addAttribute("classification", new THREE.BufferAttribute(classification, 1));
+			}
+			if(e.data.returnNumber)
+			{
+				var returnNumber = new Uint8Array(e.data.returnNumber);
+				g.addAttribute("returnNumber", new THREE.BufferAttribute(returnNumber, 1));
+			}
+			if(e.data.numberOfReturns)
+			{
+				var numberOfReturns = new Uint8Array(e.data.numberOfReturns);
+				g.addAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
+			}
+			if(e.data.pointSourceId)
+			{
+				var pointSourceId = new Uint16Array(e.data.pointSourceId);
+				g.addAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceId, 1));
+			}
+
+			g.attributes.indices.normalized = true;
+
+			var tightBoundingBox = new THREE.Box3(
+				new THREE.Vector3().fromArray(e.data.tightBoundingBox.min),
+				new THREE.Vector3().fromArray(e.data.tightBoundingBox.max)
+			);
+
+			node.doneLoading(g, tightBoundingBox, numPoints, new THREE.Vector3(...e.data.mean));
+
+			Global.workerPool.returnWorker(workerPath, worker);
+		};
+
+		var toArray = (v) => [v.x, v.y, v.z];
+		var message = {
+			buffer: buffer,
+			schema: node.ept.schema,
+			scale: node.ept.eptScale,
+			offset: node.ept.eptOffset,
+			mins: toArray(node.key.b.min)
+		};
+
+		worker.postMessage(message, [message.buffer]);
+	}
+}
+
+class U
+{
+	static toVector3(v, offset)
+	{
+		return new THREE.Vector3().fromArray(v, offset || 0);
+	}
+
+	static toBox3(b)
+	{
+		return new THREE.Box3(U.toVector3(b), U.toVector3(b, 3));
+	};
+
+	static findDim(schema, name)
+	{
+		var dim = schema.find((dim) => dim.name == name);
+		if(!dim) throw new Error("Failed to find " + name + " in schema");
+		return dim;
+	}
+
+	static sphereFrom(b)
+	{
+		return b.getBoundingSphere(new THREE.Sphere());
+	}
+}
+class PointCloudEptGeometry
+{
+	constructor(url, info)
+	{
+		let version = info.version;
+		let schema = info.schema;
+		let bounds = info.bounds;
+		let boundsConforming = info.boundsConforming;
+
+		let xyz = [
+			U.findDim(schema, "X"),
+			U.findDim(schema, "Y"),
+			U.findDim(schema, "Z")
+		];
+		let scale = xyz.map((d) => d.scale || 1);
+		let offset = xyz.map((d) => d.offset || 0);
+
+		this.eptScale = U.toVector3(scale);
+		this.eptOffset = U.toVector3(offset);
+
+		this.url = url;
+		this.info = info;
+		this.type = "ept";
+
+		this.schema = schema;
+		this.span = info.span || info.ticks;
+		this.boundingBox = U.toBox3(bounds);
+		this.tightBoundingBox = U.toBox3(boundsConforming);
+		this.offset = U.toVector3([0, 0, 0]);
+		this.boundingSphere = U.sphereFrom(this.boundingBox);
+		this.tightBoundingSphere = U.sphereFrom(this.tightBoundingBox);
+		this.version = new VersionUtils("1.6");
+
+		this.projection = null;
+		this.fallbackProjection = null;
+
+		if(info.srs && info.srs.horizontal)
+		{
+			this.projection = info.srs.authority + ":" + info.srs.horizontal;
+		}
+
+		if(info.srs.wkt)
+		{
+			if(!this.projection) this.projection = info.srs.wkt;
+			else this.fallbackProjection = info.srs.wkt;
+		}
+
+		this.pointAttributes = "LAZ";
+		this.spacing =
+			(this.boundingBox.max.x - this.boundingBox.min.x) / this.span;
+
+		let hierarchyType = info.hierarchyType || "json";
+
+		let dataType = info.dataType || "laszip";
+		this.loader = dataType == "binary" ? new EptBinaryLoader() : new EptLaszipLoader();
+	}
+}
+class EptKey
+{
+	constructor(ept, b, d, x, y, z)
+	{
+		this.ept = ept;
+		this.b = b;
+		this.d = d;
+		this.x = x || 0;
+		this.y = y || 0;
+		this.z = z || 0;
+	}
+
+	name()
+	{
+		return this.d + "-" + this.x + "-" + this.y + "-" + this.z;
+	}
+
+	step(a, b, c)
+	{
+		let min = this.b.min.clone();
+		let max = this.b.max.clone();
+		let dst = new THREE.Vector3().subVectors(max, min);
+
+		if(a) min.x += dst.x / 2;
+		else max.x -= dst.x / 2;
+
+		if(b) min.y += dst.y / 2;
+		else max.y -= dst.y / 2;
+
+		if(c) min.z += dst.z / 2;
+		else max.z -= dst.z / 2;
+
+		return new EptKey(
+				this.ept,
+				new THREE.Box3(min, max),
+				this.d + 1,
+				this.x * 2 + a,
+				this.y * 2 + b,
+				this.z * 2 + c);
+	}
+
+	children()
+	{
+		var result = [];
+		for (var a = 0; a < 2; ++a)
+		{
+			for (var b = 0; b < 2; ++b)
+			{
+				for (var c = 0; c < 2; ++c)
+				{
+					var add = this.step(a, b, c).name();
+					if(!result.includes(add)) result = result.concat(add);
+				}
+			}
+		}
+		return result;
+	}
+}
+
+class PointCloudEptGeometryNode extends PointCloudTreeNode
+{
+	constructor(ept, b, d, x, y, z) {
+		super();
+
+		this.ept = ept;
+		this.key = new EptKey(
+				this.ept,
+				b || this.ept.boundingBox,
+				d || 0,
+				x,
+				y,
+				z);
+
+		this.id = PointCloudEptGeometryNode.IDCount++;
+		this.geometry = null;
+		this.boundingBox = this.key.b;
+		this.tightBoundingBox = this.boundingBox;
+		this.spacing = this.ept.spacing / Math.pow(2, this.key.d);
+		this.boundingSphere = U.sphereFrom(this.boundingBox);
+
+		// These are set during hierarchy loading.
+		this.hasChildren = false;
+		this.children = { };
+		this.numPoints = -1;
+
+		this.level = this.key.d;
+		this.loaded = false;
+		this.loading = false;
+		this.oneTimeDisposeHandlers = [];
+
+		let k = this.key;
+		this.name = this.toPotreeName(k.d, k.x, k.y, k.z);
+		this.index = parseInt(this.name.charAt(this.name.length - 1));
+	}
+
+	isGeometryNode(){return true;}
+	getLevel(){return this.level;}
+	isTreeNode(){return false;}
+	isLoaded(){return this.loaded;}
+	getBoundingSphere(){return this.boundingSphere;}
+	getBoundingBox(){return this.boundingBox;}
+	url(){return this.ept.url + "ept-data/" + this.filename();}
+	getNumPoints(){return this.numPoints;}
+	filename(){return this.key.name();}
+
+	getChildren()
+	{
+		let children = [];
+
+		for (let i = 0; i < 8; i++) {
+			if(this.children[i]) {
+				children.push(this.children[i]);
+			}
+		}
+
+		return children;
+	}
+
+	addChild(child)
+	{
+		this.children[child.index] = child;
+		child.parent = this;
+	}
+
+	load()
+	{
+		if(this.loaded || this.loading) return;
+		if(Global.numNodesLoading >= Global.maxNodesLoading) return;
+
+		this.loading = true;
+		++Global.numNodesLoading;
+
+		if(this.numPoints == -1) this.loadHierarchy();
+		this.loadPoints();
+	}
+
+	loadPoints()
+	{
+		this.ept.loader.load(this);
+	}
+
+	async loadHierarchy()
+	{
+		let nodes = { };
+		nodes[this.filename()] = this;
+		this.hasChildren = false;
+
+		let eptHierarchyFile = `${this.ept.url}ept-hierarchy/${this.filename()}.json`;
+
+		let response = await fetch(eptHierarchyFile);
+		let hier = await response.json();
+
+		// Since we want to traverse top-down, and 10 comes
+		// lexicographically before 9 (for example), do a deep sort.
+		var keys = Object.keys(hier).sort((a, b) => {
+			let [da, xa, ya, za] = a.split("-").map((n) => parseInt(n, 10));
+			let [db, xb, yb, zb] = b.split("-").map((n) => parseInt(n, 10));
+			if(da < db) return -1; if(da > db) return 1;
+			if(xa < xb) return -1; if(xa > xb) return 1;
+			if(ya < yb) return -1; if(ya > yb) return 1;
+			if(za < zb) return -1; if(za > zb) return 1;
+			return 0;
+		});
+
+		keys.forEach((v) => {
+			let [d, x, y, z] = v.split("-").map((n) => parseInt(n, 10));
+			let a = x & 1, b = y & 1, c = z & 1;
+			let parentName =
+				(d - 1) + "-" + (x >> 1) + "-" + (y >> 1) + "-" + (z >> 1);
+
+			let parentNode = nodes[parentName];
+			if(!parentNode) return;
+			parentNode.hasChildren = true;
+
+			let key = parentNode.key.step(a, b, c);
+
+			let node = new PointCloudEptGeometryNode(
+					this.ept,
+					key.b,
+					key.d,
+					key.x,
+					key.y,
+					key.z);
+
+			node.level = d;
+			node.numPoints = hier[v];
+
+			parentNode.addChild(node);
+			nodes[key.name()] = node;
+		});
+	}
+
+	doneLoading(bufferGeometry, tightBoundingBox, np, mean)
+	{
+		bufferGeometry.boundingBox = this.boundingBox;
+		this.geometry = bufferGeometry;
+		this.tightBoundingBox = tightBoundingBox;
+		this.numPoints = np;
+		this.mean = mean;
+		this.loaded = true;
+		this.loading = false;
+		--Global.numNodesLoading;
+	}
+
+	toPotreeName(d, x, y, z)
+	{
+		var name = "r";
+
+		for (var i = 0; i < d; ++i)
+		{
+			var shift = d - i - 1;
+			var mask = 1 << shift;
+			var step = 0;
+
+			if(x & mask) step += 4;
+			if(y & mask) step += 2;
+			if(z & mask) step += 1;
+
+			name += step;
+		}
+
+		return name;
+	}
+
+	dispose()
+	{
+		if(this.geometry && this.parent != null)
+		{
+			this.geometry.dispose();
+			this.geometry = null;
+			this.loaded = false;
+
+			// this.dispatchEvent( { type: "dispose" } );
+			for (let i = 0; i < this.oneTimeDisposeHandlers.length; i++)
+			{
+				let handler = this.oneTimeDisposeHandlers[i];
+				handler();
+			}
+			
+			this.oneTimeDisposeHandlers = [];
+		}
+	}
+}
+
+PointCloudEptGeometryNode.IDCount = 0;
+
+/**
+ * @author Connor Manning
+ */
+class EptLoader
+{
+	static async load(file, callback)
+	{
+		var response = await fetch(file);
+		var json = await response.json();
+		var url = file.substr(0, file.lastIndexOf("ept.json"));
+
+		var geometry = new PointCloudEptGeometry(url, json);
+		var root = new PointCloudEptGeometryNode(geometry);
+		geometry.root = root;
+		geometry.root.load();
+
+		callback(geometry);
+	}
+}
+
+/**
  * Potree object is a wrapper to use Potree alongside other THREE based frameworks.
  * 
  * The object can be used a normal Object3D.
@@ -9757,4 +10420,4 @@ class Group extends BasicGroup
 	}
 }
 
-export { Global, AttributeLocations, Classification, ClipTask, ClipMethod, PointSizeType$1 as PointSizeType, PointShape, PointColorType, TreeType$1 as TreeType, loadPointCloud, updateVisibility, updatePointClouds, updateVisibilityStructures, paramThreeToGL, BinaryHeap, LRU, HelperUtils, VersionUtils, WorkerManager, PointAttribute, PointAttributes, PointAttributeNames, PointAttributeTypes, Gradients, Points, Shader, WebGLTexture, WebGLBuffer, Shaders, DEM$1 as DEM, DEMNode, PointCloudTree, PointCloudArena4D, PointCloudOctree, PointCloudOctreeGeometry, PointCloudArena4DGeometry, PointCloudGreyhoundGeometry, PointCloudMaterial$1 as PointCloudMaterial, LASLoader, BinaryLoader, GreyhoundUtils$1 as GreyhoundUtils, GreyhoundLoader, GreyhoundBinaryLoader, POCLoader, LASLAZLoader, BasicGroup, Group };
+export { Global, AttributeLocations, Classification, ClipTask, ClipMethod, PointSizeType$1 as PointSizeType, PointShape, PointColorType, TreeType$1 as TreeType, loadPointCloud, updateVisibility, updatePointClouds, updateVisibilityStructures, paramThreeToGL, BinaryHeap, LRU, HelperUtils, VersionUtils, WorkerManager, PointAttribute, PointAttributes, PointAttributeNames, PointAttributeTypes, Gradients, Points, Shader, WebGLTexture, WebGLBuffer, Shaders, DEM$1 as DEM, DEMNode, PointCloudTree, PointCloudArena4D, PointCloudOctree, PointCloudOctreeGeometry, PointCloudArena4DGeometry, PointCloudGreyhoundGeometry, PointCloudMaterial$1 as PointCloudMaterial, LASLoader, BinaryLoader, GreyhoundUtils$1 as GreyhoundUtils, GreyhoundLoader, GreyhoundBinaryLoader, POCLoader, LASLAZLoader, EptLaszipLoader, EptBinaryLoader, EptLoader, BasicGroup, Group };

@@ -51,6 +51,7 @@ export {PointCloudGreyhoundGeometry} from "./pointcloud/geometries/PointCloudGre
 
 export {PointCloudMaterial} from "./pointcloud/materials/PointCloudMaterial.js";
 
+
 export {LASLoader} from "./loaders/LASLoader.js";
 export {BinaryLoader} from "./loaders/BinaryLoader.js";
 export {GreyhoundUtils} from "./loaders/GreyhoundUtils.js";
@@ -58,6 +59,11 @@ export {GreyhoundLoader} from "./loaders/GreyhoundLoader.js";
 export {GreyhoundBinaryLoader} from "./loaders/GreyhoundBinaryLoader.js";
 export {POCLoader} from "./loaders/POCLoader.js";
 export {LASLAZLoader} from "./loaders/LASLAZLoader.js";
+
+
+export {EptLaszipLoader} from "./loaders/ept/EptLaszipLoader.js";
+export {EptBinaryLoader} from "./loaders/ept/EptBinaryLoader.js";
+export {EptLoader} from "./loaders/EptLoader.js";
 
 export {BasicGroup} from "./objects/BasicGroup.js";
 export {Group} from "./objects/Group.js";

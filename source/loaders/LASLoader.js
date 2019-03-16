@@ -129,10 +129,12 @@ LASLoader.prototype.readData = function(count, offset, skip)
 				count = Math.min(count, self.header.pointsCount - self.readOffset);
 				start = self.header.pointsOffset + self.readOffset * self.header.pointsStructSize;
 				var end = start + count * self.header.pointsStructSize;
-				res({
+				res(
+				{
 					buffer: self.arraybuffer.slice(start, end),
 					count: count,
-					hasMoreData: self.readOffset + count < self.header.pointsCount});
+					hasMoreData: self.readOffset + count < self.header.pointsCount
+				});
 				self.readOffset += count;
 			}
 			else
@@ -142,7 +144,8 @@ LASLoader.prototype.readData = function(count, offset, skip)
 				var pointsRead = 0;
 
 				var buf = new Uint8Array(bufferSize * self.header.pointsStructSize);
-				for(var i = 0 ; i < pointsToRead ; i ++)
+
+				for(var i = 0 ; i < pointsToRead ; i++)
 				{
 					if(i % skip === 0)
 					{
@@ -156,7 +159,8 @@ LASLoader.prototype.readData = function(count, offset, skip)
 					self.readOffset ++;
 				}
 
-				res({
+				res(
+				{
 					buffer: buf.buffer,
 					count: pointsRead,
 					hasMoreData: self.readOffset < self.header.pointsCount
@@ -203,7 +207,6 @@ var LAZLoader = function(arraybuffer)
 
 LAZLoader.prototype.open = function()
 {
-
 	// nothing needs to be done to open this file
 	var self = this;
 	return new Promise(function(res, rej)
@@ -211,7 +214,9 @@ LAZLoader.prototype.open = function()
 		self.dorr({type:"open", arraybuffer: self.arraybuffer}, function(r)
 		{
 			if(r.status !== 1)
+			{
 				return rej(new Error("Failed to open file"));
+			}
 
 			res(true);
 		});
@@ -227,7 +232,9 @@ LAZLoader.prototype.getHeader = function()
 		self.dorr({type:'header'}, function(r)
 		{
 			if(r.status !== 1)
+			{
 				return rej(new Error("Failed to get header"));
+			}
 
 			res(r.header);
 		});
@@ -262,7 +269,9 @@ LAZLoader.prototype.close = function()
 		self.dorr({type:'close'}, function(r)
 		{
 			if(r.status !== 1)
+			{
 				return rej(new Error("Failed to close file"));
+			}
 
 			res(true);
 		});

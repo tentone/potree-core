@@ -151,7 +151,6 @@ class EptLazBatcher
 			g.addAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
 			g.addAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
 			g.addAttribute("indices", new THREE.BufferAttribute(indices, 4));
-
 			g.attributes.indices.normalized = true;
 
 			var tightBoundingBox = new THREE.Box3(

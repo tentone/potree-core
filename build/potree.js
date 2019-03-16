@@ -4,6 +4,42 @@
 	(global = global || self, factory(global.Potree = {}));
 }(this, function (exports) { 'use strict';
 
+	function getBasePath()
+	{
+		if(document.currentScript.src)
+		{
+			var scriptPath = new URL(document.currentScript.src + "/..").href;
+
+			if(scriptPath.slice(-1) === "/")
+			{
+				scriptPath = scriptPath.slice(0, -1);
+			}
+
+			return scriptPath;
+		}
+		else
+		{
+			console.error("Potree: Was unable to find its script path using document.currentScript.");
+		}
+
+		return "";
+	}
+
+	var Global = 
+	{
+		debug: {},
+		workerPath: getBasePath(),
+		maxNodesLoadGPUFrame: 20,
+		maxDEMLevel: 0,
+		maxNodesLoading: navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4,
+		pointLoadLimit: 1e10,
+		numNodesLoading: 0,
+		measureTimings: false,
+		workerPool: new WorkerManager(),
+		lru: new LRU(),
+		pointcloudTransformVersion: undefined
+	};
+
 	var PointAttributeNames =
 	{
 		POSITION_CARTESIAN: 0, //float x, y, z,
@@ -176,7 +212,7 @@
 	/**
 	 * The worker manager is responsible for creating and managing worker instances.
 	 */
-	class WorkerManager
+	class WorkerManager$1
 	{
 		constructor()
 		{
@@ -198,7 +234,7 @@
 				return this.workers[type].pop();
 			}
 			
-			return new Worker(Global.workerPath + WorkerManager.URLS[type]);
+			return new Worker(Global.workerPath + WorkerManager$1.URLS[type]);
 		}
 
 		/**
@@ -233,13 +269,13 @@
 			}
 		}
 	}
-	WorkerManager.BINARY_DECODER = 0;
-	WorkerManager.LAS_LAZ = 1;
-	WorkerManager.LAS_DECODER = 2;
-	WorkerManager.GREYHOUND = 3;
-	WorkerManager.DEM = 4;
+	WorkerManager$1.BINARY_DECODER = 0;
+	WorkerManager$1.LAS_LAZ = 1;
+	WorkerManager$1.LAS_DECODER = 2;
+	WorkerManager$1.GREYHOUND = 3;
+	WorkerManager$1.DEM = 4;
 
-	WorkerManager.URLS = 
+	WorkerManager$1.URLS = 
 	[
 		"/workers/BinaryDecoderWorker.js",
 		"/workers/LASLAZWorker.js",
@@ -606,7 +642,7 @@
 
 			var self = this;
 
-			Global.workerPool.runTask(WorkerManager.DEM, function(e)
+			Global.workerPool.runTask(WorkerManager$1.DEM, function(e)
 			{
 				var data = new Float32Array(e.data.dem.data);
 
@@ -1020,6 +1056,13 @@
 						{};
 						callback(that, greyhoundHierarchy);
 					}
+					else
+					{
+						console.log(
+							"Failed to load file! HTTP status:", xhr.status,
+							"file:", hurl
+						);
+					}
 				}
 			};
 
@@ -1131,6 +1174,10 @@
 						var buffer = xhr.response;
 						self.parse(node, buffer);
 					}
+					else
+					{
+						console.log("Potree: Failed to load file.", xhr, url);
+					}
 				}
 			};
 
@@ -1162,7 +1209,7 @@
 				normalize: node.pcoGeometry.normalize
 			};
 
-			Global.workerPool.runTask(WorkerManager.GREYHOUND, function(e)
+			Global.workerPool.runTask(WorkerManager$1.GREYHOUND, function(e)
 			{
 				var data = e.data;
 				var buffers = data.attributeBuffers;
@@ -1402,6 +1449,7 @@
 		}
 		catch(e)
 		{
+			console.log("Potree: Loading failed.", url, e);
 			callback();
 		}
 	};
@@ -1553,7 +1601,7 @@
 				name: node.name
 			};
 
-			Global.workerPool.runTask(WorkerManager.BINARY_DECODER, function(e)
+			Global.workerPool.runTask(WorkerManager$1.BINARY_DECODER, function(e)
 			{
 				var data = e.data;
 				var buffers = data.attributeBuffers;
@@ -1810,7 +1858,7 @@
 		{
 			self.nextCB = cb;
 			
-			Potree.Global.workerPool.runTask(WorkerManager.LAS_LAZ, function(e)
+			Global.workerPool.runTask(WorkerManager$1.LAS_LAZ, function(e)
 			{
 				if(self.nextCB !== null)
 				{
@@ -2003,6 +2051,10 @@
 						var buffer = xhr.response;
 						this.parse(node, buffer);
 					}
+					else
+					{
+						console.log("Potree: Failed to load file! HTTP status: " + xhr.status + ", file: " + url);
+					}
 				}
 			};
 
@@ -2021,6 +2073,7 @@
 					return lf;
 				}).catch(msg =>
 				{
+					console.log("Potree: Failed to open file.");
 				}).then(lf =>
 				{
 					return lf.getHeader().then(function(h)
@@ -2120,7 +2173,7 @@
 				maxs: lasBuffer.maxs
 			};
 
-			Global.workerPool.runTask(WorkerManager.LAS_DECODER, function(e)
+			Global.workerPool.runTask(WorkerManager$1.LAS_DECODER, function(e)
 			{
 				var geometry = new THREE.BufferGeometry();
 				var numPoints = lasBuffer.pointsCount;
@@ -2427,6 +2480,7 @@
 						}
 						else
 						{
+							console.log("Failed to load file! HTTP status: " + xhr.status + ", file: " + hurl);
 							Global.numNodesLoading--;
 						}
 					}
@@ -2604,6 +2658,8 @@
 		}
 		catch(e)
 		{
+			console.log("loading failed: \"" + url + "\"");
+			console.log(e);
 
 			callback();
 		}
@@ -2677,7 +2733,7 @@
 	 *
 	 * @class LRU
 	 */
-	function LRU()
+	function LRU$1()
 	{
 		//the least recently used item
 		this.first = null;
@@ -2696,12 +2752,12 @@
 	 *
 	 * @returns {Number}
 	 */
-	LRU.prototype.size = function()
+	LRU$1.prototype.size = function()
 	{
 		return this.elements;
 	};
 
-	LRU.prototype.contains = function(node)
+	LRU$1.prototype.contains = function(node)
 	{
 		return this.items[node.id] == null;
 	};
@@ -2711,7 +2767,7 @@
 	 *
 	 * @param node
 	 */
-	LRU.prototype.touch = function(node)
+	LRU$1.prototype.touch = function(node)
 	{
 		if(!node.loaded)
 		{
@@ -2771,7 +2827,7 @@
 		}
 	};
 
-	LRU.prototype.remove = function(node)
+	LRU$1.prototype.remove = function(node)
 	{
 		var lruItem = this.items[node.id];
 
@@ -2807,7 +2863,7 @@
 		}
 	};
 
-	LRU.prototype.getLRUItem = function()
+	LRU$1.prototype.getLRUItem = function()
 	{
 		if(this.first === null)
 		{
@@ -2817,7 +2873,7 @@
 		return this.first.node;
 	};
 
-	LRU.prototype.freeMemory = function()
+	LRU$1.prototype.freeMemory = function()
 	{
 		if(this.elements <= 1)
 		{
@@ -2832,7 +2888,7 @@
 		}
 	};
 
-	LRU.prototype.disposeDescendants = function(node)
+	LRU$1.prototype.disposeDescendants = function(node)
 	{
 		var stack = [node];
 
@@ -2856,7 +2912,7 @@
 		}
 	};
 
-	LRU.prototype.toString = function()
+	LRU$1.prototype.toString = function()
 	{
 		var string = "{ ";
 		var curr = this.first;
@@ -3059,9 +3115,9 @@
 			{
 				vertexColors: THREE.VertexColors,
 				size: 0.05,
-				treeType: Potree.TreeType.KDTREE
+				treeType: TreeType.KDTREE
 			});
-			this.material.sizeType = Potree.PointSizeType.ATTENUATED;
+			this.material.sizeType = PointSizeType.ATTENUATED;
 			this.material.size = 0.05;
 			this.profileRequests = [];
 			this.name = "";
@@ -3316,7 +3372,7 @@
 				var scene = new THREE.Scene();
 
 				var material = new PointCloudMaterial();
-				material.pointColorType = Potree.PointColorType.POINT_INDEX;
+				material.pointColorType = PointColorType.POINT_INDEX;
 
 				var renderTarget = new THREE.WebGLRenderTarget(
 					1, 1,
@@ -3347,9 +3403,9 @@
 				if(params.pickClipped)
 				{
 					pickMaterial.clipBoxes = this.material.clipBoxes;
-					if(this.material.clipTask === Potree.ClipTask.HIGHLIGHT)
+					if(this.material.clipTask === ClipTask.HIGHLIGHT)
 					{
-						pickMaterial.clipTask = Potree.ClipTask.NONE;
+						pickMaterial.clipTask = ClipTask.NONE;
 					}
 					else
 					{
@@ -3598,7 +3654,7 @@
 		{
 			if(this.pcoGeometry.root)
 			{
-				return Potree.Global.numNodesLoading > 0 ? 0 : 1;
+				return Global.numNodesLoading > 0 ? 0 : 1;
 			}
 			else
 			{
@@ -4632,9 +4688,9 @@ void main()
 			var pointSize = getValid(parameters.size, 1.0);
 			var minSize = getValid(parameters.minSize, 2.0);
 			var maxSize = getValid(parameters.maxSize, 50.0);
-			var treeType = getValid(parameters.treeType, TreeType.OCTREE);
+			var treeType = getValid(parameters.treeType, TreeType$1.OCTREE);
 
-			this._pointSizeType = PointSizeType.FIXED;
+			this._pointSizeType = PointSizeType$1.FIXED;
 			this._shape = PointShape.SQUARE;
 			this._pointColorType = PointColorType.RGB;
 			this._useClipBox = false;
@@ -5037,15 +5093,15 @@ void main()
 		{
 			var defines = [];
 
-			if(this.pointSizeType === PointSizeType.FIXED)
+			if(this.pointSizeType === PointSizeType$1.FIXED)
 			{
 				defines.push("#define fixed_point_size");
 			}
-			else if(this.pointSizeType === PointSizeType.ATTENUATED)
+			else if(this.pointSizeType === PointSizeType$1.ATTENUATED)
 			{
 				defines.push("#define attenuated_point_size");
 			}
-			else if(this.pointSizeType === PointSizeType.ADAPTIVE)
+			else if(this.pointSizeType === PointSizeType$1.ADAPTIVE)
 			{
 				defines.push("#define adaptive_point_size");
 			}
@@ -5129,11 +5185,11 @@ void main()
 			{
 				defines.push("#define color_type_composite");
 			}
-			if(this._treeType === TreeType.OCTREE)
+			if(this._treeType === TreeType$1.OCTREE)
 			{
 				defines.push("#define tree_type_octree");
 			}
-			else if(this._treeType === TreeType.KDTREE)
+			else if(this._treeType === TreeType$1.KDTREE)
 			{
 				defines.push("#define tree_type_kdtree");
 			}
@@ -6585,13 +6641,6 @@ void main()
 		 */
 		getPointsInProfile(profile, maxDepth, callback)
 		{
-			if(callback)
-			{
-				var request = new Potree.ProfileRequest(this, profile, maxDepth, callback);
-				this.profileRequests.push(request);
-
-				return request;
-			}
 
 			var points = {
 				segments: [],
@@ -6686,8 +6735,8 @@ void main()
 		 */
 		getProfile(start, end, width, depth, callback)
 		{
-			var request = new Potree.ProfileRequest(start, end, width, depth, callback);
-			this.profileRequests.push(request);
+			//var request = new Potree.ProfileRequest(start, end, width, depth, callback);
+			//this.profileRequests.push(request);
 		};
 
 		getVisibleExtent()
@@ -6739,7 +6788,7 @@ void main()
 				var scene = new THREE.Scene();
 
 				var material = new PointCloudMaterial$1();
-				material.pointColorType = Potree.PointColorType.POINT_INDEX;
+				material.pointColorType = PointColorType.POINT_INDEX;
 
 				var renderTarget = new THREE.WebGLRenderTarget(
 					1, 1,
@@ -6770,9 +6819,9 @@ void main()
 			if(params.pickClipped)
 			{
 				pickMaterial.clipBoxes = this.material.clipBoxes;
-				if(this.material.clipTask === Potree.ClipTask.HIGHLIGHT)
+				if(this.material.clipTask === ClipTask.HIGHLIGHT)
 				{
-					pickMaterial.clipTask = Potree.ClipTask.NONE;
+					pickMaterial.clipTask = ClipTask.NONE;
 				}
 				else
 				{
@@ -7323,6 +7372,7 @@ void main()
 				}
 				catch(e)
 				{
+					console.error(e.message);
 					callback(null);
 				}
 			};
@@ -7511,134 +7561,131 @@ void main()
 	** All code in this book may also be considered licensed under an MIT license.
 	*/
 
-
-
-	function BinaryHeap(scoreFunction){
-	  this.content = [];
-	  this.scoreFunction = scoreFunction;
+	function BinaryHeap(scoreFunction)
+	{
+		this.content = [];
+		this.scoreFunction = scoreFunction;
 	}
 
-	BinaryHeap.prototype = {
-	  push: function(element) {
-	    // Add the new element to the end of the array.
-	    this.content.push(element);
-	    // Allow it to bubble up.
-	    this.bubbleUp(this.content.length - 1);
-	  },
-
-	  pop: function() {
-	    // Store the first element so we can return it later.
-	    var result = this.content[0];
-	    // Get the element at the end of the array.
-	    var end = this.content.pop();
-	    // If there are any elements left, put the end element at the
-	    // start, and let it sink down.
-	    if (this.content.length > 0) {
-	      this.content[0] = end;
-	      this.sinkDown(0);
-	    }
-	    return result;
-	  },
-
-	  remove: function(node) {
-	    var length = this.content.length;
-	    // To remove a value, we must search through the array to find
-	    // it.
-	    for (var i = 0; i < length; i++) {
-	      if (this.content[i] != node) continue;
-	      // When it is found, the process seen in 'pop' is repeated
-	      // to fill up the hole.
-	      var end = this.content.pop();
-	      // If the element we popped was the one we needed to remove,
-	      // we're done.
-	      if (i == length - 1) break;
-	      // Otherwise, we replace the removed element with the popped
-	      // one, and allow it to float up or sink down as appropriate.
-	      this.content[i] = end;
-	      this.bubbleUp(i);
-	      this.sinkDown(i);
-	      break;
-	    }
-	  },
-
-	  size: function() {
-	    return this.content.length;
-	  },
-
-	  bubbleUp: function(n) {
-	    // Fetch the element that has to be moved.
-	    var element = this.content[n], score = this.scoreFunction(element);
-	    // When at 0, an element can not go up any further.
-	    while (n > 0) {
-	      // Compute the parent element's index, and fetch it.
-	      var parentN = Math.floor((n + 1) / 2) - 1,
-	      parent = this.content[parentN];
-	      // If the parent has a lesser score, things are in order and we
-	      // are done.
-	      if (score >= this.scoreFunction(parent))
-	        break;
-
-	      // Otherwise, swap the parent with the current element and
-	      // continue.
-	      this.content[parentN] = element;
-	      this.content[n] = parent;
-	      n = parentN;
-	    }
-	  },
-
-	  sinkDown: function(n) {
-	    // Look up the target element and its score.
-	    var length = this.content.length,
-	    element = this.content[n],
-	    elemScore = this.scoreFunction(element);
-
-	    while(true) {
-	      // Compute the indices of the child elements.
-	      var child2N = (n + 1) * 2, child1N = child2N - 1;
-	      // This is used to store the new position of the element,
-	      // if any.
-	      var swap = null;
-	      // If the first child exists (is inside the array)...
-	      if (child1N < length) {
-	        // Look it up and compute its score.
-	        var child1 = this.content[child1N],
-	        child1Score = this.scoreFunction(child1);
-	        // If the score is less than our element's, we need to swap.
-	        if (child1Score < elemScore)
-	          swap = child1N;
-	      }
-	      // Do the same checks for the other child.
-	      if (child2N < length) {
-	        var child2 = this.content[child2N],
-	        child2Score = this.scoreFunction(child2);
-	        if (child2Score < (swap == null ? elemScore : child1Score))
-	          swap = child2N;
-	      }
-
-	      // No need to swap further, we are done.
-	      if (swap == null) break;
-
-	      // Otherwise, swap and continue.
-	      this.content[n] = this.content[swap];
-	      this.content[swap] = element;
-	      n = swap;
-	    }
-	  }
-	};
-
-	var Global = 
+	BinaryHeap.prototype =
 	{
-		debug: {},
-		workerPath: getBasePath(),
-		maxNodesLoadGPUFrame: 20,
-		maxDEMLevel: 0,
-		maxNodesLoading: navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4,
-		pointLoadLimit: 1e10,
-		numNodesLoading: 0,
-		measureTimings: false,
-		workerPool: new WorkerManager(),
-		lru: new LRU(),
-		pointcloudTransformVersion: undefined
+		push: function(element)
+		{
+			// Add the new element to the end of the array.
+			this.content.push(element);
+			// Allow it to bubble up.
+			this.bubbleUp(this.content.length - 1);
+		},
+
+		pop: function()
+		{
+			// Store the first element so we can return it later.
+			var result = this.content[0];
+			// Get the element at the end of the array.
+			var end = this.content.pop();
+			// If there are any elements left, put the end element at the
+			// start, and let it sink down.
+			if(this.content.length > 0)
+			{
+				this.content[0] = end;
+				this.sinkDown(0);
+			}
+			return result;
+		},
+
+		remove: function(node)
+		{
+			var length = this.content.length;
+			// To remove a value, we must search through the array to find
+			// it.
+			for(var i = 0; i < length; i++)
+			{
+				if(this.content[i] != node) continue;
+				// When it is found, the process seen in 'pop' is repeated
+				// to fill up the hole.
+				var end = this.content.pop();
+				// If the element we popped was the one we needed to remove,
+				// we're done.
+				if(i == length - 1) break;
+				// Otherwise, we replace the removed element with the popped
+				// one, and allow it to float up or sink down as appropriate.
+				this.content[i] = end;
+				this.bubbleUp(i);
+				this.sinkDown(i);
+				break;
+			}
+		},
+
+		size: function()
+		{
+			return this.content.length;
+		},
+
+		bubbleUp: function(n)
+		{
+			// Fetch the element that has to be moved.
+			var element = this.content[n], score = this.scoreFunction(element);
+			// When at 0, an element can not go up any further.
+			while(n > 0)
+			{
+				// Compute the parent element's index, and fetch it.
+				var parentN = Math.floor((n + 1) / 2) - 1,
+				parent = this.content[parentN];
+				// If the parent has a lesser score, things are in order and we
+				// are done.
+				if(score >= this.scoreFunction(parent))
+					break;
+
+				// Otherwise, swap the parent with the current element and
+				// continue.
+				this.content[parentN] = element;
+				this.content[n] = parent;
+				n = parentN;
+			}
+		},
+
+		sinkDown: function(n)
+		{
+			// Look up the target element and its score.
+			var length = this.content.length,
+			element = this.content[n],
+			elemScore = this.scoreFunction(element);
+
+			while(true)
+			{
+				// Compute the indices of the child elements.
+				var child2N = (n + 1) * 2, child1N = child2N - 1;
+				// This is used to store the new position of the element,
+				// if any.
+				var swap = null;
+				// If the first child exists (is inside the array)...
+				if(child1N < length)
+				{
+					// Look it up and compute its score.
+					var child1 = this.content[child1N],
+					child1Score = this.scoreFunction(child1);
+					// If the score is less than our element's, we need to swap.
+					if(child1Score < elemScore)
+						swap = child1N;
+				}
+				// Do the same checks for the other child.
+				if(child2N < length)
+				{
+					var child2 = this.content[child2N],
+					child2Score = this.scoreFunction(child2);
+					if(child2Score < (swap == null ? elemScore : child1Score))
+						swap = child2N;
+				}
+
+				// No need to swap further, we are done.
+				if(swap == null) break;
+
+				// Otherwise, swap and continue.
+				this.content[n] = this.content[swap];
+				this.content[swap] = element;
+				n = swap;
+			}
+		}
 	};
 
 	var AttributeLocations =
@@ -7688,7 +7735,7 @@ void main()
 		INSIDE_ALL: 1
 	};
 
-	var PointSizeType =
+	var PointSizeType$1 =
 	{
 		FIXED: 0,
 		ATTENUATED: 1,
@@ -7723,28 +7770,12 @@ void main()
 		COMPOSITE: 50
 	};
 
-	var TreeType =
+	var TreeType$1 =
 	{
 		OCTREE: 0,
 		KDTREE: 1
 	};
 
-	function getBasePath()
-	{
-		if(document.currentScript.src)
-		{
-			var scriptPath = new URL(document.currentScript.src + "/..").href;
-
-			if(scriptPath.slice(-1) === "/")
-			{
-				scriptPath = scriptPath.slice(0, -1);
-			}
-
-			return scriptPath;
-		}
-
-		return "";
-	}
 	function loadPointCloud(path, name, callback)
 	{
 		var loaded = function(pointcloud)
@@ -7799,6 +7830,7 @@ void main()
 			throw new Error("Potree: Failed to load point cloud from URL " + path);
 		}
 	}
+
 	function updateVisibility(pointclouds, camera, renderer)
 	{
 		var numVisiblePoints = 0;
@@ -8094,6 +8126,7 @@ void main()
 			lowestSpacing: lowestSpacing
 		};
 	}
+
 	function updatePointClouds(pointclouds, camera, renderer)
 	{
 		var result = updateVisibility(pointclouds, camera, renderer);
@@ -8108,6 +8141,7 @@ void main()
 
 		return result;
 	}
+
 	function updateVisibilityStructures(pointclouds, camera, renderer)
 	{
 		var frustums = [];
@@ -8183,6 +8217,7 @@ void main()
 			priorityQueue: priorityQueue
 		};
 	}
+
 	function paramThreeToGL(gl, p)
 	{
 		var extension;
@@ -8386,12 +8421,12 @@ void main()
 			gl.bindTexture(this.target, this.id);
 
 			var level = 0;
-			var internalFormat = Potree.paramThreeToGL(gl, texture.format);
+			var internalFormat = paramThreeToGL(gl, texture.format);
 			var width = texture.image.width;
 			var height = texture.image.height;
 			var border = 0;
 			var srcFormat = internalFormat;
-			var srcType = Potree.paramThreeToGL(gl, texture.type);
+			var srcType = paramThreeToGL(gl, texture.type);
 			var data;
 
 			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
@@ -8405,8 +8440,8 @@ void main()
 				gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 				gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-				gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
-				gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
+				gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, paramThreeToGL(gl, texture.magFilter));
+				gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, paramThreeToGL(gl, texture.minFilter));
 
 				gl.texImage2D(this.target, level, internalFormat, width, height, border, srcFormat, srcType, data);
 			}
@@ -8414,11 +8449,11 @@ void main()
 			{
 				data = texture.image;
 
-				gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, Potree.paramThreeToGL(gl, texture.wrapS));
-				gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, Potree.paramThreeToGL(gl, texture.wrapT));
+				gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, paramThreeToGL(gl, texture.wrapS));
+				gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, paramThreeToGL(gl, texture.wrapT));
 
-				gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
-				gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
+				gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, paramThreeToGL(gl, texture.magFilter));
+				gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, paramThreeToGL(gl, texture.minFilter));
 
 				gl.texImage2D(this.target, level, internalFormat, internalFormat, srcType, data);
 			}
@@ -8671,6 +8706,10 @@ void main()
 				{
 					this.setUniform3f(name, value);
 				}
+			}
+			else
+			{
+				console.error("Potree: Unhandled uniform type: ", name, value);
 			}
 
 		}
@@ -9459,7 +9498,7 @@ void main()
 
 			if(material.pointSizeType >= 0)
 			{
-				if(material.pointSizeType === PointSizeType.ADAPTIVE || material.pointColorType === PointColorType.LOD)
+				if(material.pointSizeType === PointSizeType$1.ADAPTIVE || material.pointColorType === PointColorType.LOD)
 				{
 					var vnNodes = nodes;
 					visibilityTextureData = octree.computeVisibilityTextureData(vnNodes, camera);
@@ -9729,21 +9768,20 @@ void main()
 	exports.Classification = Classification;
 	exports.ClipTask = ClipTask;
 	exports.ClipMethod = ClipMethod;
-	exports.PointSizeType = PointSizeType;
+	exports.PointSizeType = PointSizeType$1;
 	exports.PointShape = PointShape;
 	exports.PointColorType = PointColorType;
-	exports.TreeType = TreeType;
-	exports.getBasePath = getBasePath;
+	exports.TreeType = TreeType$1;
 	exports.loadPointCloud = loadPointCloud;
 	exports.updateVisibility = updateVisibility;
 	exports.updatePointClouds = updatePointClouds;
 	exports.updateVisibilityStructures = updateVisibilityStructures;
 	exports.paramThreeToGL = paramThreeToGL;
 	exports.BinaryHeap = BinaryHeap;
-	exports.LRU = LRU;
+	exports.LRU = LRU$1;
 	exports.HelperUtils = HelperUtils;
 	exports.VersionUtils = VersionUtils;
-	exports.WorkerManager = WorkerManager;
+	exports.WorkerManager = WorkerManager$1;
 	exports.PointAttribute = PointAttribute;
 	exports.PointAttributes = PointAttributes;
 	exports.PointAttributeNames = PointAttributeNames;

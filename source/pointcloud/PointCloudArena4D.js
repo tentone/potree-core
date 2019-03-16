@@ -2,7 +2,8 @@
 
 import {HelperUtils} from "../utils/HelperUtils.js";
 import {PointCloudTree, PointCloudTreeNode} from "./PointCloudTree.js";
-import {Global} from "../Potree.js";
+import {PointColorType, ClipTask} from "../Potree.js";
+import {Global} from "../Global.js";
 
 class PointCloudArena4DNode extends PointCloudTreeNode
 {
@@ -138,9 +139,9 @@ class PointCloudArena4D extends PointCloudTree
 		{
 			vertexColors: THREE.VertexColors,
 			size: 0.05,
-			treeType: Potree.TreeType.KDTREE
+			treeType: TreeType.KDTREE
 		});
-		this.material.sizeType = Potree.PointSizeType.ATTENUATED;
+		this.material.sizeType = PointSizeType.ATTENUATED;
 		this.material.size = 0.05;
 		this.profileRequests = [];
 		this.name = "";
@@ -395,7 +396,7 @@ class PointCloudArena4D extends PointCloudTree
 			var scene = new THREE.Scene();
 
 			var material = new PointCloudMaterial();
-			material.pointColorType = Potree.PointColorType.POINT_INDEX;
+			material.pointColorType = PointColorType.POINT_INDEX;
 
 			var renderTarget = new THREE.WebGLRenderTarget(
 				1, 1,
@@ -427,9 +428,9 @@ class PointCloudArena4D extends PointCloudTree
 			if(params.pickClipped)
 			{
 				pickMaterial.clipBoxes = this.material.clipBoxes;
-				if(this.material.clipTask === Potree.ClipTask.HIGHLIGHT)
+				if(this.material.clipTask === ClipTask.HIGHLIGHT)
 				{
-					pickMaterial.clipTask = Potree.ClipTask.NONE;
+					pickMaterial.clipTask = ClipTask.NONE;
 				}
 				else
 				{
@@ -681,7 +682,7 @@ class PointCloudArena4D extends PointCloudTree
 	{
 		if(this.pcoGeometry.root)
 		{
-			return Potree.Global.numNodesLoading > 0 ? 0 : 1;
+			return Global.numNodesLoading > 0 ? 0 : 1;
 		}
 		else
 		{

@@ -4,7 +4,8 @@ import {PointCloudOctreeGeometryNode} from "./geometries/PointCloudOctreeGeometr
 import {HelperUtils} from "../utils/HelperUtils.js";
 import {PointCloudTree, PointCloudTreeNode} from "./PointCloudTree.js";
 import {PointCloudMaterial} from "./materials/PointCloudMaterial.js";
-import {Global} from "../Potree.js";
+import {PointColorType, ClipTask} from "../Potree.js";
+import {Global} from "../Global.js";
 
 class PointCloudOctreeNode extends PointCloudTreeNode
 {
@@ -609,10 +610,9 @@ class PointCloudOctree extends PointCloudTree
 	{
 		if(callback)
 		{
-			var request = new Potree.ProfileRequest(this, profile, maxDepth, callback);
-			this.profileRequests.push(request);
-
-			return request;
+			//var request = new Potree.ProfileRequest(this, profile, maxDepth, callback);
+			//this.profileRequests.push(request);
+			//return request;
 		}
 
 		var points = {
@@ -708,8 +708,8 @@ class PointCloudOctree extends PointCloudTree
 	 */
 	getProfile(start, end, width, depth, callback)
 	{
-		var request = new Potree.ProfileRequest(start, end, width, depth, callback);
-		this.profileRequests.push(request);
+		//var request = new Potree.ProfileRequest(start, end, width, depth, callback);
+		//this.profileRequests.push(request);
 	};
 
 	getVisibleExtent()
@@ -761,7 +761,7 @@ class PointCloudOctree extends PointCloudTree
 			var scene = new THREE.Scene();
 
 			var material = new PointCloudMaterial();
-			material.pointColorType = Potree.PointColorType.POINT_INDEX;
+			material.pointColorType = PointColorType.POINT_INDEX;
 
 			var renderTarget = new THREE.WebGLRenderTarget(
 				1, 1,
@@ -793,9 +793,9 @@ class PointCloudOctree extends PointCloudTree
 		if(params.pickClipped)
 		{
 			pickMaterial.clipBoxes = this.material.clipBoxes;
-			if(this.material.clipTask === Potree.ClipTask.HIGHLIGHT)
+			if(this.material.clipTask === ClipTask.HIGHLIGHT)
 			{
-				pickMaterial.clipTask = Potree.ClipTask.NONE;
+				pickMaterial.clipTask = ClipTask.NONE;
 			}
 			else
 			{

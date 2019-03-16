@@ -1,5 +1,7 @@
 "use strict";
 
+import {paramThreeToGL} from "./Potree.js";
+
 class WebGLTexture
 {
 	constructor(gl, texture)
@@ -36,12 +38,12 @@ class WebGLTexture
 		gl.bindTexture(this.target, this.id);
 
 		var level = 0;
-		var internalFormat = Potree.paramThreeToGL(gl, texture.format);
+		var internalFormat = paramThreeToGL(gl, texture.format);
 		var width = texture.image.width;
 		var height = texture.image.height;
 		var border = 0;
 		var srcFormat = internalFormat;
-		var srcType = Potree.paramThreeToGL(gl, texture.type);
+		var srcType = paramThreeToGL(gl, texture.type);
 		var data;
 
 		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, texture.flipY);
@@ -55,8 +57,8 @@ class WebGLTexture
 			gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 			gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
-			gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
-			gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
+			gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, paramThreeToGL(gl, texture.magFilter));
+			gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, paramThreeToGL(gl, texture.minFilter));
 
 			gl.texImage2D(this.target, level, internalFormat, width, height, border, srcFormat, srcType, data);
 		}
@@ -64,11 +66,11 @@ class WebGLTexture
 		{
 			data = texture.image;
 
-			gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, Potree.paramThreeToGL(gl, texture.wrapS));
-			gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, Potree.paramThreeToGL(gl, texture.wrapT));
+			gl.texParameteri(this.target, gl.TEXTURE_WRAP_S, paramThreeToGL(gl, texture.wrapS));
+			gl.texParameteri(this.target, gl.TEXTURE_WRAP_T, paramThreeToGL(gl, texture.wrapT));
 
-			gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, Potree.paramThreeToGL(gl, texture.magFilter));
-			gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, Potree.paramThreeToGL(gl, texture.minFilter));
+			gl.texParameteri(this.target, gl.TEXTURE_MAG_FILTER, paramThreeToGL(gl, texture.magFilter));
+			gl.texParameteri(this.target, gl.TEXTURE_MIN_FILTER, paramThreeToGL(gl, texture.minFilter));
 
 			gl.texImage2D(this.target, level, internalFormat, internalFormat, srcType, data);
 		}

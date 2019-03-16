@@ -3,7 +3,7 @@
 import {PointAttributeNames} from "../PointAttributes.js";
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
-import {Global} from "../Potree.js";
+import {Global} from "../Global.js";
 
 class GreyhoundBinaryLoader
 {

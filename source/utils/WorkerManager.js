@@ -1,6 +1,6 @@
 "use strict";
 
-import {Global} from "../Potree.js";
+import {Global} from "../Global.js";
 
 /**
  * The worker manager is responsible for creating and managing worker instances.

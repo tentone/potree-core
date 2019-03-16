@@ -1,7 +1,8 @@
 "use strict";
 
+export {Global} from "./Global.js";
+
 export {
-	Global,
 	AttributeLocations,
 	Classification,
 	ClipTask,
@@ -10,7 +11,6 @@ export {
 	PointShape,
 	PointColorType,
 	TreeType,
-	getBasePath,
 	loadPointCloud,
 	updateVisibility,
 	updatePointClouds,

@@ -1,6 +1,7 @@
 "use strict";
 
 import {WorkerManager} from "../utils/WorkerManager.js";
+import {Global} from "../Global.js";
 
 var pointFormatReaders =
 {
@@ -189,7 +190,7 @@ var LAZLoader = function(arraybuffer)
 	{
 		self.nextCB = cb;
 		
-		Potree.Global.workerPool.runTask(WorkerManager.LAS_LAZ, function(e)
+		Global.workerPool.runTask(WorkerManager.LAS_LAZ, function(e)
 		{
 			if(self.nextCB !== null)
 			{

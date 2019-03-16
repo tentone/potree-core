@@ -8,21 +8,7 @@ import {PointCloudArena4D} from "./pointcloud/PointCloudArena4D.js";
 import {PointCloudOctree} from "./pointcloud/PointCloudOctree.js";
 import {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
 import {BinaryHeap} from "./lib/BinaryHeap.js";
-
-var Global = 
-{
-	debug: {},
-	workerPath: getBasePath(),
-	maxNodesLoadGPUFrame: 20,
-	maxDEMLevel: 0,
-	maxNodesLoading: navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4,
-	pointLoadLimit: 1e10,
-	numNodesLoading: 0,
-	measureTimings: false,
-	workerPool: new WorkerManager(),
-	lru: new LRU(),
-	pointcloudTransformVersion: undefined
-};
+import {Global} from "./Global.js";
 
 var AttributeLocations =
 {
@@ -112,27 +98,6 @@ var TreeType =
 	KDTREE: 1
 };
 
-function getBasePath()
-{
-	if(document.currentScript.src)
-	{
-		var scriptPath = new URL(document.currentScript.src + "/..").href;
-
-		if(scriptPath.slice(-1) === "/")
-		{
-			scriptPath = scriptPath.slice(0, -1);
-		}
-
-		return scriptPath;
-	}
-	else
-	{
-		console.error("Potree: Was unable to find its script path using document.currentScript.");
-	}
-
-	return "";
-};
-
 function loadPointCloud(path, name, callback)
 {
 	var loaded = function(pointcloud)
@@ -186,7 +151,7 @@ function loadPointCloud(path, name, callback)
 	{
 		throw new Error("Potree: Failed to load point cloud from URL " + path);
 	}
-};
+}
 
 function updateVisibility(pointclouds, camera, renderer)
 {
@@ -487,7 +452,7 @@ function updateVisibility(pointclouds, camera, renderer)
 		numVisiblePoints: numVisiblePoints,
 		lowestSpacing: lowestSpacing
 	};
-};
+}
 
 function updatePointClouds(pointclouds, camera, renderer)
 {
@@ -502,7 +467,7 @@ function updatePointClouds(pointclouds, camera, renderer)
 	Global.lru.freeMemory();
 
 	return result;
-};
+}
 
 function updateVisibilityStructures(pointclouds, camera, renderer)
 {
@@ -578,7 +543,7 @@ function updateVisibilityStructures(pointclouds, camera, renderer)
 		camObjPositions: camObjPositions,
 		priorityQueue: priorityQueue
 	};
-};
+}
 
 function paramThreeToGL(gl, p)
 {
@@ -689,10 +654,9 @@ function paramThreeToGL(gl, p)
 	}
 
 	return 0;
-};
+}
 
 export {
-	Global,
 	AttributeLocations,
 	Classification,
 	ClipTask,
@@ -701,7 +665,6 @@ export {
 	PointShape,
 	PointColorType,
 	TreeType,
-	getBasePath,
 	loadPointCloud,
 	updateVisibility,
 	updatePointClouds,

@@ -1,6 +1,6 @@
 "use strict";
 
-import {Global} from "../Potree.js";
+import {Global} from "../Global.js";
 
 /**
  * An item in the lru list.

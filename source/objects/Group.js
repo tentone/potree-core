@@ -5,7 +5,8 @@ import {BasicGroup} from "./BasicGroup.js";
 import {PointCloudTree} from "../pointcloud/PointCloudTree.js";
 import {PointCloudOctreeNode} from "../pointcloud/PointCloudOctree.js";
 import {PointCloudArena4DNode} from "../pointcloud/PointCloudArena4D.js";
-import {Global, PointSizeType, PointColorType, ClipTask} from "../Potree.js";
+import {PointSizeType, PointColorType, ClipTask} from "../Potree.js";
+import {Global} from "../Global.js";
 import {Shader} from "../Shader.js";
 import {WebGLTexture} from "../WebGLTexture.js";
 

@@ -3,7 +3,7 @@
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
 import {LASFile} from "./LASLoader.js";
-import {Global} from "../Potree.js";
+import {Global} from "../Global.js";
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz

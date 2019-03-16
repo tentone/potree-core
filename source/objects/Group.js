@@ -2,6 +2,7 @@
 
 import {WebGLBuffer} from "../WebGLBuffer.js";
 import {BasicGroup} from "./BasicGroup.js";
+import {PointCloudTree} from "../pointcloud/PointCloudTree.js";
 import {PointCloudOctreeNode} from "../pointcloud/PointCloudOctree.js";
 import {PointCloudArena4DNode} from "../pointcloud/PointCloudArena4D.js";
 import {Potree} from "../Potree.js";

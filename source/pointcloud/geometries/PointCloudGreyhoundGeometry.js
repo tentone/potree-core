@@ -2,6 +2,7 @@
 
 import {GreyhoundLoader} from "../../loaders/GreyhoundLoader.js";
 import {Potree} from "../../Potree.js";
+import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";
 
 function PointCloudGreyhoundGeometry()
 {

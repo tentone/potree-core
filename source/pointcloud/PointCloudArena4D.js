@@ -1,7 +1,7 @@
 "use strict";
 
 import {HelperUtils} from "../utils/HelperUtils.js";
-import {PointCloudTreeNode} from "./PointCloudTree.js";
+import {PointCloudTree, PointCloudTreeNode} from "./PointCloudTree.js";
 
 class PointCloudArena4DNode extends PointCloudTreeNode
 {

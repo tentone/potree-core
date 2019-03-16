@@ -5,7 +5,8 @@
 	"main": "source/Main.js",
 	"files": "",
 	"scripts": {
-		"build": "rollup -c && npm run uglify",
+		"build": "rollup -c",
+		"build-min": "rollup -c && npm run uglify",
 		"docs": "jsdoc -d docs source",
 		"uglify": "uglifyjs --compress --mangle --output build/potree.min.js -- build/potree.js",
 		"pub": "npm run build && npm run docs && npm publish --access public .",

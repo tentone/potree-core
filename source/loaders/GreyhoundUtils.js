@@ -220,3 +220,5 @@ class GreyhoundUtils
 		});
 	};
 };
+
+export {GreyhoundUtils};

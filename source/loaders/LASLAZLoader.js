@@ -2,6 +2,7 @@
 
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
+import {LASFile} from "./LASLoader.js";
 import {Potree} from "../Potree.js";
 
 /**
@@ -69,7 +70,7 @@ class LASLAZLoader
 	parse(node, buffer)
 	{
 		var lf = new LASFile(buffer);
-		var handler = new LasLazBatcher(node);
+		var handler = new LASLAZBatcher(node);
 
 		lf.open()
 			.then(msg =>
@@ -153,13 +154,10 @@ class LASLAZLoader
 			});
 	}
 
-	handle(node, url)
-	{
-
-	}
+	handle(node, url){}
 };
 
-class LasLazBatcher
+class LASLAZBatcher
 {
 	constructor(node)
 	{
@@ -226,4 +224,4 @@ class LasLazBatcher
 	};
 };
 
-export {LASLAZLoader, LasLazBatcher};
+export {LASLAZLoader};

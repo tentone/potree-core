@@ -3,6 +3,7 @@
 import {HelperUtils} from "../../utils/HelperUtils.js";
 import {Gradients} from "../../Gradients.js";
 import {Shaders} from "../../Shaders.js";
+import {Potree} from "../../Potree.js";
 
 class PointCloudMaterial extends THREE.RawShaderMaterial
 {
@@ -1382,3 +1383,5 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		}
 	}
 };
+
+export {PointCloudMaterial};

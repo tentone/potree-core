@@ -5,6 +5,7 @@ import {POCLoader} from "./loaders/POCLoader.js";
 import {LRU, LRUItem} from "./utils/LRU.js";
 import {WorkerManager} from "./utils/WorkerManager.js";
 import {PointCloudArena4D} from "./pointcloud/PointCloudArena4D.js";
+import {PointCloudOctree} from "./pointcloud/PointCloudOctree.js";
 import {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
 import {BinaryHeap} from "./lib/BinaryHeap.js";
 
@@ -702,3 +703,34 @@ Potree.paramThreeToGL = function(_gl, p)
 };
 
 export {Potree};
+
+/*
+export {
+	getBasePath,
+	workerPath,
+	maxNodesLoadGPUFrame,
+	maxDEMLevel,
+	maxNodesLoading,
+	pointLoadLimit,
+	framenumber,
+	numNodesLoading,
+	debug,
+	measureTimings,
+	workerPool,
+	lru,
+	attributeLocations,
+	Classification,
+	ClipTask,
+	ClipMethod,
+	PointSizeType,
+	PointShape,
+	PointColorType,
+	TreeType,
+	loadPointCloud,
+	updateVisibility,
+	updatePointClouds,
+	updateVisibilityStructures,
+	shuffleArray,
+	paramThreeToGL
+};
+*/

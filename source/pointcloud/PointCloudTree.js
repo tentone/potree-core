@@ -1,5 +1,7 @@
 "use strict";
 
+import {DEM} from "./DEM.js";
+
 class PointCloudTreeNode
 {
 	constructor()

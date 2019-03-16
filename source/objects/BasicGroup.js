@@ -2,6 +2,7 @@
 
 import {HelperUtils} from "../utils/HelperUtils.js";
 import {Potree} from "../Potree.js";
+import {PointCloudTree} from "../pointcloud/PointCloudTree.js";
 
 /**
  * Potree object is a wrapper to use Potree alongside other THREE based frameworks.

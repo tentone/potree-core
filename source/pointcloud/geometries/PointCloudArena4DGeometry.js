@@ -2,6 +2,7 @@
 
 import {PointAttributes, PointAttribute} from "../../PointAttributes.js";
 import {Potree} from "../../Potree.js";
+import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";
 
 class PointCloudArena4DGeometryNode
 {

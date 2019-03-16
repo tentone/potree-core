@@ -2,7 +2,8 @@
 
 import {PointCloudOctreeGeometryNode} from "./geometries/PointCloudOctreeGeometry.js";
 import {HelperUtils} from "../utils/HelperUtils.js";
-import {PointCloudTreeNode} from "./PointCloudTree.js";
+import {PointCloudTree, PointCloudTreeNode} from "./PointCloudTree.js";
+import {PointCloudMaterial} from "./materials/PointCloudMaterial.js";
 
 class PointCloudOctreeNode extends PointCloudTreeNode
 {
@@ -1106,3 +1107,5 @@ class PointCloudOctree extends PointCloudTree
 		return node;
 	}
 };
+
+export {PointCloudOctree, PointCloudOctreeNode};

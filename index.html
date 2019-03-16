@@ -7,7 +7,7 @@
 	<body style="background-color: #000000">
 		<script src="lib/threejs/three.min.js"></script>
 		<script src="lib/threejs/OrbitControls.js"></script>
-		<script src="build/potree.min.js"></script>
+		<script src="build/potree.js"></script>
 		
 		<script>
 			document.body.onload = function()
@@ -80,16 +80,16 @@
 				points.material.wireframe = true;
 				scene.add(points);
 
-				Potree.loadPointCloud(url, name, function(e)
+				Potree.Potree.loadPointCloud(url, name, function(e)
 				{
 					var pointcloud = e.pointcloud;
 					pointcloud.position.set(-2, -3, 0.4);
 
 					var material = pointcloud.material;
 					material.size = 2;
-					material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
-					material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
-					material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE
+					material.pointColorType = Potree.Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
+					material.pointSizeType = Potree.Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
+					material.shape = Potree.Potree.PointShape.CIRCLE; //CIRCLE | SQUARE
 
 					points.add(pointcloud);
 				});

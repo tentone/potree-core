@@ -1,7 +1,7 @@
 "use strict";
 
-import BinaryLoader from "./BinaryLoader.js";
-import LASLAZLoader from "./LASLAZLoader.js";
+import {BinaryLoader} from "./BinaryLoader.js";
+import {LASLAZLoader} from "./LASLAZLoader.js";
 import {PointAttributes, PointAttribute} from "../PointAttributes.js";
 import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "../pointcloud/geometries/PointCloudOctreeGeometry.js";
 import {VersionUtils} from "../utils/VersionUtils.js";

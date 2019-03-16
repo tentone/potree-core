@@ -2,6 +2,7 @@
 
 import {POCLoader} from "../../loaders/POCLoader.js";
 import {Potree} from "../../Potree.js";
+import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";
 
 class PointCloudOctreeGeometry
 {

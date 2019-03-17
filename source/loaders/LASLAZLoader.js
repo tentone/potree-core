@@ -2,7 +2,7 @@
 
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
-import {LASFile} from "./LASLoader.js";
+import {LASLoader, LAZLoader, LASFile, LASDecoder} from "./LASLoader.js";
 import {Global} from "../Global.js";
 
 /**

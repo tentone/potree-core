@@ -2420,7 +2420,7 @@
 	};
 
 	// Decodes LAS records into points
-	function LASDecoder$1(buffer, pointFormatID, pointSize, pointsCount, scale, offset, mins, maxs)
+	function LASDecoder(buffer, pointFormatID, pointSize, pointsCount, scale, offset, mins, maxs)
 	{
 		this.arrayb = buffer;
 		this.decoder = pointFormatReaders[pointFormatID];
@@ -2431,7 +2431,7 @@
 		this.mins = mins;
 		this.maxs = maxs;
 	}
-	LASDecoder$1.prototype.getPoint = function(index)
+	LASDecoder.prototype.getPoint = function(index)
 	{
 		if(index < 0 || index >= this.pointsCount)
 		{
@@ -3282,7 +3282,7 @@
 					var p = lf.readData(1000000, 0, 1);
 					return p.then(function (data)
 					{
-						var d = new LASDecoder$1(
+						var d = new LASDecoder(
 								data.buffer,
 								header.pointsFormatId,
 								header.pointsStructSize,

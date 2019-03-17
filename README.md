@@ -3,9 +3,9 @@
  - This project is based on Potree V1.6.
  - Potree is a web based pouint cloud visualizer project created by Markus Schütz.
  - This project contains only the main parts of the potree project adapted to be more easily used as a independent library (I have only adapted code from the original repository).
-
- - Point clouds are automatically updated, frustum culling is used to avoid unnecessary updates.
  - Support for pointclouds from LAS, LAZ, Binary files and Grehound server.
+ - Point clouds are automatically updated, frustum culling is used to avoid unnecessary updates (better update performance for multiple point clouds).
+ - Supports logarithmic depth buffer (just by enabling it on the threejs renderer), useful for large scale visualization.
 
 
 

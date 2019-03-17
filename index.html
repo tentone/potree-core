@@ -8,11 +8,9 @@
 		<script src="lib/threejs/three.min.js"></script>
 		<script src="lib/threejs/OrbitControls.js"></script>
 		<script src="build/potree.js"></script>
-		
 		<script>
 			document.body.onload = function()
 			{
-
 				//three.js
 				var scene = new THREE.Scene();
 				var camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
@@ -38,7 +36,7 @@
 					powerPreference: "high-performance"
 				});
 
-				var geometry = new THREE.BoxBufferGeometry(5, 1, 5);
+				var geometry = new THREE.BoxBufferGeometry(25, 1, 25);
 				var material = new THREE.MeshBasicMaterial({color: 0x44AA44});
 				var cube = new THREE.Mesh(geometry, material);
 				cube.position.y = -2;
@@ -74,29 +72,44 @@
 					}
 				}
 
-				//var url = "data/lion_takanawa/cloud.js";
-				var url = "data/lion_takanawa_ept_bin/ept.json";
-
-				var points = new Potree.Group();
-				points.material.opacity = 1.0;
-				points.material.wireframe = true;
-				scene.add(points);
-
 				Potree.Global.workerPath = "./source";
 
-				Potree.loadPointCloud(url, name, function(e)
+				loadPointCloud("data/lion_takanawa/cloud.js", new THREE.Vector3(-2, -3, 0.0));
+				loadPointCloud("data/lion_takanawa_las/cloud.js", new THREE.Vector3(3, -3, 0.0));
+				loadPointCloud("data/lion_takanawa_laz/cloud.js", new THREE.Vector3(8, -3, 0.0));
+				loadPointCloud("data/lion_takanawa_ept_laz/ept.json", new THREE.Vector3(-4, -4, 3.0));
+				loadPointCloud("data/lion_takanawa_ept_bin/ept.json", new THREE.Vector3(-11, -4, 3.0));
+				loadPointCloud("http://arena4d.uksouth.cloudapp.azure.com:8080/4e5059c4-f701-4a8f-8830-59e78a2c0816/BLK360 Sample.vpc");
+
+				//"http://5.9.65.151/mschuetz/potree/resources/pointclouds/faro/skatepark/cloud.js"
+				//"http://5.9.65.151/mschuetz/potree/resources/pointclouds/weiss/subseamanifold2/cloud.js"
+
+				function loadPointCloud(url, position)
 				{
-					var pointcloud = e.pointcloud;
-					pointcloud.position.set(-2, -3, 0.4);
+					var points = new Potree.Group();
+					points.material.opacity = 1.0;
+					points.material.wireframe = true;
+					scene.add(points);
 
-					var material = pointcloud.material;
-					material.size = 2;
-					material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
-					material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
-					material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE
+					Potree.loadPointCloud(url, url, function(e)
+					{
+						var pointcloud = e.pointcloud;
 
-					points.add(pointcloud);
-				});
+						if(position !== undefined)
+						{
+							pointcloud.position.copy(position);
+						}
+
+						var material = pointcloud.material;
+						material.size = 2;
+						material.pointColorType = Potree.PointColorType.RGB; //RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
+						material.pointSizeType = Potree.PointSizeType.ADAPTIVE; //ADAPTIVE | FIXED
+						material.shape = Potree.PointShape.CIRCLE; //CIRCLE | SQUARE
+
+						points.add(pointcloud);
+					});
+				}
+
 				
 				function loop()
 				{

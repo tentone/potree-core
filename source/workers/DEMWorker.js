@@ -15,7 +15,7 @@ onmessage = function(event)
 	};
 
 	var dem = new Float32Array(width * height);
-	//dem.fill(-Infinity);
+	dem.fill(-Infinity);
 
 	for(var i = 0; i < numPoints; i++)
 	{

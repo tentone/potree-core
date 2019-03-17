@@ -65,7 +65,7 @@ class DEMNode
 					height = height / weight;
 
 					//var hs = [h00, h01, h10, h11].filter(h => isFinite(h));
-					//var height = hs.reduce( (a, v, i) => a + v, 0) / hs.length;
+					//var height = hs.reduce((a, v, i) => a + v, 0) / hs.length;
 
 					mipData[i + j * mipSize] = height;
 				}

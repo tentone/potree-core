@@ -14,8 +14,7 @@ export {
 	loadPointCloud,
 	updateVisibility,
 	updatePointClouds,
-	updateVisibilityStructures,
-	paramThreeToGL
+	updateVisibilityStructures
 } from "./Potree.js";
 
 export {BinaryHeap} from "./lib/BinaryHeap.js";

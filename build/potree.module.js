@@ -558,7 +558,7 @@ class DEMNode
 					height = height / weight;
 
 					//var hs = [h00, h01, h10, h11].filter(h => isFinite(h));
-					//var height = hs.reduce( (a, v, i) => a + v, 0) / hs.length;
+					//var height = hs.reduce((a, v, i) => a + v, 0) / hs.length;
 
 					mipData[i + j * mipSize] = height;
 				}
@@ -671,8 +671,7 @@ class DEM$1
 		this.version = 0;
 	}
 
-	//expands the tree to all nodes that intersect <box> at <level>
-	//returns the intersecting nodes at <level>
+	//expands the tree to all nodes that intersect <box> at <level> returns the intersecting nodes at <level>
 	expandAndFindByBox(box, level)
 	{
 		if(level === 0)
@@ -772,8 +771,6 @@ class DEM$1
 
 	height(position)
 	{
-		//return this.root.height(position);
-
 		if(!this.root)
 		{
 			return 0;
@@ -979,9 +976,11 @@ function PointCloudGreyhoundGeometryNode(name, pcoGeometry, boundingBox, scale, 
 	this.oneTimeDisposeHandlers = [];
 	this.baseLoaded = false;
 
+	var center = new THREE.Vector3();
+
 	var bounds = this.boundingBox.clone();
-	bounds.min.sub(this.pcoGeometry.boundingBox.getCenter());
-	bounds.max.sub(this.pcoGeometry.boundingBox.getCenter());
+	bounds.min.sub(this.pcoGeometry.boundingBox.getCenter(center));
+	bounds.max.sub(this.pcoGeometry.boundingBox.getCenter(center));
 
 	if(this.scale)
 	{
@@ -996,9 +995,7 @@ function PointCloudGreyhoundGeometryNode(name, pcoGeometry, boundingBox, scale, 
 
 	//This represents the offset between the coordinate system described above
 	//and our pcoGeometry bounds.
-	this.greyhoundOffset = this.pcoGeometry.offset.clone().add(
-		this.pcoGeometry.boundingBox.getSize(new THREE.Vector3()).multiplyScalar(0.5)
-	);
+	this.greyhoundOffset = this.pcoGeometry.offset.clone().add(this.pcoGeometry.boundingBox.getSize(new THREE.Vector3()).multiplyScalar(0.5));
 }
 PointCloudGreyhoundGeometryNode.IDCount = 0;
 
@@ -1407,7 +1404,8 @@ class GreyhoundBinaryLoader
 		node.numPoints = numPoints;
 
 		var bb = node.boundingBox;
-		var nodeOffset = node.pcoGeometry.boundingBox.getCenter().sub(node.boundingBox.min);
+		var center = new THREE.Vector3();
+		var nodeOffset = node.pcoGeometry.boundingBox.getCenter(center).sub(node.boundingBox.min);
 
 		var message =
 		{
@@ -6579,7 +6577,8 @@ class PointCloudOctree extends PointCloudTree
 		var box = this.boundingBox;
 		var transform = this.matrixWorld;
 		var tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
-		this.position.set(0, 0, 0).sub(tBox.getCenter());
+
+		this.position.set(0, 0, 0).sub(tBox.getCenter(new THREE.Vector3()));
 	};
 
 	moveToGroundPlane()
@@ -6822,10 +6821,7 @@ class PointCloudOctree extends PointCloudTree
 
 		var gl = renderer.getContext();
 		gl.enable(gl.SCISSOR_TEST);
-		gl.scissor(
-			parseInt(pixelPos.x - (pickWindowSize - 1) / 2),
-			parseInt(pixelPos.y - (pickWindowSize - 1) / 2),
-			parseInt(pickWindowSize), parseInt(pickWindowSize));
+		gl.scissor(parseInt(pixelPos.x - (pickWindowSize - 1) / 2), parseInt(pixelPos.y - (pickWindowSize - 1) / 2), parseInt(pickWindowSize), parseInt(pickWindowSize));
 
 		renderer.state.buffers.depth.setTest(pickMaterial.depthTest);
 		renderer.state.buffers.depth.setMask(pickMaterial.depthWrite);
@@ -6863,6 +6859,7 @@ class PointCloudOctree extends PointCloudTree
 		var pixels = buffer;
 		var ibuffer = new Uint32Array(buffer.buffer);
 		var hits = [];
+
 		for(var u = 0; u < pickWindowSize; u++)
 		{
 			for(var v = 0; v < pickWindowSize; v++)
@@ -6900,7 +6897,6 @@ class PointCloudOctree extends PointCloudTree
 							hits.push(hit);
 						}
 					}
-
 				}
 			}
 		}
@@ -6934,6 +6930,25 @@ class PointCloudOctree extends PointCloudTree
 					point[attributeName] = position;
 				}
 
+				/*
+				else if(attributeName === "indices")
+				{
+
+				}
+				else
+				{
+					//if (values.itemSize === 1) {
+					//	point[attribute.name] = values.array[hit.pIndex];
+					//} else {
+					//	var value = [];
+					//	for (var j = 0; j < values.itemSize; j++) {
+					//		value.push(values.array[values.itemSize * hit.pIndex + j]);
+					//	}
+					//	point[attribute.name] = value;
+					//}
+				}
+				*/
+
 			}
 
 			hit.point = point;
@@ -6955,7 +6970,7 @@ class PointCloudOctree extends PointCloudTree
 			else
 			{
 				return hits[0].point;
-				//var sorted = hits.sort( (a, b) => a.distanceToCenter - b.distanceToCenter);
+				//var sorted = hits.sort((a, b) => a.distanceToCenter - b.distanceToCenter);
 				//return sorted[0].point;
 			}
 		}
@@ -7007,7 +7022,8 @@ class PointCloudOctree extends PointCloudTree
 			yield;
 		}
 
-		var fittedPosition = shrinkedLocalBounds.getCenter().applyMatrix4(boxNode.matrixWorld);
+
+		var fittedPosition = shrinkedLocalBounds.getCenter(new THREE.Vector3()).applyMatrix4(boxNode.matrixWorld);
 
 		var fitted = new THREE.Object3D();
 		fitted.position.copy(fittedPosition);
@@ -7063,7 +7079,7 @@ class PointCloudOctree extends PointCloudTree
 			}
 		}
 
-		var fittedPosition = shrinkedLocalBounds.getCenter().applyMatrix4(boxNode.matrixWorld);
+		var fittedPosition = shrinkedLocalBounds.getCenter(new THREE.Vector3()).applyMatrix4(boxNode.matrixWorld);
 
 		var fitted = new THREE.Object3D();
 		fitted.position.copy(fittedPosition);
@@ -8011,7 +8027,8 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 					geometry.boundingBox.max.add(offset);
 					geometry.offset = offset;
 
-					var center = geometry.boundingBox.getCenter();
+					var center = new THREE.Vector3();
+					geometry.boundingBox.getCenter(center);
 					var radius = geometry.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 					geometry.boundingSphere = new THREE.Sphere(center, radius);
 
@@ -8095,6 +8112,8 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 				node.level = stack.length;
 				levels = Math.max(levels, node.level);
 
+				
+
 				if(stack.length > 0)
 				{
 					var parent = stack[stack.length - 1];
@@ -8119,7 +8138,9 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 							node.boundingBox.max.z = node.boundingBox.min.z + parentBBSize.z / 2;
 						}
 
-						var center = node.boundingBox.getCenter();
+						
+						var center = new THREE.Vector3();
+						node.boundingBox.getCenter(center);
 						var radius = node.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 						node.boundingSphere = new THREE.Sphere(center, radius);
 					}
@@ -8141,7 +8162,8 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 							node.boundingBox.min.z = node.boundingBox.min.z + parentBBSize.z / 2;
 						}
 
-						var center = node.boundingBox.getCenter();
+						var center = new THREE.Vector3();
+						node.boundingBox.getCenter(center);
 						var radius = node.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 						node.boundingSphere = new THREE.Sphere(center, radius);
 					}
@@ -8150,7 +8172,9 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 				{
 					root = node;
 					root.boundingBox = this.boundingBox.clone();
-					var center = root.boundingBox.getCenter();
+
+					var center = new THREE.Vector3();
+					root.boundingBox.getCenter(center);
 					var radius = root.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 					root.boundingSphere = new THREE.Sphere(center, radius);
 				}
@@ -8882,6 +8906,62 @@ function updateVisibilityStructures(pointclouds, camera, renderer)
 	};
 }
 
+class Points
+{
+	constructor()
+	{
+		this.boundingBox = new THREE.Box3();
+		this.numPoints = 0;
+		this.data = {};
+	}
+
+	add(points)
+	{
+		var currentSize = this.numPoints;
+		var additionalSize = points.numPoints;
+		var newSize = currentSize + additionalSize;
+
+		var thisAttributes = Object.keys(this.data);
+		var otherAttributes = Object.keys(points.data);
+		var attributes = new Set([...thisAttributes, ...otherAttributes]);
+
+		for(var attribute of attributes)
+		{
+			if(thisAttributes.includes(attribute) && otherAttributes.includes(attribute))
+			{
+				//attribute in both, merge
+				var Type = this.data[attribute].constructor;
+				var merged = new Type(this.data[attribute].length + points.data[attribute].length);
+				merged.set(this.data[attribute], 0);
+				merged.set(points.data[attribute], this.data[attribute].length);
+				this.data[attribute] = merged;
+			}
+			else if(thisAttributes.includes(attribute) && !otherAttributes.includes(attribute))
+			{
+				//attribute only in this; take over this and expand to new size
+				var elementsPerPoint = this.data[attribute].length / this.numPoints;
+				var Type = this.data[attribute].constructor;
+				var expanded = new Type(elementsPerPoint * newSize);
+				expanded.set(this.data[attribute], 0);
+				this.data[attribute] = expanded;
+			}
+			else if(!thisAttributes.includes(attribute) && otherAttributes.includes(attribute))
+			{
+				//attribute only in points to be added; take over new points and expand to new size
+				var elementsPerPoint = points.data[attribute].length / points.numPoints;
+				var Type = points.data[attribute].constructor;
+				var expanded = new Type(elementsPerPoint * newSize);
+				expanded.set(points.data[attribute], elementsPerPoint * currentSize);
+				this.data[attribute] = expanded;
+			}
+		}
+
+		this.numPoints = newSize;
+
+		this.boundingBox.union(points.boundingBox);
+	}
+}
+
 function paramThreeToGL(gl, p)
 {
 	var extension;
@@ -8991,62 +9071,6 @@ function paramThreeToGL(gl, p)
 	}
 
 	return 0;
-}
-
-class Points
-{
-	constructor()
-	{
-		this.boundingBox = new THREE.Box3();
-		this.numPoints = 0;
-		this.data = {};
-	}
-
-	add(points)
-	{
-		var currentSize = this.numPoints;
-		var additionalSize = points.numPoints;
-		var newSize = currentSize + additionalSize;
-
-		var thisAttributes = Object.keys(this.data);
-		var otherAttributes = Object.keys(points.data);
-		var attributes = new Set([...thisAttributes, ...otherAttributes]);
-
-		for(var attribute of attributes)
-		{
-			if(thisAttributes.includes(attribute) && otherAttributes.includes(attribute))
-			{
-				//attribute in both, merge
-				var Type = this.data[attribute].constructor;
-				var merged = new Type(this.data[attribute].length + points.data[attribute].length);
-				merged.set(this.data[attribute], 0);
-				merged.set(points.data[attribute], this.data[attribute].length);
-				this.data[attribute] = merged;
-			}
-			else if(thisAttributes.includes(attribute) && !otherAttributes.includes(attribute))
-			{
-				//attribute only in this; take over this and expand to new size
-				var elementsPerPoint = this.data[attribute].length / this.numPoints;
-				var Type = this.data[attribute].constructor;
-				var expanded = new Type(elementsPerPoint * newSize);
-				expanded.set(this.data[attribute], 0);
-				this.data[attribute] = expanded;
-			}
-			else if(!thisAttributes.includes(attribute) && otherAttributes.includes(attribute))
-			{
-				//attribute only in points to be added; take over new points and expand to new size
-				var elementsPerPoint = points.data[attribute].length / points.numPoints;
-				var Type = points.data[attribute].constructor;
-				var expanded = new Type(elementsPerPoint * newSize);
-				expanded.set(points.data[attribute], elementsPerPoint * currentSize);
-				this.data[attribute] = expanded;
-			}
-		}
-
-		this.numPoints = newSize;
-
-		this.boundingBox.union(points.boundingBox);
-	}
 }
 
 class WebGLTexture
@@ -10160,18 +10184,13 @@ class Group extends BasicGroup
 		var visibilityTextureData = null;
 		var currentTextureBindingPoint = 0;
 
-		if(material.pointSizeType >= 0)
+		if(material.pointSizeType === PointSizeType.ADAPTIVE || material.pointColorType === PointColorType.LOD)
 		{
-			if(material.pointSizeType === PointSizeType.ADAPTIVE || material.pointColorType === PointColorType.LOD)
-			{
-				var vnNodes = nodes;
-				visibilityTextureData = octree.computeVisibilityTextureData(vnNodes, camera);
+			visibilityTextureData = octree.computeVisibilityTextureData(nodes, camera);
 
-				var vnt = material.visibleNodesTexture;
-				var data = vnt.image.data;
-				data.set(visibilityTextureData.data);
-				vnt.needsUpdate = true;
-			}
+			var vnt = material.visibleNodesTexture;
+			vnt.image.data.set(visibilityTextureData.data);
+			vnt.needsUpdate = true;
 		}
 
 		var shader = null;
@@ -10184,8 +10203,6 @@ class Group extends BasicGroup
 		else
 		{
 			shader = this.shaders.get(material);
-			vs = material.vertexShader;
-			fs = material.fragmentShader;
 		}
 
 		var numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
@@ -10235,9 +10252,7 @@ class Group extends BasicGroup
 
 		gl.useProgram(shader.program);
 
-		var transparent = material.opacity < 1;
-
-		if(transparent)
+		if(material.opacity < 1.0)
 		{
 			gl.enable(gl.BLEND);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
@@ -10427,4 +10442,4 @@ class Group extends BasicGroup
 	}
 }
 
-export { Global, AttributeLocations, Classification, ClipTask, ClipMethod, PointSizeType, PointShape, PointColorType, TreeType, loadPointCloud, updateVisibility, updatePointClouds, updateVisibilityStructures, paramThreeToGL, BinaryHeap, LRU, HelperUtils, VersionUtils, WorkerManager, PointAttribute, PointAttributes, PointAttributeNames, PointAttributeTypes, Gradients, Points, Shader, WebGLTexture, WebGLBuffer, Shaders, DEM$1 as DEM, DEMNode, PointCloudTree, PointCloudArena4D, PointCloudOctree, PointCloudOctreeGeometry, PointCloudArena4DGeometry, PointCloudGreyhoundGeometry, PointCloudEptGeometry, PointCloudMaterial, LASLoader, BinaryLoader, GreyhoundUtils$1 as GreyhoundUtils, GreyhoundLoader, GreyhoundBinaryLoader, POCLoader, LASLAZLoader, EptLoader, EptLaszipLoader, EptBinaryLoader, BasicGroup, Group };
+export { Global, AttributeLocations, Classification, ClipTask, ClipMethod, PointSizeType, PointShape, PointColorType, TreeType, loadPointCloud, updateVisibility, updatePointClouds, updateVisibilityStructures, BinaryHeap, LRU, HelperUtils, VersionUtils, WorkerManager, PointAttribute, PointAttributes, PointAttributeNames, PointAttributeTypes, Gradients, Points, Shader, WebGLTexture, WebGLBuffer, Shaders, DEM$1 as DEM, DEMNode, PointCloudTree, PointCloudArena4D, PointCloudOctree, PointCloudOctreeGeometry, PointCloudArena4DGeometry, PointCloudGreyhoundGeometry, PointCloudEptGeometry, PointCloudMaterial, LASLoader, BinaryLoader, GreyhoundUtils$1 as GreyhoundUtils, GreyhoundLoader, GreyhoundBinaryLoader, POCLoader, LASLAZLoader, EptLoader, EptLaszipLoader, EptBinaryLoader, BasicGroup, Group };

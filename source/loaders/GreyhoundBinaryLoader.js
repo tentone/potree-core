@@ -63,7 +63,8 @@ class GreyhoundBinaryLoader
 		node.numPoints = numPoints;
 
 		var bb = node.boundingBox;
-		var nodeOffset = node.pcoGeometry.boundingBox.getCenter().sub(node.boundingBox.min);
+		var center = new THREE.Vector3();
+		var nodeOffset = node.pcoGeometry.boundingBox.getCenter(center).sub(node.boundingBox.min);
 
 		var message =
 		{

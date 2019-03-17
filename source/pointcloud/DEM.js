@@ -16,8 +16,7 @@ class DEM
 		this.version = 0;
 	}
 
-	//expands the tree to all nodes that intersect <box> at <level>
-	//returns the intersecting nodes at <level>
+	//expands the tree to all nodes that intersect <box> at <level> returns the intersecting nodes at <level>
 	expandAndFindByBox(box, level)
 	{
 		if(level === 0)
@@ -117,8 +116,6 @@ class DEM
 
 	height(position)
 	{
-		//return this.root.height(position);
-
 		if(!this.root)
 		{
 			return 0;

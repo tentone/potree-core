@@ -352,18 +352,13 @@ class Group extends BasicGroup
 		var visibilityTextureData = null;
 		var currentTextureBindingPoint = 0;
 
-		if(material.pointSizeType >= 0)
+		if(material.pointSizeType === PointSizeType.ADAPTIVE || material.pointColorType === PointColorType.LOD)
 		{
-			if(material.pointSizeType === PointSizeType.ADAPTIVE || material.pointColorType === PointColorType.LOD)
-			{
-				var vnNodes = nodes;
-				visibilityTextureData = octree.computeVisibilityTextureData(vnNodes, camera);
+			visibilityTextureData = octree.computeVisibilityTextureData(nodes, camera);
 
-				var vnt = material.visibleNodesTexture;
-				var data = vnt.image.data;
-				data.set(visibilityTextureData.data);
-				vnt.needsUpdate = true;
-			}
+			var vnt = material.visibleNodesTexture;
+			vnt.image.data.set(visibilityTextureData.data);
+			vnt.needsUpdate = true;
 		}
 
 		var shader = null;
@@ -376,8 +371,6 @@ class Group extends BasicGroup
 		else
 		{
 			shader = this.shaders.get(material);
-			vs = material.vertexShader;
-			fs = material.fragmentShader;
 		}
 
 		var numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
@@ -427,9 +420,7 @@ class Group extends BasicGroup
 
 		gl.useProgram(shader.program);
 
-		var transparent = material.opacity < 1;
-
-		if(transparent)
+		if(material.opacity < 1.0)
 		{
 			gl.enable(gl.BLEND);
 			gl.blendFunc(gl.SRC_ALPHA, gl.ONE);

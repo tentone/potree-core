@@ -565,7 +565,8 @@ class PointCloudOctree extends PointCloudTree
 		var box = this.boundingBox;
 		var transform = this.matrixWorld;
 		var tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
-		this.position.set(0, 0, 0).sub(tBox.getCenter());
+
+		this.position.set(0, 0, 0).sub(tBox.getCenter(new THREE.Vector3()));
 	};
 
 	moveToGroundPlane()
@@ -815,10 +816,7 @@ class PointCloudOctree extends PointCloudTree
 
 		var gl = renderer.getContext();
 		gl.enable(gl.SCISSOR_TEST);
-		gl.scissor(
-			parseInt(pixelPos.x - (pickWindowSize - 1) / 2),
-			parseInt(pixelPos.y - (pickWindowSize - 1) / 2),
-			parseInt(pickWindowSize), parseInt(pickWindowSize));
+		gl.scissor(parseInt(pixelPos.x - (pickWindowSize - 1) / 2), parseInt(pixelPos.y - (pickWindowSize - 1) / 2), parseInt(pickWindowSize), parseInt(pickWindowSize));
 
 		renderer.state.buffers.depth.setTest(pickMaterial.depthTest);
 		renderer.state.buffers.depth.setMask(pickMaterial.depthWrite);
@@ -859,6 +857,7 @@ class PointCloudOctree extends PointCloudTree
 		//find closest hit inside pixelWindow boundaries
 		var min = Number.MAX_VALUE;
 		var hits = [];
+
 		for(var u = 0; u < pickWindowSize; u++)
 		{
 			for(var v = 0; v < pickWindowSize; v++)
@@ -896,7 +895,6 @@ class PointCloudOctree extends PointCloudTree
 							hits.push(hit);
 						}
 					}
-
 				}
 			}
 		}
@@ -929,6 +927,8 @@ class PointCloudOctree extends PointCloudTree
 
 					point[attributeName] = position;
 				}
+
+				/*
 				else if(attributeName === "indices")
 				{
 
@@ -945,6 +945,7 @@ class PointCloudOctree extends PointCloudTree
 					//	point[attribute.name] = value;
 					//}
 				}
+				*/
 
 			}
 
@@ -967,7 +968,7 @@ class PointCloudOctree extends PointCloudTree
 			else
 			{
 				return hits[0].point;
-				//var sorted = hits.sort( (a, b) => a.distanceToCenter - b.distanceToCenter);
+				//var sorted = hits.sort((a, b) => a.distanceToCenter - b.distanceToCenter);
 				//return sorted[0].point;
 			}
 		}
@@ -1019,7 +1020,8 @@ class PointCloudOctree extends PointCloudTree
 			yield;
 		}
 
-		var fittedPosition = shrinkedLocalBounds.getCenter().applyMatrix4(boxNode.matrixWorld);
+
+		var fittedPosition = shrinkedLocalBounds.getCenter(new THREE.Vector3()).applyMatrix4(boxNode.matrixWorld);
 
 		var fitted = new THREE.Object3D();
 		fitted.position.copy(fittedPosition);
@@ -1075,7 +1077,7 @@ class PointCloudOctree extends PointCloudTree
 			}
 		}
 
-		var fittedPosition = shrinkedLocalBounds.getCenter().applyMatrix4(boxNode.matrixWorld);
+		var fittedPosition = shrinkedLocalBounds.getCenter(new THREE.Vector3()).applyMatrix4(boxNode.matrixWorld);
 
 		var fitted = new THREE.Object3D();
 		fitted.position.copy(fittedPosition);

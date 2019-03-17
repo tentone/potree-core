@@ -254,7 +254,8 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 					geometry.boundingBox.max.add(offset);
 					geometry.offset = offset;
 
-					var center = geometry.boundingBox.getCenter();
+					var center = new THREE.Vector3();
+					geometry.boundingBox.getCenter(center);
 					var radius = geometry.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 					geometry.boundingSphere = new THREE.Sphere(center, radius);
 
@@ -338,6 +339,8 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 				node.level = stack.length;
 				levels = Math.max(levels, node.level);
 
+				
+
 				if(stack.length > 0)
 				{
 					var parent = stack[stack.length - 1];
@@ -362,7 +365,9 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 							node.boundingBox.max.z = node.boundingBox.min.z + parentBBSize.z / 2;
 						}
 
-						var center = node.boundingBox.getCenter();
+						
+						var center = new THREE.Vector3();
+						node.boundingBox.getCenter(center);
 						var radius = node.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 						node.boundingSphere = new THREE.Sphere(center, radius);
 					}
@@ -384,7 +389,8 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 							node.boundingBox.min.z = node.boundingBox.min.z + parentBBSize.z / 2;
 						}
 
-						var center = node.boundingBox.getCenter();
+						var center = new THREE.Vector3();
+						node.boundingBox.getCenter(center);
 						var radius = node.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 						node.boundingSphere = new THREE.Sphere(center, radius);
 					}
@@ -393,7 +399,9 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 				{
 					root = node;
 					root.boundingBox = this.boundingBox.clone();
-					var center = root.boundingBox.getCenter();
+
+					var center = new THREE.Vector3();
+					root.boundingBox.getCenter(center);
 					var radius = root.boundingBox.getSize(new THREE.Vector3()).length() / 2;
 					root.boundingSphere = new THREE.Sphere(center, radius);
 				}

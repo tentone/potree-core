@@ -26,8 +26,6 @@ class LASLAZLoader
 		}
 	}
 
-	static progressCB(){}
-
 	load(node)
 	{
 		if(node.loaded)
@@ -36,7 +34,6 @@ class LASLAZLoader
 		}
 
 		var pointAttributes = node.pcoGeometry.pointAttributes;
-
 		var url = node.getURL();
 
 		if(this.version.equalOrHigher("1.4"))
@@ -50,11 +47,18 @@ class LASLAZLoader
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
 		xhr.onload = () =>
 		{
-			this.parse(node, xhr.response);
+			if(xhr.response instanceof ArrayBuffer)
+			{
+				this.parse(node, xhr.response);
+			}
+			else
+			{
+				console.log("Potree: LASLAZLoader xhr response is not a ArrayBuffer.");
+			}
 		};
 		xhr.onerror = function()
 		{
-			console.log("Potree: Failed to load file, " + xhr.status + ", file: " + url);
+			console.log("Potree: LASLAZLoader failed to load file, " + xhr.status + ", file: " + url);
 		};
 		xhr.send(null);
 	}
@@ -64,86 +68,81 @@ class LASLAZLoader
 		var lf = new LASFile(buffer);
 		var handler = new LASLAZBatcher(node);
 
-		lf.open()
-			.then(msg =>
+		lf.open() .then(msg =>
+		{
+			lf.isOpen = true;
+			return lf;
+		}).catch(msg =>
+		{
+			console.log("Potree: Failed to open file.");
+		}).then(lf =>
+		{
+			return lf.getHeader().then(function(h)
 			{
-				lf.isOpen = true;
-				return lf;
-			}).catch(msg =>
-			{
-				console.log("Potree: Failed to open file.");
-			}).then(lf =>
-			{
-				return lf.getHeader().then(function(h)
-				{
-					return [lf, h];
-				});
-			}).then(v =>
-			{
-				var lf = v[0];
-				var header = v[1];
-
-				var skip = 1;
-				var totalRead = 0;
-				var totalToRead = (skip <= 1 ? header.pointsCount : header.pointsCount / skip);
-				var reader = function()
-				{
-					var p = lf.readData(1000000, 0, skip);
-					return p.then(function(data)
-					{
-						handler.push(new LASDecoder(data.buffer,
-							header.pointsFormatId,
-							header.pointsStructSize,
-							data.count,
-							header.scale,
-							header.offset,
-							header.mins, header.maxs));
-
-						totalRead += data.count;
-						LASLAZLoader.progressCB(totalRead / totalToRead);
-
-						if(data.hasMoreData)
-						{
-							return reader();
-						}
-						else
-						{
-							header.totalRead = totalRead;
-							header.versionAsString = lf.versionAsString;
-							header.isCompressed = lf.isCompressed;
-							return [lf, header, handler];
-						}
-					});
-				};
-
-				return reader();
-			}).then(v =>
-			{
-				var lf = v[0];
-				
-				//we"re done loading this file
-				LASLAZLoader.progressCB(1);
-
-				//Close it
-				return lf.close().then(function()
-				{
-					lf.isOpen = false;
-
-					return v.slice(1);
-				}).catch(e =>
-				{
-					//If there was a cancellation, make sure the file is closed, if the file is open close and then fail
-					if(lf.isOpen)
-					{
-						return lf.close().then(function()
-						{
-							lf.isOpen = false;
-							throw e;
-						});
-					}
-					throw e;
-				});
+				return [lf, h];
 			});
+		}).then(v =>
+		{
+			let lf = v[0];
+			let header = v[1];
+			let skip = 1;
+			let totalRead = 0;
+			let totalToRead = (skip <= 1 ? header.pointsCount : header.pointsCount / skip);
+
+			var reader = function()
+			{
+				let p = lf.readData(1000000, 0, skip);
+
+				return p.then(function(data)
+				{
+					handler.push(new LASDecoder(data.buffer,
+						header.pointsFormatId,
+						header.pointsStructSize,
+						data.count,
+						header.scale,
+						header.offset,
+						header.mins, header.maxs));
+
+					totalRead += data.count;
+
+					if(data.hasMoreData)
+					{
+						return reader();
+					}
+					else
+					{
+						header.totalRead = totalRead;
+						header.versionAsString = lf.versionAsString;
+						header.isCompressed = lf.isCompressed;
+						return [lf, header, handler];
+					}
+				});
+			};
+
+			return reader();
+		}).then(v =>
+		{
+			let lf = v[0];
+
+			//Close it
+			return lf.close().then(function()
+			{
+				lf.isOpen = false;
+				return v.slice(1);
+			}).catch(e =>
+			{
+				//If there was a cancellation, make sure the file is closed, if the file is open close and then fail
+				if(lf.isOpen)
+				{
+					return lf.close().then(function()
+					{
+						lf.isOpen = false;
+						throw e;
+					});
+				}
+				throw e;
+			});
+		});
 	}
 
 	handle(node, url){}
@@ -156,26 +155,27 @@ class LASLAZBatcher
 		this.node = node;
 	}
 
-	push(lasBuffer)
+	push(data)
 	{
 		var self = this;
 
 		var message =
 		{
-			buffer: lasBuffer.arrayb,
-			numPoints: lasBuffer.pointsCount,
-			pointSize: lasBuffer.pointSize,
+			buffer: data.arrayb,
+			numPoints: data.pointsCount,
+			pointSize: data.pointSize,
 			pointFormatID: 2,
-			scale: lasBuffer.scale,
-			offset: lasBuffer.offset,
-			mins: lasBuffer.mins,
-			maxs: lasBuffer.maxs
+			scale: data.scale,
+			offset: data.offset,
+			mins: data.mins,
+			maxs: data.maxs
 		};
 
-		Global.workerPool.runTask(WorkerManager.LAS_DECODER, function(e)
+		var worker = Global.workerPool.getWorker(WorkerManager.LAS_DECODER);
+		worker.onmessage = function(e)
 		{
 			var geometry = new THREE.BufferGeometry();
-			var numPoints = lasBuffer.pointsCount;
+			var numPoints = data.pointsCount;
 
 			var positions = new Float32Array(e.data.position);
 			var colors = new Uint8Array(e.data.color);
@@ -212,7 +212,11 @@ class LASLAZBatcher
 			self.node.loading = false;
 			Global.numNodesLoading--;
 			self.node.mean = new THREE.Vector3(...e.data.mean);
-		}, message, [message.buffer]);
+
+			Global.workerPool.returnWorker(WorkerManager.LAS_DECODER, worker);
+		};
+
+		worker.postMessage(message, [message.buffer]);
 	};
 };
 

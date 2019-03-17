@@ -53,341 +53,95 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		this.fog = false;
 		this.defines = new Map();
 		
-		this.attributes = {
-			position:
-			{
-				type: "fv",
-				value: []
-			},
-			color:
-			{
-				type: "fv",
-				value: []
-			},
-			normal:
-			{
-				type: "fv",
-				value: []
-			},
-			intensity:
-			{
-				type: "f",
-				value: []
-			},
-			classification:
-			{
-				type: "f",
-				value: []
-			},
-			returnNumber:
-			{
-				type: "f",
-				value: []
-			},
-			numberOfReturns:
-			{
-				type: "f",
-				value: []
-			},
-			pointSourceID:
-			{
-				type: "f",
-				value: []
-			},
-			indices:
-			{
-				type: "fv",
-				value: []
-			}
+		this.attributes =
+		{
+			position: {type: 'fv', value: []},
+			color: {type: 'fv', value: []},
+			normal: {type: 'fv', value: []},
+			intensity: {type: 'f', value: []},
+			classification: {type: 'f', value: []},
+			returnNumber: {type: 'f', value: []},
+			numberOfReturns: {type: 'f', value: []},
+			pointSourceID: {type: 'f', value: []},
+			indices: {type: 'fv', value: []}
 		};
 
-		this.uniforms = {
-			level:
-			{
-				type: "f",
-				value: 0.0
-			},
-			vnStart:
-			{
-				type: "f",
-				value: 0.0
-			},
-			spacing:
-			{
-				type: "f",
-				value: 1.0
-			},
-			blendHardness:
-			{
-				type: "f",
-				value: 2.0
-			},
-			blendDepthSupplement:
-			{
-				type: "f",
-				value: 0.0
-			},
-			fov:
-			{
-				type: "f",
-				value: 1.0
-			},
-			screenWidth:
-			{
-				type: "f",
-				value: 1.0
-			},
-			screenHeight:
-			{
-				type: "f",
-				value: 1.0
-			},
-			near:
-			{
-				type: "f",
-				value: 0.1
-			},
-			far:
-			{
-				type: "f",
-				value: 1.0
-			},
-			uColor:
-			{
-				type: "c",
-				value: new THREE.Color(0xffffff)
-			},
-			uOpacity:
-			{
-				type: "f",
-				value: 1.0
-			},
-			size:
-			{
-				type: "f",
-				value: pointSize
-			},
-			minSize:
-			{
-				type: "f",
-				value: minSize
-			},
-			maxSize:
-			{
-				type: "f",
-				value: maxSize
-			},
-			octreeSize:
-			{
-				type: "f",
-				value: 0
-			},
-			bbSize:
-			{
-				type: "fv",
-				value: [0, 0, 0]
-			},
-			elevationRange:
-			{
-				type: "2fv",
-				value: [0, 0]
-			},
-			clipBoxCount:
-			{
-				type: "f",
-				value: 0
-			},
-			clipPolygonCount:
-			{
-				type: "i",
-				value: 0
-			},
-			clipBoxes:
-			{
-				type: "Matrix4fv",
-				value: []
-			},
-			clipPolygons:
-			{
-				type: "3fv",
-				value: []
-			},
-			clipPolygonVCount:
-			{
-				type: "iv",
-				value: []
-			},
-			clipPolygonVP:
-			{
-				type: "Matrix4fv",
-				value: []
-			},
-			visibleNodes:
-			{
-				type: "t",
-				value: this.visibleNodesTexture
-			},
-			pcIndex:
-			{
-				type: "f",
-				value: 0
-			},
-			gradient:
-			{
-				type: "t",
-				value: this.gradientTexture
-			},
-			classificationLUT:
-			{
-				type: "t",
-				value: this.classificationTexture
-			},
-			uHQDepthMap:
-			{
-				type: "t",
-				value: null
-			},
-			toModel:
-			{
-				type: "Matrix4f",
-				value: []
-			},
-			diffuse:
-			{
-				type: "fv",
-				value: [1, 1, 1]
-			},
-			transition:
-			{
-				type: "f",
-				value: 0.5
-			},
-			intensityRange:
-			{
-				type: "fv",
-				value: [0, 65000]
-			},
-			intensityGamma:
-			{
-				type: "f",
-				value: 1
-			},
-			intensityContrast:
-			{
-				type: "f",
-				value: 0
-			},
-			intensityBrightness:
-			{
-				type: "f",
-				value: 0
-			},
-			rgbGamma:
-			{
-				type: "f",
-				value: 1
-			},
-			rgbContrast:
-			{
-				type: "f",
-				value: 0
-			},
-			rgbBrightness:
-			{
-				type: "f",
-				value: 0
-			},
-			wRGB:
-			{
-				type: "f",
-				value: 1
-			},
-			wIntensity:
-			{
-				type: "f",
-				value: 0
-			},
-			wElevation:
-			{
-				type: "f",
-				value: 0
-			},
-			wClassification:
-			{
-				type: "f",
-				value: 0
-			},
-			wReturnNumber:
-			{
-				type: "f",
-				value: 0
-			},
-			wSourceID:
-			{
-				type: "f",
-				value: 0
-			},
-			useOrthographicCamera:
-			{
-				type: "b",
-				value: false
-			},
-			clipTask:
-			{
-				type: "i",
-				value: 1
-			},
-			clipMethod:
-			{
-				type: "i",
-				value: 1
-			},
-			uSnapshot:
-			{
-				type: "tv",
-				value: []
-			},
-			uSnapshotDepth:
-			{
-				type: "tv",
-				value: []
-			},
-			uSnapView:
-			{
-				type: "Matrix4fv",
-				value: []
-			},
-			uSnapProj:
-			{
-				type: "Matrix4fv",
-				value: []
-			},
-			uSnapProjInv:
-			{
-				type: "Matrix4fv",
-				value: []
-			},
-			uSnapViewInv:
-			{
-				type: "Matrix4fv",
-				value: []
-			},
-			uShadowColor:
-			{
-				type: "3fv",
-				value: [0, 0, 0]
-			}
+		this.uniforms =
+		{
+			level: {type: "f", value: 0.0},
+			vnStart: {type: "f", value: 0.0},
+			spacing: {type: "f", value: 1.0},
+			blendHardness: {type: "f", value: 2.0},
+			blendDepthSupplement:	{type: "f", value: 0.0},
+			fov: {type: "f", value: 1.0},
+			screenWidth: {type: "f", value: 1.0},
+			screenHeight: {type: "f", value: 1.0},
+			near: {type: "f", value: 0.1},
+			far: {type: "f", value: 1.0},
+			uColor: {type: "c", value: new THREE.Color( 0xffffff )},
+			uOpacity: {type: "f", value: 1.0},
+			size: {type: "f", value: pointSize},
+			minSize: {type: "f", value: minSize},
+			maxSize: {type: "f", value: maxSize},
+			octreeSize: {type: "f", value: 0},
+			bbSize: {type: "fv", value: [0, 0, 0]},
+			elevationRange: {type: "2fv", value: [0, 0]},
+
+			clipBoxCount: {type: "f", value: 0},
+			//clipSphereCount: {type: "f", value: 0},
+			clipPolygonCount: {type: "i", value: 0},
+			clipBoxes: {type: "Matrix4fv", value: []},
+			//clipSpheres: {type: "Matrix4fv", value: []},
+			clipPolygons: {type: "3fv", value: []},
+			clipPolygonVCount: {type: "iv", value: []},
+			clipPolygonVP: {type: "Matrix4fv", value: []},
+
+			visibleNodes: {type: "t", value: this.visibleNodesTexture},
+			pcIndex: {type: "f", value: 0},
+			gradient: {type: "t", value: this.gradientTexture},
+			classificationLUT: {type: "t", value: this.classificationTexture},
+			uHQDepthMap: {type: "t", value: null},
+			toModel: {type: "Matrix4f", value: []},
+			diffuse: {type: "fv", value: [1, 1, 1]},
+			transition: {type: "f", value: 0.5},
+			intensityRange: {type: "fv", value: [0, 65000]},
+			intensityGamma: {type: "f", value: 1},
+			intensityContrast: {type: "f", value: 0},
+			intensityBrightness:{type: "f", value: 0},
+			rgbGamma: {type: "f", value: 1},
+			rgbContrast: {type: "f", value: 0},
+			rgbBrightness: {type: "f", value: 0},
+			wRGB: {type: "f", value: 1},
+			wIntensity: {type: "f", value: 0},
+			wElevation: {type: "f", value: 0},
+			wClassification: {type: "f", value: 0},
+			wReturnNumber: {type: "f", value: 0},
+			wSourceID: {type: "f", value: 0},
+			useOrthographicCamera: {type: "b", value: false},
+			clipTask: {type: "i", value: 1},
+			clipMethod: {type: "i", value: 1},
+			uSnapshot: {type: "tv", value: []},
+			uSnapshotDepth: {type: "tv", value: []},
+			uSnapView: {type: "Matrix4fv", value: []},
+			uSnapProj: {type: "Matrix4fv", value: []},
+			uSnapProjInv: {type: "Matrix4fv", value: []},
+			uSnapViewInv: {type: "Matrix4fv", value: []},
+			uShadowColor: {type: "3fv", value: [0, 0, 0]},
+
+			uFilterReturnNumberRange: {type: "fv", value: [0, 7]},
+			uFilterNumberOfReturnsRange: {type: "fv", value: [0, 7]},
+			uFilterGPSTimeClipRange: {type: "fv", value: [0, 7]},
 		};
 		
 		this.classification = Classification.DEFAULT;
 		this.defaultAttributeValues.normal = [0, 0, 0];
 		this.defaultAttributeValues.classification = [0, 0, 0];
 		this.defaultAttributeValues.indices = [0, 0, 0, 0];
-		this.vertexColors = THREE.VertexColors;
 
 		var defines = this.getDefines();
 		this.vertexShader = defines + Shaders["pointcloud.vs"];
 		this.fragmentShader = defines + Shaders["pointcloud.fs"];
+		this.vertexColors = THREE.VertexColors;
 	}
 
 	setDefine(key, value)
@@ -416,9 +170,32 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		var defines = this.getDefines();
 		this.vertexShader = defines + Shaders["pointcloud.vs"];
 		this.fragmentShader = defines + Shaders["pointcloud.fs"];
-		this.depthFunc = THREE.LessEqualDepth;
-		this.depthTest = true;
-		this.depthWrite = true;
+
+		if(this.opacity === 1.0)
+		{
+			this.blending = THREE.NoBlending;
+			this.transparent = false;
+			this.depthTest = true;
+			this.depthWrite = true;
+			this.depthFunc = THREE.LessEqualDepth;
+		}
+		else if(this.opacity < 1.0 && !this.useEDL)
+		{
+			this.blending = THREE.AdditiveBlending;
+			this.transparent = true;
+			this.depthTest = false;
+			this.depthWrite = true;
+			this.depthFunc = THREE.AlwaysDepth;
+		}
+
+		if(this.weighted)
+		{
+			this.blending = THREE.AdditiveBlending;
+			this.transparent = true;
+			this.depthTest = true;
+			this.depthWrite = false;
+		}
+
 		this.needsUpdate = true;
 	}
 
@@ -448,6 +225,7 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		{
 			defines.push("#define adaptive_point_size");
 		}
+
 		if(this.shape === PointShape.SQUARE)
 		{
 			defines.push("#define square_point_shape");
@@ -460,14 +238,17 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		{
 			defines.push("#define paraboloid_point_shape");
 		}
+
 		if(this._useEDL)
 		{
 			defines.push("#define use_edl");
 		}
+
 		if(this._snapEnabled)
 		{
 			defines.push("#define snap_enabled");
 		}
+
 		if(this._pointColorType === PointColorType.RGB)
 		{
 			defines.push("#define color_type_rgb");
@@ -528,6 +309,8 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		{
 			defines.push("#define color_type_composite");
 		}
+
+
 		if(this._treeType === TreeType.OCTREE)
 		{
 			defines.push("#define tree_type_octree");
@@ -536,6 +319,7 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		{
 			defines.push("#define tree_type_kdtree");
 		}
+
 		if(this.weighted)
 		{
 			defines.push("#define weighted_splats");
@@ -555,19 +339,24 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		{
 			return;
 		}
+
 		var doUpdate = (this.clipBoxes.length !== clipBoxes.length) && (clipBoxes.length === 0 || this.clipBoxes.length === 0);
 		this.uniforms.clipBoxCount.value = this.clipBoxes.length;
 		this.clipBoxes = clipBoxes;
+
 		if(doUpdate)
 		{
 			this.updateShaderSource();
 		}
+
 		this.uniforms.clipBoxes.value = new Float32Array(this.clipBoxes.length * 16);
+		
 		for(var i = 0; i < this.clipBoxes.length; i++)
 		{
 			var box = clipBoxes[i];
 			this.uniforms.clipBoxes.value.set(box.inverse.elements, 16 * i);
 		}
+
 		for(var i = 0; i < this.uniforms.clipBoxes.value.length; i++)
 		{
 			if(Number.isNaN(this.uniforms.clipBoxes.value[i]))

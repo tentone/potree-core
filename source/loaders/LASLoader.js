@@ -48,7 +48,9 @@ function readAs(buf, Type, offset, count)
 
 	var r = new Type(sub);
 	if(count === undefined || count === 1)
+	{
 		return r[0];
+	}
 
 	var ret = [];
 	for(var i = 0 ; i < count ; i ++)

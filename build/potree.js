@@ -4,220 +4,210 @@
 	(global = global || self, factory(global.Potree = {}));
 }(this, function (exports) { 'use strict';
 
-	/**
-	 * An item in the lru list.
-	 *
-	 * @param node
-	 * @class LRUItem
-	 */
-	function LRUItem(node)
+	class LRUItem
 	{
-		this.previous = null;
-		this.next = null;
-		this.node = node;
+		constructor(node)
+		{
+			this.previous = null;
+			this.next = null;
+			this.node = node;
+		}
 	}
 
 	/**
-	 * A doubly-linked-list of the least recently used elements.
-	 *
-	 * @class LRU
+	 * @class A doubly-linked-list of the least recently used elements.
 	 */
-	function LRU()
+	class LRU
 	{
-		//the least recently used item
-		this.first = null;
-
-		//the most recently used item
-		this.last = null;
-
-		//a list of all items in the lru list
-		this.items = {};
-		this.elements = 0;
-		this.numPoints = 0;
-	}
-
-	/**
-	 * Number of elements in the list
-	 *
-	 * @returns {Number}
-	 */
-	LRU.prototype.size = function()
-	{
-		return this.elements;
-	};
-
-	LRU.prototype.contains = function(node)
-	{
-		return this.items[node.id] == null;
-	};
-
-	/**
-	 * Makes node the most recently used item. if the list does not contain node, it will be added.
-	 *
-	 * @param node
-	 */
-	LRU.prototype.touch = function(node)
-	{
-		if(!node.loaded)
+		constructor()
 		{
-			return;
+			// the least recently used item
+			this.first = null;
+			// the most recently used item
+			this.last = null;
+			// a list of all items in the lru list
+			this.items = {};
+			this.elements = 0;
+			this.numPoints = 0;
 		}
 
-		//If item not found add item
-		if(this.items[node.id] == null)
+		size()
 		{
-			var item = new LRUItem(node);
-			item.previous = this.last;
-			this.last = item;
-			if(item.previous !== null)
-			{
-				item.previous.next = item;
-			}
-
-			this.items[node.id] = item;
-			this.elements++;
-
-			if(this.first === null)
-			{
-				this.first = item;
-			}
-			this.numPoints += node.numPoints;
+			return this.elements;
 		}
-		//Update in the list
-		else
-		{
-			var item = this.items[node.id];
 
-			//Handle first element
-			if(item.previous === null)
+		contains(node)
+		{
+			return this.items[node.id] == null;
+		}
+
+		touch(node)
+		{
+			if(!node.loaded)
 			{
-				if(item.next !== null)
+				return;
+			}
+
+			var item;
+
+			if(this.items[node.id] == null)
+			{
+				// add to list
+				item = new LRUItem(node);
+				item.previous = this.last;
+				this.last = item;
+				if(item.previous !== null)
 				{
-					this.first = item.next;
-					this.first.previous = null;
+					item.previous.next = item;
+				}
+
+				this.items[node.id] = item;
+				this.elements++;
+
+				if(this.first === null)
+				{
+					this.first = item;
+				}
+				this.numPoints += node.numPoints;
+			}
+			else
+			{
+				// update in list
+				item = this.items[node.id];
+
+				if(item.previous === null)
+				{
+					// handle touch on first element
+					if(item.next !== null)
+					{
+						this.first = item.next;
+						this.first.previous = null;
+						item.previous = this.last;
+						item.next = null;
+						this.last = item;
+						item.previous.next = item;
+					}
+				}
+				else if(item.next !== null)
+				{
+					// handle touch on any other element
+					item.previous.next = item.next;
+					item.next.previous = item.previous;
 					item.previous = this.last;
 					item.next = null;
 					this.last = item;
 					item.previous.next = item;
 				}
 			}
-			//Handle last element
-			else if(item.next === null);
-			//Handle any other element
-			else
-			{
-				item.previous.next = item.next;
-				item.next.previous = item.previous;
-				item.previous = this.last;
-				item.next = null;
-				this.last = item;
-				item.previous.next = item;
-			}
 		}
-	};
 
-	LRU.prototype.remove = function(node)
-	{
-		var lruItem = this.items[node.id];
-
-		if(lruItem)
+		remove(node)
 		{
-			if(this.elements === 1)
+			var lruItem = this.items[node.id];
+			if(lruItem)
 			{
-				this.first = null;
-				this.last = null;
-			}
-			else
-			{
-				if(!lruItem.previous)
+				if(this.elements === 1)
 				{
-					this.first = lruItem.next;
-					this.first.previous = null;
+					this.first = null;
+					this.last = null;
 				}
-				if(!lruItem.next)
+				else
 				{
-					this.last = lruItem.previous;
-					this.last.next = null;
-				}
-				if(lruItem.previous && lruItem.next)
-				{
-					lruItem.previous.next = lruItem.next;
-					lruItem.next.previous = lruItem.previous;
-				}
-			}
-
-			delete this.items[node.id];
-			this.elements--;
-			this.numPoints -= node.numPoints;
-		}
-	};
-
-	LRU.prototype.getLRUItem = function()
-	{
-		if(this.first === null)
-		{
-			return null;
-		}
-
-		return this.first.node;
-	};
-
-	LRU.prototype.freeMemory = function()
-	{
-		if(this.elements <= 1)
-		{
-			return;
-		}
-
-		while(this.numPoints > Global.pointLoadLimit)
-		{
-			var element = this.first;
-			var node = element.node;
-			this.disposeDescendants(node);
-		}
-	};
-
-	LRU.prototype.disposeDescendants = function(node)
-	{
-		var stack = [node];
-
-		while(stack.length > 0)
-		{
-			var current = stack.pop();
-			current.dispose();
-			this.remove(current);
-
-			for(var key in current.children)
-			{
-				if(current.children.hasOwnProperty(key))
-				{
-					var child = current.children[key];
-					if(child.loaded)
+					if(!lruItem.previous)
 					{
-						stack.push(current.children[key]);
+						this.first = lruItem.next;
+						this.first.previous = null;
+					}
+					if(!lruItem.next)
+					{
+						this.last = lruItem.previous;
+						this.last.next = null;
+					}
+					if(lruItem.previous && lruItem.next)
+					{
+						lruItem.previous.next = lruItem.next;
+						lruItem.next.previous = lruItem.previous;
+					}
+				}
+
+				delete this.items[node.id];
+				this.elements--;
+				this.numPoints -= node.numPoints;
+			}
+		}
+
+		getLRUItem()
+		{
+			if(this.first === null)
+			{
+				return null;
+			}
+			var lru = this.first;
+
+			return lru.node;
+		}
+
+		toString()
+		{
+			var string = "{ ";
+			var curr = this.first;
+
+			while (curr !== null)
+			{
+				string += curr.node.id;
+				if(curr.next !== null)
+				{
+					string += ", ";
+				}
+				curr = curr.next;
+			}
+
+			string += "}";
+			string += "(" + this.size() + ")";
+			return string;
+		}
+
+		freeMemory()
+		{
+			if(this.elements <= 1)
+			{
+				return;
+			}
+
+			while(this.numPoints > Global.pointLoadLimit)
+			{
+				var element = this.first;
+				var node = element.node;
+				this.disposeDescendants(node);
+			}
+		}
+
+		disposeDescendants(node)
+		{
+			var stack = [];
+			stack.push(node);
+
+			while (stack.length > 0)
+			{
+				var current = stack.pop();
+
+				current.dispose();
+				this.remove(current);
+
+				for(var key in current.children)
+				{
+					if(current.children.hasOwnProperty(key))
+					{
+						var child = current.children[key];
+						if(child.loaded)
+						{
+							stack.push(current.children[key]);
+						}
 					}
 				}
 			}
 		}
-	};
-
-	LRU.prototype.toString = function()
-	{
-		var string = "{ ";
-		var curr = this.first;
-		while(curr !== null)
-		{
-			string += curr.node.id;
-			if(curr.next !== null)
-			{
-				string += ", ";
-			}
-			curr = curr.next;
-		}
-		string += "}";
-		string += "(" + this.size() + ")";
-		return string;
-	};
+	}
 
 	/**
 	 * The worker manager is responsible for creating and managing worker instances.
@@ -939,31 +929,31 @@
 		}
 	}
 
-	function PointCloudGreyhoundGeometry()
+	class PointCloudGreyhoundGeometry
 	{
-		this.spacing = 0;
-		this.boundingBox = null;
-		this.root = null;
-		this.nodes = null;
-		this.pointAttributes = {};
-		this.hierarchyStepSize = -1;
-		this.loader = null;
-		this.schema = null;
+		constructor()
+		{
+			this.spacing = 0;
+			this.boundingBox = null;
+			this.root = null;
+			this.nodes = null;
+			this.pointAttributes = {};
+			this.hierarchyStepSize = -1;
+			this.loader = null;
+			this.schema = null;
 
-		this.baseDepth = null;
-		this.offset = null;
-		this.projection = null;
+			this.baseDepth = null;
+			this.offset = null;
+			this.projection = null;
 
-		this.boundingSphere = null;
+			this.boundingSphere = null;
 
-		//the serverURL will contain the base URL of the greyhound server. f.e. http://dev.greyhound.io/resource/autzen/
-		this.serverURL = null;
-
-		this.normalize = {
-			color: false,
-			intensity: false
-		};
+			// the serverURL will contain the base URL of the greyhound server. f.e. http://dev.greyhound.io/resource/autzen/
+			this.serverURL = null;
+			this.normalize = {color: false, intensity: false};
+		}
 	}
+
 	function PointCloudGreyhoundGeometryNode(name, pcoGeometry, boundingBox, scale, offset)
 	{
 		this.id = PointCloudGreyhoundGeometryNode.IDCount++;
@@ -1057,9 +1047,7 @@
 		var schema = this.pcoGeometry.schema;
 		var bounds = this.greyhoundBounds;
 
-		var boundsString =
-			bounds.min.x + "," + bounds.min.y + "," + bounds.min.z + "," +
-			bounds.max.x + "," + bounds.max.y + "," + bounds.max.z;
+		var boundsString = bounds.min.x + "," + bounds.min.y + "," + bounds.min.z + "," + bounds.max.x + "," + bounds.max.y + "," + bounds.max.z;
 
 		var url = "" + this.pcoGeometry.serverURL +
 			"read?depthBegin=" +
@@ -1237,9 +1225,7 @@
 
 			var bounds = this.greyhoundBounds;
 
-			var boundsString =
-				bounds.min.x + "," + bounds.min.y + "," + bounds.min.z + "," +
-				bounds.max.x + "," + bounds.max.y + "," + bounds.max.z;
+			var boundsString = bounds.min.x + "," + bounds.min.y + "," + bounds.min.z + "," + bounds.max.x + "," + bounds.max.y + "," + bounds.max.z;
 
 			var hurl = "" + this.pcoGeometry.serverURL +
 				"hierarchy?bounds=[" + boundsString + "]" +
@@ -1257,31 +1243,19 @@
 				hurl += "&offset=[" + offset.x + "," + offset.y + "," + offset.z + "]";
 			}
 
+			var self = this;
 			var xhr = new XMLHttpRequest();
 			xhr.overrideMimeType("text/plain");
 			xhr.open("GET", hurl, true);
-
-			var that = this;
-			xhr.onreadystatechange = function()
+			xhr.onload = function(event)
 			{
-				if(xhr.readyState === 4)
-				{
-					if(xhr.status === 200 || xhr.status === 0)
-					{
-						var greyhoundHierarchy = JSON.parse(xhr.responseText) ||
-						{};
-						callback(that, greyhoundHierarchy);
-					}
-					else
-					{
-						console.log(
-							"Failed to load file! HTTP status:", xhr.status,
-							"file:", hurl
-						);
-					}
-				}
+				var greyhoundHierarchy = JSON.parse(xhr.responseText) || {};
+				callback(self, greyhoundHierarchy);
 			};
-
+			xhr.onerror = function(event)
+			{
+				console.log("Potree: Failed to load file! HTTP status " + xhr.status + ", file:" + hurl, event);
+			};
 			xhr.send(null);
 		}
 	};
@@ -1299,12 +1273,12 @@
 			this.geometry = null;
 			this.loaded = false;
 
-			//this.dispatchEvent( { type: "dispose" } );
 			for(var i = 0; i < this.oneTimeDisposeHandlers.length; i++)
 			{
 				var handler = this.oneTimeDisposeHandlers[i];
 				handler();
 			}
+			
 			this.oneTimeDisposeHandlers = [];
 		}
 	};
@@ -2154,7 +2128,9 @@
 
 		var r = new Type(sub);
 		if(count === undefined || count === 1)
+		{
 			return r[0];
+		}
 
 		var ret = [];
 		for(var i = 0 ; i < count ; i ++)
@@ -2486,8 +2462,6 @@
 			}
 		}
 
-		static progressCB(){}
-
 		load(node)
 		{
 			if(node.loaded)
@@ -2496,7 +2470,6 @@
 			}
 
 			var pointAttributes = node.pcoGeometry.pointAttributes;
-
 			var url = node.getURL();
 
 			if(this.version.equalOrHigher("1.4"))
@@ -2510,11 +2483,18 @@
 			xhr.overrideMimeType("text/plain; charset=x-user-defined");
 			xhr.onload = () =>
 			{
-				this.parse(node, xhr.response);
+				if(xhr.response instanceof ArrayBuffer)
+				{
+					this.parse(node, xhr.response);
+				}
+				else
+				{
+					console.log("Potree: LASLAZLoader xhr response is not a ArrayBuffer.");
+				}
 			};
 			xhr.onerror = function()
 			{
-				console.log("Potree: Failed to load file, " + xhr.status + ", file: " + url);
+				console.log("Potree: LASLAZLoader failed to load file, " + xhr.status + ", file: " + url);
 			};
 			xhr.send(null);
 		}
@@ -2524,86 +2504,81 @@
 			var lf = new LASFile(buffer);
 			var handler = new LASLAZBatcher(node);
 
-			lf.open()
-				.then(msg =>
+			lf.open() .then(msg =>
+			{
+				lf.isOpen = true;
+				return lf;
+			}).catch(msg =>
+			{
+				console.log("Potree: Failed to open file.");
+			}).then(lf =>
+			{
+				return lf.getHeader().then(function(h)
 				{
-					lf.isOpen = true;
-					return lf;
-				}).catch(msg =>
-				{
-					console.log("Potree: Failed to open file.");
-				}).then(lf =>
-				{
-					return lf.getHeader().then(function(h)
-					{
-						return [lf, h];
-					});
-				}).then(v =>
-				{
-					var lf = v[0];
-					var header = v[1];
-
-					var skip = 1;
-					var totalRead = 0;
-					var totalToRead = (header.pointsCount);
-					var reader = function()
-					{
-						var p = lf.readData(1000000, 0, skip);
-						return p.then(function(data)
-						{
-							handler.push(new LASDecoder(data.buffer,
-								header.pointsFormatId,
-								header.pointsStructSize,
-								data.count,
-								header.scale,
-								header.offset,
-								header.mins, header.maxs));
-
-							totalRead += data.count;
-							LASLAZLoader.progressCB(totalRead / totalToRead);
-
-							if(data.hasMoreData)
-							{
-								return reader();
-							}
-							else
-							{
-								header.totalRead = totalRead;
-								header.versionAsString = lf.versionAsString;
-								header.isCompressed = lf.isCompressed;
-								return [lf, header, handler];
-							}
-						});
-					};
-
-					return reader();
-				}).then(v =>
-				{
-					var lf = v[0];
-					
-					//we"re done loading this file
-					LASLAZLoader.progressCB(1);
-
-					//Close it
-					return lf.close().then(function()
-					{
-						lf.isOpen = false;
-
-						return v.slice(1);
-					}).catch(e =>
-					{
-						//If there was a cancellation, make sure the file is closed, if the file is open close and then fail
-						if(lf.isOpen)
-						{
-							return lf.close().then(function()
-							{
-								lf.isOpen = false;
-								throw e;
-							});
-						}
-						throw e;
-					});
+					return [lf, h];
 				});
+			}).then(v =>
+			{
+				let lf = v[0];
+				let header = v[1];
+				let skip = 1;
+				let totalRead = 0;
+				let totalToRead = (header.pointsCount);
+
+				var reader = function()
+				{
+					let p = lf.readData(1000000, 0, skip);
+
+					return p.then(function(data)
+					{
+						handler.push(new LASDecoder(data.buffer,
+							header.pointsFormatId,
+							header.pointsStructSize,
+							data.count,
+							header.scale,
+							header.offset,
+							header.mins, header.maxs));
+
+						totalRead += data.count;
+
+						if(data.hasMoreData)
+						{
+							return reader();
+						}
+						else
+						{
+							header.totalRead = totalRead;
+							header.versionAsString = lf.versionAsString;
+							header.isCompressed = lf.isCompressed;
+							return [lf, header, handler];
+						}
+					});
+				};
+
+				return reader();
+			}).then(v =>
+			{
+				let lf = v[0];
+
+				//Close it
+				return lf.close().then(function()
+				{
+					lf.isOpen = false;
+					return v.slice(1);
+				}).catch(e =>
+				{
+					//If there was a cancellation, make sure the file is closed, if the file is open close and then fail
+					if(lf.isOpen)
+					{
+						return lf.close().then(function()
+						{
+							lf.isOpen = false;
+							throw e;
+						});
+					}
+					throw e;
+				});
+			});
 		}
 
 		handle(node, url){}
@@ -2615,26 +2590,27 @@
 			this.node = node;
 		}
 
-		push(lasBuffer)
+		push(data)
 		{
 			var self = this;
 
 			var message =
 			{
-				buffer: lasBuffer.arrayb,
-				numPoints: lasBuffer.pointsCount,
-				pointSize: lasBuffer.pointSize,
+				buffer: data.arrayb,
+				numPoints: data.pointsCount,
+				pointSize: data.pointSize,
 				pointFormatID: 2,
-				scale: lasBuffer.scale,
-				offset: lasBuffer.offset,
-				mins: lasBuffer.mins,
-				maxs: lasBuffer.maxs
+				scale: data.scale,
+				offset: data.offset,
+				mins: data.mins,
+				maxs: data.maxs
 			};
 
-			Global.workerPool.runTask(WorkerManager.LAS_DECODER, function(e)
+			var worker = Global.workerPool.getWorker(WorkerManager.LAS_DECODER);
+			worker.onmessage = function(e)
 			{
 				var geometry = new THREE.BufferGeometry();
-				var numPoints = lasBuffer.pointsCount;
+				var numPoints = data.pointsCount;
 
 				var positions = new Float32Array(e.data.position);
 				var colors = new Uint8Array(e.data.color);
@@ -2671,7 +2647,11 @@
 				self.node.loading = false;
 				Global.numNodesLoading--;
 				self.node.mean = new THREE.Vector3(...e.data.mean);
-			}, message, [message.buffer]);
+
+				Global.workerPool.returnWorker(WorkerManager.LAS_DECODER, worker);
+			};
+
+			worker.postMessage(message, [message.buffer]);
 		};
 	}
 
@@ -2779,7 +2759,6 @@
 		getHierarchyPath()
 		{
 			var path = "r/";
-
 			var hierarchyStepSize = this.pcoGeometry.hierarchyStepSize;
 			var indices = this.name.substr(1);
 
@@ -2836,7 +2815,6 @@
 		{
 			var node = this;
 
-			//load hierarchy
 			var callback = function(node, hbuffer)
 			{
 				var view = new DataView(hbuffer);
@@ -2845,16 +2823,11 @@
 				var children = view.getUint8(0);
 				var numPoints = view.getUint32(1, true);
 				node.numPoints = numPoints;
-				stack.push(
-				{
-					children: children,
-					numPoints: numPoints,
-					name: node.name
-				});
+				stack.push({children: children, numPoints: numPoints, name: node.name});
 
 				var decoded = [];
-
 				var offset = 5;
+
 				while(stack.length > 0)
 				{
 					var snode = stack.shift();
@@ -2864,23 +2837,11 @@
 						if((snode.children & mask) !== 0)
 						{
 							var childName = snode.name + i;
-
 							var childChildren = view.getUint8(offset);
 							var childNumPoints = view.getUint32(offset + 1, true);
 
-							stack.push(
-							{
-								children: childChildren,
-								numPoints: childNumPoints,
-								name: childName
-							});
-
-							decoded.push(
-							{
-								children: childChildren,
-								numPoints: childNumPoints,
-								name: childName
-							});
+							stack.push({children: childChildren, numPoints: childNumPoints, name: childName});
+							decoded.push({children: childChildren, numPoints: childNumPoints, name: childName});
 
 							offset += 5;
 						}
@@ -2927,21 +2888,14 @@
 				xhr.open("GET", hurl, true);
 				xhr.responseType = "arraybuffer";
 				xhr.overrideMimeType("text/plain; charset=x-user-defined");
-				xhr.onreadystatechange = function(event)
+				xhr.onload = function(event)
 				{
-					if(xhr.readyState === 4)
-					{
-						if(xhr.status === 200 || xhr.status === 0)
-						{
-							var hbuffer = xhr.response;
-							callback(node, hbuffer);
-						}
-						else
-						{
-							console.log("Failed to load file! HTTP status: " + xhr.status + ", file: " + hurl);
-							Global.numNodesLoading--;
-						}
-					}
+					callback(node, xhr.response);
+				};
+				xhr.onerror = function(event)
+				{
+					console.log("Potree: Failed to load file! HTTP status: " + xhr.status + ", file: " + hurl, event);
+					Global.numNodesLoading--;
 				};
 				xhr.send(null);
 			}
@@ -2981,187 +2935,176 @@
 	 *
 	 * @author Markus Schuetz
 	 */
-	function POCLoader(){}
-	/**
-	 * @return a point cloud octree with the root node data loaded.
-	 * loading of descendants happens asynchronously when they"re needed
-	 *
-	 * @param url
-	 * @param loadingFinishedListener executed after loading the binary has been finished
-	 */
-	POCLoader.load = function(url, callback)
+	class POCLoader
 	{
-		var pco = new PointCloudOctreeGeometry();
-		pco.url = url;
-		
-		var xhr = new XMLHttpRequest();
-		xhr.overrideMimeType("text/plain");
-		xhr.open("GET", url, true);
-		xhr.onload = function()
+		/**
+		 * @return a point cloud octree with the root node data loaded.
+		 * loading of descendants happens asynchronously when they"re needed
+		 *
+		 * @param url
+		 * @param loadingFinishedListener executed after loading the binary has been finished
+		 */
+		static load(url, callback)
 		{
-			var data = JSON.parse(xhr.responseText);
-			var version = new VersionUtils(data.version);
-
-			console.log(data, version);
-
-			//Assume dir as absolute if it starts with http
-			if(data.octreeDir.indexOf("http") === 0)
+			var pco = new PointCloudOctreeGeometry();
+			pco.url = url;
+			
+			var xhr = new XMLHttpRequest();
+			xhr.overrideMimeType("text/plain");
+			xhr.open("GET", url, true);
+			xhr.onload = function()
 			{
-				pco.octreeDir = data.octreeDir;
-			}
-			else
-			{
-				pco.octreeDir = url + "/../" + data.octreeDir;
-			}
+				var data = JSON.parse(xhr.responseText);
+				var version = new VersionUtils(data.version);
 
-			pco.spacing = data.spacing;
-			pco.hierarchyStepSize = data.hierarchyStepSize;
-			pco.pointAttributes = data.pointAttributes;
-
-			var min = new THREE.Vector3(data.boundingBox.lx, data.boundingBox.ly, data.boundingBox.lz);
-			var max = new THREE.Vector3(data.boundingBox.ux, data.boundingBox.uy, data.boundingBox.uz);
-			var boundingBox = new THREE.Box3(min, max);
-			var tightBoundingBox = boundingBox.clone();
-
-			if(data.tightBoundingBox)
-			{
-				tightBoundingBox.min.copy(new THREE.Vector3(data.tightBoundingBox.lx, data.tightBoundingBox.ly, data.tightBoundingBox.lz));
-				tightBoundingBox.max.copy(new THREE.Vector3(data.tightBoundingBox.ux, data.tightBoundingBox.uy, data.tightBoundingBox.uz));
-			}
-
-			var offset = min.clone();
-
-			boundingBox.min.sub(offset);
-			boundingBox.max.sub(offset);
-
-			tightBoundingBox.min.sub(offset);
-			tightBoundingBox.max.sub(offset);
-
-			pco.projection = data.projection;
-			pco.boundingBox = boundingBox;
-			pco.tightBoundingBox = tightBoundingBox;
-			pco.boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
-			pco.tightBoundingSphere = tightBoundingBox.getBoundingSphere(new THREE.Sphere());
-			pco.offset = offset;
-
-			//Select the appropiate loader
-			if(data.pointAttributes === "LAS" || data.pointAttributes === "LAZ")
-			{
-				pco.loader = new LASLAZLoader(data.version);
-			}
-			else
-			{
-				pco.loader = new BinaryLoader(data.version, boundingBox, data.scale);
-				pco.pointAttributes = new PointAttributes(pco.pointAttributes);
-			}
-
-			var nodes = {};
-
-			//load root
-			var name = "r";
-
-			var root = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
-			root.level = 0;
-			root.hasChildren = true;
-			root.spacing = pco.spacing;
-
-			if(version.upTo("1.5"))
-			{
-				root.numPoints = data.hierarchy[0][1];
-			}
-			else
-			{
-				root.numPoints = 0;
-			}
-
-			pco.root = root;
-			pco.root.load();
-			nodes[name] = root;
-
-			//load remaining hierarchy
-			if(version.upTo("1.4"))
-			{
-				for(var i = 1; i < data.hierarchy.length; i++)
+				//Assume dir as absolute if it starts with http
+				if(data.octreeDir.indexOf("http") === 0)
 				{
-					var name = data.hierarchy[i][0];
-					var numPoints = data.hierarchy[i][1];
-					var index = parseInt(name.charAt(name.length - 1));
-					var parentName = name.substring(0, name.length - 1);
-					var parentNode = nodes[parentName];
-					var level = name.length - 1;
-					var boundingBox = POCLoader.createChildAABB(parentNode.boundingBox, index);
-
-					var node = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
-					node.level = level;
-					node.numPoints = numPoints;
-					node.spacing = pco.spacing / Math.pow(2, level);
-					parentNode.addChild(node);
-					nodes[name] = node;
+					pco.octreeDir = data.octreeDir;
 				}
+				else
+				{
+					pco.octreeDir = url + "/../" + data.octreeDir;
+				}
+
+				pco.spacing = data.spacing;
+				pco.hierarchyStepSize = data.hierarchyStepSize;
+				pco.pointAttributes = data.pointAttributes;
+
+				var min = new THREE.Vector3(data.boundingBox.lx, data.boundingBox.ly, data.boundingBox.lz);
+				var max = new THREE.Vector3(data.boundingBox.ux, data.boundingBox.uy, data.boundingBox.uz);
+				var boundingBox = new THREE.Box3(min, max);
+				var tightBoundingBox = boundingBox.clone();
+
+				if(data.tightBoundingBox)
+				{
+					tightBoundingBox.min.copy(new THREE.Vector3(data.tightBoundingBox.lx, data.tightBoundingBox.ly, data.tightBoundingBox.lz));
+					tightBoundingBox.max.copy(new THREE.Vector3(data.tightBoundingBox.ux, data.tightBoundingBox.uy, data.tightBoundingBox.uz));
+				}
+
+				var offset = min.clone();
+
+				boundingBox.min.sub(offset);
+				boundingBox.max.sub(offset);
+
+				tightBoundingBox.min.sub(offset);
+				tightBoundingBox.max.sub(offset);
+
+				pco.projection = data.projection;
+				pco.boundingBox = boundingBox;
+				pco.tightBoundingBox = tightBoundingBox;
+				pco.boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
+				pco.tightBoundingSphere = tightBoundingBox.getBoundingSphere(new THREE.Sphere());
+				pco.offset = offset;
+
+				//Select the appropiate loader
+				if(data.pointAttributes === "LAS" || data.pointAttributes === "LAZ")
+				{
+					pco.loader = new LASLAZLoader(data.version);
+				}
+				else
+				{
+					pco.loader = new BinaryLoader(data.version, boundingBox, data.scale);
+					pco.pointAttributes = new PointAttributes(pco.pointAttributes);
+				}
+
+				var nodes = {};
+				var name = "r";
+
+				var root = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
+				root.level = 0;
+				root.hasChildren = true;
+				root.spacing = pco.spacing;
+				root.numPoints = version.upTo("1.5") ? data.hierarchy[0][1] : 0;
+
+				pco.root = root;
+				pco.root.load();
+				nodes[name] = root;
+
+				//Load remaining hierarchy
+				if(version.upTo("1.4"))
+				{
+					for(var i = 1; i < data.hierarchy.length; i++)
+					{
+						var name = data.hierarchy[i][0];
+						var numPoints = data.hierarchy[i][1];
+						var index = parseInt(name.charAt(name.length - 1));
+						var parentName = name.substring(0, name.length - 1);
+						var parentNode = nodes[parentName];
+						var level = name.length - 1;
+						var boundingBox = POCLoader.createChildAABB(parentNode.boundingBox, index);
+
+						var node = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
+						node.level = level;
+						node.numPoints = numPoints;
+						node.spacing = pco.spacing / Math.pow(2, level);
+						parentNode.addChild(node);
+						nodes[name] = node;
+					}
+				}
+				pco.nodes = nodes;
+
+				callback(pco);
+			};
+
+			xhr.onerror = function(event)
+			{
+				console.log("Potree: loading failed: \"" + url + "\"", event);
+				callback();
+			};
+
+			xhr.send(null);
+		}
+
+		static loadPointAttributes(mno)
+		{
+			var fpa = mno.pointAttributes;
+			var pa = new PointAttributes();
+
+			for(var i = 0; i < fpa.length; i++)
+			{
+				pa.add(PointAttribute[fpa[i]]);
 			}
-			pco.nodes = nodes;
 
-			callback(pco);
-		};
-
-		xhr.onerror = function(event)
-		{
-			console.log("Potree: loading failed: \"" + url + "\"", event);
-			callback();
-		};
-
-		xhr.send(null);
-	};
-
-	POCLoader.loadPointAttributes = function(mno)
-	{
-		var fpa = mno.pointAttributes;
-		var pa = new PointAttributes();
-
-		for(var i = 0; i < fpa.length; i++)
-		{
-			var pointAttribute = PointAttribute[fpa[i]];
-			pa.add(pointAttribute);
+			return pa;
 		}
 
-		return pa;
-	};
+		static createChildAABB(aabb, index)
+		{
+			var min = aabb.min.clone();
+			var max = aabb.max.clone();
+			var size = new THREE.Vector3().subVectors(max, min);
 
-	POCLoader.createChildAABB = function(aabb, index)
-	{
-		var min = aabb.min.clone();
-		var max = aabb.max.clone();
-		var size = new THREE.Vector3().subVectors(max, min);
+			if((index & 0b0001) > 0)
+			{
+				min.z += size.z / 2;
+			}
+			else
+			{
+				max.z -= size.z / 2;
+			}
 
-		if((index & 0b0001) > 0)
-		{
-			min.z += size.z / 2;
-		}
-		else
-		{
-			max.z -= size.z / 2;
-		}
+			if((index & 0b0010) > 0)
+			{
+				min.y += size.y / 2;
+			}
+			else
+			{
+				max.y -= size.y / 2;
+			}
 
-		if((index & 0b0010) > 0)
-		{
-			min.y += size.y / 2;
-		}
-		else
-		{
-			max.y -= size.y / 2;
-		}
+			if((index & 0b0100) > 0)
+			{
+				min.x += size.x / 2;
+			}
+			else
+			{
+				max.x -= size.x / 2;
+			}
 
-		if((index & 0b0100) > 0)
-		{
-			min.x += size.x / 2;
+			return new THREE.Box3(min, max);
 		}
-		else
-		{
-			max.x -= size.x / 2;
-		}
-
-		return new THREE.Box3(min, max);
-	};
+	}
 
 	class EptBinaryLoader
 	{
@@ -4895,341 +4838,95 @@ void main()
 			this.fog = false;
 			this.defines = new Map();
 			
-			this.attributes = {
-				position:
-				{
-					type: "fv",
-					value: []
-				},
-				color:
-				{
-					type: "fv",
-					value: []
-				},
-				normal:
-				{
-					type: "fv",
-					value: []
-				},
-				intensity:
-				{
-					type: "f",
-					value: []
-				},
-				classification:
-				{
-					type: "f",
-					value: []
-				},
-				returnNumber:
-				{
-					type: "f",
-					value: []
-				},
-				numberOfReturns:
-				{
-					type: "f",
-					value: []
-				},
-				pointSourceID:
-				{
-					type: "f",
-					value: []
-				},
-				indices:
-				{
-					type: "fv",
-					value: []
-				}
+			this.attributes =
+			{
+				position: {type: 'fv', value: []},
+				color: {type: 'fv', value: []},
+				normal: {type: 'fv', value: []},
+				intensity: {type: 'f', value: []},
+				classification: {type: 'f', value: []},
+				returnNumber: {type: 'f', value: []},
+				numberOfReturns: {type: 'f', value: []},
+				pointSourceID: {type: 'f', value: []},
+				indices: {type: 'fv', value: []}
 			};
 
-			this.uniforms = {
-				level:
-				{
-					type: "f",
-					value: 0.0
-				},
-				vnStart:
-				{
-					type: "f",
-					value: 0.0
-				},
-				spacing:
-				{
-					type: "f",
-					value: 1.0
-				},
-				blendHardness:
-				{
-					type: "f",
-					value: 2.0
-				},
-				blendDepthSupplement:
-				{
-					type: "f",
-					value: 0.0
-				},
-				fov:
-				{
-					type: "f",
-					value: 1.0
-				},
-				screenWidth:
-				{
-					type: "f",
-					value: 1.0
-				},
-				screenHeight:
-				{
-					type: "f",
-					value: 1.0
-				},
-				near:
-				{
-					type: "f",
-					value: 0.1
-				},
-				far:
-				{
-					type: "f",
-					value: 1.0
-				},
-				uColor:
-				{
-					type: "c",
-					value: new THREE.Color(0xffffff)
-				},
-				uOpacity:
-				{
-					type: "f",
-					value: 1.0
-				},
-				size:
-				{
-					type: "f",
-					value: pointSize
-				},
-				minSize:
-				{
-					type: "f",
-					value: minSize
-				},
-				maxSize:
-				{
-					type: "f",
-					value: maxSize
-				},
-				octreeSize:
-				{
-					type: "f",
-					value: 0
-				},
-				bbSize:
-				{
-					type: "fv",
-					value: [0, 0, 0]
-				},
-				elevationRange:
-				{
-					type: "2fv",
-					value: [0, 0]
-				},
-				clipBoxCount:
-				{
-					type: "f",
-					value: 0
-				},
-				clipPolygonCount:
-				{
-					type: "i",
-					value: 0
-				},
-				clipBoxes:
-				{
-					type: "Matrix4fv",
-					value: []
-				},
-				clipPolygons:
-				{
-					type: "3fv",
-					value: []
-				},
-				clipPolygonVCount:
-				{
-					type: "iv",
-					value: []
-				},
-				clipPolygonVP:
-				{
-					type: "Matrix4fv",
-					value: []
-				},
-				visibleNodes:
-				{
-					type: "t",
-					value: this.visibleNodesTexture
-				},
-				pcIndex:
-				{
-					type: "f",
-					value: 0
-				},
-				gradient:
-				{
-					type: "t",
-					value: this.gradientTexture
-				},
-				classificationLUT:
-				{
-					type: "t",
-					value: this.classificationTexture
-				},
-				uHQDepthMap:
-				{
-					type: "t",
-					value: null
-				},
-				toModel:
-				{
-					type: "Matrix4f",
-					value: []
-				},
-				diffuse:
-				{
-					type: "fv",
-					value: [1, 1, 1]
-				},
-				transition:
-				{
-					type: "f",
-					value: 0.5
-				},
-				intensityRange:
-				{
-					type: "fv",
-					value: [0, 65000]
-				},
-				intensityGamma:
-				{
-					type: "f",
-					value: 1
-				},
-				intensityContrast:
-				{
-					type: "f",
-					value: 0
-				},
-				intensityBrightness:
-				{
-					type: "f",
-					value: 0
-				},
-				rgbGamma:
-				{
-					type: "f",
-					value: 1
-				},
-				rgbContrast:
-				{
-					type: "f",
-					value: 0
-				},
-				rgbBrightness:
-				{
-					type: "f",
-					value: 0
-				},
-				wRGB:
-				{
-					type: "f",
-					value: 1
-				},
-				wIntensity:
-				{
-					type: "f",
-					value: 0
-				},
-				wElevation:
-				{
-					type: "f",
-					value: 0
-				},
-				wClassification:
-				{
-					type: "f",
-					value: 0
-				},
-				wReturnNumber:
-				{
-					type: "f",
-					value: 0
-				},
-				wSourceID:
-				{
-					type: "f",
-					value: 0
-				},
-				useOrthographicCamera:
-				{
-					type: "b",
-					value: false
-				},
-				clipTask:
-				{
-					type: "i",
-					value: 1
-				},
-				clipMethod:
-				{
-					type: "i",
-					value: 1
-				},
-				uSnapshot:
-				{
-					type: "tv",
-					value: []
-				},
-				uSnapshotDepth:
-				{
-					type: "tv",
-					value: []
-				},
-				uSnapView:
-				{
-					type: "Matrix4fv",
-					value: []
-				},
-				uSnapProj:
-				{
-					type: "Matrix4fv",
-					value: []
-				},
-				uSnapProjInv:
-				{
-					type: "Matrix4fv",
-					value: []
-				},
-				uSnapViewInv:
-				{
-					type: "Matrix4fv",
-					value: []
-				},
-				uShadowColor:
-				{
-					type: "3fv",
-					value: [0, 0, 0]
-				}
+			this.uniforms =
+			{
+				level: {type: "f", value: 0.0},
+				vnStart: {type: "f", value: 0.0},
+				spacing: {type: "f", value: 1.0},
+				blendHardness: {type: "f", value: 2.0},
+				blendDepthSupplement:	{type: "f", value: 0.0},
+				fov: {type: "f", value: 1.0},
+				screenWidth: {type: "f", value: 1.0},
+				screenHeight: {type: "f", value: 1.0},
+				near: {type: "f", value: 0.1},
+				far: {type: "f", value: 1.0},
+				uColor: {type: "c", value: new THREE.Color( 0xffffff )},
+				uOpacity: {type: "f", value: 1.0},
+				size: {type: "f", value: pointSize},
+				minSize: {type: "f", value: minSize},
+				maxSize: {type: "f", value: maxSize},
+				octreeSize: {type: "f", value: 0},
+				bbSize: {type: "fv", value: [0, 0, 0]},
+				elevationRange: {type: "2fv", value: [0, 0]},
+
+				clipBoxCount: {type: "f", value: 0},
+				//clipSphereCount: {type: "f", value: 0},
+				clipPolygonCount: {type: "i", value: 0},
+				clipBoxes: {type: "Matrix4fv", value: []},
+				//clipSpheres: {type: "Matrix4fv", value: []},
+				clipPolygons: {type: "3fv", value: []},
+				clipPolygonVCount: {type: "iv", value: []},
+				clipPolygonVP: {type: "Matrix4fv", value: []},
+
+				visibleNodes: {type: "t", value: this.visibleNodesTexture},
+				pcIndex: {type: "f", value: 0},
+				gradient: {type: "t", value: this.gradientTexture},
+				classificationLUT: {type: "t", value: this.classificationTexture},
+				uHQDepthMap: {type: "t", value: null},
+				toModel: {type: "Matrix4f", value: []},
+				diffuse: {type: "fv", value: [1, 1, 1]},
+				transition: {type: "f", value: 0.5},
+				intensityRange: {type: "fv", value: [0, 65000]},
+				intensityGamma: {type: "f", value: 1},
+				intensityContrast: {type: "f", value: 0},
+				intensityBrightness:{type: "f", value: 0},
+				rgbGamma: {type: "f", value: 1},
+				rgbContrast: {type: "f", value: 0},
+				rgbBrightness: {type: "f", value: 0},
+				wRGB: {type: "f", value: 1},
+				wIntensity: {type: "f", value: 0},
+				wElevation: {type: "f", value: 0},
+				wClassification: {type: "f", value: 0},
+				wReturnNumber: {type: "f", value: 0},
+				wSourceID: {type: "f", value: 0},
+				useOrthographicCamera: {type: "b", value: false},
+				clipTask: {type: "i", value: 1},
+				clipMethod: {type: "i", value: 1},
+				uSnapshot: {type: "tv", value: []},
+				uSnapshotDepth: {type: "tv", value: []},
+				uSnapView: {type: "Matrix4fv", value: []},
+				uSnapProj: {type: "Matrix4fv", value: []},
+				uSnapProjInv: {type: "Matrix4fv", value: []},
+				uSnapViewInv: {type: "Matrix4fv", value: []},
+				uShadowColor: {type: "3fv", value: [0, 0, 0]},
+
+				uFilterReturnNumberRange: {type: "fv", value: [0, 7]},
+				uFilterNumberOfReturnsRange: {type: "fv", value: [0, 7]},
+				uFilterGPSTimeClipRange: {type: "fv", value: [0, 7]},
 			};
 			
 			this.classification = Classification.DEFAULT;
 			this.defaultAttributeValues.normal = [0, 0, 0];
 			this.defaultAttributeValues.classification = [0, 0, 0];
 			this.defaultAttributeValues.indices = [0, 0, 0, 0];
-			this.vertexColors = THREE.VertexColors;
 
 			var defines = this.getDefines();
 			this.vertexShader = defines + Shaders["pointcloud.vs"];
 			this.fragmentShader = defines + Shaders["pointcloud.fs"];
+			this.vertexColors = THREE.VertexColors;
 		}
 
 		setDefine(key, value)
@@ -5258,9 +4955,32 @@ void main()
 			var defines = this.getDefines();
 			this.vertexShader = defines + Shaders["pointcloud.vs"];
 			this.fragmentShader = defines + Shaders["pointcloud.fs"];
-			this.depthFunc = THREE.LessEqualDepth;
-			this.depthTest = true;
-			this.depthWrite = true;
+
+			if(this.opacity === 1.0)
+			{
+				this.blending = THREE.NoBlending;
+				this.transparent = false;
+				this.depthTest = true;
+				this.depthWrite = true;
+				this.depthFunc = THREE.LessEqualDepth;
+			}
+			else if(this.opacity < 1.0 && !this.useEDL)
+			{
+				this.blending = THREE.AdditiveBlending;
+				this.transparent = true;
+				this.depthTest = false;
+				this.depthWrite = true;
+				this.depthFunc = THREE.AlwaysDepth;
+			}
+
+			if(this.weighted)
+			{
+				this.blending = THREE.AdditiveBlending;
+				this.transparent = true;
+				this.depthTest = true;
+				this.depthWrite = false;
+			}
+
 			this.needsUpdate = true;
 		}
 
@@ -5290,6 +5010,7 @@ void main()
 			{
 				defines.push("#define adaptive_point_size");
 			}
+
 			if(this.shape === PointShape.SQUARE)
 			{
 				defines.push("#define square_point_shape");
@@ -5302,14 +5023,17 @@ void main()
 			{
 				defines.push("#define paraboloid_point_shape");
 			}
+
 			if(this._useEDL)
 			{
 				defines.push("#define use_edl");
 			}
+
 			if(this._snapEnabled)
 			{
 				defines.push("#define snap_enabled");
 			}
+
 			if(this._pointColorType === PointColorType.RGB)
 			{
 				defines.push("#define color_type_rgb");
@@ -5370,6 +5094,8 @@ void main()
 			{
 				defines.push("#define color_type_composite");
 			}
+
+
 			if(this._treeType === TreeType.OCTREE)
 			{
 				defines.push("#define tree_type_octree");
@@ -5378,6 +5104,7 @@ void main()
 			{
 				defines.push("#define tree_type_kdtree");
 			}
+
 			if(this.weighted)
 			{
 				defines.push("#define weighted_splats");
@@ -5397,19 +5124,24 @@ void main()
 			{
 				return;
 			}
+
 			var doUpdate = (this.clipBoxes.length !== clipBoxes.length) && (clipBoxes.length === 0 || this.clipBoxes.length === 0);
 			this.uniforms.clipBoxCount.value = this.clipBoxes.length;
 			this.clipBoxes = clipBoxes;
+
 			if(doUpdate)
 			{
 				this.updateShaderSource();
 			}
+
 			this.uniforms.clipBoxes.value = new Float32Array(this.clipBoxes.length * 16);
+			
 			for(var i = 0; i < this.clipBoxes.length; i++)
 			{
 				var box = clipBoxes[i];
 				this.uniforms.clipBoxes.value.set(box.inverse.elements, 16 * i);
 			}
+
 			for(var i = 0; i < this.uniforms.clipBoxes.value.length; i++)
 			{
 				if(Number.isNaN(this.uniforms.clipBoxes.value[i]))
@@ -10073,6 +9805,7 @@ void main()
 					for(var i = 0; i < material.clipPolygons.length; i++)
 					{
 						var clipPolygon = material.clipPolygons[i];
+						
 						for(var j = 0; j < clipPolygon.markers.length; j++)
 						{
 							flattenedVertices[i * 24 + (j * 3 + 0)] = clipPolygon.markers[j].position.x;

@@ -4,31 +4,30 @@ import {GreyhoundLoader} from "../../loaders/GreyhoundLoader.js";
 import {Global} from "../../Global.js";
 import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";
 
-function PointCloudGreyhoundGeometry()
+class PointCloudGreyhoundGeometry
 {
-	this.spacing = 0;
-	this.boundingBox = null;
-	this.root = null;
-	this.nodes = null;
-	this.pointAttributes = {};
-	this.hierarchyStepSize = -1;
-	this.loader = null;
-	this.schema = null;
+	constructor()
+	{
+		this.spacing = 0;
+		this.boundingBox = null;
+		this.root = null;
+		this.nodes = null;
+		this.pointAttributes = {};
+		this.hierarchyStepSize = -1;
+		this.loader = null;
+		this.schema = null;
 
-	this.baseDepth = null;
-	this.offset = null;
-	this.projection = null;
+		this.baseDepth = null;
+		this.offset = null;
+		this.projection = null;
 
-	this.boundingSphere = null;
+		this.boundingSphere = null;
 
-	//the serverURL will contain the base URL of the greyhound server. f.e. http://dev.greyhound.io/resource/autzen/
-	this.serverURL = null;
-
-	this.normalize = {
-		color: false,
-		intensity: false
-	};
-};
+		// the serverURL will contain the base URL of the greyhound server. f.e. http://dev.greyhound.io/resource/autzen/
+		this.serverURL = null;
+		this.normalize = {color: false, intensity: false};
+	}
+}
 
 function PointCloudGreyhoundGeometryNode(name, pcoGeometry, boundingBox, scale, offset)
 {
@@ -124,9 +123,7 @@ PointCloudGreyhoundGeometryNode.prototype.getURL = function()
 	var schema = this.pcoGeometry.schema;
 	var bounds = this.greyhoundBounds;
 
-	var boundsString =
-		bounds.min.x + "," + bounds.min.y + "," + bounds.min.z + "," +
-		bounds.max.x + "," + bounds.max.y + "," + bounds.max.z;
+	var boundsString = bounds.min.x + "," + bounds.min.y + "," + bounds.min.z + "," + bounds.max.x + "," + bounds.max.y + "," + bounds.max.z;
 
 	var url = "" + this.pcoGeometry.serverURL +
 		"read?depthBegin=" +
@@ -304,9 +301,7 @@ PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = function()
 
 		var bounds = this.greyhoundBounds;
 
-		var boundsString =
-			bounds.min.x + "," + bounds.min.y + "," + bounds.min.z + "," +
-			bounds.max.x + "," + bounds.max.y + "," + bounds.max.z;
+		var boundsString = bounds.min.x + "," + bounds.min.y + "," + bounds.min.z + "," + bounds.max.x + "," + bounds.max.y + "," + bounds.max.z;
 
 		var hurl = "" + this.pcoGeometry.serverURL +
 			"hierarchy?bounds=[" + boundsString + "]" +
@@ -324,31 +319,19 @@ PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = function()
 			hurl += "&offset=[" + offset.x + "," + offset.y + "," + offset.z + "]";
 		}
 
+		var self = this;
 		var xhr = new XMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", hurl, true);
-
-		var that = this;
-		xhr.onreadystatechange = function()
+		xhr.onload = function(event)
 		{
-			if(xhr.readyState === 4)
-			{
-				if(xhr.status === 200 || xhr.status === 0)
-				{
-					var greyhoundHierarchy = JSON.parse(xhr.responseText) ||
-					{};
-					callback(that, greyhoundHierarchy);
-				}
-				else
-				{
-					console.log(
-						"Failed to load file! HTTP status:", xhr.status,
-						"file:", hurl
-					);
-				}
-			}
+			var greyhoundHierarchy = JSON.parse(xhr.responseText) || {};
+			callback(self, greyhoundHierarchy);
 		};
-
+		xhr.onerror = function(event)
+		{
+			console.log("Potree: Failed to load file! HTTP status " + xhr.status + ", file:" + hurl, event);
+		}
 		xhr.send(null);
 	}
 };
@@ -366,12 +349,12 @@ PointCloudGreyhoundGeometryNode.prototype.dispose = function()
 		this.geometry = null;
 		this.loaded = false;
 
-		//this.dispatchEvent( { type: "dispose" } );
 		for(var i = 0; i < this.oneTimeDisposeHandlers.length; i++)
 		{
 			var handler = this.oneTimeDisposeHandlers[i];
 			handler();
 		}
+		
 		this.oneTimeDisposeHandlers = [];
 	}
 };

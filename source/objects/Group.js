@@ -256,6 +256,7 @@ class Group extends BasicGroup
 				for(var i = 0; i < material.clipPolygons.length; i++)
 				{
 					var clipPolygon = material.clipPolygons[i];
+					
 					for(var j = 0; j < clipPolygon.markers.length; j++)
 					{
 						flattenedVertices[i * 24 + (j * 3 + 0)] = clipPolygon.markers[j].position.x;

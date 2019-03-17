@@ -109,7 +109,6 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 	getHierarchyPath()
 	{
 		var path = "r/";
-
 		var hierarchyStepSize = this.pcoGeometry.hierarchyStepSize;
 		var indices = this.name.substr(1);
 
@@ -166,7 +165,6 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 	{
 		var node = this;
 
-		//load hierarchy
 		var callback = function(node, hbuffer)
 		{
 			var view = new DataView(hbuffer);
@@ -175,16 +173,11 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 			var children = view.getUint8(0);
 			var numPoints = view.getUint32(1, true);
 			node.numPoints = numPoints;
-			stack.push(
-			{
-				children: children,
-				numPoints: numPoints,
-				name: node.name
-			});
+			stack.push({children: children, numPoints: numPoints, name: node.name});
 
 			var decoded = [];
-
 			var offset = 5;
+
 			while(stack.length > 0)
 			{
 				var snode = stack.shift();
@@ -194,23 +187,11 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 					if((snode.children & mask) !== 0)
 					{
 						var childName = snode.name + i;
-
 						var childChildren = view.getUint8(offset);
 						var childNumPoints = view.getUint32(offset + 1, true);
 
-						stack.push(
-						{
-							children: childChildren,
-							numPoints: childNumPoints,
-							name: childName
-						});
-
-						decoded.push(
-						{
-							children: childChildren,
-							numPoints: childNumPoints,
-							name: childName
-						});
+						stack.push({children: childChildren, numPoints: childNumPoints, name: childName});
+						decoded.push({children: childChildren, numPoints: childNumPoints, name: childName});
 
 						offset += 5;
 					}
@@ -257,22 +238,15 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 			xhr.open("GET", hurl, true);
 			xhr.responseType = "arraybuffer";
 			xhr.overrideMimeType("text/plain; charset=x-user-defined");
-			xhr.onreadystatechange = function(event)
+			xhr.onload = function(event)
 			{
-				if(xhr.readyState === 4)
-				{
-					if(xhr.status === 200 || xhr.status === 0)
-					{
-						var hbuffer = xhr.response;
-						callback(node, hbuffer);
-					}
-					else
-					{
-						console.log("Failed to load file! HTTP status: " + xhr.status + ", file: " + hurl);
-						Global.numNodesLoading--;
-					}
-				}
+				callback(node, xhr.response);
 			};
+			xhr.onerror = function(event)
+			{
+				console.log("Potree: Failed to load file! HTTP status: " + xhr.status + ", file: " + hurl, event);
+				Global.numNodesLoading--;
+			}
 			xhr.send(null);
 		}
 	}

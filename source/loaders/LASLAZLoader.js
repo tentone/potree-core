@@ -48,22 +48,14 @@ class LASLAZLoader
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
-		xhr.onreadystatechange = () =>
+		xhr.onload = () =>
 		{
-			if(xhr.readyState === 4)
-			{
-				if(xhr.status === 200)
-				{
-					var buffer = xhr.response;
-					this.parse(node, buffer);
-				}
-				else
-				{
-					console.log("Potree: Failed to load file! HTTP status: " + xhr.status + ", file: " + url);
-				}
-			}
+			this.parse(node, xhr.response);
 		};
-
+		xhr.onerror = function()
+		{
+			console.log("Potree: Failed to load file, " + xhr.status + ", file: " + url);
+		};
 		xhr.send(null);
 	}
 

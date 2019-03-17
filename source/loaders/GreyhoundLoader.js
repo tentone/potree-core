@@ -4,6 +4,7 @@ import {PointAttributes, PointAttribute} from "../PointAttributes.js";
 import {PointCloudGreyhoundGeometry, PointCloudGreyhoundGeometryNode} from "../pointcloud/geometries/PointCloudGreyhoundGeometry.js";
 import {GreyhoundBinaryLoader} from "./GreyhoundBinaryLoader.js";
 import {VersionUtils} from "../utils/VersionUtils.js";
+import {GreyhoundUtils} from "./GreyhoundUtils.js";
 
 function GreyhoundLoader(){}
 

@@ -4,8 +4,8 @@ import {WorkerManager} from "../utils/WorkerManager.js";
 import {Global} from "../Global.js";
 
 var pointFormatReaders =
-{
-	0: function(dv)
+[
+	function(dv)
 	{
 		return {
 			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
@@ -13,7 +13,7 @@ var pointFormatReaders =
 			"classification": dv.getUint8(16, true)
 		};
 	},
-	1: function(dv)
+	function(dv)
 	{
 		return {
 			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
@@ -21,7 +21,7 @@ var pointFormatReaders =
 			"classification": dv.getUint8(16, true)
 		};
 	},
-	2: function(dv)
+	function(dv)
 	{
 		return {
 			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
@@ -30,7 +30,7 @@ var pointFormatReaders =
 			"color": [dv.getUint16(20, true), dv.getUint16(22, true), dv.getUint16(24, true)]
 		};
 	},
-	3: function(dv)
+	function(dv)
 	{
 		return {
 			"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
@@ -39,7 +39,7 @@ var pointFormatReaders =
 			"color": [dv.getUint16(28, true), dv.getUint16(30, true), dv.getUint16(32, true)]
 		};
 	}
-};
+];
 
 function readAs(buf, Type, offset, count)
 {
@@ -82,7 +82,7 @@ function parseLASHeader(arraybuffer)
 // LAS Loader
 // Loads uncompressed files
 //
-var LASLoader = function(arraybuffer)
+function LASLoader(arraybuffer)
 {
 	this.arraybuffer = arraybuffer;
 };
@@ -183,7 +183,7 @@ LASLoader.prototype.close = function()
 // LAZ Loader
 // Uses NaCL module to load LAZ files
 //
-var LAZLoader = function(arraybuffer)
+function LAZLoader(arraybuffer)
 {
 	var self = this;
 
@@ -279,7 +279,7 @@ LAZLoader.prototype.close = function()
 };
 
 // A single consistent interface for loading LAS/LAZ files
-var LASFile = function(arraybuffer)
+function LASFile(arraybuffer)
 {
 	this.arraybuffer = arraybuffer;
 
@@ -341,7 +341,7 @@ LASFile.prototype.close = function()
 };
 
 // Decodes LAS records into points
-var LASDecoder = function(buffer, pointFormatID, pointSize, pointsCount, scale, offset, mins, maxs)
+function LASDecoder(buffer, pointFormatID, pointSize, pointsCount, scale, offset, mins, maxs)
 {
 	this.arrayb = buffer;
 	this.decoder = pointFormatReaders[pointFormatID];

@@ -47,6 +47,7 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 
 		this.clipBoxes = [];
 		this.clipPolygons = [];
+		
 		this.gradientTexture = PointCloudMaterial.generateGradientTexture(this._gradient);
 		this.lights = false;
 		this.fog = false;

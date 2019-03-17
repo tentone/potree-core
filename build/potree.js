@@ -1498,6 +1498,227 @@
 		}
 	}
 
+	/**
+	 * @class Loads greyhound metadata and returns a PointcloudOctree
+	 *
+	 * @author Maarten van Meersbergen
+	 * @author Oscar Martinez Rubi
+	 * @author Connor Manning
+	 */
+	class GreyhoundUtils
+	{
+		static getQueryParam(name)
+		{
+			name = name.replace(/[[\]]/g, "\\$&");
+			var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
+			var results = regex.exec(window.location.href);
+			if(!results) return null;
+			if(!results[2]) return "";
+			return decodeURIComponent(results[2].replace(/\+/g, " "));
+		}
+
+		static createSchema(attributes)
+		{
+			var schema = [
+				{
+					"name": "X",
+					"size": 4,
+					"type": "signed"
+				},
+				{
+					"name": "Y",
+					"size": 4,
+					"type": "signed"
+				},
+				{
+					"name": "Z",
+					"size": 4,
+					"type": "signed"
+				}
+			];
+
+			//Once we include options in the UI to load a dynamic list of available
+			//attributes for visualization (f.e. Classification, Intensity etc.)
+			//we will be able to ask for that specific attribute from the server,
+			//where we are now requesting all attributes for all points all the time.
+			//If we do that though, we also need to tell Potree to redraw the points
+			//that are already loaded (with different attributes).
+			//This is not default behaviour.
+			attributes.forEach(function(item)
+			{
+				if(item === "COLOR_PACKED")
+				{
+					schema.push(
+					{
+						"name": "Red",
+						"size": 2,
+						"type": "unsigned"
+					});
+					schema.push(
+					{
+						"name": "Green",
+						"size": 2,
+						"type": "unsigned"
+					});
+					schema.push(
+					{
+						"name": "Blue",
+						"size": 2,
+						"type": "unsigned"
+					});
+				}
+				else if(item === "INTENSITY")
+				{
+					schema.push(
+					{
+						"name": "Intensity",
+						"size": 2,
+						"type": "unsigned"
+					});
+				}
+				else if(item === "CLASSIFICATION")
+				{
+					schema.push(
+					{
+						"name": "Classification",
+						"size": 1,
+						"type": "unsigned"
+					});
+				}
+			});
+
+			return schema;
+		}
+
+		static fetch(url, cb)
+		{
+			var xhr = new XMLHttpRequest();
+			xhr.overrideMimeType("text/plain");
+			xhr.open("GET", url, true);
+			xhr.onreadystatechange = function()
+			{
+				if(xhr.readyState === 4)
+				{
+					if(xhr.status === 200 || xhr.status === 0)
+					{
+						cb(null, xhr.responseText);
+					}
+					else
+					{
+						cb(xhr.responseText);
+					}
+				}
+			};
+			xhr.send(null);
+		};
+
+		static fetchBinary(url, cb)
+		{
+			var xhr = new XMLHttpRequest();
+			xhr.overrideMimeType("text/plain");
+			xhr.open("GET", url, true);
+			xhr.responseType = "arraybuffer";
+			xhr.onreadystatechange = function()
+			{
+				if(xhr.readyState === 4)
+				{
+					if(xhr.status === 200 || xhr.status === 0)
+					{
+						cb(null, xhr.response);
+					}
+					else
+					{
+						cb(xhr.responseText);
+					}
+				}
+			};
+			xhr.send(null);
+		};
+
+		static pointSizeFrom(schema)
+		{
+			return schema.reduce((p, c) => p + c.size, 0);
+		};
+
+		static getNormalization(serverURL, baseDepth, cb)
+		{
+			var s = [
+				{
+					"name": "X",
+					"size": 4,
+					"type": "floating"
+				},
+				{
+					"name": "Y",
+					"size": 4,
+					"type": "floating"
+				},
+				{
+					"name": "Z",
+					"size": 4,
+					"type": "floating"
+				},
+				{
+					"name": "Red",
+					"size": 2,
+					"type": "unsigned"
+				},
+				{
+					"name": "Green",
+					"size": 2,
+					"type": "unsigned"
+				},
+				{
+					"name": "Blue",
+					"size": 2,
+					"type": "unsigned"
+				},
+				{
+					"name": "Intensity",
+					"size": 2,
+					"type": "unsigned"
+				}
+			];
+
+			var url = serverURL + "read?depth=" + baseDepth + "&schema=" + JSON.stringify(s);
+
+			GreyhoundUtils.fetchBinary(url, function(err, buffer)
+			{
+				if(err) throw new Error(err);
+
+				var view = new DataView(buffer);
+				var numBytes = buffer.byteLength - 4;
+				var pointSize = GreyhoundUtils.pointSizeFrom(s);
+
+				var colorNorm = false;
+				var intensityNorm = false;
+
+				for(var offset = 0; offset < numBytes; offset += pointSize)
+				{
+					if(view.getUint16(offset + 12, true) > 255 ||
+						view.getUint16(offset + 14, true) > 255 ||
+						view.getUint16(offset + 16, true) > 255)
+					{
+						colorNorm = true;
+					}
+
+					if(view.getUint16(offset + 18, true) > 255)
+					{
+						intensityNorm = true;
+					}
+
+					if(colorNorm && intensityNorm) break;
+				}
+
+				cb(null,
+				{
+					color: colorNorm,
+					intensity: intensityNorm
+				});
+			});
+		};
+	}
+
 	function GreyhoundLoader(){}
 
 	GreyhoundLoader.loadInfoJSON = function(url, callback){};
@@ -1889,8 +2110,8 @@
 	}
 
 	var pointFormatReaders =
-	{
-		0: function(dv)
+	[
+		function(dv)
 		{
 			return {
 				"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
@@ -1898,7 +2119,7 @@
 				"classification": dv.getUint8(16, true)
 			};
 		},
-		1: function(dv)
+		function(dv)
 		{
 			return {
 				"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
@@ -1906,7 +2127,7 @@
 				"classification": dv.getUint8(16, true)
 			};
 		},
-		2: function(dv)
+		function(dv)
 		{
 			return {
 				"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
@@ -1915,7 +2136,7 @@
 				"color": [dv.getUint16(20, true), dv.getUint16(22, true), dv.getUint16(24, true)]
 			};
 		},
-		3: function(dv)
+		function(dv)
 		{
 			return {
 				"position": [ dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
@@ -1924,7 +2145,7 @@
 				"color": [dv.getUint16(28, true), dv.getUint16(30, true), dv.getUint16(32, true)]
 			};
 		}
-	};
+	];
 
 	function readAs(buf, Type, offset, count)
 	{
@@ -1967,11 +2188,10 @@
 	// LAS Loader
 	// Loads uncompressed files
 	//
-	var LASLoader = function(arraybuffer)
+	function LASLoader(arraybuffer)
 	{
 		this.arraybuffer = arraybuffer;
-	};
-
+	}
 	LASLoader.prototype.open = function()
 	{
 		// nothing needs to be done to open this file
@@ -2068,7 +2288,7 @@
 	// LAZ Loader
 	// Uses NaCL module to load LAZ files
 	//
-	var LAZLoader = function(arraybuffer)
+	function LAZLoader(arraybuffer)
 	{
 		var self = this;
 
@@ -2088,8 +2308,7 @@
 				}
 			}, req);
 		};
-	};
-
+	}
 	LAZLoader.prototype.open = function()
 	{
 		// nothing needs to be done to open this file
@@ -2164,7 +2383,7 @@
 	};
 
 	// A single consistent interface for loading LAS/LAZ files
-	var LASFile = function(arraybuffer)
+	function LASFile(arraybuffer)
 	{
 		this.arraybuffer = arraybuffer;
 
@@ -2181,8 +2400,7 @@
 		}
 
 		this.loader = this.isCompressed ? new LAZLoader(this.arraybuffer) : new LASLoader(this.arraybuffer);
-	};
-
+	}
 	LASFile.prototype.determineFormat = function()
 	{
 		var formatId = readAs(this.arraybuffer, Uint8Array, 32*3+8);
@@ -2226,7 +2444,7 @@
 	};
 
 	// Decodes LAS records into points
-	var LASDecoder$1 = function(buffer, pointFormatID, pointSize, pointsCount, scale, offset, mins, maxs)
+	function LASDecoder$1(buffer, pointFormatID, pointSize, pointsCount, scale, offset, mins, maxs)
 	{
 		this.arrayb = buffer;
 		this.decoder = pointFormatReaders[pointFormatID];
@@ -2236,8 +2454,7 @@
 		this.offset = offset;
 		this.mins = mins;
 		this.maxs = maxs;
-	};
-
+	}
 	LASDecoder$1.prototype.getPoint = function(index)
 	{
 		if(index < 0 || index >= this.pointsCount)
@@ -2291,22 +2508,14 @@
 			xhr.open("GET", url, true);
 			xhr.responseType = "arraybuffer";
 			xhr.overrideMimeType("text/plain; charset=x-user-defined");
-			xhr.onreadystatechange = () =>
+			xhr.onload = () =>
 			{
-				if(xhr.readyState === 4)
-				{
-					if(xhr.status === 200)
-					{
-						var buffer = xhr.response;
-						this.parse(node, buffer);
-					}
-					else
-					{
-						console.log("Potree: Failed to load file! HTTP status: " + xhr.status + ", file: " + url);
-					}
-				}
+				this.parse(node, xhr.response);
 			};
-
+			xhr.onerror = function()
+			{
+				console.log("Potree: Failed to load file, " + xhr.status + ", file: " + url);
+			};
 			xhr.send(null);
 		}
 
@@ -2782,136 +2991,126 @@
 	 */
 	POCLoader.load = function(url, callback)
 	{
-		try
+		var pco = new PointCloudOctreeGeometry();
+		pco.url = url;
+		
+		var xhr = new XMLHttpRequest();
+		xhr.overrideMimeType("text/plain");
+		xhr.open("GET", url, true);
+		xhr.onload = function()
 		{
-			var pco = new PointCloudOctreeGeometry();
-			pco.url = url;
-			
-			var xhr = new XMLHttpRequest();
-			xhr.overrideMimeType("text/plain");
-			xhr.open("GET", url, true);
-			xhr.onreadystatechange = function()
+			var data = JSON.parse(xhr.responseText);
+			var version = new VersionUtils(data.version);
+
+			console.log(data, version);
+
+			//Assume dir as absolute if it starts with http
+			if(data.octreeDir.indexOf("http") === 0)
 			{
-				if(xhr.readyState === 4 && (xhr.status === 200 || xhr.status === 0))
+				pco.octreeDir = data.octreeDir;
+			}
+			else
+			{
+				pco.octreeDir = url + "/../" + data.octreeDir;
+			}
+
+			pco.spacing = data.spacing;
+			pco.hierarchyStepSize = data.hierarchyStepSize;
+			pco.pointAttributes = data.pointAttributes;
+
+			var min = new THREE.Vector3(data.boundingBox.lx, data.boundingBox.ly, data.boundingBox.lz);
+			var max = new THREE.Vector3(data.boundingBox.ux, data.boundingBox.uy, data.boundingBox.uz);
+			var boundingBox = new THREE.Box3(min, max);
+			var tightBoundingBox = boundingBox.clone();
+
+			if(data.tightBoundingBox)
+			{
+				tightBoundingBox.min.copy(new THREE.Vector3(data.tightBoundingBox.lx, data.tightBoundingBox.ly, data.tightBoundingBox.lz));
+				tightBoundingBox.max.copy(new THREE.Vector3(data.tightBoundingBox.ux, data.tightBoundingBox.uy, data.tightBoundingBox.uz));
+			}
+
+			var offset = min.clone();
+
+			boundingBox.min.sub(offset);
+			boundingBox.max.sub(offset);
+
+			tightBoundingBox.min.sub(offset);
+			tightBoundingBox.max.sub(offset);
+
+			pco.projection = data.projection;
+			pco.boundingBox = boundingBox;
+			pco.tightBoundingBox = tightBoundingBox;
+			pco.boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
+			pco.tightBoundingSphere = tightBoundingBox.getBoundingSphere(new THREE.Sphere());
+			pco.offset = offset;
+
+			//Select the appropiate loader
+			if(data.pointAttributes === "LAS" || data.pointAttributes === "LAZ")
+			{
+				pco.loader = new LASLAZLoader(data.version);
+			}
+			else
+			{
+				pco.loader = new BinaryLoader(data.version, boundingBox, data.scale);
+				pco.pointAttributes = new PointAttributes(pco.pointAttributes);
+			}
+
+			var nodes = {};
+
+			//load root
+			var name = "r";
+
+			var root = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
+			root.level = 0;
+			root.hasChildren = true;
+			root.spacing = pco.spacing;
+
+			if(version.upTo("1.5"))
+			{
+				root.numPoints = data.hierarchy[0][1];
+			}
+			else
+			{
+				root.numPoints = 0;
+			}
+
+			pco.root = root;
+			pco.root.load();
+			nodes[name] = root;
+
+			//load remaining hierarchy
+			if(version.upTo("1.4"))
+			{
+				for(var i = 1; i < data.hierarchy.length; i++)
 				{
-					var fMno = JSON.parse(xhr.responseText);
+					var name = data.hierarchy[i][0];
+					var numPoints = data.hierarchy[i][1];
+					var index = parseInt(name.charAt(name.length - 1));
+					var parentName = name.substring(0, name.length - 1);
+					var parentNode = nodes[parentName];
+					var level = name.length - 1;
+					var boundingBox = POCLoader.createChildAABB(parentNode.boundingBox, index);
 
-					var version = new VersionUtils(fMno.version);
-
-					//Assume dir as absolute if it starts with http
-					if(fMno.octreeDir.indexOf("http") === 0)
-					{
-						pco.octreeDir = fMno.octreeDir;
-					}
-					else
-					{
-						pco.octreeDir = url + "/../" + fMno.octreeDir;
-					}
-
-					pco.spacing = fMno.spacing;
-					pco.hierarchyStepSize = fMno.hierarchyStepSize;
-
-					pco.pointAttributes = fMno.pointAttributes;
-
-					var min = new THREE.Vector3(fMno.boundingBox.lx, fMno.boundingBox.ly, fMno.boundingBox.lz);
-					var max = new THREE.Vector3(fMno.boundingBox.ux, fMno.boundingBox.uy, fMno.boundingBox.uz);
-					var boundingBox = new THREE.Box3(min, max);
-					var tightBoundingBox = boundingBox.clone();
-
-					if(fMno.tightBoundingBox)
-					{
-						tightBoundingBox.min.copy(new THREE.Vector3(fMno.tightBoundingBox.lx, fMno.tightBoundingBox.ly, fMno.tightBoundingBox.lz));
-						tightBoundingBox.max.copy(new THREE.Vector3(fMno.tightBoundingBox.ux, fMno.tightBoundingBox.uy, fMno.tightBoundingBox.uz));
-					}
-
-					var offset = min.clone();
-
-					boundingBox.min.sub(offset);
-					boundingBox.max.sub(offset);
-
-					tightBoundingBox.min.sub(offset);
-					tightBoundingBox.max.sub(offset);
-
-					pco.projection = fMno.projection;
-					pco.boundingBox = boundingBox;
-					pco.tightBoundingBox = tightBoundingBox;
-					pco.boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
-					pco.tightBoundingSphere = tightBoundingBox.getBoundingSphere(new THREE.Sphere());
-					pco.offset = offset;
-
-					//Select the appropiate loader
-					if(fMno.pointAttributes === "LAS")
-					{
-						pco.loader = new LASLAZLoader(fMno.version);
-					}
-					else if(fMno.pointAttributes === "LAZ")
-					{
-						pco.loader = new LASLAZLoader(fMno.version);
-					}
-					else
-					{
-						pco.loader = new BinaryLoader(fMno.version, boundingBox, fMno.scale);
-						pco.pointAttributes = new PointAttributes(pco.pointAttributes);
-					}
-
-					var nodes = {};
-
-					//load root
-					var name = "r";
-
-					var root = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
-					root.level = 0;
-					root.hasChildren = true;
-					root.spacing = pco.spacing;
-					if(version.upTo("1.5"))
-					{
-						root.numPoints = fMno.hierarchy[0][1];
-					}
-					else
-					{
-						root.numPoints = 0;
-					}
-					pco.root = root;
-					pco.root.load();
-					nodes[name] = root;
-
-					//load remaining hierarchy
-					if(version.upTo("1.4"))
-					{
-						for(var i = 1; i < fMno.hierarchy.length; i++)
-						{
-							var name = fMno.hierarchy[i][0];
-							var numPoints = fMno.hierarchy[i][1];
-							var index = parseInt(name.charAt(name.length - 1));
-							var parentName = name.substring(0, name.length - 1);
-							var parentNode = nodes[parentName];
-							var level = name.length - 1;
-							var boundingBox = POCLoader.createChildAABB(parentNode.boundingBox, index);
-
-							var node = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
-							node.level = level;
-							node.numPoints = numPoints;
-							node.spacing = pco.spacing / Math.pow(2, level);
-							parentNode.addChild(node);
-							nodes[name] = node;
-						}
-					}
-
-					pco.nodes = nodes;
-
-					callback(pco);
+					var node = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
+					node.level = level;
+					node.numPoints = numPoints;
+					node.spacing = pco.spacing / Math.pow(2, level);
+					parentNode.addChild(node);
+					nodes[name] = node;
 				}
-			};
+			}
+			pco.nodes = nodes;
 
-			xhr.send(null);
-		}
-		catch(e)
+			callback(pco);
+		};
+
+		xhr.onerror = function(event)
 		{
-			console.log("loading failed: \"" + url + "\"");
-			console.log(e);
-
+			console.log("Potree: loading failed: \"" + url + "\"", event);
 			callback();
-		}
+		};
+
+		xhr.send(null);
 	};
 
 	POCLoader.loadPointAttributes = function(mno)
@@ -4690,6 +4889,7 @@ void main()
 
 			this.clipBoxes = [];
 			this.clipPolygons = [];
+			
 			this.gradientTexture = PointCloudMaterial.generateGradientTexture(this._gradient);
 			this.lights = false;
 			this.fog = false;
@@ -9433,227 +9633,6 @@ void main()
 	}
 
 	/**
-	 * @class Loads greyhound metadata and returns a PointcloudOctree
-	 *
-	 * @author Maarten van Meersbergen
-	 * @author Oscar Martinez Rubi
-	 * @author Connor Manning
-	 */
-	class GreyhoundUtils$1
-	{
-		static getQueryParam(name)
-		{
-			name = name.replace(/[[\]]/g, "\\$&");
-			var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)");
-			var results = regex.exec(window.location.href);
-			if(!results) return null;
-			if(!results[2]) return "";
-			return decodeURIComponent(results[2].replace(/\+/g, " "));
-		}
-
-		static createSchema(attributes)
-		{
-			var schema = [
-				{
-					"name": "X",
-					"size": 4,
-					"type": "signed"
-				},
-				{
-					"name": "Y",
-					"size": 4,
-					"type": "signed"
-				},
-				{
-					"name": "Z",
-					"size": 4,
-					"type": "signed"
-				}
-			];
-
-			//Once we include options in the UI to load a dynamic list of available
-			//attributes for visualization (f.e. Classification, Intensity etc.)
-			//we will be able to ask for that specific attribute from the server,
-			//where we are now requesting all attributes for all points all the time.
-			//If we do that though, we also need to tell Potree to redraw the points
-			//that are already loaded (with different attributes).
-			//This is not default behaviour.
-			attributes.forEach(function(item)
-			{
-				if(item === "COLOR_PACKED")
-				{
-					schema.push(
-					{
-						"name": "Red",
-						"size": 2,
-						"type": "unsigned"
-					});
-					schema.push(
-					{
-						"name": "Green",
-						"size": 2,
-						"type": "unsigned"
-					});
-					schema.push(
-					{
-						"name": "Blue",
-						"size": 2,
-						"type": "unsigned"
-					});
-				}
-				else if(item === "INTENSITY")
-				{
-					schema.push(
-					{
-						"name": "Intensity",
-						"size": 2,
-						"type": "unsigned"
-					});
-				}
-				else if(item === "CLASSIFICATION")
-				{
-					schema.push(
-					{
-						"name": "Classification",
-						"size": 1,
-						"type": "unsigned"
-					});
-				}
-			});
-
-			return schema;
-		}
-
-		static fetch(url, cb)
-		{
-			var xhr = new XMLHttpRequest();
-			xhr.overrideMimeType("text/plain");
-			xhr.open("GET", url, true);
-			xhr.onreadystatechange = function()
-			{
-				if(xhr.readyState === 4)
-				{
-					if(xhr.status === 200 || xhr.status === 0)
-					{
-						cb(null, xhr.responseText);
-					}
-					else
-					{
-						cb(xhr.responseText);
-					}
-				}
-			};
-			xhr.send(null);
-		};
-
-		static fetchBinary(url, cb)
-		{
-			var xhr = new XMLHttpRequest();
-			xhr.overrideMimeType("text/plain");
-			xhr.open("GET", url, true);
-			xhr.responseType = "arraybuffer";
-			xhr.onreadystatechange = function()
-			{
-				if(xhr.readyState === 4)
-				{
-					if(xhr.status === 200 || xhr.status === 0)
-					{
-						cb(null, xhr.response);
-					}
-					else
-					{
-						cb(xhr.responseText);
-					}
-				}
-			};
-			xhr.send(null);
-		};
-
-		static pointSizeFrom(schema)
-		{
-			return schema.reduce((p, c) => p + c.size, 0);
-		};
-
-		static getNormalization(serverURL, baseDepth, cb)
-		{
-			var s = [
-				{
-					"name": "X",
-					"size": 4,
-					"type": "floating"
-				},
-				{
-					"name": "Y",
-					"size": 4,
-					"type": "floating"
-				},
-				{
-					"name": "Z",
-					"size": 4,
-					"type": "floating"
-				},
-				{
-					"name": "Red",
-					"size": 2,
-					"type": "unsigned"
-				},
-				{
-					"name": "Green",
-					"size": 2,
-					"type": "unsigned"
-				},
-				{
-					"name": "Blue",
-					"size": 2,
-					"type": "unsigned"
-				},
-				{
-					"name": "Intensity",
-					"size": 2,
-					"type": "unsigned"
-				}
-			];
-
-			var url = serverURL + "read?depth=" + baseDepth + "&schema=" + JSON.stringify(s);
-
-			GreyhoundUtils$1.fetchBinary(url, function(err, buffer)
-			{
-				if(err) throw new Error(err);
-
-				var view = new DataView(buffer);
-				var numBytes = buffer.byteLength - 4;
-				var pointSize = GreyhoundUtils$1.pointSizeFrom(s);
-
-				var colorNorm = false;
-				var intensityNorm = false;
-
-				for(var offset = 0; offset < numBytes; offset += pointSize)
-				{
-					if(view.getUint16(offset + 12, true) > 255 ||
-						view.getUint16(offset + 14, true) > 255 ||
-						view.getUint16(offset + 16, true) > 255)
-					{
-						colorNorm = true;
-					}
-
-					if(view.getUint16(offset + 18, true) > 255)
-					{
-						intensityNorm = true;
-					}
-
-					if(colorNorm && intensityNorm) break;
-				}
-
-				cb(null,
-				{
-					color: colorNorm,
-					intensity: intensityNorm
-				});
-			});
-		};
-	}
-
-	/**
 	 * Potree object is a wrapper to use Potree alongside other THREE based frameworks.
 	 * 
 	 * The object can be used a normal Object3D.
@@ -10488,7 +10467,7 @@ void main()
 	exports.PointCloudMaterial = PointCloudMaterial;
 	exports.LASLoader = LASLoader;
 	exports.BinaryLoader = BinaryLoader;
-	exports.GreyhoundUtils = GreyhoundUtils$1;
+	exports.GreyhoundUtils = GreyhoundUtils;
 	exports.GreyhoundLoader = GreyhoundLoader;
 	exports.GreyhoundBinaryLoader = GreyhoundBinaryLoader;
 	exports.POCLoader = POCLoader;

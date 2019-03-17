@@ -20,9 +20,10 @@
 
 ### Demo
  - Live demo at https://tentone.github.io/potree-core/
+ - Contains the same model multiple times stored in different formats.
+ - Double click the models to raycast the scene and create marker points.
 
- ![alt text](https://raw.githubusercontent.com/tentone/potree-core/master/data/lion_takanawa_laz/lion_takanawa.png)
-
+<img src="https://raw.githubusercontent.com/tentone/potree-core/master/screenshot.png" width="700">
 
 
 ### Example

@@ -4,6 +4,8 @@ import {HelperUtils} from "../utils/HelperUtils.js";
 import {PointCloudTree, PointCloudTreeNode} from "./PointCloudTree.js";
 import {PointColorType, ClipTask} from "../Potree.js";
 import {Global} from "../Global.js";
+import {PointCloudMaterial} from "./materials/PointCloudMaterial.js";
+import {TreeType, PointSizeType} from "../Potree.js";
 
 class PointCloudArena4DNode extends PointCloudTreeNode
 {
@@ -416,34 +418,31 @@ class PointCloudArena4D extends PointCloudTree
 
 		var pickState = this.pickState;
 		var pickMaterial = pickState.material;
+		pickMaterial.pointSizeType = pointSizeType;
+		pickMaterial.shape = this.material.shape;
 
-		{ //update pick material
-			pickMaterial.pointSizeType = pointSizeType;
-			pickMaterial.shape = this.material.shape;
-
-			pickMaterial.size = pointSize;
-			pickMaterial.uniforms.minSize.value = this.material.uniforms.minSize.value;
-			pickMaterial.uniforms.maxSize.value = this.material.uniforms.maxSize.value;
-			pickMaterial.classification = this.material.classification;
-			if(params.pickClipped)
+		pickMaterial.size = pointSize;
+		pickMaterial.uniforms.minSize.value = this.material.uniforms.minSize.value;
+		pickMaterial.uniforms.maxSize.value = this.material.uniforms.maxSize.value;
+		pickMaterial.classification = this.material.classification;
+		if(params.pickClipped)
+		{
+			pickMaterial.clipBoxes = this.material.clipBoxes;
+			if(this.material.clipTask === ClipTask.HIGHLIGHT)
 			{
-				pickMaterial.clipBoxes = this.material.clipBoxes;
-				if(this.material.clipTask === ClipTask.HIGHLIGHT)
-				{
-					pickMaterial.clipTask = ClipTask.NONE;
-				}
-				else
-				{
-					pickMaterial.clipTask = this.material.clipTask;
-				}
+				pickMaterial.clipTask = ClipTask.NONE;
 			}
 			else
 			{
-				pickMaterial.clipBoxes = [];
+				pickMaterial.clipTask = this.material.clipTask;
 			}
-
-			this.updateMaterial(pickMaterial, nodes, camera, renderer);
 		}
+		else
+		{
+			pickMaterial.clipBoxes = [];
+		}
+
+		this.updateMaterial(pickMaterial, nodes, camera, renderer);
 
 		pickState.renderTarget.setSize(width, height);
 
@@ -451,29 +450,24 @@ class PointCloudArena4D extends PointCloudTree
 
 		var gl = renderer.getContext();
 		gl.enable(gl.SCISSOR_TEST);
-		gl.scissor(
-			parseInt(pixelPos.x - (pickWindowSize - 1) / 2),
-			parseInt(pixelPos.y - (pickWindowSize - 1) / 2),
-			parseInt(pickWindowSize), parseInt(pickWindowSize));
+		gl.scissor(parseInt(pixelPos.x - (pickWindowSize - 1) / 2), parseInt(pixelPos.y - (pickWindowSize - 1) / 2), parseInt(pickWindowSize), parseInt(pickWindowSize));
 
 		renderer.state.buffers.depth.setTest(pickMaterial.depthTest);
 		renderer.state.buffers.depth.setMask(pickMaterial.depthWrite);
 		renderer.state.setBlending(THREE.NoBlending);
 
 		renderer.clearTarget(pickState.renderTarget, true, true, true);
+		renderer.setRenderTarget(pickState.renderTarget);
+		
+		gl.clearColor(0, 0, 0, 0);
+		renderer.clearTarget(pickState.renderTarget, true, true, true);
 
-		{ //RENDER
-			renderer.setRenderTarget(pickState.renderTarget);
-			gl.clearColor(0, 0, 0, 0);
-			renderer.clearTarget(pickState.renderTarget, true, true, true);
+		var tmp = this.material;
+		this.material = pickMaterial;
 
-			var tmp = this.material;
-			this.material = pickMaterial;
+		pRenderer.renderOctree(this, nodes, camera, pickState.renderTarget);
 
-			pRenderer.renderOctree(this, nodes, camera, pickState.renderTarget);
-
-			this.material = tmp;
-		}
+		this.material = tmp;
 
 		var clamp = (number, min, max) => Math.min(Math.max(min, number), max);
 

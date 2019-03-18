@@ -139,8 +139,8 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		this.defaultAttributeValues.indices = [0, 0, 0, 0];
 
 		var defines = this.getDefines();
-		this.vertexShader = defines + Shaders["pointcloud.vs"];
-		this.fragmentShader = defines + Shaders["pointcloud.fs"];
+		this.vertexShader = defines + Shaders.vertex;
+		this.fragmentShader = defines + Shaders.fragment;
 		this.vertexColors = THREE.VertexColors;
 	}
 
@@ -168,8 +168,8 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 	updateShaderSource()
 	{
 		var defines = this.getDefines();
-		this.vertexShader = defines + Shaders["pointcloud.vs"];
-		this.fragmentShader = defines + Shaders["pointcloud.fs"];
+		this.vertexShader = defines + Shaders.vertex;
+		this.fragmentShader = defines + Shaders.fragment;
 
 		if(this.opacity === 1.0)
 		{

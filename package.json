@@ -5,10 +5,10 @@
 	"main": "source/Main.js",
 	"files": "",
 	"scripts": {
-		"build": "rollup -c",
-		"build-min": "rollup -c && npm run uglify",
+		"build": "rollup -c && npm run closure",
 		"docs": "jsdoc -d docs source",
-		"uglify": "uglifyjs --compress --mangle --output build/potree.min.js -- build/potree.js",
+		"closure": "java -jar node_modules/google-closure-compiler-java/compiler.jar --compilation_level SIMPLE --warning_level QUIET --formatting SINGLE_QUOTES --language_in ECMASCRIPT_2017 --language_out ECMASCRIPT_2017 --js build/potree.js --js_output_file build/potree.min.js",
+		"uglify": "uglifyjs --compress --output build/potree.min.js -- build/potree.js",
 		"pub": "npm run build && npm run docs && npm publish --access public .",
 		"start": "python -m http.server"
 	},
@@ -22,6 +22,7 @@
 	"license": "MIT",
 	"dependencies": {},
 	"devDependencies": {
+		"google-closure-compiler": "",
 		"jsdoc": "^3.5.0",
 		"rollup": "^1.0.0",
 		"rollup-plugin-strip": "^1.2.1",

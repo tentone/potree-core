@@ -3905,7 +3905,8 @@
 
 	var Shaders = {};
 
-	Shaders["pointcloud.vs"] = `
+	//pointcloud.vs
+	Shaders.vertex = `
 precision highp float;
 precision highp int;
 
@@ -4700,7 +4701,8 @@ void main()
 	#endif
 }`;
 
-	Shaders["pointcloud.fs"] = `
+	//"pointcloud.fs"
+	Shaders.fragment = `
 
 #if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
 	#extension GL_EXT_frag_depth : enable
@@ -4924,8 +4926,8 @@ void main()
 			this.defaultAttributeValues.indices = [0, 0, 0, 0];
 
 			var defines = this.getDefines();
-			this.vertexShader = defines + Shaders["pointcloud.vs"];
-			this.fragmentShader = defines + Shaders["pointcloud.fs"];
+			this.vertexShader = defines + Shaders.vertex;
+			this.fragmentShader = defines + Shaders.fragment;
 			this.vertexColors = THREE.VertexColors;
 		}
 
@@ -4953,8 +4955,8 @@ void main()
 		updateShaderSource()
 		{
 			var defines = this.getDefines();
-			this.vertexShader = defines + Shaders["pointcloud.vs"];
-			this.fragmentShader = defines + Shaders["pointcloud.fs"];
+			this.vertexShader = defines + Shaders.vertex;
+			this.fragmentShader = defines + Shaders.fragment;
 
 			if(this.opacity === 1.0)
 			{

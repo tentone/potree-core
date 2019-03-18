@@ -1,16 +1,17 @@
 {
-	"name": "potree",
-	"version": "1.6.0",
-	"description": "potree wrapper for threejs applications",
-	"main": "source/Main.js",
-	"files": "",
+	"name": "potree-core",
+	"version": "1.0.0",
+	"description": "Potree wrapper for threejs applications",
+	"main": "build/potree.module.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tentone/potree-core.git"
+	},
 	"scripts": {
 		"build": "rollup -c && npm run closure",
 		"docs": "jsdoc -d docs source",
 		"closure": "java -jar node_modules/google-closure-compiler-java/compiler.jar --compilation_level SIMPLE --warning_level QUIET --formatting SINGLE_QUOTES --language_in ECMASCRIPT_2017 --language_out ECMASCRIPT_2017 --js build/potree.js --js_output_file build/potree.min.js",
-		"uglify": "uglifyjs --compress --output build/potree.min.js -- build/potree.js",
-		"pub": "npm run build && npm run docs && npm publish --access public .",
-		"start": "python -m http.server"
+		"pub": "npm run build && npm publish --access public ."
 	},
 	"keywords": [
 		"three",
@@ -22,10 +23,9 @@
 	"license": "MIT",
 	"dependencies": {},
 	"devDependencies": {
-		"google-closure-compiler": "",
+		"google-closure-compiler": "^20190301.0.0",
 		"jsdoc": "^3.5.0",
 		"rollup": "^1.0.0",
-		"rollup-plugin-strip": "^1.2.1",
-		"uglify-js": "^3.4.9"
+		"rollup-plugin-strip": "^1.2.1"
 	}
 }

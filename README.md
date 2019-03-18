@@ -10,7 +10,8 @@
 
 
 ### How to use
- - Download the custom potree build from the build folder.
+ - Download the custom potree build from the build folder or add it to your project using NPM.
+    - https://www.npmjs.com/package/potree-core
  - Include it alonside the worker folder in your project (can be found on the source folder).
  - Download threejs from github repository.
     - https://github.com/mrdoob/three.js/tree/dev/build

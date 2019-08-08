@@ -89,10 +89,10 @@ class BinaryLoader
 		{
 			var data = e.data;
 
-			if(data.error)
+			if(data.error !== undefined)
 			{
 				Global.numNodesLoading--;
-				console.error("Potree: Binary worker error.");
+				console.error("Potree: Binary worker error.", data);
 				return;
 			}
 

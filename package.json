@@ -1,6 +1,6 @@
 {
 	"name": "potree-core",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "Potree wrapper for threejs applications",
 	"main": "build/potree.module.js",
 	"repository": {

@@ -27,19 +27,19 @@ onmessage = function(event) {
 		let type = dimensions[name].type;
 		let size = dimensions[name].size;
 
-		if (type == 'signed') switch (size) {
+		if (type == "signed") switch (size) {
 			case 1: return (p) => view.getInt8(p + offset);
 			case 2: return (p) => view.getInt16(p + offset, true);
 			case 4: return (p) => view.getInt32(p + offset, true);
 			case 8: return (p) => view.getInt64(p + offset, true);
 		}
-		if (type == 'unsigned') switch (size) {
+		if (type == "unsigned") switch (size) {
 			case 1: return (p) => view.getUint8(p + offset);
 			case 2: return (p) => view.getUint16(p + offset, true);
 			case 4: return (p) => view.getUint32(p + offset, true);
 			case 8: return (p) => view.getUint64(p + offset, true);
 		}
-		if (type == 'float') switch (size) {
+		if (type == "float") switch (size) {
 			case 4: return (p) => view.getFloat32(p + offset, true);
 			case 8: return (p) => view.getFloat64(p + offset, true);
 		}
@@ -59,23 +59,23 @@ onmessage = function(event) {
 		returnNumberExtractor, numberOfReturnsExtractor, pointSourceIdExtractor;
 	let twoByteColor = false;
 
-	if (dimensions['X'] && dimensions['Y'] && dimensions['Z']) {
+	if (dimensions["X"] && dimensions["Y"] && dimensions["Z"]) {
 		xyzBuffer = new ArrayBuffer(numPoints * 4 * 3);
 		xyz = new Float32Array(xyzBuffer);
 		xyzExtractor = [
-			getExtractor('X'),
-			getExtractor('Y'),
-			getExtractor('Z')
+			getExtractor("X"),
+			getExtractor("Y"),
+			getExtractor("Z")
 		];
 	}
 
-	if (dimensions['Red'] && dimensions['Green'] && dimensions['Blue']) {
+	if (dimensions["Red"] && dimensions["Green"] && dimensions["Blue"]) {
 		rgbBuffer = new ArrayBuffer(numPoints * 4);
 		rgb = new Uint8Array(rgbBuffer);
 		rgbExtractor = [
-			getExtractor('Red'),
-			getExtractor('Green'),
-			getExtractor('Blue')
+			getExtractor("Red"),
+			getExtractor("Green"),
+			getExtractor("Blue")
 		];
 
 		let r, g, b, pos;
@@ -88,34 +88,34 @@ onmessage = function(event) {
 		}
 	}
 
-	if (dimensions['Intensity']) {
+	if (dimensions["Intensity"]) {
 		intensityBuffer = new ArrayBuffer(numPoints * 4);
 		intensity = new Float32Array(intensityBuffer);
-		intensityExtractor = getExtractor('Intensity');
+		intensityExtractor = getExtractor("Intensity");
 	}
 
-	if (dimensions['Classification']) {
+	if (dimensions["Classification"]) {
 		classificationBuffer = new ArrayBuffer(numPoints);
 		classification = new Uint8Array(classificationBuffer);
-		classificationExtractor = getExtractor('Classification');
+		classificationExtractor = getExtractor("Classification");
 	}
 
-	if (dimensions['ReturnNumber']) {
+	if (dimensions["ReturnNumber"]) {
 		returnNumberBuffer = new ArrayBuffer(numPoints);
 		returnNumber = new Uint8Array(returnNumberBuffer);
-		returnNumberExtractor = getExtractor('ReturnNumber');
+		returnNumberExtractor = getExtractor("ReturnNumber");
 	}
 
-	if (dimensions['NumberOfReturns']) {
+	if (dimensions["NumberOfReturns"]) {
 		numberOfReturnsBuffer = new ArrayBuffer(numPoints);
 		numberOfReturns = new Uint8Array(numberOfReturnsBuffer);
-		numberOfReturnsExtractor = getExtractor('NumberOfReturns');
+		numberOfReturnsExtractor = getExtractor("NumberOfReturns");
 	}
 
-	if (dimensions['PointSourceId']) {
+	if (dimensions["PointSourceId"]) {
 		pointSourceIdBuffer = new ArrayBuffer(numPoints * 2);
 		pointSourceId = new Uint16Array(pointSourceIdBuffer);
-		pointSourceIdExtractor = getExtractor('PointSourceId');
+		pointSourceIdExtractor = getExtractor("PointSourceId");
 	}
 
 	let mean = [0, 0, 0];

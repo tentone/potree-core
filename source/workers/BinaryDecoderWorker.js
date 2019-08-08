@@ -60,12 +60,19 @@ onmessage = function(event)
 		if(pointAttribute.name === PointAttribute.POSITION_CARTESIAN.name)
 		{
 			var buff = new ArrayBuffer(numPoints * 4 * 3);
+
+			if (buff % 4 !== 0)
+			{
+				postMessage({error: true});
+				return;
+			}
+
 			var positions = new Float32Array(buff);
 		
 			for(var j = 0; j < numPoints; j++) {
 				var x, y, z;
 
-				if(version.newerThan('1.3'))
+				if(version.newerThan("1.3"))
 				{
 					x = (cv.getUint32(inOffset + j * pointAttributes.byteSize + 0, true) * scale);
 					y = (cv.getUint32(inOffset + j * pointAttributes.byteSize + 4, true) * scale);
@@ -355,11 +362,11 @@ onmessage = function(event)
 
 	var message =
 	{
+		error: false,
 		buffer: buffer,
 		mean: mean,
 		attributeBuffers: attributeBuffers,
 		tightBoundingBox: { min: tightBoxMin, max: tightBoxMax },
-		//estimatedSpacing: estimatedSpacing,
 	};
 
 	var transferables = [];
@@ -376,7 +383,7 @@ onmessage = function(event)
 function Version(version)
 {
 	this.version = version;
-	var vmLength = (version.indexOf('.') === -1) ? version.length : version.indexOf('.');
+	var vmLength = (version.indexOf(".") === -1) ? version.length : version.indexOf(".");
 	this.versionMajor = parseInt(version.substr(0, vmLength));
 	this.versionMinor = parseInt(version.substr(vmLength + 1));
 

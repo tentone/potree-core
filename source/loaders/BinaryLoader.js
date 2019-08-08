@@ -49,8 +49,8 @@ class BinaryLoader
 			}
 			catch(e)
 			{
-				console.error("Potree: Exception thrown parsing points.", e);
 				Global.numNodesLoading--;
+				console.error("Potree: Exception thrown parsing points.", e);
 			}
 		};
 		xhr.onerror = function(event)
@@ -88,9 +88,16 @@ class BinaryLoader
 		Global.workerPool.runTask(WorkerManager.BINARY_DECODER, function(e)
 		{
 			var data = e.data;
+
+			if(data.error)
+			{
+				Global.numNodesLoading--;
+				console.error("Potree: Binary worker error.");
+				return;
+			}
+
 			var buffers = data.attributeBuffers;
 			var tightBoundingBox = new THREE.Box3(new THREE.Vector3().fromArray(data.tightBoundingBox.min), new THREE.Vector3().fromArray(data.tightBoundingBox.max));
-
 			var geometry = new THREE.BufferGeometry();
 
 			for(var property in buffers)

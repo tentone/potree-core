@@ -174,7 +174,7 @@
 				return;
 			}
 
-			while(this.numPoints > Global$1.pointLoadLimit)
+			while(this.numPoints > Global.pointLoadLimit)
 			{
 				var element = this.first;
 				var node = element.node;
@@ -234,7 +234,7 @@
 				return this.workers[type].pop();
 			}
 			
-			return new Worker(Global$1.workerPath + WorkerManager.URLS[type]);
+			return new Worker(Global.workerPath + WorkerManager.URLS[type]);
 		}
 
 		/**
@@ -309,7 +309,7 @@
 		return "";
 	}
 
-	var Global$1 = 
+	var Global = 
 	{
 		debug: {},
 		workerPath: getBasePath(),
@@ -848,7 +848,7 @@
 
 			var self = this;
 
-			Global$1.workerPool.runTask(WorkerManager.DEM, function(e)
+			Global.workerPool.runTask(WorkerManager.DEM, function(e)
 			{
 				var data = new Float32Array(e.data.dem.data);
 
@@ -1081,13 +1081,13 @@
 
 	PointCloudGreyhoundGeometryNode.prototype.load = function()
 	{
-		if(this.loading === true || this.loaded === true || Global$1.numNodesLoading >= Global$1.maxNodesLoading)
+		if(this.loading === true || this.loaded === true || Global.numNodesLoading >= Global.maxNodesLoading)
 		{
 			return;
 		}
 
 		this.loading = true;
-		Global$1.numNodesLoading++;
+		Global.numNodesLoading++;
 
 		if(this.level % this.pcoGeometry.hierarchyStepSize === 0 && this.hasChildren)
 		{
@@ -1255,7 +1255,7 @@
 				}
 				catch(e)
 				{
-					Global$1.numNodesLoading--;
+					Global.numNodesLoading--;
 					console.error("Potree: Exception thrown parsing points.", e);
 				}
 			};
@@ -1371,12 +1371,12 @@
 				catch(e)
 				{
 					console.error("Potree: Exception thrown parsing points.", e);
-					Global$1.numNodesLoading--;
+					Global.numNodesLoading--;
 				}
 			};
 			xhr.onerror = function(event)
 			{
-				Global$1.numNodesLoading--;
+				Global.numNodesLoading--;
 				console.error("Potree: Failed to load file.", xhr, url);
 			};
 			xhr.send(null);
@@ -1408,7 +1408,7 @@
 				normalize: node.pcoGeometry.normalize
 			};
 
-			Global$1.workerPool.runTask(WorkerManager.GREYHOUND, function(e)
+			Global.workerPool.runTask(WorkerManager.GREYHOUND, function(e)
 			{
 				var data = e.data;
 				var buffers = data.attributeBuffers;
@@ -1475,7 +1475,7 @@
 				node.tightBoundingBox = tightBoundingBox;
 				node.loaded = true;
 				node.loading = false;
-				Global$1.numNodesLoading--;
+				Global.numNodesLoading--;
 			}, message, [message.buffer]);
 		}
 	}
@@ -1988,13 +1988,13 @@
 				}
 				catch(e)
 				{
-					Global$1.numNodesLoading--;
+					Global.numNodesLoading--;
 					console.error("Potree: Exception thrown parsing points.", e);
 				}
 			};
 			xhr.onerror = function(event)
 			{
-				Global$1.numNodesLoading--;
+				Global.numNodesLoading--;
 				console.error("Potree: Failed to load file.", xhr, url);
 			};
 
@@ -2024,13 +2024,13 @@
 				name: node.name
 			};
 
-			Global$1.workerPool.runTask(WorkerManager.BINARY_DECODER, function(e)
+			Global.workerPool.runTask(WorkerManager.BINARY_DECODER, function(e)
 			{
 				var data = e.data;
 
 				if(data.error !== undefined)
 				{
-					Global$1.numNodesLoading--;
+					Global.numNodesLoading--;
 					console.error("Potree: Binary worker error.", data);
 					return;
 				}
@@ -2096,7 +2096,7 @@
 				node.loaded = true;
 				node.loading = false;
 				node.estimatedSpacing = data.estimatedSpacing;
-				Global$1.numNodesLoading--;
+				Global.numNodesLoading--;
 			}, message, [message.buffer]);
 		};
 	}
@@ -2293,7 +2293,7 @@
 		{
 			self.nextCB = cb;
 			
-			Global$1.workerPool.runTask(WorkerManager.LAS_LAZ, function(e)
+			Global.workerPool.runTask(WorkerManager.LAS_LAZ, function(e)
 			{
 				if(self.nextCB !== null)
 				{
@@ -2512,18 +2512,18 @@
 					catch(e)
 					{
 						console.error("Potree: Exception thrown parsing points.", e);
-						Global$1.numNodesLoading--;
+						Global.numNodesLoading--;
 					}
 				}
 				else
 				{
-					Global$1.numNodesLoading--;
+					Global.numNodesLoading--;
 					console.log("Potree: LASLAZLoader xhr response is not a ArrayBuffer.");
 				}
 			};
 			xhr.onerror = function()
 			{
-				Global$1.numNodesLoading--;
+				Global.numNodesLoading--;
 				console.log("Potree: LASLAZLoader failed to load file, " + xhr.status + ", file: " + url);
 			};
 			xhr.send(null);
@@ -2636,7 +2636,7 @@
 				maxs: data.maxs
 			};
 
-			var worker = Global$1.workerPool.getWorker(WorkerManager.LAS_DECODER);
+			var worker = Global.workerPool.getWorker(WorkerManager.LAS_DECODER);
 			worker.onmessage = function(e)
 			{
 				var geometry = new THREE.BufferGeometry();
@@ -2675,10 +2675,10 @@
 				self.node.numPoints = numPoints;
 				self.node.loaded = true;
 				self.node.loading = false;
-				Global$1.numNodesLoading--;
+				Global.numNodesLoading--;
 				self.node.mean = new THREE.Vector3(...e.data.mean);
 
-				Global$1.workerPool.returnWorker(WorkerManager.LAS_DECODER, worker);
+				Global.workerPool.returnWorker(WorkerManager.LAS_DECODER, worker);
 			};
 
 			worker.postMessage(message, [message.buffer]);
@@ -2811,13 +2811,13 @@
 
 		load()
 		{
-			if(this.loading === true || this.loaded === true || Global$1.numNodesLoading >= Global$1.maxNodesLoading)
+			if(this.loading === true || this.loaded === true || Global.numNodesLoading >= Global.maxNodesLoading)
 			{
 				return;
 			}
 
 			this.loading = true;
-			Global$1.numNodesLoading++;
+			Global.numNodesLoading++;
 
 			try
 			{
@@ -2839,7 +2839,7 @@
 			}
 			catch(e)
 			{
-				Global$1.numNodesLoading--;
+				Global.numNodesLoading--;
 				console.error("Potree: Exception thrown loading points file.", e);
 			}
 
@@ -2935,13 +2935,13 @@
 					}
 					catch(e)
 					{
-						Global$1.numNodesLoading--;
+						Global.numNodesLoading--;
 						console.error("Potree: Exception thrown parsing points.", e);
 					}
 				};
 				xhr.onerror = function(event)
 				{
-					Global$1.numNodesLoading--;
+					Global.numNodesLoading--;
 					console.error("Potree: Failed to load file.", xhr.status, hurl, event);
 				};
 				xhr.send(null);
@@ -3194,7 +3194,7 @@
 
 		parse(node, buffer)
 		{
-			var worker = Global$1.workerPool.getWorker(WorkerManager.EPT_BINARY_DECODER);
+			var worker = Global.workerPool.getWorker(WorkerManager.EPT_BINARY_DECODER);
 
 			worker.onmessage = function(e)
 			{
@@ -3247,7 +3247,7 @@
 
 				node.doneLoading(g, tightBoundingBox, numPoints, new THREE.Vector3(...e.data.mean));
 
-				Global$1.workerPool.returnWorker(WorkerManager.EPT_BINARY_DECODER, worker);
+				Global.workerPool.returnWorker(WorkerManager.EPT_BINARY_DECODER, worker);
 			};
 
 			var toArray = (v) => [v.x, v.y, v.z];
@@ -3387,7 +3387,7 @@
 
 		push(las)
 		{
-			var worker = Global$1.workerPool.getWorker(WorkerManager.EPT_LAS_ZIP_DECODER);
+			var worker = Global.workerPool.getWorker(WorkerManager.EPT_LAS_ZIP_DECODER);
 
 			worker.onmessage = (e) =>
 			{
@@ -3421,7 +3421,7 @@
 
 				this.node.doneLoading(g, tightBoundingBox, numPoints, new THREE.Vector3(...e.data.mean));
 
-				Global$1.workerPool.returnWorker(WorkerManager.EPT_LAS_ZIP_DECODER, worker);
+				Global.workerPool.returnWorker(WorkerManager.EPT_LAS_ZIP_DECODER, worker);
 			};
 
 			var message = {
@@ -3646,13 +3646,13 @@
 
 		load()
 		{
-			if(this.loaded || this.loading || Global$1.numNodesLoading >= Global$1.maxNodesLoading)
+			if(this.loaded || this.loading || Global.numNodesLoading >= Global.maxNodesLoading)
 			{
 				return;
 			}
 
 			this.loading = true;
-			Global$1.numNodesLoading++;
+			Global.numNodesLoading++;
 
 			if(this.numPoints === -1)
 			{
@@ -3726,7 +3726,7 @@
 			this.mean = mean;
 			this.loaded = true;
 			this.loading = false;
-			Global$1.numNodesLoading--;
+			Global.numNodesLoading--;
 		}
 
 		toPotreeName(d, x, y, z)
@@ -6309,7 +6309,7 @@ void main()
 
 		computeVisibilityTextureData(nodes, camera)
 		{
-			if(Global$1.measureTimings)
+			if(Global.measureTimings)
 			{
 				performance.mark("computeVisibilityTextureData-start");
 			}
@@ -6458,7 +6458,7 @@ void main()
 				}
 			}
 
-			if(Global$1.measureTimings)
+			if(Global.measureTimings)
 			{
 				performance.mark("computeVisibilityTextureData-end");
 				performance.measure("render.computeVisibilityTextureData", "computeVisibilityTextureData-start", "computeVisibilityTextureData-end");
@@ -7687,7 +7687,7 @@ void main()
 
 		computeVisibilityTextureData(nodes)
 		{
-			if(Global$1.measureTimings)
+			if(Global.measureTimings)
 			{
 				performance.mark("computeVisibilityTextureData-start");
 			}
@@ -7757,7 +7757,7 @@ void main()
 				data[i * 3 + 2] = b3;
 			}
 
-			if(Global$1.measureTimings)
+			if(Global.measureTimings)
 			{
 				performance.mark("computeVisibilityTextureData-end");
 				performance.measure("render.computeVisibilityTextureData", "computeVisibilityTextureData-start", "computeVisibilityTextureData-end");
@@ -7773,7 +7773,7 @@ void main()
 		{
 			if(this.pcoGeometry.root)
 			{
-				return Global$1.numNodesLoading > 0 ? 0 : 1;
+				return Global.numNodesLoading > 0 ? 0 : 1;
 			}
 			else
 			{
@@ -7852,14 +7852,14 @@ void main()
 				return;
 			}
 
-			if(Global$1.numNodesLoading >= Global$1.maxNodesLoading)
+			if(Global.numNodesLoading >= Global.maxNodesLoading)
 			{
 				return;
 			}
 
 			this.loading = true;
 
-			Global$1.numNodesLoading++;
+			Global.numNodesLoading++;
 
 			var self = this;
 			var url = this.pcoGeometry.url + "?node=" + this.number;
@@ -7941,18 +7941,18 @@ void main()
 					self.numPoints = numPoints;
 					self.loaded = true;
 					self.loading = false;
-					Global$1.numNodesLoading--;
+					Global.numNodesLoading--;
 				}
 				catch(e)
 				{
 					console.error("Potree: Exception thrown parsing points.", e);
-					Global$1.numNodesLoading--;
+					Global.numNodesLoading--;
 				}
 
 			};
 			xhr.onerror = function()
 			{
-				Global$1.numNodesLoading--;
+				Global.numNodesLoading--;
 				console.log("Potree: Failed to load file, " + xhr.status + ", file: " + url);
 			};
 			xhr.send(null);
@@ -8550,12 +8550,12 @@ void main()
 		var domHeight = renderer.domElement.clientHeight;
 
 		//Check if pointcloud has been transformed, some code will only be executed if changes have been detected
-		if(!Global$1.pointcloudTransformVersion)
+		if(!Global.pointcloudTransformVersion)
 		{
-			Global$1.pointcloudTransformVersion = new Map();
+			Global.pointcloudTransformVersion = new Map();
 		}
 
-		var pointcloudTransformVersion = Global$1.pointcloudTransformVersion;
+		var pointcloudTransformVersion = Global.pointcloudTransformVersion;
 
 		for(var i = 0; i < pointclouds.length; i++)
 		{
@@ -8699,7 +8699,7 @@ void main()
 
 			if(node.isGeometryNode() && (!parent || parent.isTreeNode()))
 			{
-				if(node.isLoaded() && loadedToGPUThisFrame < Global$1.maxNodesLoadGPUFrame)
+				if(node.isLoaded() && loadedToGPUThisFrame < Global.maxNodesLoadGPUFrame)
 				{
 					node = pointcloud.toTreeNode(node, parent);
 					loadedToGPUThisFrame++;
@@ -8712,7 +8712,7 @@ void main()
 
 			if(node.isTreeNode())
 			{
-				Global$1.lru.touch(node.geometryNode);
+				Global.lru.touch(node.geometryNode);
 
 				node.sceneNode.visible = true;
 				node.sceneNode.material = pointcloud.material;
@@ -8811,11 +8811,11 @@ void main()
 		
 		for(var pointcloud of candidates)
 		{
-			var updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= Global$1.maxDEMLevel);
+			var updatingNodes = pointcloud.visibleNodes.filter(n => n.getLevel() <= Global.maxDEMLevel);
 			pointcloud.dem.update(updatingNodes);
 		}
 		
-		for(var i = 0; i < Math.min(Global$1.maxNodesLoading, unloadedGeometry.length); i++)
+		for(var i = 0; i < Math.min(Global.maxNodesLoading, unloadedGeometry.length); i++)
 		{
 			unloadedGeometry[i].load();
 		}
@@ -8837,7 +8837,7 @@ void main()
 			pointclouds[i].updateVisibleBounds();
 		}
 
-		Global$1.lru.freeMemory();
+		Global.lru.freeMemory();
 
 		return result;
 	}
@@ -9813,9 +9813,9 @@ void main()
 
 			for(var node of nodes)
 			{
-				if(Global$1.debug.allowedNodes !== undefined)
+				if(Global.debug.allowedNodes !== undefined)
 				{
-					if(!Global$1.debug.allowedNodes.includes(node.name))
+					if(!Global.debug.allowedNodes.includes(node.name))
 					{
 						continue;
 					}
@@ -10246,7 +10246,7 @@ void main()
 	exports.EptBinaryLoader = EptBinaryLoader;
 	exports.EptLaszipLoader = EptLaszipLoader;
 	exports.EptLoader = EptLoader;
-	exports.Global = Global$1;
+	exports.Global = Global;
 	exports.Gradients = Gradients;
 	exports.GreyhoundBinaryLoader = GreyhoundBinaryLoader;
 	exports.GreyhoundLoader = GreyhoundLoader;

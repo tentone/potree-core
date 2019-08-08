@@ -5,6 +5,7 @@ import {LASLAZLoader} from "./LASLAZLoader.js";
 import {PointAttributes, PointAttribute} from "../PointAttributes.js";
 import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "../pointcloud/geometries/PointCloudOctreeGeometry.js";
 import {VersionUtils} from "../utils/VersionUtils.js";
+import {Global} from "../Global.js";
 
 /**
  * @class Loads mno files and returns a PointcloudOctree

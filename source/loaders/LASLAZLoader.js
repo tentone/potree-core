@@ -41,23 +41,27 @@ class LASLAZLoader
 			url += "." + pointAttributes.toLowerCase();
 		}
 
+		var self = this;
+
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
-		xhr.onload = () =>
+		xhr.onload = function()
 		{
 			if(xhr.response instanceof ArrayBuffer)
 			{
-				this.parse(node, xhr.response);
+				self.parse(node, xhr.response);
 			}
 			else
 			{
+				Global.numNodesLoading--;
 				console.log("Potree: LASLAZLoader xhr response is not a ArrayBuffer.");
 			}
 		};
 		xhr.onerror = function()
 		{
+			Global.numNodesLoading--;
 			console.log("Potree: LASLAZLoader failed to load file, " + xhr.status + ", file: " + url);
 		};
 		xhr.send(null);

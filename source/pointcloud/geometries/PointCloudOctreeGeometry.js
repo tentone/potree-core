@@ -244,8 +244,8 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 			};
 			xhr.onerror = function(event)
 			{
-				console.log("Potree: Failed to load file! HTTP status: " + xhr.status + ", file: " + hurl, event);
 				Global.numNodesLoading--;
+				console.error("Potree: Failed to load file.", xhr.status, hurl, event);
 			}
 			xhr.send(null);
 		}

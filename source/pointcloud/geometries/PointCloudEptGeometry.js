@@ -213,13 +213,18 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 	load()
 	{
-		if(this.loaded || this.loading) return;
-		if(Global.numNodesLoading >= Global.maxNodesLoading) return;
+		if(this.loaded || this.loading || Global.numNodesLoading >= Global.maxNodesLoading)
+		{
+			return;
+		}
 
 		this.loading = true;
-		++Global.numNodesLoading;
+		Global.numNodesLoading++;
 
-		if(this.numPoints == -1) this.loadHierarchy();
+		if(this.numPoints === -1)
+		{
+			this.loadHierarchy();
+		}
 		this.loadPoints();
 	}
 
@@ -288,7 +293,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 		this.mean = mean;
 		this.loaded = true;
 		this.loading = false;
-		--Global.numNodesLoading;
+		Global.numNodesLoading--;
 	}
 
 	toPotreeName(d, x, y, z)

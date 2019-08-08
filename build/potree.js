@@ -1355,22 +1355,15 @@
 			xhr.open("GET", url, true);
 			xhr.responseType = "arraybuffer";
 			xhr.overrideMimeType("text/plain; charset=x-user-defined");
-			xhr.onreadystatechange = function()
+			xhr.onload = function()
 			{
-				if(xhr.readyState === 4)
-				{
-					if(xhr.status === 200 || xhr.status === 0)
-					{
-						var buffer = xhr.response;
-						self.parse(node, buffer);
-					}
-					else
-					{
-						console.log("Potree: Failed to load file.", xhr, url);
-					}
-				}
+				self.parse(node, xhr.response);
 			};
-
+			xhr.onerror = function(event)
+			{
+				Global.numNodesLoading--;
+				console.error("Potree: Failed to load file.", xhr, url);
+			};
 			xhr.send(null);
 		}
 
@@ -1972,21 +1965,16 @@
 			xhr.open("GET", url, true);
 			xhr.responseType = "arraybuffer";
 			xhr.overrideMimeType("text/plain; charset=x-user-defined");
-			xhr.onreadystatechange = function()
+			xhr.onload = function()
 			{
-				if(xhr.readyState === 4)
-				{
-					if((xhr.status === 200 || xhr.status === 0) && xhr.response !== null)
-					{
-						var buffer = xhr.response;
-						self.parse(node, buffer);
-					}
-					else
-					{
-						throw new Error("Potree: Failed to load file, HTTP status " + xhr.status);
-					}
-				}
+				self.parse(node, xhr.response);
 			};
+			xhr.onerror = function(event)
+			{
+				Global.numNodesLoading--;
+				console.error("Potree: Failed to load file.", xhr, url);
+			};
+
 			xhr.send(null);
 		};
 
@@ -2477,23 +2465,27 @@
 				url += "." + pointAttributes.toLowerCase();
 			}
 
+			var self = this;
+
 			var xhr = new XMLHttpRequest();
 			xhr.open("GET", url, true);
 			xhr.responseType = "arraybuffer";
 			xhr.overrideMimeType("text/plain; charset=x-user-defined");
-			xhr.onload = () =>
+			xhr.onload = function()
 			{
 				if(xhr.response instanceof ArrayBuffer)
 				{
-					this.parse(node, xhr.response);
+					self.parse(node, xhr.response);
 				}
 				else
 				{
+					Global.numNodesLoading--;
 					console.log("Potree: LASLAZLoader xhr response is not a ArrayBuffer.");
 				}
 			};
 			xhr.onerror = function()
 			{
+				Global.numNodesLoading--;
 				console.log("Potree: LASLAZLoader failed to load file, " + xhr.status + ", file: " + url);
 			};
 			xhr.send(null);
@@ -2523,7 +2515,7 @@
 				let header = v[1];
 				let skip = 1;
 				let totalRead = 0;
-				let totalToRead = (header.pointsCount);
+				let totalToRead = ( header.pointsCount );
 
 				var reader = function()
 				{
@@ -2894,8 +2886,8 @@
 				};
 				xhr.onerror = function(event)
 				{
-					console.log("Potree: Failed to load file! HTTP status: " + xhr.status + ", file: " + hurl, event);
 					Global.numNodesLoading--;
+					console.error("Potree: Failed to load file.", xhr.status, hurl, event);
 				};
 				xhr.send(null);
 			}
@@ -3598,13 +3590,18 @@
 
 		load()
 		{
-			if(this.loaded || this.loading) return;
-			if(Global.numNodesLoading >= Global.maxNodesLoading) return;
+			if(this.loaded || this.loading || Global.numNodesLoading >= Global.maxNodesLoading)
+			{
+				return;
+			}
 
 			this.loading = true;
-			++Global.numNodesLoading;
+			Global.numNodesLoading++;
 
-			if(this.numPoints == -1) this.loadHierarchy();
+			if(this.numPoints === -1)
+			{
+				this.loadHierarchy();
+			}
 			this.loadPoints();
 		}
 
@@ -3673,7 +3670,7 @@
 			this.mean = mean;
 			this.loaded = true;
 			this.loading = false;
-			--Global.numNodesLoading;
+			Global.numNodesLoading--;
 		}
 
 		toPotreeName(d, x, y, z)
@@ -7815,7 +7812,7 @@ void main()
 			xhr.overrideMimeType("text/plain");
 			xhr.open("GET", url, true);
 			xhr.responseType = "arraybuffer";
-			xhr.onreadystatechange = function()
+			xhr.onload = function()
 			{
 				if(!(xhr.readyState === 4 && xhr.status === 200))
 				{
@@ -7882,7 +7879,11 @@ void main()
 				self.loading = false;
 				Global.numNodesLoading--;
 			};
-
+			xhr.onerror = function()
+			{
+				Global.numNodesLoading--;
+				console.log("Potree: Failed to load file, " + xhr.status + ", file: " + url);
+			};
 			xhr.send(null);
 		}
 
@@ -8468,7 +8469,7 @@ void main()
 		var lowestSpacing = Infinity;
 
 		//Calculate object space frustum and cam pos and setup priority queue
-		var structures = updateVisibilityStructures(pointclouds, camera, renderer);
+		var structures = updateVisibilityStructures(pointclouds, camera);
 		var frustums = structures.frustums;
 		var camObjPositions = structures.camObjPositions;
 		var priorityQueue = structures.priorityQueue;
@@ -10162,56 +10163,56 @@ void main()
 		}
 	}
 
-	exports.Global = Global;
 	exports.AttributeLocations = AttributeLocations;
-	exports.Classification = Classification;
-	exports.ClipTask = ClipTask;
-	exports.ClipMethod = ClipMethod;
-	exports.PointSizeType = PointSizeType;
-	exports.PointShape = PointShape;
-	exports.PointColorType = PointColorType;
-	exports.TreeType = TreeType;
-	exports.loadPointCloud = loadPointCloud;
-	exports.updateVisibility = updateVisibility;
-	exports.updatePointClouds = updatePointClouds;
-	exports.updateVisibilityStructures = updateVisibilityStructures;
+	exports.BasicGroup = BasicGroup;
 	exports.BinaryHeap = BinaryHeap;
-	exports.LRU = LRU;
-	exports.HelperUtils = HelperUtils;
-	exports.VersionUtils = VersionUtils;
-	exports.WorkerManager = WorkerManager;
-	exports.PointAttribute = PointAttribute;
-	exports.PointAttributes = PointAttributes;
-	exports.PointAttributeNames = PointAttributeNames;
-	exports.PointAttributeTypes = PointAttributeTypes;
-	exports.Gradients = Gradients;
-	exports.Points = Points;
-	exports.Shader = Shader;
-	exports.WebGLTexture = WebGLTexture;
-	exports.WebGLBuffer = WebGLBuffer;
-	exports.Shaders = Shaders;
+	exports.BinaryLoader = BinaryLoader;
+	exports.Classification = Classification;
+	exports.ClipMethod = ClipMethod;
+	exports.ClipTask = ClipTask;
 	exports.DEM = DEM$1;
 	exports.DEMNode = DEMNode;
-	exports.PointCloudTree = PointCloudTree;
+	exports.EptBinaryLoader = EptBinaryLoader;
+	exports.EptLaszipLoader = EptLaszipLoader;
+	exports.EptLoader = EptLoader;
+	exports.Global = Global;
+	exports.Gradients = Gradients;
+	exports.GreyhoundBinaryLoader = GreyhoundBinaryLoader;
+	exports.GreyhoundLoader = GreyhoundLoader;
+	exports.GreyhoundUtils = GreyhoundUtils;
+	exports.Group = Group;
+	exports.HelperUtils = HelperUtils;
+	exports.LASLAZLoader = LASLAZLoader;
+	exports.LASLoader = LASLoader;
+	exports.LRU = LRU;
+	exports.POCLoader = POCLoader;
+	exports.PointAttribute = PointAttribute;
+	exports.PointAttributeNames = PointAttributeNames;
+	exports.PointAttributeTypes = PointAttributeTypes;
+	exports.PointAttributes = PointAttributes;
 	exports.PointCloudArena4D = PointCloudArena4D;
+	exports.PointCloudArena4DGeometry = PointCloudArena4DGeometry;
+	exports.PointCloudEptGeometry = PointCloudEptGeometry;
+	exports.PointCloudGreyhoundGeometry = PointCloudGreyhoundGeometry;
+	exports.PointCloudMaterial = PointCloudMaterial;
 	exports.PointCloudOctree = PointCloudOctree;
 	exports.PointCloudOctreeGeometry = PointCloudOctreeGeometry;
-	exports.PointCloudArena4DGeometry = PointCloudArena4DGeometry;
-	exports.PointCloudGreyhoundGeometry = PointCloudGreyhoundGeometry;
-	exports.PointCloudEptGeometry = PointCloudEptGeometry;
-	exports.PointCloudMaterial = PointCloudMaterial;
-	exports.LASLoader = LASLoader;
-	exports.BinaryLoader = BinaryLoader;
-	exports.GreyhoundUtils = GreyhoundUtils;
-	exports.GreyhoundLoader = GreyhoundLoader;
-	exports.GreyhoundBinaryLoader = GreyhoundBinaryLoader;
-	exports.POCLoader = POCLoader;
-	exports.LASLAZLoader = LASLAZLoader;
-	exports.EptLoader = EptLoader;
-	exports.EptLaszipLoader = EptLaszipLoader;
-	exports.EptBinaryLoader = EptBinaryLoader;
-	exports.BasicGroup = BasicGroup;
-	exports.Group = Group;
+	exports.PointCloudTree = PointCloudTree;
+	exports.PointColorType = PointColorType;
+	exports.PointShape = PointShape;
+	exports.PointSizeType = PointSizeType;
+	exports.Points = Points;
+	exports.Shader = Shader;
+	exports.Shaders = Shaders;
+	exports.TreeType = TreeType;
+	exports.VersionUtils = VersionUtils;
+	exports.WebGLBuffer = WebGLBuffer;
+	exports.WebGLTexture = WebGLTexture;
+	exports.WorkerManager = WorkerManager;
+	exports.loadPointCloud = loadPointCloud;
+	exports.updatePointClouds = updatePointClouds;
+	exports.updateVisibility = updateVisibility;
+	exports.updateVisibilityStructures = updateVisibilityStructures;
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 

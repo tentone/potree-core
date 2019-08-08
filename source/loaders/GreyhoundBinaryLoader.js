@@ -34,22 +34,15 @@ class GreyhoundBinaryLoader
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
-		xhr.onreadystatechange = function()
+		xhr.onload = function()
 		{
-			if(xhr.readyState === 4)
-			{
-				if(xhr.status === 200 || xhr.status === 0)
-				{
-					var buffer = xhr.response;
-					self.parse(node, buffer);
-				}
-				else
-				{
-					console.log("Potree: Failed to load file.", xhr, url);
-				}
-			}
+			self.parse(node, xhr.response);
 		};
-
+		xhr.onerror = function(event)
+		{
+			Global.numNodesLoading--;
+			console.error("Potree: Failed to load file.", xhr, url);
+		};
 		xhr.send(null);
 	}
 

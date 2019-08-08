@@ -1349,22 +1349,15 @@ class GreyhoundBinaryLoader
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
-		xhr.onreadystatechange = function()
+		xhr.onload = function()
 		{
-			if(xhr.readyState === 4)
-			{
-				if(xhr.status === 200 || xhr.status === 0)
-				{
-					var buffer = xhr.response;
-					self.parse(node, buffer);
-				}
-				else
-				{
-					console.log("Potree: Failed to load file.", xhr, url);
-				}
-			}
+			self.parse(node, xhr.response);
 		};
-
+		xhr.onerror = function(event)
+		{
+			Global.numNodesLoading--;
+			console.error("Potree: Failed to load file.", xhr, url);
+		};
 		xhr.send(null);
 	}
 
@@ -1966,21 +1959,16 @@ class BinaryLoader
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
-		xhr.onreadystatechange = function()
+		xhr.onload = function()
 		{
-			if(xhr.readyState === 4)
-			{
-				if((xhr.status === 200 || xhr.status === 0) && xhr.response !== null)
-				{
-					var buffer = xhr.response;
-					self.parse(node, buffer);
-				}
-				else
-				{
-					throw new Error("Potree: Failed to load file, HTTP status " + xhr.status);
-				}
-			}
+			self.parse(node, xhr.response);
 		};
+		xhr.onerror = function(event)
+		{
+			Global.numNodesLoading--;
+			console.error("Potree: Failed to load file.", xhr, url);
+		};
+
 		xhr.send(null);
 	};
 
@@ -2471,23 +2459,27 @@ class LASLAZLoader
 			url += "." + pointAttributes.toLowerCase();
 		}
 
+		var self = this;
+
 		var xhr = new XMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
-		xhr.onload = () =>
+		xhr.onload = function()
 		{
 			if(xhr.response instanceof ArrayBuffer)
 			{
-				this.parse(node, xhr.response);
+				self.parse(node, xhr.response);
 			}
 			else
 			{
+				Global.numNodesLoading--;
 				console.log("Potree: LASLAZLoader xhr response is not a ArrayBuffer.");
 			}
 		};
 		xhr.onerror = function()
 		{
+			Global.numNodesLoading--;
 			console.log("Potree: LASLAZLoader failed to load file, " + xhr.status + ", file: " + url);
 		};
 		xhr.send(null);
@@ -2517,7 +2509,7 @@ class LASLAZLoader
 			let header = v[1];
 			let skip = 1;
 			let totalRead = 0;
-			let totalToRead = (header.pointsCount);
+			let totalToRead = ( header.pointsCount );
 
 			var reader = function()
 			{
@@ -2888,8 +2880,8 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 			};
 			xhr.onerror = function(event)
 			{
-				console.log("Potree: Failed to load file! HTTP status: " + xhr.status + ", file: " + hurl, event);
 				Global.numNodesLoading--;
+				console.error("Potree: Failed to load file.", xhr.status, hurl, event);
 			};
 			xhr.send(null);
 		}
@@ -3592,13 +3584,18 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 	load()
 	{
-		if(this.loaded || this.loading) return;
-		if(Global.numNodesLoading >= Global.maxNodesLoading) return;
+		if(this.loaded || this.loading || Global.numNodesLoading >= Global.maxNodesLoading)
+		{
+			return;
+		}
 
 		this.loading = true;
-		++Global.numNodesLoading;
+		Global.numNodesLoading++;
 
-		if(this.numPoints == -1) this.loadHierarchy();
+		if(this.numPoints === -1)
+		{
+			this.loadHierarchy();
+		}
 		this.loadPoints();
 	}
 
@@ -3667,7 +3664,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 		this.mean = mean;
 		this.loaded = true;
 		this.loading = false;
-		--Global.numNodesLoading;
+		Global.numNodesLoading--;
 	}
 
 	toPotreeName(d, x, y, z)
@@ -7809,7 +7806,7 @@ class PointCloudArena4DGeometryNode
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
-		xhr.onreadystatechange = function()
+		xhr.onload = function()
 		{
 			if(!(xhr.readyState === 4 && xhr.status === 200))
 			{
@@ -7876,7 +7873,11 @@ class PointCloudArena4DGeometryNode
 			self.loading = false;
 			Global.numNodesLoading--;
 		};
-
+		xhr.onerror = function()
+		{
+			Global.numNodesLoading--;
+			console.log("Potree: Failed to load file, " + xhr.status + ", file: " + url);
+		};
 		xhr.send(null);
 	}
 
@@ -8462,7 +8463,7 @@ function updateVisibility(pointclouds, camera, renderer)
 	var lowestSpacing = Infinity;
 
 	//Calculate object space frustum and cam pos and setup priority queue
-	var structures = updateVisibilityStructures(pointclouds, camera, renderer);
+	var structures = updateVisibilityStructures(pointclouds, camera);
 	var frustums = structures.frustums;
 	var camObjPositions = structures.camObjPositions;
 	var priorityQueue = structures.priorityQueue;
@@ -10156,4 +10157,4 @@ class Group extends BasicGroup
 	}
 }
 
-export { Global, AttributeLocations, Classification, ClipTask, ClipMethod, PointSizeType, PointShape, PointColorType, TreeType, loadPointCloud, updateVisibility, updatePointClouds, updateVisibilityStructures, BinaryHeap, LRU, HelperUtils, VersionUtils, WorkerManager, PointAttribute, PointAttributes, PointAttributeNames, PointAttributeTypes, Gradients, Points, Shader, WebGLTexture, WebGLBuffer, Shaders, DEM$1 as DEM, DEMNode, PointCloudTree, PointCloudArena4D, PointCloudOctree, PointCloudOctreeGeometry, PointCloudArena4DGeometry, PointCloudGreyhoundGeometry, PointCloudEptGeometry, PointCloudMaterial, LASLoader, BinaryLoader, GreyhoundUtils, GreyhoundLoader, GreyhoundBinaryLoader, POCLoader, LASLAZLoader, EptLoader, EptLaszipLoader, EptBinaryLoader, BasicGroup, Group };
+export { AttributeLocations, BasicGroup, BinaryHeap, BinaryLoader, Classification, ClipMethod, ClipTask, DEM$1 as DEM, DEMNode, EptBinaryLoader, EptLaszipLoader, EptLoader, Global, Gradients, GreyhoundBinaryLoader, GreyhoundLoader, GreyhoundUtils, Group, HelperUtils, LASLAZLoader, LASLoader, LRU, POCLoader, PointAttribute, PointAttributeNames, PointAttributeTypes, PointAttributes, PointCloudArena4D, PointCloudArena4DGeometry, PointCloudEptGeometry, PointCloudGreyhoundGeometry, PointCloudMaterial, PointCloudOctree, PointCloudOctreeGeometry, PointCloudTree, PointColorType, PointShape, PointSizeType, Points, Shader, Shaders, TreeType, VersionUtils, WebGLBuffer, WebGLTexture, WorkerManager, loadPointCloud, updatePointClouds, updateVisibility, updateVisibilityStructures };

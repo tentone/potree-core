@@ -41,21 +41,16 @@ class BinaryLoader
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
-		xhr.onreadystatechange = function()
+		xhr.onload = function()
 		{
-			if(xhr.readyState === 4)
-			{
-				if((xhr.status === 200 || xhr.status === 0) && xhr.response !== null)
-				{
-					var buffer = xhr.response;
-					self.parse(node, buffer);
-				}
-				else
-				{
-					throw new Error("Potree: Failed to load file, HTTP status " + xhr.status);
-				}
-			}
+			self.parse(node, xhr.response);
 		};
+		xhr.onerror = function(event)
+		{
+			Global.numNodesLoading--;
+			console.error("Potree: Failed to load file.", xhr, url);
+		};
+
 		xhr.send(null);
 	};
 

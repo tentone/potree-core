@@ -90,7 +90,7 @@ class PointCloudArena4DGeometryNode
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
-		xhr.onreadystatechange = function()
+		xhr.onload = function()
 		{
 			if(!(xhr.readyState === 4 && xhr.status === 200))
 			{
@@ -168,7 +168,11 @@ class PointCloudArena4DGeometryNode
 			self.loading = false;
 			Global.numNodesLoading--;
 		};
-
+		xhr.onerror = function()
+		{
+			Global.numNodesLoading--;
+			console.log("Potree: Failed to load file, " + xhr.status + ", file: " + url);
+		};
 		xhr.send(null);
 	}
 

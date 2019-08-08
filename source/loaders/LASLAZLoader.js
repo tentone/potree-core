@@ -51,7 +51,15 @@ class LASLAZLoader
 		{
 			if(xhr.response instanceof ArrayBuffer)
 			{
-				self.parse(node, xhr.response);
+				try
+				{
+					self.parse(node, xhr.response);
+				}
+				catch(e)
+				{
+					console.error("Potree: Exception thrown parsing points.", e);
+					Global.numNodesLoading--;
+				}
 			}
 			else
 			{

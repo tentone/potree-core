@@ -325,8 +325,15 @@ PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = function()
 		xhr.open("GET", hurl, true);
 		xhr.onload = function(event)
 		{
-			var greyhoundHierarchy = JSON.parse(xhr.responseText) || {};
-			callback(self, greyhoundHierarchy);
+			try
+			{
+				callback(self, JSON.parse(xhr.responseText) || {});
+			}
+			catch(e)
+			{
+				Global.numNodesLoading--;
+				console.error("Potree: Exception thrown parsing points.", e);
+			}
 		};
 		xhr.onerror = function(event)
 		{

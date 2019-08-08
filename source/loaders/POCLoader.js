@@ -126,7 +126,8 @@ class POCLoader
 
 		xhr.onerror = function(event)
 		{
-			console.log("Potree: loading failed: \"" + url + "\"", event);
+			Global.numNodesLoading--;
+			console.log("Potree: loading file failed.", url, event);
 			callback();
 		};
 

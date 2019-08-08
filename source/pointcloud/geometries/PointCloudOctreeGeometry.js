@@ -139,21 +139,30 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 		this.loading = true;
 		Global.numNodesLoading++;
 
-		if(this.pcoGeometry.loader.version.equalOrHigher("1.5"))
+		try
 		{
-			if((this.level % this.pcoGeometry.hierarchyStepSize) === 0 && this.hasChildren)
+			if(this.pcoGeometry.loader.version.equalOrHigher("1.5"))
 			{
-				this.loadHierachyThenPoints();
+				if((this.level % this.pcoGeometry.hierarchyStepSize) === 0 && this.hasChildren)
+				{
+					this.loadHierachyThenPoints();
+				}
+				else
+				{
+					this.loadPoints();
+				}
 			}
 			else
 			{
 				this.loadPoints();
 			}
 		}
-		else
+		catch(e)
 		{
-			this.loadPoints();
+			Global.numNodesLoading--;
+			console.error("Potree: Exception thrown loading points file.", e);
 		}
+
 	}
 
 	loadPoints()
@@ -240,7 +249,15 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 			xhr.overrideMimeType("text/plain; charset=x-user-defined");
 			xhr.onload = function(event)
 			{
-				callback(node, xhr.response);
+				try
+				{
+					callback(node, xhr.response);
+				}
+				catch(e)
+				{
+					Global.numNodesLoading--;
+					console.error("Potree: Exception thrown parsing points.", e);
+				}
 			};
 			xhr.onerror = function(event)
 			{

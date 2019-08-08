@@ -92,81 +92,85 @@ class PointCloudArena4DGeometryNode
 		xhr.responseType = "arraybuffer";
 		xhr.onload = function()
 		{
-			if(!(xhr.readyState === 4 && xhr.status === 200))
+			try
 			{
-				return;
+				var buffer = xhr.response;
+				var sourceView = new DataView(buffer);
+				var numPoints = buffer.byteLength / 17;
+				var bytesPerPoint = 28;
+
+				var data = new ArrayBuffer(numPoints * bytesPerPoint);
+				var targetView = new DataView(data);
+
+				var attributes = [
+					PointAttribute.POSITION_CARTESIAN,
+					PointAttribute.RGBA_PACKED,
+					PointAttribute.INTENSITY,
+					PointAttribute.CLASSIFICATION,
+				];
+
+				var position = new Float32Array(numPoints * 3);
+				var color = new Uint8Array(numPoints * 4);
+				var intensities = new Float32Array(numPoints);
+				var classifications = new Uint8Array(numPoints);
+				var indices = new ArrayBuffer(numPoints * 4);
+				var u32Indices = new Uint32Array(indices);
+
+				var tightBoundingBox = new THREE.Box3();
+
+				for(var i = 0; i < numPoints; i++)
+				{
+					var x = sourceView.getFloat32(i * 17 + 0, true) + self.boundingBox.min.x;
+					var y = sourceView.getFloat32(i * 17 + 4, true) + self.boundingBox.min.y;
+					var z = sourceView.getFloat32(i * 17 + 8, true) + self.boundingBox.min.z;
+
+					var r = sourceView.getUint8(i * 17 + 12, true);
+					var g = sourceView.getUint8(i * 17 + 13, true);
+					var b = sourceView.getUint8(i * 17 + 14, true);
+
+					var intensity = sourceView.getUint8(i * 17 + 15, true);
+
+					var classification = sourceView.getUint8(i * 17 + 16, true);
+
+					tightBoundingBox.expandByPoint(new THREE.Vector3(x, y, z));
+
+					position[i * 3 + 0] = x;
+					position[i * 3 + 1] = y;
+					position[i * 3 + 2] = z;
+
+					color[i * 4 + 0] = r;
+					color[i * 4 + 1] = g;
+					color[i * 4 + 2] = b;
+					color[i * 4 + 3] = 255;
+
+					intensities[i] = intensity;
+					classifications[i] = classification;
+
+					u32Indices[i] = i;
+				}
+
+				var geometry = new THREE.BufferGeometry();
+				geometry.addAttribute("position", new THREE.BufferAttribute(position, 3));
+				geometry.addAttribute("color", new THREE.BufferAttribute(color, 4, true));
+				geometry.addAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
+				geometry.addAttribute("classification", new THREE.BufferAttribute(classifications, 1));
+				{
+					var bufferAttribute = new THREE.BufferAttribute(new Uint8Array(indices), 4, true);
+					geometry.addAttribute("indices", bufferAttribute);
+				}
+
+				self.geometry = geometry;
+				self.numPoints = numPoints;
+				self.loaded = true;
+				self.loading = false;
+				Global.numNodesLoading--;
+			}
+			catch(e)
+			{
+				console.error("Potree: Exception thrown parsing points.", e);
+				Global.numNodesLoading--;
 			}
 
-			var buffer = xhr.response;
-			var sourceView = new DataView(buffer);
-			var numPoints = buffer.byteLength / 17;
-			var bytesPerPoint = 28;
-
-			var data = new ArrayBuffer(numPoints * bytesPerPoint);
-			var targetView = new DataView(data);
-
-			var attributes = [
-				PointAttribute.POSITION_CARTESIAN,
-				PointAttribute.RGBA_PACKED,
-				PointAttribute.INTENSITY,
-				PointAttribute.CLASSIFICATION,
-			];
-
-			var position = new Float32Array(numPoints * 3);
-			var color = new Uint8Array(numPoints * 4);
-			var intensities = new Float32Array(numPoints);
-			var classifications = new Uint8Array(numPoints);
-			var indices = new ArrayBuffer(numPoints * 4);
-			var u32Indices = new Uint32Array(indices);
-
-			var tightBoundingBox = new THREE.Box3();
-
-			for(var i = 0; i < numPoints; i++)
-			{
-				var x = sourceView.getFloat32(i * 17 + 0, true) + self.boundingBox.min.x;
-				var y = sourceView.getFloat32(i * 17 + 4, true) + self.boundingBox.min.y;
-				var z = sourceView.getFloat32(i * 17 + 8, true) + self.boundingBox.min.z;
-
-				var r = sourceView.getUint8(i * 17 + 12, true);
-				var g = sourceView.getUint8(i * 17 + 13, true);
-				var b = sourceView.getUint8(i * 17 + 14, true);
-
-				var intensity = sourceView.getUint8(i * 17 + 15, true);
-
-				var classification = sourceView.getUint8(i * 17 + 16, true);
-
-				tightBoundingBox.expandByPoint(new THREE.Vector3(x, y, z));
-
-				position[i * 3 + 0] = x;
-				position[i * 3 + 1] = y;
-				position[i * 3 + 2] = z;
-
-				color[i * 4 + 0] = r;
-				color[i * 4 + 1] = g;
-				color[i * 4 + 2] = b;
-				color[i * 4 + 3] = 255;
-
-				intensities[i] = intensity;
-				classifications[i] = classification;
-
-				u32Indices[i] = i;
-			}
-
-			var geometry = new THREE.BufferGeometry();
-			geometry.addAttribute("position", new THREE.BufferAttribute(position, 3));
-			geometry.addAttribute("color", new THREE.BufferAttribute(color, 4, true));
-			geometry.addAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
-			geometry.addAttribute("classification", new THREE.BufferAttribute(classifications, 1));
-			{
-				var bufferAttribute = new THREE.BufferAttribute(new Uint8Array(indices), 4, true);
-				geometry.addAttribute("indices", bufferAttribute);
-			}
-
-			self.geometry = geometry;
-			self.numPoints = numPoints;
-			self.loaded = true;
-			self.loading = false;
-			Global.numNodesLoading--;
 		};
 		xhr.onerror = function()
 		{

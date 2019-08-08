@@ -43,7 +43,15 @@ class BinaryLoader
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
 		xhr.onload = function()
 		{
-			self.parse(node, xhr.response);
+			try
+			{
+				self.parse(node, xhr.response);
+			}
+			catch(e)
+			{
+				console.error("Potree: Exception thrown parsing points.", e);
+				Global.numNodesLoading--;
+			}
 		};
 		xhr.onerror = function(event)
 		{

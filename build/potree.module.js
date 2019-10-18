@@ -284,7 +284,7 @@ WorkerManager.URLS =
 
 function getBasePath()
 {
-	if(document.currentScript.src)
+	if(document.currentScript && document.currentScript.src)
 	{
 		var scriptPath = new URL(document.currentScript.src + "/..").href;
 

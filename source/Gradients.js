@@ -1,36 +1,5 @@
 "use strict";
 
-//
-//to get a ready to use gradient array from a chroma.js gradient:
-//http://gka.github.io/chroma.js/
-//
-//var stops = [];
-//for(var i = 0; i <= 10; i++){
-//	var range = chroma.scale(["yellow", "navy"]).mode("lch").domain([10,0])(i)._rgb
-//		.slice(0, 3)
-//		.map(v => (v / 255).toFixed(4))
-//		.join(", ");
-//
-//	var line = `[${i / 10}, new THREE.Color(${range})],`;
-//
-//	stops.push(line);
-//}
-//stops.join("\n");
-
-//to get a ready to use gradient array from matplotlib:
-//import matplotlib.pyplot as plt
-//import matplotlib.colors as colors
-//
-//norm = colors.Normalize(vmin=0,vmax=1)
-//cmap = plt.cm.viridis
-//
-//for i in range(0,11):
-//   u = i / 10
-//   rgb = cmap(norm(u))[0:3]
-//   rgb = ["{0:.3f}".format(v) for v in rgb]
-//   rgb = "[" + str(u) + ", new THREE.Color(" +  ", ".join(rgb) + ")],"
-//   print(rgb)
-
 var Gradients = {
 	RAINBOW: [
 		[0, new THREE.Color(0.278, 0, 0.714)],

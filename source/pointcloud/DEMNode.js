@@ -1,8 +1,6 @@
 "use strict";
 
-//
 //index is in order xyzxyzxyz
-//
 class DEMNode
 {
 	constructor(name, box, tileSize)

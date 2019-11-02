@@ -2,7 +2,7 @@
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 	typeof define === 'function' && define.amd ? define(['exports'], factory) :
 	(global = global || self, factory(global.Potree = {}));
-}(this, function (exports) { 'use strict';
+}(this, (function (exports) { 'use strict';
 
 	class LRUItem
 	{
@@ -493,9 +493,7 @@
 		return false;
 	};
 
-	//
 	//index is in order xyzxyzxyz
-	//
 	class DEMNode
 	{
 		constructor(name, box, tileSize)
@@ -1169,8 +1167,6 @@
 						child = base.neu;
 						childName = parentName + transform[7];
 						break;
-					default:
-						break;
 				}
 
 				stack.push(
@@ -1427,42 +1423,42 @@
 
 					if(parseInt(property) === PointAttributeNames.POSITION_CARTESIAN)
 					{
-						geometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(buffer), 3));
+						geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 					}
 					else if(parseInt(property) === PointAttributeNames.COLOR_PACKED)
 					{
-						geometry.addAttribute("color", new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
+						geometry.setAttribute("color", new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
 					}
 					else if(parseInt(property) === PointAttributeNames.INTENSITY)
 					{
-						geometry.addAttribute("intensity", new THREE.BufferAttribute(new Float32Array(buffer), 1));
+						geometry.setAttribute("intensity", new THREE.BufferAttribute(new Float32Array(buffer), 1));
 					}
 					else if(parseInt(property) === PointAttributeNames.CLASSIFICATION)
 					{
-						geometry.addAttribute("classification", new THREE.BufferAttribute(new Uint8Array(buffer), 1));
+						geometry.setAttribute("classification", new THREE.BufferAttribute(new Uint8Array(buffer), 1));
 					}
 					else if(parseInt(property) === PointAttributeNames.NORMAL_SPHEREMAPPED)
 					{
-						geometry.addAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
+						geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 					}
 					else if(parseInt(property) === PointAttributeNames.NORMAL_OCT16)
 					{
-						geometry.addAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
+						geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 					}
 					else if(parseInt(property) === PointAttributeNames.NORMAL)
 					{
-						geometry.addAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
+						geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 					}
 					else if(parseInt(property) === PointAttributeNames.INDICES)
 					{
 						var bufferAttribute = new THREE.BufferAttribute(new Uint8Array(buffer), 4);
 						bufferAttribute.normalized = true;
-						geometry.addAttribute("indices", bufferAttribute);
+						geometry.setAttribute("indices", bufferAttribute);
 					}
 					else if(parseInt(property) === PointAttributeNames.SPACING)
 					{
 						var bufferAttribute = new THREE.BufferAttribute(new Float32Array(buffer), 1);
-						geometry.addAttribute("spacing", bufferAttribute);
+						geometry.setAttribute("spacing", bufferAttribute);
 					}
 				}
 
@@ -2045,42 +2041,42 @@
 
 					if(parseInt(property) === PointAttributeNames.POSITION_CARTESIAN)
 					{
-						geometry.addAttribute("position", new THREE.BufferAttribute(new Float32Array(buffer), 3));
+						geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 					}
 					else if(parseInt(property) === PointAttributeNames.COLOR_PACKED)
 					{
-						geometry.addAttribute("color", new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
+						geometry.setAttribute("color", new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
 					}
 					else if(parseInt(property) === PointAttributeNames.INTENSITY)
 					{
-						geometry.addAttribute("intensity", new THREE.BufferAttribute(new Float32Array(buffer), 1));
+						geometry.setAttribute("intensity", new THREE.BufferAttribute(new Float32Array(buffer), 1));
 					}
 					else if(parseInt(property) === PointAttributeNames.CLASSIFICATION)
 					{
-						geometry.addAttribute("classification", new THREE.BufferAttribute(new Uint8Array(buffer), 1));
+						geometry.setAttribute("classification", new THREE.BufferAttribute(new Uint8Array(buffer), 1));
 					}
 					else if(parseInt(property) === PointAttributeNames.NORMAL_SPHEREMAPPED)
 					{
-						geometry.addAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
+						geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 					}
 					else if(parseInt(property) === PointAttributeNames.NORMAL_OCT16)
 					{
-						geometry.addAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
+						geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 					}
 					else if(parseInt(property) === PointAttributeNames.NORMAL)
 					{
-						geometry.addAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
+						geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 					}
 					else if(parseInt(property) === PointAttributeNames.INDICES)
 					{
 						var bufferAttribute = new THREE.BufferAttribute(new Uint8Array(buffer), 4);
 						bufferAttribute.normalized = true;
-						geometry.addAttribute("indices", bufferAttribute);
+						geometry.setAttribute("indices", bufferAttribute);
 					}
 					else if(parseInt(property) === PointAttributeNames.SPACING)
 					{
 						var bufferAttribute = new THREE.BufferAttribute(new Float32Array(buffer), 1);
-						geometry.addAttribute("spacing", bufferAttribute);
+						geometry.setAttribute("spacing", bufferAttribute);
 					}
 				}
 
@@ -2651,15 +2647,15 @@
 				var pointSourceIDs = new Uint16Array(e.data.pointSourceID);
 				var indices = new Uint8Array(e.data.indices);
 
-				geometry.addAttribute("position", new THREE.BufferAttribute(positions, 3));
-				geometry.addAttribute("color", new THREE.BufferAttribute(colors, 4, true));
-				geometry.addAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
-				geometry.addAttribute("classification", new THREE.BufferAttribute(classifications, 1));
-				geometry.addAttribute("returnNumber", new THREE.BufferAttribute(returnNumbers, 1));
-				geometry.addAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
-				geometry.addAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
-				//geometry.addAttribute("normal", new THREE.BufferAttribute(new Float32Array(numPoints * 3), 3));
-				geometry.addAttribute("indices", new THREE.BufferAttribute(indices, 4));
+				geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+				geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4, true));
+				geometry.setAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
+				geometry.setAttribute("classification", new THREE.BufferAttribute(classifications, 1));
+				geometry.setAttribute("returnNumber", new THREE.BufferAttribute(returnNumbers, 1));
+				geometry.setAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
+				geometry.setAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
+				//geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(numPoints * 3), 3));
+				geometry.setAttribute("indices", new THREE.BufferAttribute(indices, 4));
 				geometry.attributes.indices.normalized = true;
 
 				var tightBoundingBox = new THREE.Box3
@@ -3202,40 +3198,40 @@
 				var numPoints = e.data.numPoints;
 
 				var position = new Float32Array(e.data.position);
-				g.addAttribute("position", new THREE.BufferAttribute(position, 3));
+				g.setAttribute("position", new THREE.BufferAttribute(position, 3));
 
 				var indices = new Uint8Array(e.data.indices);
-				g.addAttribute("indices", new THREE.BufferAttribute(indices, 4));
+				g.setAttribute("indices", new THREE.BufferAttribute(indices, 4));
 
 				if(e.data.color)
 				{
 					var color = new Uint8Array(e.data.color);
-					g.addAttribute("color", new THREE.BufferAttribute(color, 4, true));
+					g.setAttribute("color", new THREE.BufferAttribute(color, 4, true));
 				}
 				if(e.data.intensity)
 				{
 					var intensity = new Float32Array(e.data.intensity);
-					g.addAttribute("intensity", new THREE.BufferAttribute(intensity, 1));
+					g.setAttribute("intensity", new THREE.BufferAttribute(intensity, 1));
 				}
 				if(e.data.classification)
 				{
 					var classification = new Uint8Array(e.data.classification);
-					g.addAttribute("classification", new THREE.BufferAttribute(classification, 1));
+					g.setAttribute("classification", new THREE.BufferAttribute(classification, 1));
 				}
 				if(e.data.returnNumber)
 				{
 					var returnNumber = new Uint8Array(e.data.returnNumber);
-					g.addAttribute("returnNumber", new THREE.BufferAttribute(returnNumber, 1));
+					g.setAttribute("returnNumber", new THREE.BufferAttribute(returnNumber, 1));
 				}
 				if(e.data.numberOfReturns)
 				{
 					var numberOfReturns = new Uint8Array(e.data.numberOfReturns);
-					g.addAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
+					g.setAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
 				}
 				if(e.data.pointSourceId)
 				{
 					var pointSourceId = new Uint16Array(e.data.pointSourceId);
-					g.addAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceId, 1));
+					g.setAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceId, 1));
 				}
 
 				g.attributes.indices.normalized = true;
@@ -3404,14 +3400,14 @@
 				var pointSourceIDs = new Uint16Array(e.data.pointSourceID);
 				var indices = new Uint8Array(e.data.indices);
 
-				g.addAttribute("position", new THREE.BufferAttribute(positions, 3));
-				g.addAttribute("color", new THREE.BufferAttribute(colors, 4, true));
-				g.addAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
-				g.addAttribute("classification", new THREE.BufferAttribute(classifications, 1));
-				g.addAttribute("returnNumber", new THREE.BufferAttribute(returnNumbers, 1));
-				g.addAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
-				g.addAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
-				g.addAttribute("indices", new THREE.BufferAttribute(indices, 4));
+				g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+				g.setAttribute("color", new THREE.BufferAttribute(colors, 4, true));
+				g.setAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
+				g.setAttribute("classification", new THREE.BufferAttribute(classifications, 1));
+				g.setAttribute("returnNumber", new THREE.BufferAttribute(returnNumbers, 1));
+				g.setAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
+				g.setAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
+				g.setAttribute("indices", new THREE.BufferAttribute(indices, 4));
 				g.attributes.indices.normalized = true;
 
 				var tightBoundingBox = new THREE.Box3(
@@ -3439,7 +3435,7 @@
 		};
 	}
 
-	class U
+	class Utils
 	{
 		static toVector3(v, offset)
 		{
@@ -3448,7 +3444,7 @@
 
 		static toBox3(b)
 		{
-			return new THREE.Box3(U.toVector3(b), U.toVector3(b, 3));
+			return new THREE.Box3(Utils.toVector3(b), Utils.toVector3(b, 3));
 		};
 
 		static findDim(schema, name)
@@ -3473,15 +3469,15 @@
 			let boundsConforming = info.boundsConforming;
 
 			let xyz = [
-				U.findDim(schema, "X"),
-				U.findDim(schema, "Y"),
-				U.findDim(schema, "Z")
+				Utils.findDim(schema, "X"),
+				Utils.findDim(schema, "Y"),
+				Utils.findDim(schema, "Z")
 			];
 			let scale = xyz.map((d) => d.scale || 1);
 			let offset = xyz.map((d) => d.offset || 0);
 
-			this.eptScale = U.toVector3(scale);
-			this.eptOffset = U.toVector3(offset);
+			this.eptScale = Utils.toVector3(scale);
+			this.eptOffset = Utils.toVector3(offset);
 
 			this.url = url;
 			this.info = info;
@@ -3489,11 +3485,11 @@
 
 			this.schema = schema;
 			this.span = info.span || info.ticks;
-			this.boundingBox = U.toBox3(bounds);
-			this.tightBoundingBox = U.toBox3(boundsConforming);
-			this.offset = U.toVector3([0, 0, 0]);
-			this.boundingSphere = U.sphereFrom(this.boundingBox);
-			this.tightBoundingSphere = U.sphereFrom(this.tightBoundingBox);
+			this.boundingBox = Utils.toBox3(bounds);
+			this.tightBoundingBox = Utils.toBox3(boundsConforming);
+			this.offset = Utils.toVector3([0, 0, 0]);
+			this.boundingSphere = Utils.sphereFrom(this.boundingBox);
+			this.tightBoundingSphere = Utils.sphereFrom(this.tightBoundingBox);
 			this.version = new VersionUtils("1.6");
 
 			this.projection = null;
@@ -3598,7 +3594,7 @@
 			this.boundingBox = this.key.b;
 			this.tightBoundingBox = this.boundingBox;
 			this.spacing = this.ept.spacing / Math.pow(2, this.key.d);
-			this.boundingSphere = U.sphereFrom(this.boundingBox);
+			this.boundingSphere = Utils.sphereFrom(this.boundingBox);
 
 			// These are set during hierarchy loading.
 			this.hasChildren = false;
@@ -3842,37 +3838,6 @@
 			return boundingBox;
 		};
 	}
-
-	//
-	//to get a ready to use gradient array from a chroma.js gradient:
-	//http://gka.github.io/chroma.js/
-	//
-	//var stops = [];
-	//for(var i = 0; i <= 10; i++){
-	//	var range = chroma.scale(["yellow", "navy"]).mode("lch").domain([10,0])(i)._rgb
-	//		.slice(0, 3)
-	//		.map(v => (v / 255).toFixed(4))
-	//		.join(", ");
-	//
-	//	var line = `[${i / 10}, new THREE.Color(${range})],`;
-	//
-	//	stops.push(line);
-	//}
-	//stops.join("\n");
-
-	//to get a ready to use gradient array from matplotlib:
-	//import matplotlib.pyplot as plt
-	//import matplotlib.colors as colors
-	//
-	//norm = colors.Normalize(vmin=0,vmax=1)
-	//cmap = plt.cm.viridis
-	//
-	//for i in range(0,11):
-	//   u = i / 10
-	//   rgb = cmap(norm(u))[0:3]
-	//   rgb = ["{0:.3f}".format(v) for v in rgb]
-	//   rgb = "[" + str(u) + ", new THREE.Color(" +  ", ".join(rgb) + ")],"
-	//   print(rgb)
 
 	var Gradients = {
 		RAINBOW: [
@@ -7928,13 +7893,13 @@ void main()
 					}
 
 					var geometry = new THREE.BufferGeometry();
-					geometry.addAttribute("position", new THREE.BufferAttribute(position, 3));
-					geometry.addAttribute("color", new THREE.BufferAttribute(color, 4, true));
-					geometry.addAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
-					geometry.addAttribute("classification", new THREE.BufferAttribute(classifications, 1));
+					geometry.setAttribute("position", new THREE.BufferAttribute(position, 3));
+					geometry.setAttribute("color", new THREE.BufferAttribute(color, 4, true));
+					geometry.setAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
+					geometry.setAttribute("classification", new THREE.BufferAttribute(classifications, 1));
 					{
 						var bufferAttribute = new THREE.BufferAttribute(new Uint8Array(indices), 4, true);
-						geometry.addAttribute("indices", bufferAttribute);
+						geometry.setAttribute("indices", bufferAttribute);
 					}
 
 					self.geometry = geometry;
@@ -9667,7 +9632,7 @@ void main()
 		{
 			super.onBeforeRender(renderer, scene, camera, geometry, material, group);
 
-			var gl = renderer.context;
+			var gl = renderer.getContext();
 			if(gl.bindVertexArray === undefined)
 			{
 				this.getExtensions(gl);
@@ -9804,7 +9769,7 @@ void main()
 
 		renderNodes(renderer, octree, nodes, visibilityTextureData, camera, shader)
 		{
-			var gl = renderer.context;
+			var gl = renderer.getContext();
 			var material = octree.material;
 			var view = camera.matrixWorldInverse;
 
@@ -9964,7 +9929,7 @@ void main()
 
 		renderOctree(renderer, octree, nodes, camera)
 		{
-			var gl = renderer.context;
+			var gl = renderer.getContext();
 			var material = octree.material;
 			var shadowMaps = [];
 			var view = camera.matrixWorldInverse;
@@ -10287,4 +10252,4 @@ void main()
 
 	Object.defineProperty(exports, '__esModule', { value: true });
 
-}));
+})));

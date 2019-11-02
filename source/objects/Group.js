@@ -43,7 +43,7 @@ class Group extends BasicGroup
 	{
 		super.onBeforeRender(renderer, scene, camera, geometry, material, group);
 
-		var gl = renderer.context;
+		var gl = renderer.getContext();
 		if(gl.bindVertexArray === undefined)
 		{
 			this.getExtensions(gl)
@@ -180,7 +180,7 @@ class Group extends BasicGroup
 
 	renderNodes(renderer, octree, nodes, visibilityTextureData, camera, shader)
 	{
-		var gl = renderer.context;
+		var gl = renderer.getContext();
 		var material = octree.material;
 		var shadowMaps = [];
 		var view = camera.matrixWorldInverse;
@@ -341,7 +341,7 @@ class Group extends BasicGroup
 
 	renderOctree(renderer, octree, nodes, camera)
 	{
-		var gl = renderer.context;
+		var gl = renderer.getContext();
 		var material = octree.material;
 		var shadowMaps = [];
 		var view = camera.matrixWorldInverse;

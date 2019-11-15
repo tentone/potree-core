@@ -2,7 +2,7 @@
 
 import {PointAttributes, PointAttribute} from "../../PointAttributes.js";
 import {Global} from "../../Global.js";
-import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";
+import {XHRFactory} from "../../XHRFactory.js";
 
 class PointCloudArena4DGeometryNode
 {
@@ -86,7 +86,7 @@ class PointCloudArena4DGeometryNode
 		var self = this;
 		var url = this.pcoGeometry.url + "?node=" + this.number;
 		
-		var xhr = new XMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
@@ -228,7 +228,7 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 
 	static load(url, callback)
 	{
-		var xhr = new XMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url + "?info", true);
 
@@ -290,7 +290,7 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 	{
 		var url = this.url + "?tree";
 		
-		var xhr = new XMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";

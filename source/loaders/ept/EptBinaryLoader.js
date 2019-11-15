@@ -2,6 +2,7 @@
 
 import {Global} from "../../Global.js";
 import {WorkerManager} from "../../utils/WorkerManager.js";
+import {XHRFactory} from "../../XHRFactory.js";
 
 class EptBinaryLoader
 {
@@ -10,8 +11,8 @@ class EptBinaryLoader
 		if(node.loaded) return;
 
 		var url = node.url() + ".bin";
-
-		var xhr = new XMLHttpRequest();
+		
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");

@@ -4,6 +4,7 @@ import {PointAttributeNames} from "../PointAttributes.js";
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
 import {Global} from "../Global.js";
+import {XHRFactory} from "../XHRFactory.js";
 
 class GreyhoundBinaryLoader
 {
@@ -29,7 +30,7 @@ class GreyhoundBinaryLoader
 		var self = this;
 		var url = node.getURL();
 
-		var xhr = new XMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";

@@ -4,6 +4,7 @@ import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
 import {LASLoader, LAZLoader, LASFile, LASDecoder} from "./LASLoader.js";
 import {Global} from "../Global.js";
+import {XHRFactory} from "../XHRFactory.js";
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
@@ -43,7 +44,7 @@ class LASLAZLoader
 
 		var self = this;
 
-		var xhr = new XMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");

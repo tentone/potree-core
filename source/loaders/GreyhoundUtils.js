@@ -1,5 +1,7 @@
 "use strict";
 
+import {XHRFactory} from "../XHRFactory.js";
+
 /**
  * @class Loads greyhound metadata and returns a PointcloudOctree
  *
@@ -94,7 +96,7 @@ class GreyhoundUtils
 
 	static fetch(url, cb)
 	{
-		var xhr = new XMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.onreadystatechange = function()
@@ -116,7 +118,7 @@ class GreyhoundUtils
 
 	static fetchBinary(url, cb)
 	{
-		var xhr = new XMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";

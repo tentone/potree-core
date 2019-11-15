@@ -3,6 +3,7 @@
 import {POCLoader} from "../../loaders/POCLoader.js";
 import {Global} from "../../Global.js";
 import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";
+import {XHRFactory} from "../../XHRFactory.js";
 
 class PointCloudOctreeGeometry
 {
@@ -243,7 +244,7 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 		if((node.level % node.pcoGeometry.hierarchyStepSize) === 0)
 		{
 			var hurl = node.pcoGeometry.octreeDir + "/" + node.getHierarchyPath() + "/" + node.name + ".hrc";
-			var xhr = new XMLHttpRequest();
+			var xhr = XHRFactory.createXMLHttpRequest();
 			xhr.open("GET", hurl, true);
 			xhr.responseType = "arraybuffer";
 			xhr.overrideMimeType("text/plain; charset=x-user-defined");

@@ -44,7 +44,7 @@ export {PointCloudTree} from "./pointcloud/PointCloudTree.js";
 export {PointCloudArena4D} from "./pointcloud/PointCloudArena4D.js";
 export {PointCloudOctree} from "./pointcloud/PointCloudOctree.js";
 
-export {PointCloudOctreeGeometry} from "./pointcloud/geometries/PointCloudOctreeGeometry.js";
+export {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "./pointcloud/geometries/PointCloudOctreeGeometry.js";
 export {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
 export {PointCloudGreyhoundGeometry} from "./pointcloud/geometries/PointCloudGreyhoundGeometry.js";
 export {PointCloudEptGeometry} from "./pointcloud/geometries/PointCloudEptGeometry.js";
@@ -65,3 +65,4 @@ export {EptBinaryLoader} from "./loaders/ept/EptBinaryLoader.js";
 
 export {BasicGroup} from "./objects/BasicGroup.js";
 export {Group} from "./objects/Group.js";
+export {XHRFactory} from './XHRFactory.js';

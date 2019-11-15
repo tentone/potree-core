@@ -6,6 +6,7 @@ import {PointAttributes, PointAttribute} from "../PointAttributes.js";
 import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "../pointcloud/geometries/PointCloudOctreeGeometry.js";
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {Global} from "../Global.js";
+import {XHRFactory} from "../XHRFactory.js";
 
 /**
  * @class Loads mno files and returns a PointcloudOctree
@@ -27,7 +28,7 @@ class POCLoader
 		var pco = new PointCloudOctreeGeometry();
 		pco.url = url;
 		
-		var xhr = new XMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", url, true);
 		xhr.onload = function()

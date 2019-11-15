@@ -320,7 +320,7 @@ PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = function()
 		}
 
 		var self = this;
-		var xhr = new XMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", hurl, true);
 		xhr.onload = function(event)

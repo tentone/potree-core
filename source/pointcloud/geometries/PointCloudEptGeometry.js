@@ -3,6 +3,7 @@ import {EptLaszipLoader} from "../../loaders/ept/EptLaszipLoader";
 import {VersionUtils} from "../../utils/VersionUtils.js";
 import {PointCloudTreeNode} from "../PointCloudTree.js";
 import {Global} from "../../Global.js";
+import {XHRFactory} from "../../XHRFactory.js";
 
 class U
 {
@@ -241,7 +242,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 		let eptHierarchyFile = `${this.ept.url}ept-hierarchy/${this.filename()}.json`;
 
-		let response = await fetch(eptHierarchyFile);
+		let response = await XHRFactory.fetch(eptHierarchyFile);
 		let hier = await response.json();
 
 		// Since we want to traverse top-down, and 10 comes

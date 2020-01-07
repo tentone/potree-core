@@ -37,6 +37,9 @@ function CustomView(buffer)
 
 onmessage = function(event)
 {
+  if (!event.data || !event.data.buffer) {
+    return;
+  }
 	try
 	{
 		var buffer = event.data.buffer;

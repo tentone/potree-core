@@ -1,5 +1,7 @@
 "use strict";
 
+import * as THREE from 'three';
+
 import {Global} from "../../Global.js";
 import {LASFile, LASDecoder} from "../LASLoader.js";
 import {WorkerManager} from "../../utils/WorkerManager.js";
@@ -147,14 +149,14 @@ class EptLazBatcher
 			var pointSourceIDs = new Uint16Array(e.data.pointSourceID);
 			var indices = new Uint8Array(e.data.indices);
 
-			g.addAttribute("position", new THREE.BufferAttribute(positions, 3));
-			g.addAttribute("color", new THREE.BufferAttribute(colors, 4, true));
-			g.addAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
-			g.addAttribute("classification", new THREE.BufferAttribute(classifications, 1));
-			g.addAttribute("returnNumber", new THREE.BufferAttribute(returnNumbers, 1));
-			g.addAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
-			g.addAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
-			g.addAttribute("indices", new THREE.BufferAttribute(indices, 4));
+			g.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+			g.setAttribute("color", new THREE.BufferAttribute(colors, 4, true));
+			g.setAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
+			g.setAttribute("classification", new THREE.BufferAttribute(classifications, 1));
+			g.setAttribute("returnNumber", new THREE.BufferAttribute(returnNumbers, 1));
+			g.setAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
+			g.setAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
+			g.setAttribute("indices", new THREE.BufferAttribute(indices, 4));
 			g.attributes.indices.normalized = true;
 
 			var tightBoundingBox = new THREE.Box3(

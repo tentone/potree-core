@@ -1,5 +1,7 @@
 "use strict";
 
+import * as THREE from 'three';
+
 import {GreyhoundLoader} from "../../loaders/GreyhoundLoader.js";
 import {Global} from "../../Global.js";
 import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";

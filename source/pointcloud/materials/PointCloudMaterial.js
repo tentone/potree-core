@@ -1,5 +1,7 @@
 "use strict";
 
+import * as THREE from 'three';
+
 import {HelperUtils} from "../../utils/HelperUtils.js";
 import {Gradients} from "../../Gradients.js";
 import {Shaders} from "../../Shaders.js";

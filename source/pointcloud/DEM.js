@@ -1,5 +1,7 @@
 "use strict";
 
+import * as THREE from 'three';
+
 import {WorkerManager} from "../utils/WorkerManager.js";
 import {Global} from "../Global.js";
 import {DEMNode} from "./DEMNode.js";

@@ -5,7 +5,7 @@ import {WorkerManager} from "./utils/WorkerManager.js";
 
 function getBasePath()
 {
-	if(document.currentScript && document.currentScript.src)
+	if(document.currentScript.src)
 	{
 		var scriptPath = new URL(document.currentScript.src + "/..").href;
 

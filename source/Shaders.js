@@ -1,5 +1,7 @@
 "use strict";
 
+import * as THREE from 'three';
+
 var Shaders = {};
 
 //pointcloud.vs
@@ -8,8 +10,8 @@ precision highp float;
 precision highp int;
 
 #define MAX_CLIP_POLYGONS 8
-#define PI 3.141592653589793
 
+` + THREE.ShaderChunk.common + `
 ` + THREE.ShaderChunk.logdepthbuf_pars_vertex + `
 
 attribute vec3 position;
@@ -808,6 +810,7 @@ Shaders.fragment = `
 precision highp float;
 precision highp int;
 
+` + THREE.ShaderChunk.common + `
 ` + THREE.ShaderChunk.logdepthbuf_pars_fragment + `
 
 uniform mat4 viewMatrix;

@@ -47,7 +47,7 @@ export {PointCloudOctree} from "./pointcloud/PointCloudOctree.js";
 export {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "./pointcloud/geometries/PointCloudOctreeGeometry.js";
 export {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
 export {PointCloudGreyhoundGeometry} from "./pointcloud/geometries/PointCloudGreyhoundGeometry.js";
-export {PointCloudEptGeometry} from "./pointcloud/geometries/PointCloudEptGeometry.js";
+export {PointCloudEptGeometry, PointCloudEptGeometryNode} from "./pointcloud/geometries/PointCloudEptGeometry.js";
 
 export {PointCloudMaterial} from "./pointcloud/materials/PointCloudMaterial.js";
 

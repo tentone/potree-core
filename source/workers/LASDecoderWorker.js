@@ -2,6 +2,9 @@
 
 onmessage = function(event)
 {
+  if (!event.data || !event.data.buffer) {
+    return;
+  }
 	var buffer = event.data.buffer;
 	var numPoints = event.data.numPoints;
 	var sourcePointSize = event.data.pointSize;

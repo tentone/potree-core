@@ -1,5 +1,7 @@
 "use strict";
 
+import * as THREE from 'three';
+
 import {Global} from "../../Global.js";
 import {WorkerManager} from "../../utils/WorkerManager.js";
 import {XHRFactory} from "../../XHRFactory.js";
@@ -52,40 +54,40 @@ class EptBinaryLoader
 			var numPoints = e.data.numPoints;
 
 			var position = new Float32Array(e.data.position);
-			g.addAttribute("position", new THREE.BufferAttribute(position, 3));
+			g.setAttribute("position", new THREE.BufferAttribute(position, 3));
 
 			var indices = new Uint8Array(e.data.indices);
-			g.addAttribute("indices", new THREE.BufferAttribute(indices, 4));
+			g.setAttribute("indices", new THREE.BufferAttribute(indices, 4));
 
 			if(e.data.color)
 			{
 				var color = new Uint8Array(e.data.color);
-				g.addAttribute("color", new THREE.BufferAttribute(color, 4, true));
+				g.setAttribute("color", new THREE.BufferAttribute(color, 4, true));
 			}
 			if(e.data.intensity)
 			{
 				var intensity = new Float32Array(e.data.intensity);
-				g.addAttribute("intensity", new THREE.BufferAttribute(intensity, 1));
+				g.setAttribute("intensity", new THREE.BufferAttribute(intensity, 1));
 			}
 			if(e.data.classification)
 			{
 				var classification = new Uint8Array(e.data.classification);
-				g.addAttribute("classification", new THREE.BufferAttribute(classification, 1));
+				g.setAttribute("classification", new THREE.BufferAttribute(classification, 1));
 			}
 			if(e.data.returnNumber)
 			{
 				var returnNumber = new Uint8Array(e.data.returnNumber);
-				g.addAttribute("returnNumber", new THREE.BufferAttribute(returnNumber, 1));
+				g.setAttribute("returnNumber", new THREE.BufferAttribute(returnNumber, 1));
 			}
 			if(e.data.numberOfReturns)
 			{
 				var numberOfReturns = new Uint8Array(e.data.numberOfReturns);
-				g.addAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
+				g.setAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
 			}
 			if(e.data.pointSourceId)
 			{
 				var pointSourceId = new Uint16Array(e.data.pointSourceId);
-				g.addAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceId, 1));
+				g.setAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceId, 1));
 			}
 
 			g.attributes.indices.normalized = true;

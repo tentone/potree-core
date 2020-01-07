@@ -1,5 +1,7 @@
 "use strict";
 
+import * as THREE from 'three';
+
 import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
 import {LASLoader, LAZLoader, LASFile, LASDecoder} from "./LASLoader.js";
@@ -199,15 +201,15 @@ class LASLAZBatcher
 			var pointSourceIDs = new Uint16Array(e.data.pointSourceID);
 			var indices = new Uint8Array(e.data.indices);
 
-			geometry.addAttribute("position", new THREE.BufferAttribute(positions, 3));
-			geometry.addAttribute("color", new THREE.BufferAttribute(colors, 4, true));
-			geometry.addAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
-			geometry.addAttribute("classification", new THREE.BufferAttribute(classifications, 1));
-			geometry.addAttribute("returnNumber", new THREE.BufferAttribute(returnNumbers, 1));
-			geometry.addAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
-			geometry.addAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
-			//geometry.addAttribute("normal", new THREE.BufferAttribute(new Float32Array(numPoints * 3), 3));
-			geometry.addAttribute("indices", new THREE.BufferAttribute(indices, 4));
+			geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+			geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4, true));
+			geometry.setAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
+			geometry.setAttribute("classification", new THREE.BufferAttribute(classifications, 1));
+			geometry.setAttribute("returnNumber", new THREE.BufferAttribute(returnNumbers, 1));
+			geometry.setAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
+			geometry.setAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
+			//geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(numPoints * 3), 3));
+			geometry.setAttribute("indices", new THREE.BufferAttribute(indices, 4));
 			geometry.attributes.indices.normalized = true;
 
 			var tightBoundingBox = new THREE.Box3

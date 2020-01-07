@@ -1,16 +1,15 @@
 {
-	"name": "potree-core",
-	"version": "1.0.6",
+	"name": "@cognite/potree-core",
+	"version": "1.0.10",
 	"description": "Potree wrapper for threejs applications",
-	"main": "build/potree.module.js",
+	"main": "dist/bundle.js",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/tentone/potree-core.git"
+		"url": "https://github.com/cognite/potree-core.git"
 	},
 	"scripts": {
-		"build": "rollup -c && npm run closure",
+		"build": "webpack",
 		"docs": "jsdoc -d docs source",
-		"closure": "java -jar node_modules/google-closure-compiler-java/compiler.jar --compilation_level SIMPLE --warning_level QUIET --formatting SINGLE_QUOTES --language_in ECMASCRIPT_2017 --language_out ECMASCRIPT_2017 --js build/potree.js --js_output_file build/potree.min.js",
 		"pub": "npm run build && npm publish --access public ."
 	},
 	"keywords": [
@@ -19,13 +18,26 @@
 		"3d",
 		"webgl"
 	],
+	"files": [
+		"dist"
+	],
 	"author": "Tentone",
 	"license": "MIT",
-	"dependencies": {},
+	"peerDependencies": {
+		"three": "^0.109.0"
+	},
+	"dependencies": {
+		"peer-deps-externals-webpack-plugin": "^1.0.4",
+		"rollup-plugin-commonjs": "^10.1.0",
+		"rollup-plugin-peer-deps-external": "^2.2.0",
+		"rollup-plugin-web-worker-loader": "^0.6.0",
+		"webpack-cli": "^3.3.9",
+		"worker-loader": "^2.0.0"
+	},
 	"devDependencies": {
-		"google-closure-compiler": "^20190301.0.0",
 		"jsdoc": "^3.5.0",
 		"rollup": "^1.0.0",
-		"rollup-plugin-strip": "^1.2.1"
+		"rollup-plugin-strip": "^1.2.1",
+		"webpack": "^4.41.2"
 	}
 }

@@ -1,3 +1,6 @@
+
+import * as THREE from 'three';
+
 import {EptBinaryLoader} from "../../loaders/ept/EptBinaryLoader";
 import {EptLaszipLoader} from "../../loaders/ept/EptLaszipLoader";
 import {VersionUtils} from "../../utils/VersionUtils.js";
@@ -5,7 +8,7 @@ import {PointCloudTreeNode} from "../PointCloudTree.js";
 import {Global} from "../../Global.js";
 import {XHRFactory} from "../../XHRFactory.js";
 
-class U
+class Utils
 {
 	static toVector3(v, offset)
 	{
@@ -14,7 +17,7 @@ class U
 
 	static toBox3(b)
 	{
-		return new THREE.Box3(U.toVector3(b), U.toVector3(b, 3));
+		return new THREE.Box3(Utils.toVector3(b), Utils.toVector3(b, 3));
 	};
 
 	static findDim(schema, name)
@@ -40,15 +43,15 @@ class PointCloudEptGeometry
 		let boundsConforming = info.boundsConforming;
 
 		let xyz = [
-			U.findDim(schema, "X"),
-			U.findDim(schema, "Y"),
-			U.findDim(schema, "Z")
+			Utils.findDim(schema, "X"),
+			Utils.findDim(schema, "Y"),
+			Utils.findDim(schema, "Z")
 		];
 		let scale = xyz.map((d) => d.scale || 1);
 		let offset = xyz.map((d) => d.offset || 0);
 
-		this.eptScale = U.toVector3(scale);
-		this.eptOffset = U.toVector3(offset);
+		this.eptScale = Utils.toVector3(scale);
+		this.eptOffset = Utils.toVector3(offset);
 
 		this.url = url;
 		this.info = info;
@@ -56,11 +59,11 @@ class PointCloudEptGeometry
 
 		this.schema = schema;
 		this.span = info.span || info.ticks;
-		this.boundingBox = U.toBox3(bounds);
-		this.tightBoundingBox = U.toBox3(boundsConforming);
-		this.offset = U.toVector3([0, 0, 0]);
-		this.boundingSphere = U.sphereFrom(this.boundingBox);
-		this.tightBoundingSphere = U.sphereFrom(this.tightBoundingBox);
+		this.boundingBox = Utils.toBox3(bounds);
+		this.tightBoundingBox = Utils.toBox3(boundsConforming);
+		this.offset = Utils.toVector3([0, 0, 0]);
+		this.boundingSphere = Utils.sphereFrom(this.boundingBox);
+		this.tightBoundingSphere = Utils.sphereFrom(this.tightBoundingBox);
 		this.version = new VersionUtils("1.6");
 
 		this.projection = null;
@@ -166,7 +169,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 		this.boundingBox = this.key.b;
 		this.tightBoundingBox = this.boundingBox;
 		this.spacing = this.ept.spacing / Math.pow(2, this.key.d);
-		this.boundingSphere = U.sphereFrom(this.boundingBox);
+		this.boundingSphere = Utils.sphereFrom(this.boundingBox);
 
 		// These are set during hierarchy loading.
 		this.hasChildren = false;

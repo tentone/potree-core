@@ -1,5 +1,7 @@
 "use strict";
 
+import * as THREE from 'three';
+
 import {PointCloudOctreeGeometryNode} from "./geometries/PointCloudOctreeGeometry.js";
 import {HelperUtils} from "../utils/HelperUtils.js";
 import {PointCloudTree, PointCloudTreeNode} from "./PointCloudTree.js";

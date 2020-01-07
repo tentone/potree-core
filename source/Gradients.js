@@ -1,5 +1,7 @@
 "use strict";
 
+import * as THREE from 'three';
+
 //
 //to get a ready to use gradient array from a chroma.js gradient:
 //http://gka.github.io/chroma.js/

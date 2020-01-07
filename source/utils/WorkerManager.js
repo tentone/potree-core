@@ -1,6 +1,14 @@
 "use strict";
 
 import {Global} from "../Global.js";
+// Force workers to be included
+import BinaryDecoderWorker from "../workers/BinaryDecoderWorker";
+//import LASLAZWorker from "../workers/LASLAZWorker";
+import LASDecoderWorker from "../workers/LASDecoderWorker";
+//import GreyhoundBinaryDecoderWorker from "../workers/GreyhoundBinaryDecoderWorker";
+import DEMWorker from "../workers/DEMWorker";
+import EptLaszipDecoderWorker from "../workers/EptLaszipDecoderWorker";
+import EptBinaryDecoderWorker from "../workers/EptBinaryDecoderWorker";
 
 /**
  * The worker manager is responsible for creating and managing worker instances.
@@ -11,7 +19,7 @@ class WorkerManager
 	{
 		this.workers = [];
 
-		for(var i = 0; i < WorkerManager.URLS.length; i++)
+		for(var i = 0; i < 7; i++)
 		{
 			this.workers.push([]);
 		}
@@ -25,9 +33,26 @@ class WorkerManager
 		if(this.workers[type].length > 0)
 		{
 			return this.workers[type].pop();
-		}
-		
-		return new Worker(Global.workerPath + WorkerManager.URLS[type]);
+    }
+
+    switch (type) {
+      case 0:
+        return new BinaryDecoderWorker();
+      case 1:
+        throw "LASLAZWorker not implemented";
+      case 2:
+        return new LASDecoderWorker();
+      case 3:
+        throw "GreyhoundBinaryDecoderWorker not implemented";
+      case 4:
+        return new DEMWorker();
+      case 5:
+        return new EptLaszipDecoderWorker();
+      case 6:
+        return new EptBinaryDecoderWorker();
+      defautl:
+        throw "Unknown worker requested";
+    };
 	}
 
 	/**
@@ -70,16 +95,5 @@ WorkerManager.GREYHOUND = 3;
 WorkerManager.DEM = 4;
 WorkerManager.EPT_LAS_ZIP_DECODER = 5;
 WorkerManager.EPT_BINARY_DECODER = 6;
-
-WorkerManager.URLS = 
-[
-	"/workers/BinaryDecoderWorker.js",
-	"/workers/LASLAZWorker.js",
-	"/workers/LASDecoderWorker.js",
-	"/workers/GreyhoundBinaryDecoderWorker.js",
-	"/workers/DEMWorker.js",
-	"/workers/EptLaszipDecoderWorker.js",
-	"/workers/EptBinaryDecoderWorker.js"
-];
 
 export {WorkerManager};

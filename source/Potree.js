@@ -1,5 +1,7 @@
 "use strict";
 
+import * as THREE from 'three';
+
 import {GreyhoundLoader} from "./loaders/GreyhoundLoader.js";
 import {POCLoader} from "./loaders/POCLoader.js";
 import {EptLoader} from "./loaders/EptLoader.js";

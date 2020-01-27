@@ -8,7 +8,7 @@
 		"url": "https://github.com/cognite/potree-core.git"
 	},
 	"scripts": {
-		"build": "webpack",
+		"build": "webpack && cp source/bundle.d.ts dist/",
 		"docs": "jsdoc -d docs source",
 		"pub": "npm run build && npm publish --access public ."
 	},

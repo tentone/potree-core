@@ -37,7 +37,9 @@ const XHRFactory = {
 	fetch: async function(resource) {
 		const headers = new Headers();
 		for (const header of XHRFactory.config.customHeaders) {
-			headers.append(header.header, header.value);
+			if (header.header) {
+				headers.append(header.header, header.value);
+			}
 		}
 		const options = {
 			headers,

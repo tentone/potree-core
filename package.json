@@ -5,7 +5,7 @@
 	"main": "dist/bundle.js",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/cognite/potree-core.git"
+		"url": "https://github.com/cognitedata/potree-core.git"
 	},
 	"scripts": {
 		"build": "webpack && cp source/bundle.d.ts dist/",
@@ -24,7 +24,7 @@
 	"author": "Tentone",
 	"license": "MIT",
 	"peerDependencies": {
-		"three": "^0.109.0"
+		"three": "^0.113.2"
 	},
 	"dependencies": {
 		"peer-deps-externals-webpack-plugin": "^1.0.4",

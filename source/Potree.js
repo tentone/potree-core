@@ -517,7 +517,7 @@ function updateVisibilityStructures(pointclouds, camera, renderer)
 		var proj = camera.projectionMatrix;
 
 		var fm = new THREE.Matrix4().multiply(proj).multiply(viewI).multiply(world);
-		frustum.setFromMatrix(fm);
+		frustum.setFromProjectionMatrix(fm);
 		frustums.push(frustum);
 
 		//Camera position in object space

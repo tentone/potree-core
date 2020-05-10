@@ -3,11 +3,20 @@
 import {LRU} from "./utils/LRU.js";
 import {WorkerManager} from "./utils/WorkerManager.js";
 
+function getCurrentScript() {
+	var currentScript = (document && document.currentScript) ? document.currentScript : (function() {
+		var scripts = document.getElementsByTagName('script');
+		return scripts[scripts.length - 1].getAttribute('src');
+	})();
+	return currentScript;	
+}
+
 function getBasePath()
 {
-	if(document.currentScript && document.currentScript.src)
+	var currentScript = getCurrentScript();
+	if(currentScript && currentScript.src)
 	{
-		var scriptPath = new URL(document.currentScript.src + "/..").href;
+		var scriptPath = new URL(currentScript.src + "/..").href;
 
 		if(scriptPath.slice(-1) === "/")
 		{

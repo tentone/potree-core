@@ -1,5 +1,4 @@
 const path = require('path');
-//const PeerDepsExternalsPlugin = require('peer-deps-externals-webpack-plugin');
 
 function resolve(name) {
   return path.resolve(__dirname, name);
@@ -35,7 +34,4 @@ module.exports = {
       root: '_',
     },
   },
-  plugins: [
-    //new PeerDepsExternalsPlugin(),
-  ],
 };

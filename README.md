@@ -183,7 +183,6 @@ document.body.onresize();
 
 
 ### Building
- - The output javascript is a module built using rollup.
  - The project can be build running the commands `npm install` and `npm run build`.
 
 

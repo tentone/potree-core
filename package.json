@@ -1,36 +1,36 @@
 {
-	"name": "@cognite/potree-core",
-	"version": "1.1.4",
-	"description": "Potree wrapper for threejs applications",
-	"main": "dist/bundle.js",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/cognitedata/potree-core.git"
-	},
-	"scripts": {
-		"build": "webpack && cp source/bundle.d.ts dist/",
-		"docs": "jsdoc -d docs source",
-		"pub": "npm run build && npm publish --access public ."
-	},
-	"keywords": [
-		"three",
-		"potree",
-		"3d",
-		"webgl"
-	],
-	"files": [
-		"dist"
-	],
-	"author": "Tentone",
-	"license": "MIT",
-	"peerDependencies": {
-		"three": "^0.113.2"
-	},
-	"dependencies": {},
-	"devDependencies": {
-		"jsdoc": "^3.5.0",
-		"webpack": "^4.41.2",
-		"webpack-cli": "^3.3.9",
-		"worker-loader": "^2.0.0"
-	}
+  "name": "@cognite/potree-core",
+  "version": "1.1.4",
+  "description": "Potree wrapper for threejs applications",
+  "main": "dist/bundle.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cognitedata/potree-core.git"
+  },
+  "scripts": {
+    "build": "webpack",
+    "docs": "jsdoc -d docs source",
+    "pub": "npm run build && npm publish --access public ."
+  },
+  "keywords": [
+    "three",
+    "potree",
+    "3d",
+    "webgl"
+  ],
+  "files": [
+    "dist"
+  ],
+  "author": "Tentone",
+  "license": "MIT",
+  "peerDependencies": {
+    "three": "^0.125.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "jsdoc": "^3.5.0",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.9",
+    "worker-loader": "^2.0.0"
+  }
 }

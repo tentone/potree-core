@@ -69,7 +69,7 @@ class BasicGroup extends THREE.Mesh {
     matrix.makeTranslation(center.x, -center.z, center.y);
 
     var geometry = new THREE.BoxBufferGeometry(size.x, size.z, size.y);
-    geometry.applyMatrix(matrix);
+    geometry.applyMatrix4(matrix);
 
     this.geometry = geometry;
   }

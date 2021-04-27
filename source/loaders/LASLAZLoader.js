@@ -2,11 +2,11 @@
 
 import * as THREE from 'three';
 
-import {VersionUtils} from "../utils/VersionUtils.js";
-import {WorkerManager} from "../utils/WorkerManager.js";
-import {LASLoader, LAZLoader, LASFile, LASDecoder} from "./LASLoader.js";
-import {Global} from "../Global.js";
-import {XHRFactory} from "../XHRFactory.js";
+import { VersionUtils } from "../utils/VersionUtils.js";
+import { WorkerManager } from "../utils/WorkerManager.js";
+import { LASLoader, LAZLoader, LASFile, LASDecoder } from "./LASLoader.js";
+import { Global } from "../Global.js";
+import { XHRFactory } from "../XHRFactory.js";
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
@@ -15,32 +15,25 @@ import {XHRFactory} from "../XHRFactory.js";
  *
  * Thanks to Uday Verma and Howard Butler
  */
-class LASLAZLoader
-{
-	constructor(version)
-	{
-		if(typeof(version) === "string")
-		{
+class LASLAZLoader {
+	constructor(version) {
+		if (typeof (version) === "string") {
 			this.version = new VersionUtils(version);
 		}
-		else
-		{
+		else {
 			this.version = version;
 		}
 	}
 
-	load(node)
-	{
-		if(node.loaded)
-		{
+	load(node) {
+		if (node.loaded) {
 			return;
 		}
 
 		var pointAttributes = node.pcoGeometry.pointAttributes;
 		var url = node.getURL();
 
-		if(this.version.equalOrHigher("1.4"))
-		{
+		if (this.version.equalOrHigher("1.4")) {
 			url += "." + pointAttributes.toLowerCase();
 		}
 
@@ -50,66 +43,50 @@ class LASLAZLoader
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
-		xhr.onload = function()
-		{
-			if(xhr.response instanceof ArrayBuffer)
-			{
-				try
-				{
+		xhr.onload = function () {
+			if (xhr.response instanceof ArrayBuffer) {
+				try {
 					self.parse(node, xhr.response);
 				}
-				catch(e)
-				{
+				catch (e) {
 					console.error("Potree: Exception thrown parsing points.", e);
 					Global.numNodesLoading--;
 				}
 			}
-			else
-			{
+			else {
 				Global.numNodesLoading--;
 				console.log("Potree: LASLAZLoader xhr response is not a ArrayBuffer.");
 			}
 		};
-		xhr.onerror = function()
-		{
+		xhr.onerror = function () {
 			Global.numNodesLoading--;
 			console.log("Potree: LASLAZLoader failed to load file, " + xhr.status + ", file: " + url);
 		};
 		xhr.send(null);
 	}
 
-	parse(node, buffer)
-	{
+	parse(node, buffer) {
 		var lf = new LASFile(buffer);
 		var handler = new LASLAZBatcher(node);
 
-		lf.open() .then(msg =>
-		{
+		lf.open().then(msg => {
 			lf.isOpen = true;
 			return lf;
-		}).catch(msg =>
-		{
-			console.log("Potree: Failed to open file.");
-		}).then(lf =>
-		{
-			return lf.getHeader().then(function(h)
-			{
+		}).then(lf => {
+			return lf.getHeader().then(function (h) {
 				return [lf, h];
 			});
-		}).then(v =>
-		{
+		}).then(v => {
 			let lf = v[0];
 			let header = v[1];
 			let skip = 1;
 			let totalRead = 0;
 			let totalToRead = (skip <= 1 ? header.pointsCount : header.pointsCount / skip);
 
-			var reader = function()
-			{
+			var reader = function () {
 				let p = lf.readData(1000000, 0, skip);
 
-				return p.then(function(data)
-				{
+				return p.then(function (data) {
 					handler.push(new LASDecoder(data.buffer,
 						header.pointsFormatId,
 						header.pointsStructSize,
@@ -120,12 +97,10 @@ class LASLAZLoader
 
 					totalRead += data.count;
 
-					if(data.hasMoreData)
-					{
+					if (data.hasMoreData) {
 						return reader();
 					}
-					else
-					{
+					else {
 						header.totalRead = totalRead;
 						header.versionAsString = lf.versionAsString;
 						header.isCompressed = lf.isCompressed;
@@ -135,43 +110,37 @@ class LASLAZLoader
 			};
 
 			return reader();
-		}).then(v =>
-		{
+		}).then(v => {
 			let lf = v[0];
 
 			//Close it
-			return lf.close().then(function()
-			{
+			return lf.close().then(function () {
 				lf.isOpen = false;
 				return v.slice(1);
-			}).catch(e =>
-			{
+			}).catch(e => {
 				//If there was a cancellation, make sure the file is closed, if the file is open close and then fail
-				if(lf.isOpen)
-				{
-					return lf.close().then(function()
-					{
+				if (lf.isOpen) {
+					return lf.close().then(function () {
 						lf.isOpen = false;
 						throw e;
 					});
 				}
 				throw e;
 			});
+		}).catch(msg => {
+			console.error("Potree: Failed to open file:", msg);
 		});
 	}
 
-	handle(node, url){}
+	handle(node, url) { }
 };
 
-class LASLAZBatcher
-{
-	constructor(node)
-	{
+class LASLAZBatcher {
+	constructor(node) {
 		this.node = node;
 	}
 
-	push(data)
-	{
+	push(data) {
 		var self = this;
 
 		var message =
@@ -187,8 +156,7 @@ class LASLAZBatcher
 		};
 
 		var worker = Global.workerPool.getWorker(WorkerManager.LAS_DECODER);
-		worker.onmessage = function(e)
-		{
+		worker.onmessage = function (e) {
 			var geometry = new THREE.BufferGeometry();
 			var numPoints = data.pointsCount;
 
@@ -213,10 +181,10 @@ class LASLAZBatcher
 			geometry.attributes.indices.normalized = true;
 
 			var tightBoundingBox = new THREE.Box3
-			(
-				new THREE.Vector3().fromArray(e.data.tightBoundingBox.min),
-				new THREE.Vector3().fromArray(e.data.tightBoundingBox.max)
-			);
+				(
+					new THREE.Vector3().fromArray(e.data.tightBoundingBox.min),
+					new THREE.Vector3().fromArray(e.data.tightBoundingBox.max)
+				);
 
 			geometry.boundingBox = self.node.boundingBox;
 			self.node.tightBoundingBox = tightBoundingBox;
@@ -235,4 +203,4 @@ class LASLAZBatcher
 	};
 };
 
-export {LASLAZLoader};
+export { LASLAZLoader };

@@ -1,14 +1,15 @@
 {
-  "name": "@cognite/potree-core",
-  "version": "1.1.6",
+  "name": "potree-core",
+  "version": "1.2.0",
   "description": "Potree wrapper for threejs applications",
-  "main": "dist/bundle.js",
+  "main": "dist/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/cognitedata/potree-core.git"
   },
   "scripts": {
     "build": "webpack",
+    "watch": "webpack --watch",
     "docs": "jsdoc -d docs source",
     "pub": "npm run build && npm publish --access public ."
   },
@@ -21,16 +22,18 @@
   "files": [
     "dist"
   ],
+  "types": "types/Main.d.ts",
   "author": "Tentone",
   "license": "MIT",
   "peerDependencies": {
-    "three": "^0.125.0"
+    "three": "^0.128.0"
   },
-  "dependencies": {},
   "devDependencies": {
     "jsdoc": "^3.5.0",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9",
-    "worker-loader": "^2.0.0"
+    "typescript": "^4.2.4",
+    "webpack": "^5.35.1",
+    "webpack-cli": "^4.6.0",
+    "webpack-node-externals": "^3.0.0",
+    "worker-loader": "^3.0.8"
   }
 }

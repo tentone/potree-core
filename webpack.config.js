@@ -1,37 +1,45 @@
+const nodeExternals = require('webpack-node-externals');
+const package = require('./package.json');
 const path = require('path');
+const webpack = require('webpack');
 
 function resolve(name) {
   return path.resolve(__dirname, name);
 }
 
 module.exports = {
-  mode: 'development',
-  entry: "./source/Main.js",
+  entry: path.resolve(__dirname, 'source/Main.js'),
+  devtool: 'inline-source-map',
+  mode: 'production',
+
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'index.js',
+    library: {
+      type: 'commonjs2'
+    }
+  },
+
+  resolve: {
+    extensions: ['.js']
+  },
+
   module: {
     rules: [
       {
         test: /Worker\.js$/,
         loader: 'worker-loader',
         include: [resolve('source')],
-        options: { inline: true, fallback: false },
+        options: { inline: 'no-fallback' },
       },
     ],
   },
-  resolve: {
-    extensions: [ '.js' ],
-  },
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist'),
-    sourceMapFilename: '[name].map',
-    libraryTarget: 'commonjs',
-  },
-  devtool: 'inline-source-map',
-  externals: {
-    three: {
-      commonjs: 'three',
-      amd: 'three',
-      root: '_',
-    },
-  },
+
+  plugins: [
+    new webpack.DefinePlugin({
+      __VERSION__: JSON.stringify(package.version),
+    }),
+  ],
+
+  externals: [nodeExternals()],
 };

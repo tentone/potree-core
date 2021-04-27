@@ -2,29 +2,24 @@
 
 import * as THREE from 'three';
 
-import {HelperUtils} from "../../utils/HelperUtils.js";
-import {Gradients} from "../../Gradients.js";
-import {Shaders} from "../../Shaders.js";
-import {TreeType, PointColorType, PointSizeType, PointShape, Classification} from "../../Potree.js";
+import { HelperUtils } from "../../utils/HelperUtils.js";
+import { Gradients } from "../../Gradients.js";
+import { Shaders } from "../../Shaders.js";
+import { TreeType, PointColorType, PointSizeType, PointShape, Classification, PointSelectionType } from "../../Potree.js";
 
-class PointCloudMaterial extends THREE.RawShaderMaterial
-{
-	constructor(parameters = {})
-	{
+class PointCloudMaterial extends THREE.RawShaderMaterial {
+	constructor(parameters = {}) {
 		super();
-		
+
 		this.visibleNodesTexture = HelperUtils.generateDataTexture(2048, 1, new THREE.Color(0xffffff));
 		this.visibleNodesTexture.minFilter = THREE.NearestFilter;
 		this.visibleNodesTexture.magFilter = THREE.NearestFilter;
 
-		var getValid = function(a, b)
-		{
-			if(a !== undefined)
-			{
+		var getValid = function (a, b) {
+			if (a !== undefined) {
 				return a;
 			}
-			else
-			{
+			else {
 				return b;
 			}
 		};
@@ -46,95 +41,102 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		this._numSnapshots = 0;
 		this._defaultIntensityRangeChanged = false;
 		this._defaultElevationRangeChanged = false;
+		this._pointSelectionType = PointSelectionType.BRIGHTNESS;
 
 		this.clipBoxes = [];
 		this.clipPolygons = [];
-		
+
 		this.gradientTexture = PointCloudMaterial.generateGradientTexture(this._gradient);
 		this.lights = false;
 		this.fog = false;
 		this.defines = new Map();
-		
+
 		this.attributes =
 		{
-			position: {type: 'fv', value: []},
-			color: {type: 'fv', value: []},
-			normal: {type: 'fv', value: []},
-			intensity: {type: 'f', value: []},
-			classification: {type: 'f', value: []},
-			returnNumber: {type: 'f', value: []},
-			numberOfReturns: {type: 'f', value: []},
-			pointSourceID: {type: 'f', value: []},
-			indices: {type: 'fv', value: []}
+			position: { type: 'fv', value: [] },
+			color: { type: 'fv', value: [] },
+			normal: { type: 'fv', value: [] },
+			intensity: { type: 'f', value: [] },
+			classification: { type: 'f', value: [] },
+			returnNumber: { type: 'f', value: [] },
+			numberOfReturns: { type: 'f', value: [] },
+			pointSourceID: { type: 'f', value: [] },
+			indices: { type: 'fv', value: [] }
 		};
 
+		// Note: Don't forget to update Group.renderOctree, these are not transferred to the shader automatically!
 		this.uniforms =
 		{
-			level: {type: "f", value: 0.0},
-			vnStart: {type: "f", value: 0.0},
-			spacing: {type: "f", value: 1.0},
-			blendHardness: {type: "f", value: 2.0},
-			blendDepthSupplement:	{type: "f", value: 0.0},
-			fov: {type: "f", value: 1.0},
-			screenWidth: {type: "f", value: 1.0},
-			screenHeight: {type: "f", value: 1.0},
-			near: {type: "f", value: 0.1},
-			far: {type: "f", value: 1.0},
-			uColor: {type: "c", value: new THREE.Color( 0xffffff )},
-			uOpacity: {type: "f", value: 1.0},
-			size: {type: "f", value: pointSize},
-			minSize: {type: "f", value: minSize},
-			maxSize: {type: "f", value: maxSize},
-			octreeSize: {type: "f", value: 0},
-			bbSize: {type: "fv", value: [0, 0, 0]},
-			elevationRange: {type: "2fv", value: [0, 0]},
+			level: { type: "f", value: 0.0 },
+			vnStart: { type: "f", value: 0.0 },
+			spacing: { type: "f", value: 1.0 },
+			blendHardness: { type: "f", value: 2.0 },
+			blendDepthSupplement: { type: "f", value: 0.0 },
+			fov: { type: "f", value: 1.0 },
+			screenWidth: { type: "f", value: 1.0 },
+			screenHeight: { type: "f", value: 1.0 },
+			near: { type: "f", value: 0.1 },
+			far: { type: "f", value: 1.0 },
+			uColor: { type: "c", value: new THREE.Color(0xffffff) },
+			uOpacity: { type: "f", value: 1.0 },
+			size: { type: "f", value: pointSize },
+			minSize: { type: "f", value: minSize },
+			maxSize: { type: "f", value: maxSize },
+			octreeSize: { type: "f", value: 0 },
+			bbSize: { type: "fv", value: [0, 0, 0] },
+			elevationRange: { type: "2fv", value: [0, 0] },
 
-			clipBoxCount: {type: "f", value: 0},
+			clipBoxCount: { type: "f", value: 0 },
 			//clipSphereCount: {type: "f", value: 0},
-			clipPolygonCount: {type: "i", value: 0},
-			clipBoxes: {type: "Matrix4fv", value: []},
+			clipPolygonCount: { type: "i", value: 0 },
+			clipBoxes: { type: "Matrix4fv", value: [] },
 			//clipSpheres: {type: "Matrix4fv", value: []},
-			clipPolygons: {type: "3fv", value: []},
-			clipPolygonVCount: {type: "iv", value: []},
-			clipPolygonVP: {type: "Matrix4fv", value: []},
+			clipPolygons: { type: "3fv", value: [] },
+			clipPolygonVCount: { type: "iv", value: [] },
+			clipPolygonVP: { type: "Matrix4fv", value: [] },
 
-			visibleNodes: {type: "t", value: this.visibleNodesTexture},
-			pcIndex: {type: "f", value: 0},
-			gradient: {type: "t", value: this.gradientTexture},
-			classificationLUT: {type: "t", value: this.classificationTexture},
-			uHQDepthMap: {type: "t", value: null},
-			toModel: {type: "Matrix4f", value: []},
-			diffuse: {type: "fv", value: [1, 1, 1]},
-			transition: {type: "f", value: 0.5},
-			intensityRange: {type: "fv", value: [0, 65000]},
-			intensityGamma: {type: "f", value: 1},
-			intensityContrast: {type: "f", value: 0},
-			intensityBrightness:{type: "f", value: 0},
-			rgbGamma: {type: "f", value: 1},
-			rgbContrast: {type: "f", value: 0},
-			rgbBrightness: {type: "f", value: 0},
-			wRGB: {type: "f", value: 1},
-			wIntensity: {type: "f", value: 0},
-			wElevation: {type: "f", value: 0},
-			wClassification: {type: "f", value: 0},
-			wReturnNumber: {type: "f", value: 0},
-			wSourceID: {type: "f", value: 0},
-			useOrthographicCamera: {type: "b", value: false},
-			clipTask: {type: "i", value: 1},
-			clipMethod: {type: "i", value: 1},
-			uSnapshot: {type: "tv", value: []},
-			uSnapshotDepth: {type: "tv", value: []},
-			uSnapView: {type: "Matrix4fv", value: []},
-			uSnapProj: {type: "Matrix4fv", value: []},
-			uSnapProjInv: {type: "Matrix4fv", value: []},
-			uSnapViewInv: {type: "Matrix4fv", value: []},
-			uShadowColor: {type: "3fv", value: [0, 0, 0]},
+			visibleNodes: { type: "t", value: this.visibleNodesTexture },
+			pcIndex: { type: "f", value: 0 },
+			gradient: { type: "t", value: this.gradientTexture },
+			classificationLUT: { type: "t", value: this.classificationTexture },
+			uHQDepthMap: { type: "t", value: null },
+			toModel: { type: "Matrix4f", value: [] },
+			diffuse: { type: "fv", value: [1, 1, 1] },
+			transition: { type: "f", value: 0.5 },
+			intensityRange: { type: "fv", value: [0, 65000] },
+			intensityGamma: { type: "f", value: 1 },
+			intensityContrast: { type: "f", value: 0 },
+			intensityBrightness: { type: "f", value: 0 },
+			rgbGamma: { type: "f", value: 1 },
+			rgbContrast: { type: "f", value: 0 },
+			rgbBrightness: { type: "f", value: 0 },
+			wRGB: { type: "f", value: 0.5 },
+			wIntensity: { type: "f", value: 0 },
+			wElevation: { type: "f", value: 0 },
+			wClassification: { type: "f", value: 0 },
+			wReturnNumber: { type: "f", value: 0 },
+			wSourceID: { type: "f", value: 0 },
+			useOrthographicCamera: { type: "b", value: false },
+			clipTask: { type: "i", value: 1 },
+			clipMethod: { type: "i", value: 1 },
+			uSnapshot: { type: "tv", value: [] },
+			uSnapshotDepth: { type: "tv", value: [] },
+			uSnapView: { type: "Matrix4fv", value: [] },
+			uSnapProj: { type: "Matrix4fv", value: [] },
+			uSnapProjInv: { type: "Matrix4fv", value: [] },
+			uSnapViewInv: { type: "Matrix4fv", value: [] },
+			uShadowColor: { type: "3fv", value: [0, 0, 0] },
 
-			uFilterReturnNumberRange: {type: "fv", value: [0, 7]},
-			uFilterNumberOfReturnsRange: {type: "fv", value: [0, 7]},
-			uFilterGPSTimeClipRange: {type: "fv", value: [0, 7]},
+			uFilterReturnNumberRange: { type: "fv", value: [0, 7] },
+			uFilterNumberOfReturnsRange: { type: "fv", value: [0, 7] },
+			uFilterGPSTimeClipRange: { type: "fv", value: [0, 7] },
+
+			hiddenClassifications: { type: "fv", value: [] },
+			hiddenPointSourceIDs: { type: "fv", value: [] },
+			selectedPointSourceID: { type: "f", value: -1 },
+			selectedPointSourceIDColor: { type: "3fv", value: new THREE.Color(0.10, 0.61, 0.78) },
 		};
-		
+
 		this.classification = Classification.DEFAULT;
 		this.defaultAttributeValues.normal = [0, 0, 0];
 		this.defaultAttributeValues.classification = [0, 0, 0];
@@ -146,43 +148,35 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		this.vertexColors = THREE.VertexColors;
 	}
 
-	setDefine(key, value)
-	{
-		if(value !== undefined && value !== null)
-		{
-			if(this.defines.get(key) !== value)
-			{
+	setDefine(key, value) {
+		if (value !== undefined && value !== null) {
+			if (this.defines.get(key) !== value) {
 				this.defines.set(key, value);
 				this.updateShaderSource();
 			}
 		}
-		else
-		{
+		else {
 			this.removeDefine(key);
 		}
 	}
 
-	removeDefine(key)
-	{
+	removeDefine(key) {
 		this.defines.delete(key);
 	}
 
-	updateShaderSource()
-	{
+	updateShaderSource() {
 		var defines = this.getDefines();
 		this.vertexShader = defines + Shaders.vertex;
 		this.fragmentShader = defines + Shaders.fragment;
 
-		if(this.opacity === 1.0)
-		{
+		if (this.opacity === 1.0) {
 			this.blending = THREE.NoBlending;
 			this.transparent = false;
 			this.depthTest = true;
 			this.depthWrite = true;
 			this.depthFunc = THREE.LessEqualDepth;
 		}
-		else if(this.opacity < 1.0 && !this.useEDL)
-		{
+		else if (this.opacity < 1.0 && !this.useEDL) {
 			this.blending = THREE.AdditiveBlending;
 			this.transparent = true;
 			this.depthTest = false;
@@ -190,8 +184,7 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 			this.depthFunc = THREE.AlwaysDepth;
 		}
 
-		if(this.weighted)
-		{
+		if (this.weighted) {
 			this.blending = THREE.AdditiveBlending;
 			this.transparent = true;
 			this.depthTest = true;
@@ -201,144 +194,122 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		this.needsUpdate = true;
 	}
 
-	onBeforeCompile(shader, renderer)
-	{
-		if(renderer.capabilities.logarithmicDepthBuffer)
-		{
-			var define = "#define USE_LOGDEPTHBUF\n#define USE_LOGDEPTHBUF_EXT\n#define EPSILON 1e-6\n"
+	onBeforeCompile(shader, renderer) {
+		if (renderer.capabilities.logarithmicDepthBuffer) {
+			var define = "#define USE_LOGDEPTHBUF\n#define USE_LOGDEPTHBUF_EXT\n#define EPSILON 1e-6\n";
 			shader.fragmentShader = define + shader.fragmentShader;
 			shader.vertexShader = define + shader.vertexShader;
 		}
 	}
 
-	getDefines()
-	{
+	getDefines() {
 		var defines = [];
 
-		if(this.pointSizeType === PointSizeType.FIXED)
-		{
+		if (this.pointSizeType === PointSizeType.FIXED) {
 			defines.push("#define fixed_point_size");
 		}
-		else if(this.pointSizeType === PointSizeType.ATTENUATED)
-		{
+		else if (this.pointSizeType === PointSizeType.ATTENUATED) {
 			defines.push("#define attenuated_point_size");
 		}
-		else if(this.pointSizeType === PointSizeType.ADAPTIVE)
-		{
+		else if (this.pointSizeType === PointSizeType.ADAPTIVE) {
 			defines.push("#define adaptive_point_size");
 		}
 
-		if(this.shape === PointShape.SQUARE)
-		{
+		if (this.shape === PointShape.SQUARE) {
 			defines.push("#define square_point_shape");
 		}
-		else if(this.shape === PointShape.CIRCLE)
-		{
+		else if (this.shape === PointShape.CIRCLE) {
 			defines.push("#define circle_point_shape");
 		}
-		else if(this.shape === PointShape.PARABOLOID)
-		{
+		else if (this.shape === PointShape.PARABOLOID) {
 			defines.push("#define paraboloid_point_shape");
 		}
 
-		if(this._useEDL)
-		{
+		if (this._useEDL) {
 			defines.push("#define use_edl");
 		}
 
-		if(this._snapEnabled)
-		{
+		if (this._snapEnabled) {
 			defines.push("#define snap_enabled");
 		}
 
-		if(this._pointColorType === PointColorType.RGB)
-		{
+		if (this._pointColorType === PointColorType.RGB) {
 			defines.push("#define color_type_rgb");
 		}
-		else if(this._pointColorType === PointColorType.COLOR)
-		{
+		else if (this._pointColorType === PointColorType.COLOR) {
 			defines.push("#define color_type_color");
 		}
-		else if(this._pointColorType === PointColorType.DEPTH)
-		{
+		else if (this._pointColorType === PointColorType.DEPTH) {
 			defines.push("#define color_type_depth");
 		}
-		else if(this._pointColorType === PointColorType.HEIGHT)
-		{
+		else if (this._pointColorType === PointColorType.HEIGHT) {
 			defines.push("#define color_type_height");
 		}
-		else if(this._pointColorType === PointColorType.INTENSITY)
-		{
+		else if (this._pointColorType === PointColorType.INTENSITY) {
 			defines.push("#define color_type_intensity");
 		}
-		else if(this._pointColorType === PointColorType.INTENSITY_GRADIENT)
-		{
+		else if (this._pointColorType === PointColorType.INTENSITY_GRADIENT) {
 			defines.push("#define color_type_intensity_gradient");
 		}
-		else if(this._pointColorType === PointColorType.LOD)
-		{
+		else if (this._pointColorType === PointColorType.LOD) {
 			defines.push("#define color_type_lod");
 		}
-		else if(this._pointColorType === PointColorType.POINT_INDEX)
-		{
+		else if (this._pointColorType === PointColorType.POINT_INDEX) {
 			defines.push("#define color_type_point_index");
 		}
-		else if(this._pointColorType === PointColorType.CLASSIFICATION)
-		{
+		else if (this._pointColorType === PointColorType.CLASSIFICATION) {
 			defines.push("#define color_type_classification");
 		}
-		else if(this._pointColorType === PointColorType.RETURN_NUMBER)
-		{
+		else if (this._pointColorType === PointColorType.RETURN_NUMBER) {
 			defines.push("#define color_type_return_number");
 		}
-		else if(this._pointColorType === PointColorType.SOURCE)
-		{
+		else if (this._pointColorType === PointColorType.SOURCE) {
 			defines.push("#define color_type_source");
 		}
-		else if(this._pointColorType === PointColorType.NORMAL)
-		{
+		else if (this._pointColorType === PointColorType.NORMAL) {
 			defines.push("#define color_type_normal");
 		}
-		else if(this._pointColorType === PointColorType.PHONG)
-		{
+		else if (this._pointColorType === PointColorType.PHONG) {
 			defines.push("#define color_type_phong");
 		}
-		else if(this._pointColorType === PointColorType.RGB_HEIGHT)
-		{
+		else if (this._pointColorType === PointColorType.RGB_HEIGHT) {
 			defines.push("#define color_type_rgb_height");
 		}
-		else if(this._pointColorType === PointColorType.COMPOSITE)
-		{
+		else if (this._pointColorType === PointColorType.COMPOSITE) {
 			defines.push("#define color_type_composite");
 		}
 
-
-		if(this._treeType === TreeType.OCTREE)
-		{
+		if (this._treeType === TreeType.OCTREE) {
 			defines.push("#define tree_type_octree");
 		}
-		else if(this._treeType === TreeType.KDTREE)
-		{
+		else if (this._treeType === TreeType.KDTREE) {
 			defines.push("#define tree_type_kdtree");
 		}
 
-		if(this.weighted)
-		{
+		if (this.weighted) {
 			defines.push("#define weighted_splats");
 		}
 
-		for(var [key, value] of this.defines)
-		{
+		if (this.hiddenClassifications.length) {
+			defines.push(`#define num_hiddenclassifications ${this.hiddenClassifications.length}`);
+		}
+		if (this.hiddenPointSourceIDs.length) {
+			defines.push(`#define num_hiddenpointsourceids ${this.hiddenPointSourceIDs.length}`);
+		}
+
+		if (this.pointSelectionType === PointSelectionType.COLOR) {
+			defines.push("#define selection_type_color");
+		}
+
+		for (var [key, value] of this.defines) {
 			defines.push(value);
 		}
 
 		return defines.join("\n");
 	}
 
-	setClipBoxes(clipBoxes)
-	{
-		if(!clipBoxes)
-		{
+	setClipBoxes(clipBoxes) {
+		if (!clipBoxes) {
 			return;
 		}
 
@@ -346,517 +317,489 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		this.uniforms.clipBoxCount.value = this.clipBoxes.length;
 		this.clipBoxes = clipBoxes;
 
-		if(doUpdate)
-		{
+		if (doUpdate) {
 			this.updateShaderSource();
 		}
 
 		this.uniforms.clipBoxes.value = new Float32Array(this.clipBoxes.length * 16);
-		
-		for(var i = 0; i < this.clipBoxes.length; i++)
-		{
+
+		for (var i = 0; i < this.clipBoxes.length; i++) {
 			var box = clipBoxes[i];
 			this.uniforms.clipBoxes.value.set(box.inverse.elements, 16 * i);
 		}
 
-		for(var i = 0; i < this.uniforms.clipBoxes.value.length; i++)
-		{
-			if(Number.isNaN(this.uniforms.clipBoxes.value[i]))
-			{
+		for (var i = 0; i < this.uniforms.clipBoxes.value.length; i++) {
+			if (Number.isNaN(this.uniforms.clipBoxes.value[i])) {
 				this.uniforms.clipBoxes.value[i] = Infinity;
 			}
 		}
 	}
 
-	setClipPolygons(clipPolygons, maxPolygonVertices)
-	{
-		if(!clipPolygons)
-		{
+	setClipPolygons(clipPolygons, maxPolygonVertices) {
+		if (!clipPolygons) {
 			return;
 		}
 		this.clipPolygons = clipPolygons;
 		var doUpdate = (this.clipPolygons.length !== clipPolygons.length);
-		if(doUpdate)
-		{
+		if (doUpdate) {
 			this.updateShaderSource();
 		}
 	}
 
-	get gradient()
-	{
+	get gradient() {
 		return this._gradient;
 	}
-	
-	set gradient(value)
-	{
-		if(this._gradient !== value)
-		{
+
+	set gradient(value) {
+		if (this._gradient !== value) {
 			this._gradient = value;
 			this.gradientTexture = PointCloudMaterial.generateGradientTexture(this._gradient);
 			this.uniforms.gradient.value = this.gradientTexture;
 		}
 	}
 
-	get useOrthographicCamera()
-	{
+	get useOrthographicCamera() {
 		return this.uniforms.useOrthographicCamera.value;
 	}
-	
-	set useOrthographicCamera(value)
-	{
-		if(this.uniforms.useOrthographicCamera.value !== value)
-		{
+
+	set useOrthographicCamera(value) {
+		if (this.uniforms.useOrthographicCamera.value !== value) {
 			this.uniforms.useOrthographicCamera.value = value;
 		}
 	}
 
-	get classification()
-	{
+	get classification() {
 		return this._classification;
 	}
-	
-	set classification(value)
-	{
+
+	set classification(value) {
 		var copy = {};
-		for(var key of Object.keys(value))
-		{
+		for (var key of Object.keys(value)) {
 			copy[key] = value[key].clone();
 		}
-		
+
 		var isEqual = false;
-		if(this._classification === undefined)
-		{
+		if (this._classification === undefined) {
 			isEqual = false;
 		}
-		else
-		{
+		else {
 			isEqual = Object.keys(copy).length === Object.keys(this._classification).length;
-			for(var key of Object.keys(copy))
-			{
+			for (var key of Object.keys(copy)) {
 				isEqual = isEqual && this._classification[key] !== undefined;
 				isEqual = isEqual && copy[key].equals(this._classification[key]);
 			}
 		}
 
-		if(!isEqual)
-		{
+		if (!isEqual) {
 			this._classification = copy;
 			this.recomputeClassification();
 		}
 	}
-	
-	recomputeClassification()
-	{
+
+	recomputeClassification() {
 		this.classificationTexture = PointCloudMaterial.generateClassificationTexture(this._classification);
 		this.uniforms.classificationLUT.value = this.classificationTexture;
 		this.dispatchEvent(
-		{
-			type: "material_property_changed",
-			target: this
-		});
+			{
+				type: "material_property_changed",
+				target: this
+			});
 	}
 
-	get numSnapshots()
-	{
+	get hiddenClassifications() {
+		return this.uniforms.hiddenClassifications.value;
+	}
+
+	set hiddenClassifications(value) {
+		value = this.getDistinctFV(value);
+		if (JSON.stringify(value) !== JSON.stringify(this.uniforms.hiddenClassifications.value)) {
+			this.uniforms.hiddenClassifications.value = value;
+			this.updateShaderSource();
+			this.dispatchEvent({
+				type: "material_property_changed",
+				target: this
+			});
+		}
+	}
+
+	get hiddenPointSourceIDs() {
+		return this.uniforms.hiddenPointSourceIDs.value;
+	}
+
+	set hiddenPointSourceIDs(value) {
+		value = this.getDistinctFV(value);
+		if (JSON.stringify(value) !== JSON.stringify(this.uniforms.hiddenPointSourceIDs.value)) {
+			this.uniforms.hiddenPointSourceIDs.value = value;
+			this.updateShaderSource();
+			this.dispatchEvent({
+				type: "material_property_changed",
+				target: this
+			});
+		}
+	}
+
+	getDistinctFV(value) {
+		return [...new Set(value)].sort();
+	}
+
+	get selectedPointSourceID() {
+		return this.uniforms.selectedPointSourceID.value;
+	}
+
+	set selectedPointSourceID(value) {
+		if (value !== this.uniforms.selectedPointSourceID.value) {
+			this.uniforms.selectedPointSourceID.value = value || -1;
+			this.updateShaderSource();
+			this.dispatchEvent({
+				type: "material_property_changed",
+				target: this
+			});
+		}
+	}
+
+	get selectedPointSourceIDColor() {
+		return this.uniforms.selectedPointSourceIDColor.value;
+	}
+
+	set selectedPointSourceIDColor(value) {
+		if (value !== this.uniforms.selectedPointSourceIDColor.value) {
+			this.uniforms.selectedPointSourceIDColor.value = value;
+			this.updateShaderSource();
+			this.dispatchEvent({
+				type: "material_property_changed",
+				target: this
+			});
+		}
+	}
+
+	get numSnapshots() {
 		return this._numSnapshots;
 	}
-	
-	set numSnapshots(value)
-	{
+
+	set numSnapshots(value) {
 		this._numSnapshots = value;
 	}
 
-	get snapEnabled()
-	{
+	get snapEnabled() {
 		return this._snapEnabled;
 	}
-	
-	set snapEnabled(value)
-	{
-		if(this._snapEnabled !== value)
-		{
+
+	set snapEnabled(value) {
+		if (this._snapEnabled !== value) {
 			this._snapEnabled = value;
 			this.updateShaderSource();
 		}
 	}
 
-	get spacing()
-	{
+	get spacing() {
 		return this.uniforms.spacing.value;
 	}
-	
-	set spacing(value)
-	{
-		if(this.uniforms.spacing.value !== value)
-		{
+
+	set spacing(value) {
+		if (this.uniforms.spacing.value !== value) {
 			this.uniforms.spacing.value = value;
 		}
 	}
 
-	get useClipBox()
-	{
+	get useClipBox() {
 		return this._useClipBox;
 	}
-	
-	set useClipBox(value)
-	{
-		if(this._useClipBox !== value)
-		{
+
+	set useClipBox(value) {
+		if (this._useClipBox !== value) {
 			this._useClipBox = value;
 			this.updateShaderSource();
 		}
 	}
 
-	get clipTask()
-	{
+	get clipTask() {
 		return this.uniforms.clipTask.value;
 	}
-	
-	set clipTask(mode)
-	{
+
+	set clipTask(mode) {
 		this.uniforms.clipTask.value = mode;
 	}
 
-	get clipMethod()
-	{
+	get clipMethod() {
 		return this.uniforms.clipMethod.value;
 	}
-	
-	set clipMethod(mode)
-	{
+
+	set clipMethod(mode) {
 		this.uniforms.clipMethod.value = mode;
 	}
 
-	get weighted()
-	{
+	get weighted() {
 		return this._weighted;
 	}
-	
-	set weighted(value)
-	{
-		if(this._weighted !== value)
-		{
+
+	set weighted(value) {
+		if (this._weighted !== value) {
 			this._weighted = value;
 			this.updateShaderSource();
 		}
 	}
 
-	get fov()
-	{
+	get fov() {
 		return this.uniforms.fov.value;
 	}
-	
-	set fov(value)
-	{
-		if(this.uniforms.fov.value !== value)
-		{
+
+	set fov(value) {
+		if (this.uniforms.fov.value !== value) {
 			this.uniforms.fov.value = value;
 			this.updateShaderSource();
 		}
 	}
 
-	get screenWidth()
-	{
+	get screenWidth() {
 		return this.uniforms.screenWidth.value;
 	}
-	
-	set screenWidth(value)
-	{
-		if(this.uniforms.screenWidth.value !== value)
-		{
+
+	set screenWidth(value) {
+		if (this.uniforms.screenWidth.value !== value) {
 			this.uniforms.screenWidth.value = value;
 			this.updateShaderSource();
 		}
 	}
 
-	get screenHeight()
-	{
+	get screenHeight() {
 		return this.uniforms.screenHeight.value;
 	}
-	
-	set screenHeight(value)
-	{
-		if(this.uniforms.screenHeight.value !== value)
-		{
+
+	set screenHeight(value) {
+		if (this.uniforms.screenHeight.value !== value) {
 			this.uniforms.screenHeight.value = value;
 			this.updateShaderSource();
 		}
 	}
 
-	get near()
-	{
+	get near() {
 		return this.uniforms.near.value;
 	}
-	
-	set near(value)
-	{
-		if(this.uniforms.near.value !== value)
-		{
+
+	set near(value) {
+		if (this.uniforms.near.value !== value) {
 			this.uniforms.near.value = value;
 		}
 	}
 
-	get far()
-	{
+	get far() {
 		return this.uniforms.far.value;
 	}
-	
-	set far(value)
-	{
-		if(this.uniforms.far.value !== value)
-		{
+
+	set far(value) {
+		if (this.uniforms.far.value !== value) {
 			this.uniforms.far.value = value;
 		}
 	}
 
-	get opacity()
-	{
+	get opacity() {
 		return this.uniforms.uOpacity.value;
 	}
-	
-	set opacity(value)
-	{
-		if(this.uniforms && this.uniforms.uOpacity)
-		{
-			if(this.uniforms.uOpacity.value !== value)
-			{
+
+	set opacity(value) {
+		if (this.uniforms && this.uniforms.uOpacity) {
+			if (this.uniforms.uOpacity.value !== value) {
 				this.uniforms.uOpacity.value = value;
 				this.updateShaderSource();
 				this.dispatchEvent(
-				{
-					type: "opacity_changed",
-					target: this
-				});
+					{
+						type: "opacity_changed",
+						target: this
+					});
 				this.dispatchEvent(
-				{
-					type: "material_property_changed",
-					target: this
-				});
+					{
+						type: "material_property_changed",
+						target: this
+					});
 			}
 		}
 	}
 
-	get pointColorType()
-	{
+	get pointColorType() {
 		return this._pointColorType;
 	}
-	
-	set pointColorType(value)
-	{
-		if(this._pointColorType !== value)
-		{
+
+	set pointColorType(value) {
+		if (this._pointColorType !== value) {
 			this._pointColorType = value;
 			this.updateShaderSource();
 			this.dispatchEvent(
-			{
-				type: "point_color_type_changed",
-				target: this
-			});
+				{
+					type: "point_color_type_changed",
+					target: this
+				});
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get pointSizeType()
-	{
+	get pointSizeType() {
 		return this._pointSizeType;
 	}
-	
-	set pointSizeType(value)
-	{
-		if(this._pointSizeType !== value)
-		{
+
+	set pointSizeType(value) {
+		if (this._pointSizeType !== value) {
 			this._pointSizeType = value;
 			this.updateShaderSource();
 			this.dispatchEvent(
-			{
-				type: "point_size_type_changed",
-				target: this
-			});
+				{
+					type: "point_size_type_changed",
+					target: this
+				});
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get useEDL()
-	{
+	get useEDL() {
 		return this._useEDL;
 	}
-	
-	set useEDL(value)
-	{
-		if(this._useEDL !== value)
-		{
+
+	set useEDL(value) {
+		if (this._useEDL !== value) {
 			this._useEDL = value;
 			this.updateShaderSource();
 		}
 	}
 
-	get color()
-	{
+	get color() {
 		return this.uniforms.uColor.value;
 	}
-	
-	set color(value)
-	{
-		if(!this.uniforms.uColor.value.equals(value))
-		{
+
+	set color(value) {
+		if (!this.uniforms.uColor.value.equals(value)) {
 			this.uniforms.uColor.value.copy(value);
 			this.dispatchEvent(
-			{
-				type: "color_changed",
-				target: this
-			});
+				{
+					type: "color_changed",
+					target: this
+				});
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get shape()
-	{
+	get shape() {
 		return this._shape;
 	}
-	
-	set shape(value)
-	{
-		if(this._shape !== value)
-		{
+
+	set shape(value) {
+		if (this._shape !== value) {
 			this._shape = value;
 			this.updateShaderSource();
 			this.dispatchEvent(
-			{
-				type: "point_shape_changed",
-				target: this
-			});
+				{
+					type: "point_shape_changed",
+					target: this
+				});
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get treeType()
-	{
+	get treeType() {
 		return this._treeType;
 	}
 
-	set treeType(value)
-	{
-		if(this._treeType !== value)
-		{
+	set treeType(value) {
+		if (this._treeType !== value) {
 			this._treeType = value;
 			this.updateShaderSource();
 		}
 	}
 
-	get bbSize()
-	{
+	get bbSize() {
 		return this.uniforms.bbSize.value;
 	}
 
-	set bbSize(value)
-	{
+	set bbSize(value) {
 		this.uniforms.bbSize.value = value;
 	}
 
-	get size()
-	{
+	get size() {
 		return this.uniforms.size.value;
 	}
 
-	set size(value)
-	{
-		if(this.uniforms.size.value !== value)
-		{
+	set size(value) {
+		if (this.uniforms.size.value !== value) {
 			this.uniforms.size.value = value;
 			this.dispatchEvent(
-			{
-				type: "point_size_changed",
-				target: this
-			});
+				{
+					type: "point_size_changed",
+					target: this
+				});
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get elevationRange()
-	{
+	get elevationRange() {
 		return this.uniforms.elevationRange.value;
 	}
 
-	set elevationRange(value)
-	{
+	set elevationRange(value) {
 		var changed = this.uniforms.elevationRange.value[0] !== value[0] ||
 			this.uniforms.elevationRange.value[1] !== value[1];
-		if(changed)
-		{
+		if (changed) {
 			this.uniforms.elevationRange.value = value;
 			this._defaultElevationRangeChanged = true;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get heightMin()
-	{
+	get heightMin() {
 		return this.uniforms.elevationRange.value[0];
 	}
 
-	set heightMin(value)
-	{
+	set heightMin(value) {
 		this.elevationRange = [value, this.elevationRange[1]];
 	}
 
-	get heightMax()
-	{
+	get heightMax() {
 		return this.uniforms.elevationRange.value[1];
 	}
 
-	set heightMax(value)
-	{
+	set heightMax(value) {
 		this.elevationRange = [this.elevationRange[0], value];
 	}
 
-	get transition()
-	{
+	get transition() {
 		return this.uniforms.transition.value;
 	}
 
-	set transition(value)
-	{
+	set transition(value) {
 		this.uniforms.transition.value = value;
 	}
 
-	get intensityRange()
-	{
+	get intensityRange() {
 		return this.uniforms.intensityRange.value;
 	}
 
-	set intensityRange(value)
-	{
-		if(!(value instanceof Array && value.length === 2))
-		{
+	set intensityRange(value) {
+		if (!(value instanceof Array && value.length === 2)) {
 			return;
 		}
 
-		if(value[0] === this.uniforms.intensityRange.value[0] && value[1] === this.uniforms.intensityRange.value[1])
-		{
+		if (value[0] === this.uniforms.intensityRange.value[0] && value[1] === this.uniforms.intensityRange.value[1]) {
 			return;
 		}
 
@@ -864,232 +807,195 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		this._defaultIntensityRangeChanged = true;
 
 		this.dispatchEvent(
-		{
-			type: "material_property_changed",
-			target: this
-		});
+			{
+				type: "material_property_changed",
+				target: this
+			});
 	}
 
-	get intensityGamma()
-	{
+	get intensityGamma() {
 		return this.uniforms.intensityGamma.value;
 	}
 
-	set intensityGamma(value)
-	{
-		if(this.uniforms.intensityGamma.value !== value)
-		{
+	set intensityGamma(value) {
+		if (this.uniforms.intensityGamma.value !== value) {
 			this.uniforms.intensityGamma.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get intensityContrast()
-	{
+	get intensityContrast() {
 		return this.uniforms.intensityContrast.value;
 	}
 
-	set intensityContrast(value)
-	{
-		if(this.uniforms.intensityContrast.value !== value)
-		{
+	set intensityContrast(value) {
+		if (this.uniforms.intensityContrast.value !== value) {
 			this.uniforms.intensityContrast.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get intensityBrightness()
-	{
+	get intensityBrightness() {
 		return this.uniforms.intensityBrightness.value;
 	}
 
-	set intensityBrightness(value)
-	{
-		if(this.uniforms.intensityBrightness.value !== value)
-		{
+	set intensityBrightness(value) {
+		if (this.uniforms.intensityBrightness.value !== value) {
 			this.uniforms.intensityBrightness.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get rgbGamma()
-	{
+	get rgbGamma() {
 		return this.uniforms.rgbGamma.value;
 	}
 
-	set rgbGamma(value)
-	{
-		if(this.uniforms.rgbGamma.value !== value)
-		{
+	set rgbGamma(value) {
+		if (this.uniforms.rgbGamma.value !== value) {
 			this.uniforms.rgbGamma.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get rgbContrast()
-	{
+	get rgbContrast() {
 		return this.uniforms.rgbContrast.value;
 	}
 
-	set rgbContrast(value)
-	{
-		if(this.uniforms.rgbContrast.value !== value)
-		{
+	set rgbContrast(value) {
+		if (this.uniforms.rgbContrast.value !== value) {
 			this.uniforms.rgbContrast.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get rgbBrightness()
-	{
+	get rgbBrightness() {
 		return this.uniforms.rgbBrightness.value;
 	}
 
-	set rgbBrightness(value)
-	{
-		if(this.uniforms.rgbBrightness.value !== value)
-		{
+	set rgbBrightness(value) {
+		if (this.uniforms.rgbBrightness.value !== value) {
 			this.uniforms.rgbBrightness.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get weightRGB()
-	{
+	get weightRGB() {
 		return this.uniforms.wRGB.value;
 	}
 
-	set weightRGB(value)
-	{
-		if(this.uniforms.wRGB.value !== value)
-		{
+	set weightRGB(value) {
+		if (this.uniforms.wRGB.value !== value) {
 			this.uniforms.wRGB.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get weightIntensity()
-	{
+	get weightIntensity() {
 		return this.uniforms.wIntensity.value;
 	}
 
-	set weightIntensity(value)
-	{
-		if(this.uniforms.wIntensity.value !== value)
-		{
+	set weightIntensity(value) {
+		if (this.uniforms.wIntensity.value !== value) {
 			this.uniforms.wIntensity.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get weightElevation()
-	{
+	get weightElevation() {
 		return this.uniforms.wElevation.value;
 	}
 
-	set weightElevation(value)
-	{
-		if(this.uniforms.wElevation.value !== value)
-		{
+	set weightElevation(value) {
+		if (this.uniforms.wElevation.value !== value) {
 			this.uniforms.wElevation.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get weightClassification()
-	{
+	get weightClassification() {
 		return this.uniforms.wClassification.value;
 	}
 
-	set weightClassification(value)
-	{
-		if(this.uniforms.wClassification.value !== value)
-		{
+	set weightClassification(value) {
+		if (this.uniforms.wClassification.value !== value) {
 			this.uniforms.wClassification.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get weightReturnNumber()
-	{
+	get weightReturnNumber() {
 		return this.uniforms.wReturnNumber.value;
 	}
 
-	set weightReturnNumber(value)
-	{
-		if(this.uniforms.wReturnNumber.value !== value)
-		{
+	set weightReturnNumber(value) {
+		if (this.uniforms.wReturnNumber.value !== value) {
 			this.uniforms.wReturnNumber.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	get weightSourceID()
-	{
+	get weightSourceID() {
 		return this.uniforms.wSourceID.value;
 	}
 
-	set weightSourceID(value)
-	{
-		if(this.uniforms.wSourceID.value !== value)
-		{
+	set weightSourceID(value) {
+		if (this.uniforms.wSourceID.value !== value) {
 			this.uniforms.wSourceID.value = value;
 			this.dispatchEvent(
-			{
-				type: "material_property_changed",
-				target: this
-			});
+				{
+					type: "material_property_changed",
+					target: this
+				});
 		}
 	}
 
-	static generateGradientTexture(gradient)
-	{
+	static generateGradientTexture(gradient) {
 		var size = 64;
-		
+
 		//Create canvas
 		var canvas = document.createElement("canvas");
 		canvas.width = size;
@@ -1101,8 +1007,7 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		//Draw gradient
 		context.rect(0, 0, size, size);
 		var ctxGradient = context.createLinearGradient(0, 0, size, size);
-		for(var i = 0; i < gradient.length; i++)
-		{
+		for (var i = 0; i < gradient.length; i++) {
 			var step = gradient[i];
 			ctxGradient.addColorStop(step[0], "#" + step[1].getHexString());
 		}
@@ -1116,28 +1021,22 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		return texture;
 	}
 
-	static generateClassificationTexture(classification)
-	{
+	static generateClassificationTexture(classification) {
 		var width = 256;
 		var height = 256;
 		var size = width * height;
 		var data = new Uint8Array(4 * size);
-		for(var x = 0; x < width; x++)
-		{
-			for(var y = 0; y < height; y++)
-			{
+		for (var x = 0; x < width; x++) {
+			for (var y = 0; y < height; y++) {
 				var i = x + width * y;
 				var color;
-				if(classification[x])
-				{
+				if (classification[x]) {
 					color = classification[x];
 				}
-				else if(classification[x % 32])
-				{
+				else if (classification[x % 32]) {
 					color = classification[x % 32];
 				}
-				else
-				{
+				else {
 					color = classification.DEFAULT;
 				}
 				data[4 * i + 0] = 255 * color.x;
@@ -1152,28 +1051,23 @@ class PointCloudMaterial extends THREE.RawShaderMaterial
 		return texture;
 	}
 
-	disableEvents()
-	{
-		if(this._hiddenListeners === undefined)
-		{
+	disableEvents() {
+		if (this._hiddenListeners === undefined) {
 			this._hiddenListeners = this._listeners;
 			this._listeners = {};
 		}
 	}
 
-	enableEvents()
-	{
+	enableEvents() {
 		this._listeners = this._hiddenListeners;
 		this._hiddenListeners = undefined;
 	}
 
-	copyFrom(from)
-	{
-		for(var name of this.uniforms)
-		{
+	copyFrom(from) {
+		for (var name of this.uniforms) {
 			this.uniforms[name].value = from.uniforms[name].value;
 		}
 	}
 };
 
-export {PointCloudMaterial};
+export { PointCloudMaterial };

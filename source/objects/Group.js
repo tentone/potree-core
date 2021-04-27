@@ -43,7 +43,7 @@ class Group extends BasicGroup {
 
     var gl = renderer.getContext();
     if (gl.bindVertexArray === undefined) {
-      this.getExtensions(gl)
+      this.getExtensions(gl);
     }
 
     var result = this.fetchOctrees();
@@ -485,6 +485,10 @@ class Group extends BasicGroup {
     shader.setUniform1f("wClassification", material.weightClassification);
     shader.setUniform1f("wReturnNumber", material.weightReturnNumber);
     shader.setUniform1f("wSourceID", material.weightSourceID);
+    shader.setUniform1fv("hiddenClassifications", material.hiddenClassifications);
+    shader.setUniform1fv("hiddenPointSourceIDs", material.hiddenPointSourceIDs);
+    shader.setUniform1f("selectedPointSourceID", material.selectedPointSourceID);
+    shader.setUniform3f("selectedPointSourceIDColor", material.selectedPointSourceIDColor);
 
     var vnWebGLTexture = this.textures.get(material.visibleNodesTexture);
     shader.setUniform1i("visibleNodesTexture", currentTextureBindingPoint);

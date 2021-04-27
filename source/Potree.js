@@ -99,6 +99,12 @@ var TreeType =
   KDTREE: 1
 };
 
+var PointSelectionType =
+{
+  BRIGHTNESS: 0,
+  COLOR: 1
+};
+
 function loadPointCloud(path, name, callback) {
   var loaded = function (pointcloud) {
     if (name !== undefined) {
@@ -505,6 +511,8 @@ function updateVisibilityStructures(pointclouds, camera, renderer) {
   };
 }
 
+const VERSION = __VERSION__;
+
 export {
   AttributeLocations,
   Classification,
@@ -514,8 +522,10 @@ export {
   PointShape,
   PointColorType,
   TreeType,
+  PointSelectionType,
   loadPointCloud,
   updateVisibility,
   updatePointClouds,
-  updateVisibilityStructures
+  updateVisibilityStructures,
+  VERSION
 };

@@ -2,17 +2,19 @@
 
 import * as THREE from 'three';
 
+const glsl = value => value;
+
 var Shaders = {};
 
 //pointcloud.vs
-Shaders.vertex = `
+Shaders.vertex = glsl`
 precision highp float;
 precision highp int;
 
 #define MAX_CLIP_POLYGONS 8
 
 ` + THREE.ShaderChunk.common + `
-` + THREE.ShaderChunk.logdepthbuf_pars_vertex + `
+` + THREE.ShaderChunk.logdepthbuf_pars_vertex + glsl`
 
 attribute vec3 position;
 attribute vec3 color;
@@ -110,6 +112,17 @@ uniform sampler2D classificationLUT;
 	uniform mat4 uShadowWorldView[num_shadowmaps];
 	uniform mat4 uShadowProj[num_shadowmaps];
 #endif
+
+#if defined num_hiddenclassifications && num_hiddenclassifications > 0
+	uniform float hiddenClassifications[num_hiddenclassifications];
+#endif
+
+#if defined num_hiddenpointsourceids && num_hiddenpointsourceids > 0
+  uniform float hiddenPointSourceIDs[num_hiddenpointsourceids];
+#endif
+
+uniform float selectedPointSourceID;
+uniform vec3 selectedPointSourceIDColor;
 
 varying vec3 vColor;
 varying float vLogDepth;
@@ -475,7 +488,7 @@ vec3 getCompositeColor()
 	w += wSourceID;
 	
 	vec4 cl = wClassification * getClassification();
-    c += cl.a * cl.rgb;
+  c += cl.a * cl.rgb;
 	w += wClassification * cl.a;
 
 	c = c / w;
@@ -492,6 +505,13 @@ vec3 getColor()
 {
 	vec3 color;
 	
+	#ifdef selection_type_color
+	if (pointSourceID == selectedPointSourceID) 
+	{
+		return selectedPointSourceIDColor;
+	}
+	#endif
+
 	#ifdef color_type_rgb
 		color = getRGB();
 	#elif defined color_type_height
@@ -531,7 +551,14 @@ vec3 getColor()
 	#elif defined color_type_composite
 		color = getCompositeColor();
 	#endif
-	
+
+	if (pointSourceID == selectedPointSourceID) 
+	{
+		color[0] = min(color[0] + 0.2, 1.0);
+		color[1] = min(color[1] + 0.2, 1.0);
+		color[2] = min(color[2] + 0.2, 1.0);
+	}
+
 	return color;
 }
 
@@ -689,8 +716,48 @@ void doClipping()
 	}
 }
 
+bool isHiddenClassification()
+{
+	#if defined num_hiddenclassifications && num_hiddenclassifications > 0
+	for (int i = 0; i < num_hiddenclassifications; i++)
+	{
+		if (classification == hiddenClassifications[i])
+		{
+			return true;
+		}
+	}
+	#endif
+
+	return false;
+}
+
+bool isHiddenPointSourceID()
+{
+	#if defined num_hiddenpointsourceids && num_hiddenpointsourceids > 0
+	for (int i = 0; i < num_hiddenpointsourceids; i++)
+	{
+		if (pointSourceID == hiddenPointSourceIDs[i])
+		{
+			return true;
+		}
+	}
+	#endif
+
+	return false;
+}
+
 void main()
 {
+	if (isHiddenClassification())
+	{
+		return;
+	}
+
+	if (isHiddenPointSourceID())
+	{
+		return;
+	}
+
 	vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
 	vViewPosition = mvPosition.xyz;
 	gl_Position = projectionMatrix * mvPosition;
@@ -702,7 +769,7 @@ void main()
 	gl_PointSize = pointSize;
 	vPointSize = pointSize;
 
-	` + THREE.ShaderChunk.logdepthbuf_vertex + `
+	` + THREE.ShaderChunk.logdepthbuf_vertex + glsl`
 
 	//COLOR
 	vColor = getColor();
@@ -801,7 +868,7 @@ void main()
 }`;
 
 //"pointcloud.fs"
-Shaders.fragment = `
+Shaders.fragment = glsl`
 
 #if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
 	#extension GL_EXT_frag_depth : enable
@@ -811,7 +878,7 @@ precision highp float;
 precision highp int;
 
 ` + THREE.ShaderChunk.common + `
-` + THREE.ShaderChunk.logdepthbuf_pars_fragment + `
+` + THREE.ShaderChunk.logdepthbuf_pars_fragment + glsl`
 
 uniform mat4 viewMatrix;
 uniform mat4 uViewInv;
@@ -880,7 +947,7 @@ void main()
 		#endif
 	#endif
 	
-	` + THREE.ShaderChunk.logdepthbuf_fragment +  `
+	` + THREE.ShaderChunk.logdepthbuf_fragment + glsl`
 
 	#if defined weighted_splats
 		float distance = 2.0 * length(gl_PointCoord.xy - 0.5);
@@ -892,4 +959,4 @@ void main()
 	#endif
 }`;
 
-export {Shaders};
+export { Shaders };

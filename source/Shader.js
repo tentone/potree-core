@@ -2,13 +2,11 @@
 
 import * as THREE from 'three';
 
-import {WebGLTexture} from "./WebGLTexture.js";
-import {AttributeLocations} from "./Potree.js";
+import { WebGLTexture } from "./WebGLTexture.js";
+import { AttributeLocations } from "./Potree.js";
 
-class Shader
-{
-	constructor(gl, name, vsSource, fsSource)
-	{
+class Shader {
+	constructor(gl, name, vsSource, fsSource) {
 		this.gl = gl;
 		this.name = name;
 		this.vsSource = vsSource;
@@ -26,16 +24,14 @@ class Shader
 		this.update(vsSource, fsSource);
 	}
 
-	update(vsSource, fsSource)
-	{
+	update(vsSource, fsSource) {
 		this.vsSource = vsSource;
 		this.fsSource = fsSource;
 
 		this.linkProgram();
 	}
 
-	compileShader(shader, source)
-	{
+	compileShader(shader, source) {
 		var gl = this.gl;
 
 		gl.shaderSource(shader, source);
@@ -43,15 +39,13 @@ class Shader
 		gl.compileShader(shader);
 
 		var success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-		if(!success)
-		{
+		if (!success) {
 			var info = gl.getShaderInfoLog(shader);
 			throw new Error("Potree: Could not compile shader " + this.name + ", " + info);
 		}
 	}
 
-	linkProgram()
-	{
+	linkProgram() {
 
 		var gl = this.gl;
 
@@ -61,8 +55,7 @@ class Shader
 		gl.useProgram(null);
 
 		var cached = this.cache.get(`${this.vsSource}, ${this.fsSource}`);
-		if(cached)
-		{
+		if (cached) {
 			this.program = cached.program;
 			this.vs = cached.vs;
 			this.fs = cached.fs;
@@ -71,14 +64,12 @@ class Shader
 
 			return;
 		}
-		else
-		{
+		else {
 			this.vs = gl.createShader(gl.VERTEX_SHADER);
 			this.fs = gl.createShader(gl.FRAGMENT_SHADER);
 			this.program = gl.createProgram();
 
-			for(var name of Object.keys(AttributeLocations))
-			{
+			for (var name of Object.keys(AttributeLocations)) {
 				var location = AttributeLocations[name];
 				gl.bindAttribLocation(this.program, location, name);
 			}
@@ -97,8 +88,7 @@ class Shader
 			gl.detachShader(program, this.fs);
 
 			var success = gl.getProgramParameter(program, gl.LINK_STATUS);
-			if(!success)
-			{
+			if (!success) {
 				var info = gl.getProgramInfoLog(program);
 				throw new Error("Potree: Could not link program " + this.name + ", " + info);
 			}
@@ -106,8 +96,7 @@ class Shader
 			//attribute locations
 			var numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
 
-			for(var i = 0; i < numAttributes; i++)
-			{
+			for (var i = 0; i < numAttributes; i++) {
 				var attribute = gl.getActiveAttrib(program, i);
 
 				var location = gl.getAttribLocation(program, attribute.name);
@@ -118,8 +107,7 @@ class Shader
 			//uniform locations
 			var numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
 
-			for(var i = 0; i < numUniforms; i++)
-			{
+			for (var i = 0; i < numUniforms; i++) {
 				var uniform = gl.getActiveUniform(program, i);
 
 				var location = gl.getUniformLocation(program, uniform.name);
@@ -139,129 +127,138 @@ class Shader
 		}
 	}
 
-	setUniformMatrix4(name, value)
-	{
+	setUniformMatrix4(name, value) {
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if(location == null)
-		{
+		if (location == null) {
 			return;
 		}
 
-		var tmp = new Float32Array(value.elements);
+		let tmp = new Float32Array(value.elements);
 		gl.uniformMatrix4fv(location, false, tmp);
 	}
 
-	setUniform1f(name, value)
-	{
+	setUniformMatrix4v(name, values) {
+		const gl = this.gl;
+		const location = this.uniformLocations[`${name}[0]`];
+
+		if (location == null) {
+			return;
+		}
+
+		const elements = values.forEach(matrix4 => elements.push(...matrix4.elements));
+		const tmp = new Float32Array(elements);
+
+		gl.uniformMatrix4fv(location, false, tmp);
+	}
+
+	setUniform1f(name, value) {
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if(location == null)
-		{
+		if (location == null) {
 			return;
 		}
 
 		gl.uniform1f(location, value);
 	}
 
-	setUniformBoolean(name, value)
-	{
+	setUniform1fv(name, values) {
+		const gl = this.gl;
+		const location = this.uniformLocations[`${name}[0]`];
+
+		if (location == null) {
+			return;
+		}
+
+		gl.uniform1fv(location, values);
+	}
+
+	setUniformBoolean(name, value) {
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if(location == null)
-		{
+		if (location == null) {
 			return;
 		}
 
 		gl.uniform1i(location, value);
 	}
 
-	setUniformTexture(name, value)
-	{
+	setUniformTexture(name, value) {
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if(location == null)
-		{
+		if (location == null) {
 			return;
 		}
 
 		gl.uniform1i(location, value);
 	}
 
-	setUniform2f(name, value)
-	{
+	setUniform2f(name, value) {
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if(location == null)
-		{
+		if (location == null) {
 			return;
 		}
 
 		gl.uniform2f(location, value[0], value[1]);
 	}
 
-	setUniform3f(name, value)
-	{
+	setUniform3f(name, value) {
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if(location == null)
-		{
+		if (value instanceof THREE.Color) {
+			value = value.toArray();
+		}
+
+		if (location == null) {
 			return;
 		}
 
 		gl.uniform3f(location, value[0], value[1], value[2]);
 	}
 
-	setUniform(name, value)
-	{
+	setUniform(name, value) {
 
-		if(value.constructor === THREE.Matrix4)
-		{
+		if (value.constructor === THREE.Matrix4) {
 			this.setUniformMatrix4(name, value);
 		}
-		else if(typeof value === "number")
-		{
+		else if (value.constructor === THREE.Color) {
+			this.setUniform3f(name, value);
+		}
+		else if (typeof value === "number") {
 			this.setUniform1f(name, value);
 		}
-		else if(typeof value === "boolean")
-		{
+		else if (typeof value === "boolean") {
 			this.setUniformBoolean(name, value);
 		}
-		else if(value instanceof WebGLTexture)
-		{
+		else if (value instanceof WebGLTexture) {
 			this.setUniformTexture(name, value);
 		}
-		else if(value instanceof Array)
-		{
-			if(value.length === 2)
-			{
+		else if (value instanceof Array) {
+			if (value.length === 2) {
 				this.setUniform2f(name, value);
 			}
-			else if(value.length === 3)
-			{
+			else if (value.length === 3) {
 				this.setUniform3f(name, value);
 			}
 		}
-		else
-		{
+		else {
 			console.error("Potree: Unhandled uniform type: ", name, value);
 		}
 
 	}
 
-	setUniform1i(name, value)
-	{
+	setUniform1i(name, value) {
 		var gl = this.gl;
 		var location = this.uniformLocations[name];
 
-		if(location == null)
-		{
+		if (location == null) {
 			return;
 		}
 
@@ -269,4 +266,4 @@ class Shader
 	}
 };
 
-export {Shader};
+export { Shader };

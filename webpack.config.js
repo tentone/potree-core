@@ -5,7 +5,7 @@ function resolve(name) {
 }
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',
   entry: "./source/Main.js",
   module: {
     rules: [

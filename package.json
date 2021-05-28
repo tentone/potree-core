@@ -1,6 +1,6 @@
 {
   "name": "@cognite/potree-core",
-  "version": "1.1.6",
+  "version": "1.2.0",
   "description": "Potree wrapper for threejs applications",
   "main": "dist/bundle.js",
   "repository": {
@@ -10,7 +10,7 @@
   "scripts": {
     "build": "webpack",
     "docs": "jsdoc -d docs source",
-    "pub": "npm run build && npm publish --access public ."
+    "pub": "yarn && yarn build && yarn publish --access public ."
   },
   "keywords": [
     "three",
@@ -24,7 +24,7 @@
   "author": "Tentone",
   "license": "MIT",
   "peerDependencies": {
-    "three": "^0.125.0"
+    "three": "^0.128.0"
   },
   "dependencies": {},
   "devDependencies": {

@@ -4,8 +4,10 @@ function resolve(name) {
   return path.resolve(__dirname, name);
 }
 
+const isDevelopment = process.env.NODE_ENV === 'development'
+
 module.exports = {
-  mode: 'production',
+  mode: isDevelopment ? 'development' : 'production',
   entry: "./source/Main.js",
   module: {
     rules: [
@@ -26,7 +28,7 @@ module.exports = {
     sourceMapFilename: '[name].map',
     libraryTarget: 'commonjs',
   },
-  devtool: 'inline-source-map',
+  devtool: isDevelopment ? 'inline-source-map' : false,
   externals: {
     three: {
       commonjs: 'three',

@@ -4,11 +4,14 @@ import {LRU} from "./utils/LRU.js";
 import {WorkerManager} from "./utils/WorkerManager.js";
 
 function getCurrentScript() {
-	var currentScript = (document && document.currentScript) ? document.currentScript : (function() {
-		var scripts = document.getElementsByTagName('script');
+	if (document && document.currentScript) {
+		return document.currentScript;
+	}
+	const scripts = document.getElementsByTagName('script');
+	if (scripts && scripts.length) {
 		return scripts[scripts.length - 1].getAttribute('src');
-	})();
-	return currentScript;	
+	}
+	return null;
 }
 
 function getBasePath()

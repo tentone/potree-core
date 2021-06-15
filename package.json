@@ -10,7 +10,12 @@
   "scripts": {
     "build": "webpack",
     "docs": "jsdoc -d docs source",
-    "pub": "yarn && yarn build && yarn publish --access public ."
+    "prebump": "yarn version --no-git-tag-version && yarn",
+    "bump": " yarn bump:commit && yarn bump:tag && yarn bump:push",
+    "bump:commit": "git add -A && cross-var git commit -m \"chore: bump version $npm_package_version\"",
+    "bump:tag": "cross-var git tag $npm_package_name@$npm_package_version",
+    "bump:push": "git push -u origin head && git push --tags",
+    "release": "yarn build && yarn publish --non-interactive"
   },
   "keywords": [
     "three",
@@ -28,6 +33,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "cross-var": "^1.1.0",
     "jsdoc": "^3.5.0",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.9",

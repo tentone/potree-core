@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "webpack",
+    "build:watch": "webpack --watch",
     "docs": "jsdoc -d docs source",
     "prebump": "yarn version --no-git-tag-version && yarn",
     "bump": " yarn bump:commit && yarn bump:tag && yarn bump:push",

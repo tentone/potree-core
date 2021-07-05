@@ -51,7 +51,7 @@ class BasicGroup extends THREE.Mesh {
       this.pointclouds[i].minimumNodePixelSize = this.nodeSize;
     }
 
-    updatePointClouds(this.pointclouds, camera, renderer);
+    updatePointClouds(this.pointclouds, camera, renderer, this.pointBudget);
   }
 
   /**

@@ -1,6 +1,6 @@
 {
   "name": "@cognite/potree-core",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Potree wrapper for threejs applications",
   "main": "dist/bundle.js",
   "repository": {
@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "webpack",
-    "build:watch": "webpack --watch",
+    "build:watch": "webpack --watch --env.development",
     "docs": "jsdoc -d docs source",
     "prebump": "yarn version --no-git-tag-version && yarn",
     "bump": " yarn bump:commit && yarn bump:tag && yarn bump:push",

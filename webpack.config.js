@@ -4,7 +4,29 @@ function resolve(name) {
   return path.resolve(__dirname, name);
 }
 
-const isDevelopment = process.env.NODE_ENV === 'development'
+/*
+ * Set args on the command line using
+ * ```bash
+ * webpack --env.argname=value
+ * ```
+ */
+function getEnvArg(env, name, defaultValue) {
+  if (env === undefined) {
+    return defaultValue;
+  }
+  if (env[name] === undefined) {
+    return defaultValue;
+  }
+  if (env[name] === "true") {
+    return true;
+  }
+  if (env[name] === "false") {
+    return false;
+  }
+  return typeof env[name] === "string" ? env[name].trim() : env[name];
+}
+
+const isDevelopment = getEnvArg(process.env, 'development', false);
 
 module.exports = {
   mode: isDevelopment ? 'development' : 'production',
@@ -28,7 +50,7 @@ module.exports = {
     sourceMapFilename: '[name].map',
     libraryTarget: 'commonjs',
   },
-  devtool: isDevelopment ? 'inline-source-map' : false,
+  devtool: isDevelopment ? 'inline-source-map' : 'source-map',
   externals: {
     three: {
       commonjs: 'three',

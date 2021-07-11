@@ -108,6 +108,27 @@ uniform sampler2D visibleNodes;
 uniform sampler2D gradient;
 uniform sampler2D classificationLUT;
 
+#if defined(num_clipplanes) && num_clipplanes > 0 
+
+uniform vec4 clipPlanes[num_clipplanes];
+
+bool isClipped(vec3 point) {
+	bool clipped = false;
+	for (int i = 0; i < num_clipplanes; ++i) {
+		vec4 p = clipPlanes[i];
+		clipped = clipped || dot(-point, p.xyz) > p.w;
+	}
+	return clipped;
+}
+
+#else
+
+bool isClipped(vec3 point) {
+	return false;
+}
+
+#endif
+
 #if defined(num_shadowmaps) && num_shadowmaps > 0
 	uniform sampler2D uShadowMap[num_shadowmaps];
 	uniform mat4 uShadowWorldView[num_shadowmaps];
@@ -719,6 +740,10 @@ void main()
 	#endif
 
 	//CLIPPING
+	vec4 clipPosition = modelMatrix * vec4( position, 1.0 );
+	if (isClipped(clipPosition.xyz)) {
+		gl_Position = vec4(100.0, 100.0, 100.0, 1.0); // Outside clip space
+	} 
 	doClipping();
 
 	#if defined num_clipspheres && num_clipspheres > 0

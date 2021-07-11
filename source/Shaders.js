@@ -32,6 +32,9 @@ uniform mat4 uViewInv;
 
 uniform float uScreenWidth;
 uniform float uScreenHeight;
+// #define uScreenWidth 1107.0
+// #define uScreenHeight 774.0
+
 uniform float fov;
 uniform float near;
 uniform float far;
@@ -701,7 +704,6 @@ void main()
 	float pointSize = getPointSize();
 	gl_PointSize = pointSize;
 	vPointSize = pointSize;
-
 	` + THREE.ShaderChunk.logdepthbuf_vertex + `
 
 	//COLOR

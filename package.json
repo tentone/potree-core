@@ -26,7 +26,7 @@
   "author": "Tentone",
   "license": "MIT",
   "peerDependencies": {
-    "three": "^0.128.0"
+    "three": ">=0.128.0"
   },
   "devDependencies": {
     "jsdoc": "^3.5.0",

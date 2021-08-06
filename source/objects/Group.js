@@ -485,8 +485,8 @@ class Group extends BasicGroup {
     shader.setUniform1f("wClassification", material.weightClassification);
     shader.setUniform1f("wReturnNumber", material.weightReturnNumber);
     shader.setUniform1f("wSourceID", material.weightSourceID);
+
     shader.setUniform1fv("hiddenClassifications", material.hiddenClassifications);
-    shader.setUniform1fv("hiddenPointSourceIDs", material.hiddenPointSourceIDs);
     shader.setUniform1f("selectedPointSourceID", material.selectedPointSourceID);
     shader.setUniform3f("selectedPointSourceIDColor", material.selectedPointSourceIDColor);
 
@@ -506,6 +506,12 @@ class Group extends BasicGroup {
     shader.setUniform1i("classificationLUT", currentTextureBindingPoint);
     gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
     gl.bindTexture(classificationTexture.target, classificationTexture.id);
+    currentTextureBindingPoint++;
+
+    var hiddenPointSourceIDsTexture = this.textures.get(material.hiddenPointSourceIDsTexture);
+    shader.setUniform1i("hiddenPointSourceIDs", currentTextureBindingPoint);
+    gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
+    gl.bindTexture(hiddenPointSourceIDsTexture.target, hiddenPointSourceIDsTexture.id);
     currentTextureBindingPoint++;
 
     if (material.snapEnabled === true) {

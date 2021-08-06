@@ -132,10 +132,12 @@ class PointCloudMaterial extends THREE.RawShaderMaterial {
 			uFilterGPSTimeClipRange: { type: "fv", value: [0, 7] },
 
 			hiddenClassifications: { type: "fv", value: [] },
-			hiddenPointSourceIDs: { type: "fv", value: [] },
+			hiddenPointSourceIDs: { type: "t", value: null },
 			selectedPointSourceID: { type: "f", value: -1 },
 			selectedPointSourceIDColor: { type: "3fv", value: new THREE.Color(0.10, 0.61, 0.78) },
 		};
+
+		this.hiddenPointSourceIDs = [];
 
 		this.classification = Classification.DEFAULT;
 		this.defaultAttributeValues.normal = [0, 0, 0];
@@ -422,24 +424,55 @@ class PointCloudMaterial extends THREE.RawShaderMaterial {
 		}
 	}
 
-	get hiddenPointSourceIDs() {
+	get hiddenPointSourceIDsTexture() {
 		return this.uniforms.hiddenPointSourceIDs.value;
+	}
+
+	get hiddenPointSourceIDs() {
+		return this._hiddenPointSourceIDs;
 	}
 
 	set hiddenPointSourceIDs(value) {
 		value = this.getDistinctFV(value);
-		if (JSON.stringify(value) !== JSON.stringify(this.uniforms.hiddenPointSourceIDs.value)) {
-			this.uniforms.hiddenPointSourceIDs.value = value;
-			this.updateShaderSource();
-			this.dispatchEvent({
-				type: "material_property_changed",
-				target: this
-			});
+		if (JSON.stringify(value) !== JSON.stringify(this._hiddenPointSourceIDs)) {
+			this._hiddenPointSourceIDs = value;
+			this.recomputeHiddenPointSourceIDs();
 		}
 	}
 
 	getDistinctFV(value) {
 		return [...new Set(value)].sort();
+	}
+
+	/**
+	 * WebGL float[] is only guaranteed to support 1,024 values, beyond which it can crash,
+	 * so we upload hiddenPointSourceIDs as a 256x256 texture, where each pixel represents
+	 * the state of the 65,536 available pointSourceIds (the max allowed by LAS/Potree)
+	 */
+	recomputeHiddenPointSourceIDs() {
+
+		const hiddenPointSourceIDs = this.hiddenPointSourceIDs;
+		const width = 256;
+		const height = 256;
+		const size = width * height;
+		const data = new Uint8Array(3 * size);
+
+		hiddenPointSourceIDs.forEach(id => {
+			const n = id * 3;
+			data[n] = 255; // 255 here => texture2d(...).r == 1.0 in GLSL
+		});
+
+		const texture = new THREE.DataTexture(data, width, height, THREE.RGBFormat);
+		texture.magFilter = THREE.NearestFilter;
+		texture.needsUpdate = true;
+
+		this.uniforms.hiddenPointSourceIDs.value = texture;
+
+		this.updateShaderSource();
+		this.dispatchEvent({
+			type: "material_property_changed",
+			target: this
+		});
 	}
 
 	get selectedPointSourceID() {
@@ -1029,6 +1062,7 @@ class PointCloudMaterial extends THREE.RawShaderMaterial {
 		for (var x = 0; x < width; x++) {
 			for (var y = 0; y < height; y++) {
 				var i = x + width * y;
+
 				var color;
 				if (classification[x]) {
 					color = classification[x];
@@ -1048,6 +1082,7 @@ class PointCloudMaterial extends THREE.RawShaderMaterial {
 		var texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
 		texture.magFilter = THREE.NearestFilter;
 		texture.needsUpdate = true;
+
 		return texture;
 	}
 

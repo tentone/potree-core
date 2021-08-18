@@ -6,9 +6,9 @@ import BinaryDecoderWorker from "../workers/BinaryDecoderWorker";
 // import LASLAZWorker from "../workers/LASLAZWorker";
 import LASDecoderWorker from "../workers/LASDecoderWorker";
 // import GreyhoundBinaryDecoderWorker from "../workers/GreyhoundBinaryDecoderWorker";
-import DEMWorker from "../workers/DEMWorker";
-import EptLaszipDecoderWorker from "../workers/EptLaszipDecoderWorker";
-import EptBinaryDecoderWorker from "../workers/EptBinaryDecoderWorker";
+// import DEMWorker from "../workers/DEMWorker";
+// import EptLaszipDecoderWorker from "../workers/EptLaszipDecoderWorker";
+// import EptBinaryDecoderWorker from "../workers/EptBinaryDecoderWorker";
 
 /**
  * The worker manager is responsible for creating and managing worker instances.
@@ -42,11 +42,14 @@ class WorkerManager {
 				// return new GreyhoundBinaryDecoderWorker();
 				throw new Error('GreyhoundBinaryDecoderWorker not implemented');
 			case 4:
-				return new DEMWorker();
+				// return new DEMWorker();
+				throw new Error('DEMWorker not implemented');
 			case 5:
-				return new EptLaszipDecoderWorker();
+				// return new EptLaszipDecoderWorker();
+				throw new Error('EptLaszipDecoderWorker not implemented');
 			case 6:
-				return new EptBinaryDecoderWorker();
+				// return new EptBinaryDecoderWorker();
+				throw new Error('EptBinaryDecoderWorker not implemented');
 			default:
 				throw "Unknown worker requested";
 		};

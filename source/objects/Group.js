@@ -30,7 +30,7 @@ class Group extends BasicGroup {
     this.types.set(Uint8Array, gl.UNSIGNED_BYTE);
     this.types.set(Uint16Array, gl.UNSIGNED_SHORT);
 
-    var extVAO = gl.getExtension("OES_vertex_array_object");
+    let extVAO = gl.getExtension("OES_vertex_array_object");
     gl.createVertexArray = extVAO.createVertexArrayOES.bind(extVAO);
     gl.bindVertexArray = extVAO.bindVertexArrayOES.bind(extVAO);
   }
@@ -41,15 +41,15 @@ class Group extends BasicGroup {
   onBeforeRender(renderer, scene, camera, geometry, material, group) {
     super.onBeforeRender(renderer, scene, camera, geometry, material, group);
 
-    var gl = renderer.getContext();
+    let gl = renderer.getContext();
     if (gl.bindVertexArray === undefined) {
       this.getExtensions(gl);
     }
 
-    var result = this.fetchOctrees();
+    let result = this.fetchOctrees();
 
-    for (var octree of result.octrees) {
-      var nodes = octree.visibleNodes;
+    for (let octree of result.octrees) {
+      let nodes = octree.visibleNodes;
       this.renderOctree(renderer, octree, nodes, camera);
     }
 
@@ -60,22 +60,22 @@ class Group extends BasicGroup {
   }
 
   createBuffer(gl, geometry) {
-    var webglBuffer = new WebGLBuffer();
+    let webglBuffer = new WebGLBuffer();
     webglBuffer.vao = gl.createVertexArray();
     webglBuffer.numElements = geometry.attributes.position.count;
 
     gl.bindVertexArray(webglBuffer.vao);
 
-    for (var attributeName in geometry.attributes) {
-      var bufferAttribute = geometry.attributes[attributeName];
+    for (let attributeName in geometry.attributes) {
+      let bufferAttribute = geometry.attributes[attributeName];
 
-      var vbo = gl.createBuffer();
+      let vbo = gl.createBuffer();
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
       gl.bufferData(gl.ARRAY_BUFFER, bufferAttribute.array, gl.STATIC_DRAW);
 
-      var attributeLocation = AttributeLocations[attributeName];
-      var normalized = bufferAttribute.normalized;
-      var type = this.types.get(bufferAttribute.array.constructor);
+      let attributeLocation = AttributeLocations[attributeName];
+      let normalized = bufferAttribute.normalized;
+      let type = this.types.get(bufferAttribute.array.constructor);
 
       if (type !== undefined) {
         gl.vertexAttribPointer(attributeLocation, bufferAttribute.itemSize, type, normalized, 0, 0);
@@ -100,18 +100,18 @@ class Group extends BasicGroup {
   }
 
   updateBuffer(gl, geometry) {
-    var webglBuffer = this.buffers.get(geometry);
+    let webglBuffer = this.buffers.get(geometry);
 
     gl.bindVertexArray(webglBuffer.vao);
 
-    for (var attributeName in geometry.attributes) {
-      var bufferAttribute = geometry.attributes[attributeName];
+    for (let attributeName in geometry.attributes) {
+      let bufferAttribute = geometry.attributes[attributeName];
 
-      var attributeLocation = AttributeLocations[attributeName];
-      var normalized = bufferAttribute.normalized;
-      var type = this.types.get(bufferAttribute.array.constructor);
+      let attributeLocation = AttributeLocations[attributeName];
+      let normalized = bufferAttribute.normalized;
+      let type = this.types.get(bufferAttribute.array.constructor);
 
-      var vbo = null;
+      let vbo = null;
       if (!webglBuffer.vbos.has(attributeName)) {
         vbo = gl.createBuffer();
 
@@ -141,22 +141,22 @@ class Group extends BasicGroup {
   }
 
   fetchOctrees() {
-    var octrees = [];
-    var stack = [this];
+    let octrees = [];
+    let stack = [this];
 
     while (stack.length > 0) {
-      var node = stack.pop();
+      let node = stack.pop();
 
       if (node instanceof PointCloudTree) {
         octrees.push(node);
         continue;
       }
 
-      var visibleChildren = node.children.filter(c => c.visible);
+      let visibleChildren = node.children.filter(c => c.visible);
       stack.push(...visibleChildren);
     }
 
-    var result =
+    let result =
     {
       octrees: octrees
     };
@@ -165,33 +165,33 @@ class Group extends BasicGroup {
   }
 
   renderNodes(renderer, octree, nodes, visibilityTextureData, camera, shader) {
-    var gl = renderer.getContext();
-    var material = octree.material;
-    var shadowMaps = [];
-    var view = camera.matrixWorldInverse;
+    let gl = renderer.getContext();
+    let material = octree.material;
+    let shadowMaps = [];
+    let view = camera.matrixWorldInverse;
 
-    var worldView = new THREE.Matrix4();
-    var mat4holder = new Float32Array(16);
+    let worldView = new THREE.Matrix4();
+    let mat4holder = new Float32Array(16);
 
-    for (var node of nodes) {
+    for (let node of nodes) {
       if (Global.debug.allowedNodes !== undefined) {
         if (!Global.debug.allowedNodes.includes(node.name)) {
           continue;
         }
       }
 
-      var world = node.sceneNode.matrixWorld;
+      let world = node.sceneNode.matrixWorld;
       worldView.multiplyMatrices(view, world);
 
       if (visibilityTextureData) {
-        var vnStart = visibilityTextureData.offsets.get(node);
+        let vnStart = visibilityTextureData.offsets.get(node);
         shader.setUniform1f("uVNStart", vnStart);
       }
 
-      var level = node.getLevel();
+      let level = node.getLevel();
       shader.setUniform("uDebug", node.debug === true);
 
-      var isLeaf;
+      let isLeaf;
       if (node instanceof PointCloudOctreeNode) {
         isLeaf = Object.keys(node.children).length === 0;
       }
@@ -201,101 +201,101 @@ class Group extends BasicGroup {
       shader.setUniform("uIsLeafNode", isLeaf);
 
       //TODO <consider passing matrices in an array to avoid uniformMatrix4fv overhead>
-      var lModel = shader.uniformLocations["modelMatrix"];
+      let lModel = shader.uniformLocations["modelMatrix"];
       if (lModel) {
         mat4holder.set(world.elements);
         gl.uniformMatrix4fv(lModel, false, mat4holder);
       }
 
-      var lModelView = shader.uniformLocations["modelViewMatrix"];
+      let lModelView = shader.uniformLocations["modelViewMatrix"];
       mat4holder.set(worldView.elements);
       gl.uniformMatrix4fv(lModelView, false, mat4holder);
 
       //Clip Polygons
       if (material.clipPolygons && material.clipPolygons.length > 0) {
-        var clipPolygonVCount = [];
-        var worldViewProjMatrices = [];
+        let clipPolygonVCount = [];
+        let worldViewProjMatrices = [];
 
-        for (var clipPolygon of material.clipPolygons) {
-          var view = clipPolygon.viewMatrix;
-          var proj = clipPolygon.projMatrix;
+        for (let clipPolygon of material.clipPolygons) {
+          let view = clipPolygon.viewMatrix;
+          let proj = clipPolygon.projMatrix;
 
-          var worldViewProj = proj.clone().multiply(view).multiply(world);
+          let worldViewProj = proj.clone().multiply(view).multiply(world);
 
           clipPolygonVCount.push(clipPolygon.markers.length);
           worldViewProjMatrices.push(worldViewProj);
         }
 
-        var flattenedMatrices = [].concat(...worldViewProjMatrices.map(m => m.elements));
+        let flattenedMatrices = [].concat(...worldViewProjMatrices.map(m => m.elements));
+        let flattenedVertices = new Array(8 * 3 * material.clipPolygons.length);
 
-        var flattenedVertices = new Array(8 * 3 * material.clipPolygons.length);
-        for (var i = 0; i < material.clipPolygons.length; i++) {
-          var clipPolygon = material.clipPolygons[i];
+        for (let i = 0; i < material.clipPolygons.length; i++) {
+          let clipPolygon = material.clipPolygons[i];
 
-          for (var j = 0; j < clipPolygon.markers.length; j++) {
+          for (let j = 0; j < clipPolygon.markers.length; j++) {
             flattenedVertices[i * 24 + (j * 3 + 0)] = clipPolygon.markers[j].position.x;
             flattenedVertices[i * 24 + (j * 3 + 1)] = clipPolygon.markers[j].position.y;
             flattenedVertices[i * 24 + (j * 3 + 2)] = clipPolygon.markers[j].position.z;
           }
         }
 
-        var lClipPolygonVCount = shader.uniformLocations["uClipPolygonVCount[0]"];
+        let lClipPolygonVCount = shader.uniformLocations["uClipPolygonVCount[0]"];
         gl.uniform1iv(lClipPolygonVCount, clipPolygonVCount);
 
-        var lClipPolygonVP = shader.uniformLocations["uClipPolygonWVP[0]"];
+        let lClipPolygonVP = shader.uniformLocations["uClipPolygonWVP[0]"];
         gl.uniformMatrix4fv(lClipPolygonVP, false, flattenedMatrices);
 
-        var lClipPolygons = shader.uniformLocations["uClipPolygonVertices[0]"];
+        let lClipPolygons = shader.uniformLocations["uClipPolygonVertices[0]"];
         gl.uniform3fv(lClipPolygons, flattenedVertices);
       }
 
       shader.setUniform1f("uLevel", level);
       shader.setUniform1f("uNodeSpacing", node.geometryNode.estimatedSpacing);
-      shader.setUniform1f("uPCIndex", i);
+      shader.setUniform1f("uPCIndex", material.clipPolygons.length);
 
       /*
       if(shadowMaps.length > 0)
       {
-        var lShadowMap = shader.uniformLocations["uShadowMap[0]"];
+        let lShadowMap = shader.uniformLocations["uShadowMap[0]"];
 
         shader.setUniform3f("uShadowColor", material.uniforms.uShadowColor.value);
 
-        var bindingStart = 5;
-        var bindingPoints = new Array(shadowMaps.length).fill(bindingStart).map((a, i) => (a + i));
+        let bindingStart = 5;
+        let bindingPoints = new Array(shadowMaps.length).fill(bindingStart).map((a, i) => (a + i));
         gl.uniform1iv(lShadowMap, bindingPoints);
 
-        for(var i = 0; i < shadowMaps.length; i++)
+        for(let i = 0; i < shadowMaps.length; i++)
         {
-          var shadowMap = shadowMaps[i];
-          var bindingPoint = bindingPoints[i];
-          var glTexture = renderer.properties.get(shadowMap.target.texture).__webglTexture;
+          let shadowMap = shadowMaps[i];
+          let bindingPoint = bindingPoints[i];
+          let glTexture = renderer.properties.get(shadowMap.target.texture).__webglTexture;
 
           gl.activeTexture(gl[`TEXTURE${bindingPoint}`]);
           gl.bindTexture(gl.TEXTURE_2D, glTexture);
         }
 
-        var worldViewMatrices = shadowMaps.map(sm => sm.camera.matrixWorldInverse).map(view => new THREE.Matrix4().multiplyMatrices(view, world))
+        let worldViewMatrices = shadowMaps.map(sm => sm.camera.matrixWorldInverse).map(view => new THREE.Matrix4().multiplyMatrices(view, world))
 
-        var flattenedMatrices = [].concat(...worldViewMatrices.map(c => c.elements));
-        var lWorldView = shader.uniformLocations["uShadowWorldView[0]"];
+        let flattenedMatrices = [].concat(...worldViewMatrices.map(c => c.elements));
+        let lWorldView = shader.uniformLocations["uShadowWorldView[0]"];
         gl.uniformMatrix4fv(lWorldView, false, flattenedMatrices);
 
         flattenedMatrices = [].concat(...shadowMaps.map(sm => sm.camera.projectionMatrix.elements));
-        var lProj = shader.uniformLocations["uShadowProj[0]"];
+        let lProj = shader.uniformLocations["uShadowProj[0]"];
         gl.uniformMatrix4fv(lProj, false, flattenedMatrices);
       }
       */
 
-      var geometry = node.geometryNode.geometry;
-      var webglBuffer = null;
+      let geometry = node.geometryNode.geometry;
+      let webglBuffer = null;
       if (!this.buffers.has(geometry)) {
         webglBuffer = this.createBuffer(gl, geometry);
         this.buffers.set(geometry, webglBuffer);
       }
       else {
         webglBuffer = this.buffers.get(geometry);
-        for (var attributeName in geometry.attributes) {
-          var attribute = geometry.attributes[attributeName];
+        for (let attributeName in geometry.attributes) {
+          let attribute = geometry.attributes[attributeName];
           if (attribute.version > webglBuffer.vbos.get(attributeName).version) {
             this.updateBuffer(gl, geometry);
           }
@@ -309,28 +309,28 @@ class Group extends BasicGroup {
     gl.bindVertexArray(null);
   }
 
-  renderOctree(renderer, octree, nodes, camera) {
-    var gl = renderer.getContext();
-    var material = octree.material;
-    var shadowMaps = [];
-    var view = camera.matrixWorldInverse;
-    var viewInv = camera.matrixWorld;
-    var proj = camera.projectionMatrix;
-    var projInv = proj.clone().invert();
-    var worldView = new THREE.Matrix4();
+  renderOctree(renderer, octree, nodes, camera, target = null, params = {}) {
+    let gl = renderer.getContext();
+    let material = params.material || octree.material;
+    let shadowMaps = params.shadowMaps || [];
+    let view = camera.matrixWorldInverse;
+    let viewInv = camera.matrixWorld;
+    let proj = camera.projectionMatrix;
+    let projInv = camera.projectionMatrixInverse;
+    let worldView = new THREE.Matrix4();
 
-    var visibilityTextureData = null;
-    var currentTextureBindingPoint = 0;
+    let visibilityTextureData = null;
+    let currentTextureBindingPoint = 0;
 
     if (material.pointSizeType === PointSizeType.ADAPTIVE || material.pointColorType === PointColorType.LOD) {
       visibilityTextureData = octree.computeVisibilityTextureData(nodes, camera);
 
-      var vnt = material.visibleNodesTexture;
+      let vnt = material.visibleNodesTexture;
       vnt.image.data.set(visibilityTextureData.data);
       vnt.needsUpdate = true;
     }
 
-    var shader = null;
+    let shader = null;
 
     if (!this.shaders.has(material)) {
       shader = new Shader(gl, "pointcloud", material.vertexShader, material.fragmentShader);
@@ -340,12 +340,12 @@ class Group extends BasicGroup {
       shader = this.shaders.get(material);
     }
 
-    var numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
-    var numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
-    var numClipPolygons = (material.clipPolygons && material.clipPolygons.length) ? material.clipPolygons.length : 0;
-    var numClipSpheres = 0;
+    let numSnapshots = material.snapEnabled ? material.numSnapshots : 0;
+    let numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
+    let numClipPolygons = (material.clipPolygons && material.clipPolygons.length) ? material.clipPolygons.length : 0;
+    let numClipSpheres = 0;
 
-    var defines = [
+    let defines = [
       "#define num_shadowmaps" + shadowMaps.length,
       "#define num_snapshots" + numSnapshots,
       "#define num_clipboxes" + numClipBoxes,
@@ -353,30 +353,30 @@ class Group extends BasicGroup {
       "#define num_clippolygons" + numClipPolygons,
     ];
 
-    var definesString = defines.join("\n");
-    var vs = definesString + "\n" + material.vertexShader;
-    var fs = definesString + "\n" + material.fragmentShader;
+    let definesString = defines.join("\n");
+    let vs = definesString + "\n" + material.vertexShader;
+    let fs = definesString + "\n" + material.fragmentShader;
 
     shader.update(vs, fs);
 
     material.needsUpdate = false;
 
-    for (var uniformName of Object.keys(material.uniforms)) {
-      var uniform = material.uniforms[uniformName];
+    for (let uniformName of Object.keys(material.uniforms)) {
+      let uniform = material.uniforms[uniformName];
 
       if (uniform.type == "t") {
-        var texture = uniform.value;
+        let texture = uniform.value;
 
         if (!texture) {
           continue;
         }
 
         if (!this.textures.has(texture)) {
-          var webglTexture = new WebGLTexture(gl, texture);
+          let webglTexture = new WebGLTexture(gl, texture);
           this.textures.set(texture, webglTexture);
         }
 
-        var webGLTexture = this.textures.get(texture);
+        let webGLTexture = this.textures.get(texture);
         webGLTexture.update();
       }
     }
@@ -401,8 +401,8 @@ class Group extends BasicGroup {
     shader.setUniformMatrix4("uViewInv", viewInv);
     shader.setUniformMatrix4("uProjInv", projInv);
 
-    var screenWidth = material.screenWidth;
-    var screenHeight = material.screenHeight;
+    let screenWidth = target ? target.width : material.screenWidth;
+    let screenHeight = target ? target.height : material.screenHeight;
 
     shader.setUniform1f("uScreenWidth", screenWidth);
     shader.setUniform1f("uScreenHeight", screenHeight);
@@ -437,29 +437,29 @@ class Group extends BasicGroup {
 
     //Clipboxes
     if (material.clipBoxes && material.clipBoxes.length > 0) {
-      var lClipBoxes = shader.uniformLocations["clipBoxes[0]"];
+      let lClipBoxes = shader.uniformLocations["clipBoxes[0]"];
       gl.uniformMatrix4fv(lClipBoxes, false, material.uniforms.clipBoxes.value);
     }
 
     //Clispheres
     /*if(material.clipSpheres && material.clipSpheres.length > 0)
     {
-      var clipSpheres = material.clipSpheres;
-      var matrices = [];
-      for(var clipSphere of clipSpheres)
+      let clipSpheres = material.clipSpheres;
+      let matrices = [];
+      for(let clipSphere of clipSpheres)
       {
-        var clipToWorld = clipSphere.matrixWorld;
-        var viewToWorld = camera.matrixWorld
-        var worldToClip = new THREE.Matrix4().getInverse(clipToWorld);
+        let clipToWorld = clipSphere.matrixWorld;
+        let viewToWorld = camera.matrixWorld
+        let worldToClip = new THREE.Matrix4().getInverse(clipToWorld);
 
-        var viewToClip = new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
+        let viewToClip = new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
 
         matrices.push(viewToClip);
       }
 
-      var flattenedMatrices = [].concat(...matrices.map(matrix => matrix.elements));
+      let flattenedMatrices = [].concat(...matrices.map(matrix => matrix.elements));
 
-      var lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
+      let lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
       gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
     }*/
 
@@ -490,55 +490,55 @@ class Group extends BasicGroup {
     shader.setUniform1f("selectedPointSourceID", material.selectedPointSourceID);
     shader.setUniform3f("selectedPointSourceIDColor", material.selectedPointSourceIDColor);
 
-    var vnWebGLTexture = this.textures.get(material.visibleNodesTexture);
+    let vnWebGLTexture = this.textures.get(material.visibleNodesTexture);
     shader.setUniform1i("visibleNodesTexture", currentTextureBindingPoint);
     gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
     gl.bindTexture(vnWebGLTexture.target, vnWebGLTexture.id);
     currentTextureBindingPoint++;
 
-    var gradientTexture = this.textures.get(material.gradientTexture);
+    let gradientTexture = this.textures.get(material.gradientTexture);
     shader.setUniform1i("gradient", currentTextureBindingPoint);
     gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
     gl.bindTexture(gradientTexture.target, gradientTexture.id);
     currentTextureBindingPoint++;
 
-    var classificationTexture = this.textures.get(material.classificationTexture);
+    let classificationTexture = this.textures.get(material.classificationTexture);
     shader.setUniform1i("classificationLUT", currentTextureBindingPoint);
     gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
     gl.bindTexture(classificationTexture.target, classificationTexture.id);
     currentTextureBindingPoint++;
 
-    var hiddenPointSourceIDsTexture = this.textures.get(material.hiddenPointSourceIDsTexture);
+    let hiddenPointSourceIDsTexture = this.textures.get(material.hiddenPointSourceIDsTexture);
     shader.setUniform1i("hiddenPointSourceIDs", currentTextureBindingPoint);
     gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
     gl.bindTexture(hiddenPointSourceIDsTexture.target, hiddenPointSourceIDsTexture.id);
     currentTextureBindingPoint++;
 
     if (material.snapEnabled === true) {
-      var lSnapshot = shader.uniformLocations["uSnapshot[0]"];
-      var lSnapshotDepth = shader.uniformLocations["uSnapshotDepth[0]"];
+      let lSnapshot = shader.uniformLocations["uSnapshot[0]"];
+      let lSnapshotDepth = shader.uniformLocations["uSnapshotDepth[0]"];
 
-      var bindingStart = currentTextureBindingPoint;
-      var lSnapshotBindingPoints = new Array(5).fill(bindingStart).map((a, i) => (a + i));
-      var lSnapshotDepthBindingPoints = new Array(5).fill(1 + Math.max(...lSnapshotBindingPoints)).map((a, i) => (a + i));
+      let bindingStart = currentTextureBindingPoint;
+      let lSnapshotBindingPoints = new Array(5).fill(bindingStart).map((a, i) => (a + i));
+      let lSnapshotDepthBindingPoints = new Array(5).fill(1 + Math.max(...lSnapshotBindingPoints)).map((a, i) => (a + i));
       currentTextureBindingPoint = 1 + Math.max(...lSnapshotDepthBindingPoints);
 
       gl.uniform1iv(lSnapshot, lSnapshotBindingPoints);
       gl.uniform1iv(lSnapshotDepth, lSnapshotDepthBindingPoints);
 
-      for (var i = 0; i < 5; i++) {
-        var texture = material.uniforms["uSnapshot"].value[i];
-        var textureDepth = material.uniforms["uSnapshotDepth"].value[i];
+      for (let i = 0; i < 5; i++) {
+        let texture = material.uniforms["uSnapshot"].value[i];
+        let textureDepth = material.uniforms["uSnapshotDepth"].value[i];
 
         if (!texture) {
           break;
         }
 
-        var snapTexture = renderer.properties.get(texture).__webglTexture;
-        var snapTextureDepth = renderer.properties.get(textureDepth).__webglTexture;
+        let snapTexture = renderer.properties.get(texture).__webglTexture;
+        let snapTextureDepth = renderer.properties.get(textureDepth).__webglTexture;
 
-        var bindingPoint = lSnapshotBindingPoints[i];
-        var depthBindingPoint = lSnapshotDepthBindingPoints[i];
+        let bindingPoint = lSnapshotBindingPoints[i];
+        let depthBindingPoint = lSnapshotDepthBindingPoints[i];
 
         gl.activeTexture(gl[`TEXTURE${bindingPoint}`]);
         gl.bindTexture(gl.TEXTURE_2D, snapTexture);
@@ -547,20 +547,20 @@ class Group extends BasicGroup {
         gl.bindTexture(gl.TEXTURE_2D, snapTextureDepth);
       }
 
-      var flattenedMatrices = [].concat(...material.uniforms.uSnapView.value.map(c => c.elements));
-      var lSnapView = shader.uniformLocations["uSnapView[0]"];
+      let flattenedMatrices = [].concat(...material.uniforms.uSnapView.value.map(c => c.elements));
+      let lSnapView = shader.uniformLocations["uSnapView[0]"];
       gl.uniformMatrix4fv(lSnapView, false, flattenedMatrices);
 
       flattenedMatrices = [].concat(...material.uniforms.uSnapProj.value.map(c => c.elements));
-      var lSnapProj = shader.uniformLocations["uSnapProj[0]"];
+      let lSnapProj = shader.uniformLocations["uSnapProj[0]"];
       gl.uniformMatrix4fv(lSnapProj, false, flattenedMatrices);
 
       flattenedMatrices = [].concat(...material.uniforms.uSnapProjInv.value.map(c => c.elements));
-      var lSnapProjInv = shader.uniformLocations["uSnapProjInv[0]"];
+      let lSnapProjInv = shader.uniformLocations["uSnapProjInv[0]"];
       gl.uniformMatrix4fv(lSnapProjInv, false, flattenedMatrices);
 
       flattenedMatrices = [].concat(...material.uniforms.uSnapViewInv.value.map(c => c.elements));
-      var lSnapViewInv = shader.uniformLocations["uSnapViewInv[0]"];
+      let lSnapViewInv = shader.uniformLocations["uSnapViewInv[0]"];
       gl.uniformMatrix4fv(lSnapViewInv, false, flattenedMatrices);
     }
 

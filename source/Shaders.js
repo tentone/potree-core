@@ -34,6 +34,9 @@ uniform mat4 uViewInv;
 
 uniform float uScreenWidth;
 uniform float uScreenHeight;
+// #define uScreenWidth 1107.0
+// #define uScreenHeight 774.0
+
 uniform float fov;
 uniform float near;
 uniform float far;
@@ -106,6 +109,27 @@ uniform vec3 uShadowColor;
 uniform sampler2D visibleNodes;
 uniform sampler2D gradient;
 uniform sampler2D classificationLUT;
+
+#if defined(num_clipplanes) && num_clipplanes > 0 
+
+uniform vec4 clipPlanes[num_clipplanes];
+
+bool isClipped(vec3 point) {
+	bool clipped = false;
+	for (int i = 0; i < num_clipplanes; ++i) {
+		vec4 p = clipPlanes[i];
+		clipped = clipped || dot(-point, p.xyz) > p.w;
+	}
+	return clipped;
+}
+
+#else
+
+bool isClipped(vec3 point) {
+	return false;
+}
+
+#endif
 
 #if defined(num_shadowmaps) && num_shadowmaps > 0
 	uniform sampler2D uShadowMap[num_shadowmaps];
@@ -762,7 +786,6 @@ void main()
 	float pointSize = getPointSize();
 	gl_PointSize = pointSize;
 	vPointSize = pointSize;
-
 	` + THREE.ShaderChunk.logdepthbuf_vertex + glsl`
 
 	//COLOR
@@ -778,6 +801,10 @@ void main()
 	#endif
 
 	//CLIPPING
+	vec4 clipPosition = modelMatrix * vec4( position, 1.0 );
+	if (isClipped(clipPosition.xyz)) {
+		gl_Position = vec4(100.0, 100.0, 100.0, 1.0); // Outside clip space
+	} 
 	doClipping();
 
 	#if defined num_clipspheres && num_clipspheres > 0

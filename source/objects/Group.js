@@ -211,6 +211,24 @@ class Group extends BasicGroup {
       mat4holder.set(worldView.elements);
       gl.uniformMatrix4fv(lModelView, false, mat4holder);
 
+      // Clip planes
+      if (material.clipping && material.clippingPlanes && material.clippingPlanes.length > 0) {
+        var planes = material.clippingPlanes;
+        var flattenedPlanes = new Array(4 * material.clippingPlanes.length);
+        for (var i = 0; i < planes.length; i++) {
+          flattenedPlanes[4*i + 0] = planes[i].normal.x;
+          flattenedPlanes[4*i + 1] = planes[i].normal.y;
+          flattenedPlanes[4*i + 2] = planes[i].normal.z;
+          flattenedPlanes[4*i + 3] = planes[i].constant;
+        }
+
+        var clipPlanesLoc = shader.uniformLocations['clipPlanes[0]'];
+        if (clipPlanesLoc === undefined) {
+          throw new Error('Could not find uniform clipPlanes');
+        }
+        gl.uniform4fv(clipPlanesLoc, flattenedPlanes);
+      }
+
       //Clip Polygons
       if (material.clipPolygons && material.clipPolygons.length > 0) {
         let clipPolygonVCount = [];
@@ -344,13 +362,15 @@ class Group extends BasicGroup {
     let numClipBoxes = (material.clipBoxes && material.clipBoxes.length) ? material.clipBoxes.length : 0;
     let numClipPolygons = (material.clipPolygons && material.clipPolygons.length) ? material.clipPolygons.length : 0;
     let numClipSpheres = 0;
+    var numClippingPlanes = (material.clipping && material.clippingPlanes && material.clippingPlanes.length) ? material.clippingPlanes.length : 0;
 
     let defines = [
-      "#define num_shadowmaps" + shadowMaps.length,
-      "#define num_snapshots" + numSnapshots,
-      "#define num_clipboxes" + numClipBoxes,
-      "#define num_clipspheres" + numClipSpheres,
-      "#define num_clippolygons" + numClipPolygons,
+      "#define num_shadowmaps " + shadowMaps.length,
+      "#define num_snapshots " + numSnapshots,
+      "#define num_clipboxes " + numClipBoxes,
+      "#define num_clipspheres " + numClipSpheres,
+      "#define num_clippolygons " + numClipPolygons,
+      "#define num_clipplanes " + numClippingPlanes,
     ];
 
     let definesString = defines.join("\n");

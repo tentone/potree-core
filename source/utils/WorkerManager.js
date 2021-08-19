@@ -1,6 +1,5 @@
 "use strict";
 
-import { Global } from "../Global.js";
 // Force workers to be included
 import BinaryDecoderWorker from "../workers/BinaryDecoderWorker";
 // import LASLAZWorker from "../workers/LASLAZWorker";

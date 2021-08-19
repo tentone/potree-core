@@ -190,6 +190,9 @@ class PointCloudOctree extends PointCloudTree {
 					material.program.getUniforms().map.pcIndex.setValue(_this.getContext(), i);
 				}
 			}
+			// Since we are handling rendering our selves, instruct ThreeJS to not
+			// draw any of the points during 'regular' rendering
+			geometry.setDrawRange(0, 0);
 		};
 
 		node.geometryNode = geometryNode;
@@ -216,6 +219,7 @@ class PointCloudOctree extends PointCloudTree {
 			parent.children[childIndex] = geometryNode;
 		};
 		geometryNode.oneTimeDisposeHandlers.push(disposeListener);
+
 
 		return node;
 	}

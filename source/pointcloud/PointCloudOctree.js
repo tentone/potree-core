@@ -429,20 +429,45 @@ class PointCloudOctree extends PointCloudTree {
 		return intersects;
 	}
 
-	nodesOnRay(nodes, ray) {
+	nodesOnRay(nodes, ray, recursive = false) {
 		let nodesOnRay = [];
 		let _ray = ray.clone();
 
 		for (let i = 0; i < nodes.length; i++) {
 			let node = nodes[i];
 			let sphere = node.getBoundingSphere().clone().applyMatrix4(node.sceneNode.matrixWorld);
+			let box = node.getBoundingBox().clone().applyMatrix4(node.sceneNode.matrixWorld);
 
-			if (_ray.intersectsSphere(sphere)) {
+			if (_ray.intersectsSphere(sphere) || _ray.intersectsBox(box)) {
 				nodesOnRay.push(node);
+
+				if (recursive && node.children) {
+					const children = Object.values(node.children).filter(node => node && node.sceneNode);
+					if (children.length) {
+						const nodes = this.nodesOnRay(children, _ray, true);
+						nodesOnRay.push(...nodes);
+					}
+				}
 			}
 		}
 
 		return nodesOnRay;
+	}
+
+	pointsOnRay(nodes, ray, maxDistance = 0.5, recursive = false) {
+		const nodesOnRay = this.nodesOnRay(nodes, ray, recursive);
+		const pointsOnRay = [];
+
+		for (const node of nodesOnRay) {
+			pointsOnRay.push(...HelperUtils.nodeToPoints(node));
+		}
+
+		return pointsOnRay
+			.filter(point => {
+				point.distanceToRay = ray.distanceToPoint(point.position);
+				return point.distanceToRay <= maxDistance;
+			})
+			.sort((a, b) => a.distanceToRay - b.distanceToRay);
 	}
 
 	updateMatrixWorld(force) {
@@ -657,7 +682,7 @@ class PointCloudOctree extends PointCloudTree {
 		let height = Math.ceil(getVal(params.height, size.y));
 
 		let pointSizeType = getVal(params.pointSizeType, PointSizeType.FIXED); //this.material.pointSizeType);
-		let pointSize = getVal(params.pointSize, 10);
+		let pointSize = getVal(params.pointSize, 8);
 		let pointShape = getVal(params.pointShape, PointShape.SQUARE);
 
 		let nodes = this.nodesOnRay(this.visibleNodes, ray);
@@ -788,61 +813,20 @@ class PointCloudOctree extends PointCloudTree {
 						}
 					}
 
-
 				}
 			}
 		}
 
 		for (let hit of hits) {
-			let point = {};
-
 			if (!nodes[hit.pcIndex]) {
 				return null;
 			}
 
-			let node = nodes[hit.pcIndex];
-			let pc = node.sceneNode;
-			let geometry = node.geometryNode.geometry;
-
-			for (let attributeName in geometry.attributes) {
-				let attribute = geometry.attributes[attributeName];
-
-				if (attributeName === 'position') {
-					let x = attribute.array[3 * hit.pIndex + 0];
-					let y = attribute.array[3 * hit.pIndex + 1];
-					let z = attribute.array[3 * hit.pIndex + 2];
-
-					let position = new THREE.Vector3(x, y, z);
-					position.applyMatrix4(pc.matrixWorld);
-
-					point[attributeName] = position;
-				} else if (attributeName === 'indices') {
-
-				} else {
-
-					let values = attribute.array.slice(attribute.itemSize * hit.pIndex, attribute.itemSize * (hit.pIndex + 1));
-
-					if (attribute.potree) {
-						const { scale, offset } = attribute.potree;
-						values = values.map(v => v / scale + offset);
-					}
-
-					if (attributeName === 'color') {
-						const rgb = [...values].map(v => v / 255);
-						point.color = new THREE.Color(...rgb);
-					} else {
-						point[attributeName] = values.length === 1 ? values[0] : values;
-					}
-
-				}
-
-			}
-
+			let point = HelperUtils.nodeToPoint(node, hit.pcIndex);
 			hit.point = point;
 		}
 
-		performance.mark("pick-end");
-		performance.measure("pick", "pick-start", "pick-end");
+		performance.measure("pick", "pick-start");
 
 		if (params.all) {
 			return hits
@@ -857,6 +841,39 @@ class PointCloudOctree extends PointCloudTree {
 		}
 
 	};
+
+	/**
+	 * Looks for points in close proximity to the specified Ray, anywhere along
+	 * the entire length of the Ray.
+	 *
+	 * By default, all points within params.maxDistance (default: 0.5) of the Ray
+	 * are returned. Setting params.firstHitOnly to true will only return the
+	 * nearest point to the Ray's origin.
+	 */
+	pickAll(ray, params = {}) {
+		performance.mark('pickAll-start');
+
+		// TODO Optimise this!
+		const pointsOnRay = this.pointsOnRay(
+			this.visibleNodes,
+			ray,
+			params.maxDistance || 0.5,
+			params.recursive !== false,
+		);
+
+		performance.measure('pickAll', 'pickAll-start');
+
+		if (params.firstHitOnly) {
+			const point = pointsOnRay
+				.map(point => Object.assign(point, { distanceToOrigin: point.position.distanceTo(ray.origin) }))
+				.sort((a, b) => a.distanceToOrigin - b.distanceToOrigin)
+				.shift();
+
+			return point;
+		}
+
+		return pointsOnRay;
+	}
 
 	*getFittedBoxGen(boxNode) {
 		let shrinkedLocalBounds = new THREE.Box3();

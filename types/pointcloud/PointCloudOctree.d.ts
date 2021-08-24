@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 export class PointCloudOctree extends PointCloudTree {
     constructor(geometry: any, material: any);
     pointBudget: number;
@@ -30,7 +32,8 @@ export class PointCloudOctree extends PointCloudTree {
         offsets: Map<any, any>;
     };
     nodeIntersectsProfile(node: any, profile: any): boolean;
-    nodesOnRay(nodes: any, ray: any): any[];
+    nodesOnRay(nodes: any[], ray: THREE.Ray, recursive?: boolean): any[];
+    pointsOnRay(nodes: any[], ray: THREE.Ray, maxDistance: number = 0.5, recursive: boolean = false): any[];
     updateMatrixWorld(force: any): void;
     matrixWorldNeedsUpdate: boolean;
     hideDescendants(object: any): void;
@@ -85,7 +88,16 @@ export class PointCloudOctree extends PointCloudTree {
      * TODO: only draw pixels that are actually read with readPixels().
      *
      */
-    pick(viewer: any, camera: any, ray: any, params?: {}): any;
+    pick(viewer: { renderer: THREE.WebGLRenderer, pRenderer: BasicGroup; }, camera: any, ray: any, params?: {}): any;
+    /**
+     * Looks for points in close proximity to the specified Ray, anywhere along
+     * the entire length of the Ray.
+     *
+     * By default, all points within params.maxDistance (default: 0.5) of the Ray
+     * are returned. Setting params.firstHitOnly to true will only return the
+     * nearest point to the Ray's origin.
+     */
+    pickAll(ray: THREE.Ray, params?: { firstHitOnly?: boolean; maxDistance?: number; recursive?: boolean; });
     pickState: {
         renderTarget: any;
         material: PointCloudMaterial;
@@ -106,4 +118,4 @@ export class PointCloudOctreeNode extends PointCloudTreeNode {
 }
 import { PointCloudTree } from "./PointCloudTree.js";
 import { PointCloudMaterial } from "./materials/PointCloudMaterial.js";
-import { PointCloudTreeNode } from "./PointCloudTree.js";
+import { PointCloudTreeNode } from "./PointCloudTree.js"; import { BasicGroup } from '../objects/BasicGroup.js';

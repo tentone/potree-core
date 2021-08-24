@@ -1,6 +1,6 @@
 {
   "name": "potree-core",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Potree wrapper for threejs applications",
   "main": "dist/index.js",
   "repository": {
@@ -31,7 +31,7 @@
   "author": "Tentone",
   "license": "MIT",
   "peerDependencies": {
-    "three": ">=0.128.0"
+    "three": "^0.130.1"
   },
   "devDependencies": {
     "@types/three": "^0.130.1",

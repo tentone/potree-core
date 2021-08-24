@@ -216,10 +216,10 @@ class Group extends BasicGroup {
         var planes = material.clippingPlanes;
         var flattenedPlanes = new Array(4 * material.clippingPlanes.length);
         for (var i = 0; i < planes.length; i++) {
-          flattenedPlanes[4*i + 0] = planes[i].normal.x;
-          flattenedPlanes[4*i + 1] = planes[i].normal.y;
-          flattenedPlanes[4*i + 2] = planes[i].normal.z;
-          flattenedPlanes[4*i + 3] = planes[i].constant;
+          flattenedPlanes[4 * i + 0] = planes[i].normal.x;
+          flattenedPlanes[4 * i + 1] = planes[i].normal.y;
+          flattenedPlanes[4 * i + 2] = planes[i].normal.z;
+          flattenedPlanes[4 * i + 3] = planes[i].constant;
         }
 
         var clipPlanesLoc = shader.uniformLocations['clipPlanes[0]'];

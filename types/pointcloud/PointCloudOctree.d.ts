@@ -32,8 +32,8 @@ export class PointCloudOctree extends PointCloudTree {
         offsets: Map<any, any>;
     };
     nodeIntersectsProfile(node: any, profile: any): boolean;
-    nodesOnRay(nodes: any[], ray: THREE.Ray, recursive?: boolean): any[];
-    pointsOnRay(nodes: any[], ray: THREE.Ray, maxDistance: number = 0.5, recursive: boolean = false): any[];
+    nodesOnRay(nodes: any[], ray: THREE.Ray, params?: { recursive?: boolean; }): any[];
+    pointsOnRay(nodes: any[], ray: THREE.Ray, params?: { maxDistance: number; recursive: boolean; }): any[];
     updateMatrixWorld(force: any): void;
     matrixWorldNeedsUpdate: boolean;
     hideDescendants(object: any): void;

@@ -13,12 +13,12 @@ export class HelperUtils {
      * Returns an array of objects describing all of the points contained within
      * the specified node, including their world position and all available attributes
      */
-    static nodeToPoints(node: any): any[];
+    static nodeToPoints(node: any, params?: { recursive?: boolean; }): any[];
     /**
      * Returns an object describing the point within the node at the specified index,
      * including its world position and all available attributes
      */
-    static nodeToPoint(node: any, pointIndex: number = 0): any;
+    static nodeToPoint(node: any, pointIndex: number = 0, params?: { attributeFilter?: (key: string, value: any) => boolean; }): any;
     /**
      * Returns an object describing the nearers point to the selected Intersection,
      * including it's world position and all available attributes

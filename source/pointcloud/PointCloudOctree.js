@@ -429,45 +429,51 @@ class PointCloudOctree extends PointCloudTree {
 		return intersects;
 	}
 
-	nodesOnRay(nodes, ray, recursive = false) {
+	nodesOnRay(nodes, ray, params = {}) {
 		let nodesOnRay = [];
 		let _ray = ray.clone();
 
 		for (let i = 0; i < nodes.length; i++) {
 			let node = nodes[i];
 			let sphere = node.getBoundingSphere().clone().applyMatrix4(node.sceneNode.matrixWorld);
-			let box = node.getBoundingBox().clone().applyMatrix4(node.sceneNode.matrixWorld);
+			// let box = node.getBoundingBox().clone().applyMatrix4(node.sceneNode.matrixWorld);
 
-			if (_ray.intersectsSphere(sphere) || _ray.intersectsBox(box)) {
+			if (_ray.intersectsSphere(sphere)) { // || _ray.intersectsBox(box)) {
+				node.distanceToOrigin = sphere.center.distanceTo(_ray.origin);
 				nodesOnRay.push(node);
 
-				if (recursive && node.children) {
+				if (params.recursive && node.children) {
 					const children = Object.values(node.children).filter(node => node && node.sceneNode);
 					if (children.length) {
-						const nodes = this.nodesOnRay(children, _ray, true);
+						const nodes = this.nodesOnRay(children, _ray, params);
 						nodesOnRay.push(...nodes);
 					}
 				}
 			}
 		}
 
-		return nodesOnRay;
+		return nodesOnRay.sort((a, b) => a.distanceToOrigin - b.distanceToOrigin);
 	}
 
-	pointsOnRay(nodes, ray, maxDistance = 0.5, recursive = false) {
-		const nodesOnRay = this.nodesOnRay(nodes, ray, recursive);
+	pointsOnRay(nodes, ray, params = {}) {
+		const nodesOnRay = this.nodesOnRay(nodes, ray, params);
 		const pointsOnRay = [];
+		const maxDistance = params.maxDistance || 0.5;
+
+		params = Object.assign({
+			attributeFilter: (key, value) => {
+				switch (key) {
+					case 'position': return ray.distanceToPoint(value) <= maxDistance;
+					default: return true;
+				}
+			}
+		}, params);
 
 		for (const node of nodesOnRay) {
-			pointsOnRay.push(...HelperUtils.nodeToPoints(node));
+			pointsOnRay.push(...HelperUtils.nodeToPoints(node, params));
 		}
 
-		return pointsOnRay
-			.filter(point => {
-				point.distanceToRay = ray.distanceToPoint(point.position);
-				return point.distanceToRay <= maxDistance;
-			})
-			.sort((a, b) => a.distanceToRay - b.distanceToRay);
+		return pointsOnRay.sort((a, b) => a.distanceToRay - b.distanceToRay);
 	}
 
 	updateMatrixWorld(force) {
@@ -858,7 +864,7 @@ class PointCloudOctree extends PointCloudTree {
 			this.visibleNodes,
 			ray,
 			params.maxDistance || 0.5,
-			params.recursive !== false,
+			params.recursive,
 		);
 
 		performance.measure('pickAll', 'pickAll-start');

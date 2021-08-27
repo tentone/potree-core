@@ -154,7 +154,7 @@ function loadPointCloud(path, name, callback) {
   }
 }
 
-function updateVisibility(pointclouds, camera, renderer, totalPointBudget) {
+function updateVisibility(pointclouds, camera, renderer) {
   var numVisibleNodes = 0;
   var numVisiblePoints = 0;
   var numVisiblePointsInPointclouds = new Map(pointclouds.map(pc => [pc, 0]));
@@ -226,9 +226,6 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget) {
     var level = node.getLevel();
 
     var visible = insideFrustum;
-    // Within 'global' total budget?
-    visible = visible && (numVisiblePoints + node.getNumPoints() <= totalPointBudget);
-    // Within budget of the point cloud?
     visible = visible && !(numVisiblePointsInPointclouds.get(pointcloud) + node.getNumPoints() > pointcloud.pointBudget);
     visible = visible && level < maxLevel;
 
@@ -431,8 +428,8 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget) {
   };
 }
 
-function updatePointClouds(pointclouds, camera, renderer, totalPointBudget) {
-  var result = updateVisibility(pointclouds, camera, renderer, totalPointBudget);
+function updatePointClouds(pointclouds, camera, renderer) {
+  var result = updateVisibility(pointclouds, camera, renderer);
 
   for (var i = 0; i < pointclouds.length; i++) {
     pointclouds[i].updateMaterial(pointclouds[i].material, pointclouds[i].visibleNodes, camera, renderer);

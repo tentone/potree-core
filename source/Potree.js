@@ -44,20 +44,6 @@ var Classification =
   }
 };
 
-var ClipTask =
-{
-  NONE: 0,
-  HIGHLIGHT: 1,
-  SHOW_INSIDE: 2,
-  SHOW_OUTSIDE: 3
-};
-
-var ClipMethod =
-{
-  INSIDE_ANY: 0,
-  INSIDE_ALL: 1
-};
-
 var PointSizeType =
 {
   FIXED: 0,
@@ -226,70 +212,6 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget) {
     visible = visible && !(numVisiblePointsInPointclouds.get(pointcloud) + node.getNumPoints() > pointcloud.pointBudget);
     visible = visible && level < maxLevel;
 
-    //TODO <CLIPPING TASKS>
-    /*
-    if(false && pointcloud.material.clipBoxes.length > 0)
-    {
-      var numIntersecting = 0;
-      var numIntersectionVolumes = 0;
-
-      for(var clipBox of pointcloud.material.clipBoxes)
-      {
-        var pcWorldInverse = new THREE.Matrix4().getInverse(pointcloud.matrixWorld);
-        var toPCObject = pcWorldInverse.multiply(clipBox.box.matrixWorld);
-
-        var px = new THREE.Vector3(+1, 0, 0).applyMatrix4(toPCObject);
-        var nx = new THREE.Vector3(-1, 0, 0).applyMatrix4(toPCObject);
-        var py = new THREE.Vector3(0, +1, 0).applyMatrix4(toPCObject);
-        var ny = new THREE.Vector3(0, -1, 0).applyMatrix4(toPCObject);
-        var pz = new THREE.Vector3(0, 0, +1).applyMatrix4(toPCObject);
-        var nz = new THREE.Vector3(0, 0, -1).applyMatrix4(toPCObject);
-
-        var pxN = new THREE.Vector3().subVectors(nx, px).normalize();
-        var nxN = pxN.clone().multiplyScalar(-1);
-        var pyN = new THREE.Vector3().subVectors(ny, py).normalize();
-        var nyN = pyN.clone().multiplyScalar(-1);
-        var pzN = new THREE.Vector3().subVectors(nz, pz).normalize();
-        var nzN = pzN.clone().multiplyScalar(-1);
-
-        var pxPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(pxN, px);
-        var nxPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(nxN, nx);
-        var pyPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(pyN, py);
-        var nyPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(nyN, ny);
-        var pzPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(pzN, pz);
-        var nzPlane = new THREE.Plane().setFromNormalAndCoplanarPoint(nzN, nz);
-
-        var frustum = new THREE.Frustum(pxPlane, nxPlane, pyPlane, nyPlane, pzPlane, nzPlane);
-        var intersects = frustum.intersectsBox(box);
-
-        if(intersects)
-        {
-          numIntersecting++;
-        }
-        numIntersectionVolumes++;
-      }
-
-      var insideAny = numIntersecting > 0;
-      var insideAll = numIntersecting === numIntersectionVolumes;
-
-      if(pointcloud.material.clipTask === ClipTask.SHOW_INSIDE)
-      {
-        if(pointcloud.material.clipMethod === ClipMethod.INSIDE_ANY && insideAny)
-        {
-          //node.debug = true
-        }
-        else if(pointcloud.material.clipMethod === ClipMethod.INSIDE_ALL && insideAll)
-        {
-          //node.debug = true;
-        }
-        else
-        {
-          visible = false;
-        }
-      }
-    }
-    */
-
     if (node.spacing) {
       lowestSpacing = Math.min(lowestSpacing, node.spacing);
     }
@@ -429,7 +351,7 @@ function updatePointClouds(pointclouds, camera, renderer, totalPointBudget) {
   var result = updateVisibility(pointclouds, camera, renderer, totalPointBudget);
 
   for (var i = 0; i < pointclouds.length; i++) {
-    pointclouds[i].updateMaterial(pointclouds[i].material, pointclouds[i].visibleNodes, camera, renderer);
+    pointclouds[i].updateMaterial(pointclouds[i].material, camera, renderer);
     pointclouds[i].updateVisibleBounds();
   }
 
@@ -511,8 +433,6 @@ function updateVisibilityStructures(pointclouds, camera, renderer) {
 export {
   AttributeLocations,
   Classification,
-  ClipTask,
-  ClipMethod,
   PointSizeType,
   PointShape,
   PointColorType,

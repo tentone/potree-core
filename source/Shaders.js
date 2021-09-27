@@ -9,13 +9,11 @@ Shaders.vertex = `
 precision highp float;
 precision highp int;
 
-#define MAX_CLIP_POLYGONS 8
-
 ` + THREE.ShaderChunk.common + `
 ` + THREE.ShaderChunk.logdepthbuf_pars_vertex + `
 
-attribute vec3 position;
-attribute vec3 color;
+// attribute vec3 position;
+// attribute vec3 color;
 attribute float intensity;
 attribute float classification;
 attribute float returnNumber;
@@ -24,51 +22,20 @@ attribute float pointSourceID;
 attribute vec4 indices;
 attribute float spacing;
 
-uniform mat4 modelMatrix;
-uniform mat4 modelViewMatrix;
-uniform mat4 projectionMatrix;
-uniform mat4 viewMatrix;
+// uniform mat4 modelMatrix;
+// uniform mat4 modelViewMatrix;
+// uniform mat4 projectionMatrix;
+// uniform mat4 viewMatrix;
 uniform mat4 uViewInv;
 
 uniform float uScreenWidth;
 uniform float uScreenHeight;
-// #define uScreenWidth 1107.0
-// #define uScreenHeight 774.0
 
 uniform float fov;
 uniform float near;
 uniform float far;
 
 uniform bool uDebug;
-
-uniform bool uUseOrthographicCamera;
-uniform float uOrthoWidth;
-uniform float uOrthoHeight;
-
-#define CLIPTASK_NONE 0
-#define CLIPTASK_HIGHLIGHT 1
-#define CLIPTASK_SHOW_INSIDE 2
-#define CLIPTASK_SHOW_OUTSIDE 3
-
-#define CLIPMETHOD_INSIDE_ANY 0
-#define CLIPMETHOD_INSIDE_ALL 1
-
-uniform int clipTask;
-uniform int clipMethod;
-
-#if defined(num_clipboxes) && num_clipboxes > 0
-	uniform mat4 clipBoxes[num_clipboxes];
-#endif
-
-#if defined(num_clipspheres) && num_clipspheres > 0
-	uniform mat4 uClipSpheres[num_clipspheres];
-#endif
-
-#if defined(num_clippolygons) && num_clippolygons > 0
-	uniform int uClipPolygonVCount[num_clippolygons];
-	uniform vec3 uClipPolygonVertices[num_clippolygons * 8];
-	uniform mat4 uClipPolygonWVP[num_clippolygons];
-#endif
 
 uniform float size;
 uniform float minSize;
@@ -92,7 +59,7 @@ uniform float intensityGamma;
 uniform float intensityContrast;
 uniform float intensityBrightness;
 uniform float rgbGamma;
-uniform float rgbContrast;
+// uniform float rgbContrast;
 uniform float rgbBrightness;
 uniform float uTransition;
 uniform float wRGB;
@@ -101,8 +68,6 @@ uniform float wElevation;
 uniform float wClassification;
 uniform float wReturnNumber;
 uniform float wSourceID;
-
-uniform vec3 uShadowColor;
 
 uniform sampler2D visibleNodes;
 uniform sampler2D gradient;
@@ -129,12 +94,6 @@ bool isClipped(vec3 point) {
 
 #endif
 
-#if defined(num_shadowmaps) && num_shadowmaps > 0
-	uniform sampler2D uShadowMap[num_shadowmaps];
-	uniform mat4 uShadowWorldView[num_shadowmaps];
-	uniform mat4 uShadowProj[num_shadowmaps];
-#endif
-
 varying vec3 vColor;
 varying float vLogDepth;
 varying vec3 vViewPosition;
@@ -151,7 +110,6 @@ float round(float number)
 //---------------------
 
 #if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_octree)
-
 	/**
 	 * number of 1-bits up to inclusive index position
 	 * number is treated as if it were an integer in the range 0-255
@@ -572,31 +530,16 @@ float getPointSize()
 	#if defined fixed_point_size
 		pointSize = size;
 	#elif defined attenuated_point_size
-		if(uUseOrthographicCamera)
-		{
-			pointSize = size;
-		}
-		else
+		pointSize = size * spacing * projFactor;
+	#elif defined adaptive_point_size
+		if(uIsLeafNode && false)
 		{
 			pointSize = size * spacing * projFactor;
 		}
-	#elif defined adaptive_point_size
-		if(uUseOrthographicCamera)
-		{
-			float worldSpaceSize = 1.0 * size * r / getPointSizeAttenuation();
-			pointSize = (worldSpaceSize / uOrthoWidth) * uScreenWidth;
-		}
 		else
 		{
-			if(uIsLeafNode && false)
-			{
-				pointSize = size * spacing * projFactor;
-			}
-			else
-			{
-				float worldSpaceSize = 1.0 * size * r / getPointSizeAttenuation();
-				pointSize = worldSpaceSize * projFactor;
-			}
+			float worldSpaceSize = 1.0 * size * r / getPointSizeAttenuation();
+			pointSize = worldSpaceSize * projFactor;
 		}
 	#endif
 
@@ -606,111 +549,6 @@ float getPointSize()
 	vRadius = pointSize / projFactor;
 
 	return pointSize;
-}
-
-#if defined num_clippolygons && num_clippolygons > 0
-	bool pointInClipPolygon(vec3 point, int polyIdx)
-	{
-		mat4 wvp = uClipPolygonWVP[polyIdx];
-
-		vec4 pointNDC = wvp * vec4(point, 1.0);
-		pointNDC.xy = pointNDC.xy / pointNDC.w;
-
-		int j = uClipPolygonVCount[polyIdx] - 1;
-		bool c = false;
-		for(int i = 0; i < 8; i++)
-		{
-			if(i == uClipPolygonVCount[polyIdx])
-			{
-				break;
-			}
-
-			vec3 verti = uClipPolygonVertices[polyIdx * 8 + i];
-			vec3 vertj = uClipPolygonVertices[polyIdx * 8 + j];
-
-			if(((verti.y > pointNDC.y) != (vertj.y > pointNDC.y)) && (pointNDC.x < (vertj.x-verti.x) * (pointNDC.y-verti.y) / (vertj.y-verti.y) + verti.x))
-			{
-				c = !c;
-			}
-
-			j = i;
-		}
-
-		return c;
-	}
-#endif
-
-void doClipping()
-{
-	#if !defined color_type_composite
-		vec4 cl = getClassification(); 
-		if(cl.a == 0.0)
-		{
-			gl_Position = vec4(100.0, 100.0, 100.0, 0.0);
-			
-			return;
-		}
-	#endif
-
-	int clipVolumesCount = 0;
-	int insideCount = 0;
-
-	#if defined(num_clipboxes) && num_clipboxes > 0
-		for(int i = 0; i < num_clipboxes; i++)
-		{
-			vec4 clipPosition = clipBoxes[i] * modelMatrix * vec4( position, 1.0 );
-			bool inside = -0.5 <= clipPosition.x && clipPosition.x <= 0.5;
-			inside = inside && -0.5 <= clipPosition.y && clipPosition.y <= 0.5;
-			inside = inside && -0.5 <= clipPosition.z && clipPosition.z <= 0.5;
-
-			insideCount = insideCount + (inside ? 1 : 0);
-			clipVolumesCount++;
-		}	
-	#endif
-
-	#if defined(num_clippolygons) && num_clippolygons > 0
-		for(int i = 0; i < num_clippolygons; i++)
-		{
-			bool inside = pointInClipPolygon(position, i);
-
-			insideCount = insideCount + (inside ? 1 : 0);
-			clipVolumesCount++;
-		}
-	#endif
-
-	bool insideAny = insideCount > 0;
-	bool insideAll = (clipVolumesCount > 0) && (clipVolumesCount == insideCount);
-
-	if(clipMethod == CLIPMETHOD_INSIDE_ANY)
-	{
-		if(insideAny && clipTask == CLIPTASK_HIGHLIGHT)
-		{
-			vColor.r += 0.5;
-		}
-		else if(!insideAny && clipTask == CLIPTASK_SHOW_INSIDE)
-		{
-			gl_Position = vec4(100.0, 100.0, 100.0, 1.0);
-		}
-		else if(insideAny && clipTask == CLIPTASK_SHOW_OUTSIDE)
-		{
-			gl_Position = vec4(100.0, 100.0, 100.0, 1.0);
-		}
-	}
-	else if(clipMethod == CLIPMETHOD_INSIDE_ALL)
-	{
-		if(insideAll && clipTask == CLIPTASK_HIGHLIGHT)
-		{
-			vColor.r += 0.5;
-		}
-		else if(!insideAll && clipTask == CLIPTASK_SHOW_INSIDE)
-		{
-			gl_Position = vec4(100.0, 100.0, 100.0, 1.0);
-		}
-		else if(insideAll && clipTask == CLIPTASK_SHOW_OUTSIDE)
-		{
-			gl_Position = vec4(100.0, 100.0, 100.0, 1.0);
-		}
-	}
 }
 
 void main()
@@ -739,92 +577,11 @@ void main()
 		gl_Position = projectionMatrix * mvPosition;
 	#endif
 
-	//CLIPPING
+	// CLIPPING
 	vec4 clipPosition = modelMatrix * vec4( position, 1.0 );
 	if (isClipped(clipPosition.xyz)) {
-		gl_Position = vec4(100.0, 100.0, 100.0, 1.0); // Outside clip space
+		gl_Position = vec4(100.0, 100.0, 100.0, 1.0); // Outside clip volume
 	} 
-	doClipping();
-
-	#if defined num_clipspheres && num_clipspheres > 0
-		for(int i = 0; i < num_clipspheres; i++)
-		{
-			vec4 sphereLocal = uClipSpheres[i] * mvPosition;
-
-			float distance = length(sphereLocal.xyz);
-
-			if(distance < 1.0)
-			{
-				float w = distance;
-				vec3 cGradient = texture2D(gradient, vec2(w, 1.0 - w)).rgb;
-				
-				vColor = cGradient;
-			}
-		}
-	#endif
-
-	#if defined num_shadowmaps && num_shadowmaps > 0
-
-		const float sm_near = 0.1;
-		const float sm_far = 10000.0;
-
-		for(int i = 0; i < num_shadowmaps; i++)
-		{
-			vec3 viewPos = (uShadowWorldView[i] * vec4(position, 1.0)).xyz;
-			float distanceToLight = abs(viewPos.z);
-			
-			vec4 projPos = uShadowProj[i] * uShadowWorldView[i] * vec4(position, 1);
-			vec3 nc = projPos.xyz / projPos.w;
-			
-			float u = nc.x * 0.5 + 0.5;
-			float v = nc.y * 0.5 + 0.5;
-
-			vec2 sampleStep = vec2(1.0 / (2.0*1024.0), 1.0 / (2.0*1024.0)) * 1.5;
-			vec2 sampleLocations[9];
-
-			sampleLocations[0] = vec2(0.0, 0.0);
-			sampleLocations[1] = sampleStep;
-			sampleLocations[2] = -sampleStep;
-			sampleLocations[3] = vec2(sampleStep.x, -sampleStep.y);
-			sampleLocations[4] = vec2(-sampleStep.x, sampleStep.y);
-			sampleLocations[5] = vec2(0.0, sampleStep.y);
-			sampleLocations[6] = vec2(0.0, -sampleStep.y);
-			sampleLocations[7] = vec2(sampleStep.x, 0.0);
-			sampleLocations[8] = vec2(-sampleStep.x, 0.0);
-
-			float visibleSamples = 0.0;
-			float numSamples = 0.0;
-
-			float bias = vRadius * 2.0;
-
-			for(int j = 0; j < 9; j++)
-			{
-				vec4 depthMapValue = texture2D(uShadowMap[i], vec2(u, v) + sampleLocations[j]);
-
-				float linearDepthFromSM = depthMapValue.x + bias;
-				float linearDepthFromViewer = distanceToLight;
-
-				if(linearDepthFromSM > linearDepthFromViewer)
-				{
-					visibleSamples += 1.0;
-				}
-
-				numSamples += 1.0;
-			}
-
-			float visibility = visibleSamples / numSamples;
-
-			if(u < 0.0 || u > 1.0 || v < 0.0 || v > 1.0 || nc.x < -1.0 || nc.x > 1.0 || nc.y < -1.0 || nc.y > 1.0 || nc.z < -1.0 || nc.z > 1.0)
-			{
-				//vColor = vec3(0.0, 0.0, 0.2);
-			}
-			else
-			{
-				vColor = vColor * visibility + vColor * uShadowColor * (1.0 - visibility);
-			}
-		}
-
-	#endif
 }`;
 
 //"pointcloud.fs"
@@ -840,16 +597,14 @@ precision highp int;
 ` + THREE.ShaderChunk.common + `
 ` + THREE.ShaderChunk.logdepthbuf_pars_fragment + `
 
-uniform mat4 viewMatrix;
+// uniform mat4 viewMatrix;
 uniform mat4 uViewInv;
-uniform mat4 uProjInv;
-uniform vec3 cameraPosition;
+// uniform mat4 uProjInv;
+// uniform vec3 cameraPosition;
 
 uniform mat4 projectionMatrix;
 uniform float uOpacity;
 
-uniform float blendHardness;
-uniform float blendDepthSupplement;
 uniform float fov;
 uniform float uSpacing;
 uniform float near;

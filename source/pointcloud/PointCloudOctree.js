@@ -6,7 +6,7 @@ import {PointCloudOctreeGeometryNode} from "./geometries/PointCloudOctreeGeometr
 import {HelperUtils} from "../utils/HelperUtils.js";
 import {PointCloudTree, PointCloudTreeNode} from "./PointCloudTree.js";
 import {PointCloudMaterial} from "./materials/PointCloudMaterial.js";
-import {PointColorType, ClipTask} from "../Potree.js";
+import {PointColorType } from "../Potree.js";
 import {Global} from "../Global.js";
 
 class PointCloudOctreeNode extends PointCloudTreeNode
@@ -188,41 +188,25 @@ class PointCloudOctree extends PointCloudTree
 	toTreeNode(geometryNode, parent)
 	{
 		var node = new PointCloudOctreeNode();
-
 		var sceneNode = new THREE.Points(geometryNode.geometry, this.material);
 		sceneNode.name = geometryNode.name;
 		sceneNode.position.copy(geometryNode.boundingBox.min);
 		sceneNode.frustumCulled = true;
-		sceneNode.onBeforeRender = (_this, scene, camera, geometry, material, group) =>
+		sceneNode.onBeforeRender = (renderer, scene, camera, geometry, material, group) =>
 		{
-			if(material.program)
+			var vnStart = null;
+			if(this.visibleNodeTextureOffsets)
 			{
-				_this.getContext().useProgram(material.program.program);
-
-				if(material.program.getUniforms().map.level)
-				{
-					var level = geometryNode.getLevel();
-					material.uniforms.level.value = level;
-					material.program.getUniforms().map.level.setValue(_this.getContext(), level);
-				}
-
-				if(this.visibleNodeTextureOffsets && material.program.getUniforms().map.vnStart)
-				{
-					var vnStart = this.visibleNodeTextureOffsets.get(node);
-					material.uniforms.vnStart.value = vnStart;
-					material.program.getUniforms().map.vnStart.setValue(_this.getContext(), vnStart);
-				}
-
-				if(material.program.getUniforms().map.pcIndex)
-				{
-					var i = node.pcIndex ? node.pcIndex : this.visibleNodes.indexOf(node);
-					material.uniforms.pcIndex.value = i;
-					material.program.getUniforms().map.pcIndex.setValue(_this.getContext(), i);
-				}
+				vnStart = this.visibleNodeTextureOffsets.get(node);
 			}
-			// Since we are handling rendering our selves, instruct ThreeJS to not
-			// draw any of the points during 'regular' rendering
-			geometry.setDrawRange(0, 0);
+
+			var pcIndex = node.pcIndex ? node.pcIndex : this.visibleNodes.indexOf(node);
+			var level = geometryNode.getLevel();
+	
+			material.uniforms.level.value = level;
+			material.uniforms.vnStart.value = vnStart;
+			material.uniforms.uPCIndex.value = pcIndex;
+			this.updateMaterial(material, camera, renderer);
 		};
 
 		node.geometryNode = geometryNode;
@@ -296,15 +280,20 @@ class PointCloudOctree extends PointCloudTree
 		}
 	}
 
-	updateMaterial(material, visibleNodes, camera, renderer)
+	updateMaterial(material, camera, renderer)
 	{
-		material.fov = camera.fov * (Math.PI / 180);
-		material.screenWidth = renderer.domElement.clientWidth;
-		material.screenHeight = renderer.domElement.clientHeight;
-		material.spacing = this.pcoGeometry.spacing * Math.max(this.scale.x, this.scale.y, this.scale.z);
-		material.near = camera.near;
-		material.far = camera.far;
-		material.uniforms.octreeSize.value = this.pcoGeometry.boundingBox.getSize(new THREE.Vector3()).x;
+		var octtreeSpacing = this.pcoGeometry.spacing * Math.max(this.scale.x, this.scale.y, this.scale.z);
+		var octreeSize = this.pcoGeometry.boundingBox.getSize(new THREE.Vector3()).x;
+
+		material.uniforms.fov.value = camera.fov * (Math.PI / 180);
+		material.uniforms.uScreenWidth.value = renderer.domElement.clientWidth;
+		material.uniforms.uScreenHeight.value = renderer.domElement.clientHeight;
+		material.uniforms.uOctreeSpacing.value = octtreeSpacing;
+		material.uniforms.near.value = camera.near;
+		material.uniforms.far.value = camera.far;
+		material.uniforms.octreeSize.value = octreeSize;
+
+		material.uniformsNeedUpdate  = true;
 	}
 
 	computeVisibilityTextureData(nodes, camera)
@@ -378,9 +367,6 @@ class PointCloudOctree extends PointCloudTree
 					children.push(child);
 				}
 			}
-
-			var spacing = node.geometryNode.estimatedSpacing;
-			var isLeafNode;
 
 			data[i * 4 + 0] = 0;
 			data[i * 4 + 1] = 0;
@@ -737,7 +723,6 @@ class PointCloudOctree extends PointCloudTree
 	 */
 	pick(viewer, camera, ray, params = {})
 	{
-
 		var renderer = viewer.renderer;
 		var pRenderer = viewer.pRenderer;
 
@@ -746,7 +731,6 @@ class PointCloudOctree extends PointCloudTree
 		var getVal = (a, b) => a !== undefined ? a : b;
 
 		var pickWindowSize = getVal(params.pickWindowSize, 17);
-		var pickOutsideClipRegion = getVal(params.pickOutsideClipRegion, false);
 
 		var size = renderer.getSize(new THREE.Vector3());
 
@@ -797,24 +781,10 @@ class PointCloudOctree extends PointCloudTree
 		pickMaterial.uniforms.minSize.value = this.material.uniforms.minSize.value;
 		pickMaterial.uniforms.maxSize.value = this.material.uniforms.maxSize.value;
 		pickMaterial.classification = this.material.classification;
-		if(params.pickClipped)
-		{
-			pickMaterial.clipBoxes = this.material.clipBoxes;
-			if(this.material.clipTask === ClipTask.HIGHLIGHT)
-			{
-				pickMaterial.clipTask = ClipTask.NONE;
-			}
-			else
-			{
-				pickMaterial.clipTask = this.material.clipTask;
-			}
-		}
-		else
-		{
-			pickMaterial.clipBoxes = [];
-		}
+		pickMaterial.clippingPlanes = this.material.clippingPlanes;
+		pickMaterial.clipping = this.material.clipping;
 
-		this.updateMaterial(pickMaterial, nodes, camera, renderer);
+		this.updateMaterial(pickMaterial, camera, renderer);
 
 		pickState.renderTarget.setSize(width, height);
 

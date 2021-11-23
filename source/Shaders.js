@@ -100,11 +100,6 @@ varying vec3 vViewPosition;
 varying float vRadius;
 varying float vPointSize;
 
-float round(float number)
-{
-	return floor(number + 0.5);
-}
-
 //---------------------
 //OCTREE
 //---------------------

@@ -165,11 +165,10 @@ class PointCloudMaterial extends THREE.ShaderMaterial
 
 	onBeforeCompile(shader, renderer)
 	{
-		console.log('compile', shader);
 		if(renderer.capabilities.logarithmicDepthBuffer)
 		{
 			this.defines = { ...this.defines, USE_LOGDEPTHBUF: true, USE_LOGDEPTHBUF_EXT: true, EPSILON: 1e-6 };
-		} 
+		}
 	}
 
 	getDefines()

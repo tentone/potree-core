@@ -100,7 +100,8 @@ varying vec3 vViewPosition;
 varying float vRadius;
 varying float vPointSize;
 
-float round(float number)
+// The round() function is not available in WebGL 1.0
+float myRound(float number)
 {
 	return floor(number + 0.5);
 }
@@ -203,16 +204,16 @@ float round(float number)
 			
 			vec3 index3d = (position-offset) / nodeSizeAtLevel;
 			index3d = floor(index3d + 0.5);
-			int index = int(round(4.0 * index3d.x + 2.0 * index3d.y + index3d.z));
-			
+			int index = int(myRound(4.0 * index3d.x + 2.0 * index3d.y + index3d.z));
+
 			vec4 value = texture2D(visibleNodes, vec2(float(iOffset) / 2048.0, 0.0));
-			int mask = int(round(value.r * 255.0));
+			int mask = int(myRound(value.r * 255.0));
 
 			if(isBitSet(mask, index))
 			{
 				//there are more visible child nodes at this position
-				int advanceG = int(round(value.g * 255.0)) * 256;
-				int advanceB = int(round(value.b * 255.0));
+				int advanceG = int(myRound(value.g * 255.0)) * 256;
+				int advanceB = int(myRound(value.b * 255.0));
 				int advanceChild = numberOfOnes(mask, index - 1);
 				int advance = advanceG + advanceB + advanceChild;
 
@@ -246,10 +247,10 @@ float round(float number)
 			
 			vec3 index3d = (position-offset) / nodeSizeAtLevel;
 			index3d = floor(index3d + 0.5);
-			int index = int(round(4.0 * index3d.x + 2.0 * index3d.y + index3d.z));
-			
+			int index = int(myRound(4.0 * index3d.x + 2.0 * index3d.y + index3d.z));
+
 			vec4 value = texture2D(visibleNodes, vec2(float(iOffset) / 2048.0, 0.0));
-			int mask = int(round(value.r * 255.0));
+			int mask = int(myRound(value.r * 255.0));
 			float spacingFactor = value.a;
 
 			if(i > 0.0)
@@ -260,8 +261,8 @@ float round(float number)
 			if(isBitSet(mask, index))
 			{
 				//there are more visible child nodes at this position
-				int advanceG = int(round(value.g * 255.0)) * 256;
-				int advanceB = int(round(value.b * 255.0));
+				int advanceG = int(myRound(value.g * 255.0)) * 256;
+				int advanceB = int(myRound(value.b * 255.0));
 				int advanceChild = numberOfOnes(mask, index - 1);
 				int advance = advanceG + advanceB + advanceChild;
 

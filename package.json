@@ -1,6 +1,6 @@
 {
   "name": "@cognite/potree-core",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Potree wrapper for threejs applications",
   "main": "dist/bundle.js",
   "repository": {
@@ -37,7 +37,7 @@
     "cross-var": "^1.1.0",
     "jsdoc": "^3.5.0",
     "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9",
+    "webpack-cli": "^4.9.1",
     "worker-loader": "^2.0.0"
   }
 }

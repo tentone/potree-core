@@ -39,7 +39,19 @@ module.exports = {
     new webpack.DefinePlugin({
       __VERSION__: JSON.stringify(package.version),
     }),
+    new webpack.container.ModuleFederationPlugin({
+      name: 'potree-core',
+      shared: {
+        'three': {
+          singleton: true,
+          eager: true,
+          strictVersion: false,
+          requiredVersion: package.peerDependencies['three'],
+        },
+      }
+    }),
   ],
 
+  externalsPresets: { node: true },
   externals: [nodeExternals()],
 };

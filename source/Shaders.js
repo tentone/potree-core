@@ -110,7 +110,7 @@ uniform sampler2D visibleNodes;
 uniform sampler2D gradient;
 uniform sampler2D classificationLUT;
 
-#if defined(num_clipplanes) && num_clipplanes > 0 
+#if defined(num_clipplanes) && num_clipplanes > 0
 
 uniform vec4 clipPlanes[num_clipplanes];
 
@@ -773,6 +773,7 @@ void main()
 {
 	if (isHiddenClassification() || isHiddenPointSourceID())
 	{
+		gl_Position = vec4(100.0, 100.0, 100.0, 1.0); // Outside clip space
 		return; // Note: 'discard' only supported in fragment shaders
 	}
 
@@ -804,7 +805,7 @@ void main()
 	vec4 clipPosition = modelMatrix * vec4( position, 1.0 );
 	if (isClipped(clipPosition.xyz)) {
 		gl_Position = vec4(100.0, 100.0, 100.0, 1.0); // Outside clip space
-	} 
+	}
 	doClipping();
 
 	#if defined num_clipspheres && num_clipspheres > 0

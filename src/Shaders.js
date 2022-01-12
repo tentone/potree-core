@@ -34,8 +34,6 @@ uniform mat4 uViewInv;
 
 uniform float uScreenWidth;
 uniform float uScreenHeight;
-// #define uScreenWidth 1107.0
-// #define uScreenHeight 774.0
 
 uniform float fov;
 uniform float near;
@@ -576,12 +574,12 @@ vec3 getColor()
 		color = getCompositeColor();
 	#endif
 
-	if (pointSourceID == selectedPointSourceID)
-	{
-		color[0] = min(color[0] + 0.2, 1.0);
-		color[1] = min(color[1] + 0.2, 1.0);
-		color[2] = min(color[2] + 0.2, 1.0);
-	}
+	// if (pointSourceID == selectedPointSourceID)
+	// {
+	// 	color[0] = min(color[0] + 0.2, 1.0);
+	// 	color[1] = min(color[1] + 0.2, 1.0);
+	// 	color[2] = min(color[2] + 0.2, 1.0);
+	// }
 
 	return color;
 }

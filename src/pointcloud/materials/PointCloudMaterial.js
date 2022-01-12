@@ -6,8 +6,35 @@ import { HelperUtils } from "../../utils/HelperUtils.js";
 import { Gradients } from "../../Gradients.js";
 import { Shaders } from "../../Shaders.js";
 import { TreeType, PointColorType, PointSizeType, PointShape, Classification, PointSelectionType } from "../../Potree.js";
+import { PointCloudOctree } from '../PointCloudOctree.js';
 
 class PointCloudMaterial extends THREE.RawShaderMaterial {
+
+	static makeOnBeforeRender(octree, node, pcIndex) {
+		return (_renderer, _scene, _camera, _geometry, material) => {
+			const pointCloudMaterial = material;
+			const materialUniforms = pointCloudMaterial.uniforms;
+
+			materialUniforms.level.value = node.level;
+			// materialUniforms.isLeafNode.value = node.isLeafNode;
+
+			const vnStart = pointCloudMaterial.visibleNodeTextureOffsets.get(node.name);
+			if (vnStart !== undefined) {
+				materialUniforms.vnStart.value = vnStart;
+			}
+
+			materialUniforms.pcIndex.value =
+				pcIndex !== undefined ? pcIndex : octree.visibleNodes.indexOf(node);
+
+			// Note: when changing uniforms in onBeforeRender, the flag uniformsNeedUpdate has to be
+			// set to true to instruct ThreeJS to upload them. See also
+			// https://github.com/mrdoob/three.js/issues/9870#issuecomment-368750182.
+
+			// Remove the cast to any after updating to Three.JS >= r113
+			material.uniformsNeedUpdate = true;
+		};
+	}
+
 	constructor(parameters = {}) {
 		super();
 

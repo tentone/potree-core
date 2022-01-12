@@ -1,7 +1,7 @@
 {
   "name": "potree-core",
-  "version": "1.4.3",
-  "description": "Potree wrapper for threejs applications",
+  "version": "1.4.4",
+  "description": "Potree wrapper for Three.js applications",
   "main": "dist/index.js",
   "repository": {
     "type": "git",

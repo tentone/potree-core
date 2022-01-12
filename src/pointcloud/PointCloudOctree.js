@@ -426,51 +426,20 @@ class PointCloudOctree extends PointCloudTree {
 		return intersects;
 	}
 
-	nodesOnRay(nodes, ray, params = {}) {
+	nodesOnRay(nodes, ray) {
 		let nodesOnRay = [];
 		let _ray = ray.clone();
 
 		for (let i = 0; i < nodes.length; i++) {
 			let node = nodes[i];
-			let sphere = node.getBoundingSphere().clone().applyMatrix4(node.sceneNode.matrixWorld);
-			// let box = node.getBoundingBox().clone().applyMatrix4(node.sceneNode.matrixWorld);
+			let sphere = node.getBoundingSphere().clone().applyMatrix4(this.matrixWorld);
 
-			if (_ray.intersectsSphere(sphere)) { // || _ray.intersectsBox(box)) {
-				node.distanceToOrigin = sphere.center.distanceTo(_ray.origin);
+			if (_ray.intersectsSphere(sphere)) {
 				nodesOnRay.push(node);
-
-				if (params.recursive && node.children) {
-					const children = Object.values(node.children).filter(node => node && node.sceneNode);
-					if (children.length) {
-						const nodes = this.nodesOnRay(children, _ray, params);
-						nodesOnRay.push(...nodes);
-					}
-				}
 			}
 		}
 
-		return nodesOnRay.sort((a, b) => a.distanceToOrigin - b.distanceToOrigin);
-	}
-
-	pointsOnRay(nodes, ray, params = {}) {
-		const nodesOnRay = this.nodesOnRay(nodes, ray, params);
-		const pointsOnRay = [];
-		const maxDistance = params.maxDistance || 0.5;
-
-		params = Object.assign({
-			attributeFilter: (key, value) => {
-				switch (key) {
-					case 'position': return ray.distanceToPoint(value) <= maxDistance;
-					default: return true;
-				}
-			}
-		}, params);
-
-		for (const node of nodesOnRay) {
-			pointsOnRay.push(...HelperUtils.nodeToPoints(node, params));
-		}
-
-		return pointsOnRay.sort((a, b) => a.distanceToRay - b.distanceToRay);
+		return nodesOnRay;
 	}
 
 	updateMatrixWorld(force) {
@@ -662,31 +631,30 @@ class PointCloudOctree extends PointCloudTree {
 	};
 
 	/**
-	 * params.pickWindowSize:
-	 * 	Look for points inside a pixel window of this size.
-	 * 	Use odd values: 1, 3, 5, ...
+	 * Pick the point(s) closest to the specified pointer position
 	 *
-	 * TODO: only draw pixels that are actually read with readPixels().
+	 * @param {THREE.WebGLRenderer} renderer
+	 * @param {Potree.BasicGroup} pRenderer
+	 * @param {THREE.Camera} camera
+	 * @param {THREE.Ray} ray
+	 * @param {*} params	{ x, y }
+	 * @returns
 	 */
-	pick(viewer, camera, ray, params = {}) {
-
-		let renderer = viewer.renderer;
-		let pRenderer = viewer.pRenderer;
+	pick(renderer, pRenderer, camera, ray, params = {}) {
 
 		performance.mark("pick-start");
 
 		let getVal = (a, b) => a !== undefined ? a : b;
 
-		let pickWindowSize = getVal(params.pickWindowSize, 15);
-		let pickOutsideClipRegion = getVal(params.pickOutsideClipRegion, false);
+		// Ensure pick window is an odd value
+		let pickWindowSize = ~~((params.pickWindowSize || 17) / 2) + 1;
 
 		let size = renderer.getSize(new THREE.Vector2());
-		let width = Math.ceil(getVal(params.width, size.x));
-		let height = Math.ceil(getVal(params.height, size.y));
+		let width = Math.ceil(getVal(params.width, size.width));
+		let height = Math.ceil(getVal(params.height, size.height));
 
-		let pointSizeType = getVal(params.pointSizeType, PointSizeType.FIXED); //this.material.pointSizeType);
-		let pointSize = getVal(params.pointSize, 8);
-		let pointShape = getVal(params.pointShape, PointShape.SQUARE);
+		let pointSizeType = getVal(params.pointSizeType, this.material.pointSizeType);
+		let pointSize = getVal(params.pointSize, this.material.size);
 
 		let nodes = this.nodesOnRay(this.visibleNodes, ray);
 
@@ -709,32 +677,38 @@ class PointCloudOctree extends PointCloudTree {
 				}
 			);
 
-			this.pickState = { renderTarget, material, scene };
+			this.pickState = {
+				renderTarget: renderTarget,
+				material: material,
+				scene: scene
+			};
 		};
 
 		let pickState = this.pickState;
 		let pickMaterial = pickState.material;
 
-		//Update pick material
-		pickMaterial.pointSizeType = pointSizeType;
-		pickMaterial.shape = pointShape;
+		{ // update pick material
+			pickMaterial.pointSizeType = pointSizeType;
+			pickMaterial.shape = this.material.shape;
 
-		pickMaterial.size = pointSize;
-		pickMaterial.uniforms.minSize.value = this.material.uniforms.minSize.value;
-		pickMaterial.uniforms.maxSize.value = this.material.uniforms.maxSize.value;
-		pickMaterial.classification = this.material.classification;
-		if (params.pickClipped) {
-			pickMaterial.clipBoxes = this.material.clipBoxes;
-			if (this.material.clipTask === ClipTask.HIGHLIGHT) {
-				pickMaterial.clipTask = ClipTask.NONE;
+			pickMaterial.size = pointSize;
+			pickMaterial.uniforms.minSize.value = this.material.uniforms.minSize.value;
+			pickMaterial.uniforms.maxSize.value = this.material.uniforms.maxSize.value;
+			pickMaterial.classification = this.material.classification;
+
+			if (params.pickClipped) {
+				pickMaterial.clipBoxes = this.material.clipBoxes;
+				if (this.material.clipTask === ClipTask.HIGHLIGHT) {
+					pickMaterial.clipTask = ClipTask.NONE;
+				} else {
+					pickMaterial.clipTask = this.material.clipTask;
+				}
 			} else {
-				pickMaterial.clipTask = this.material.clipTask;
+				pickMaterial.clipBoxes = [];
 			}
-		} else {
-			pickMaterial.clipBoxes = [];
-		}
 
-		this.updateMaterial(pickMaterial, nodes, camera, renderer);
+			this.updateMaterial(pickMaterial, nodes, camera, renderer);
+		}
 
 		pickState.renderTarget.setSize(width, height);
 
@@ -743,34 +717,35 @@ class PointCloudOctree extends PointCloudTree {
 		let gl = renderer.getContext();
 		gl.enable(gl.SCISSOR_TEST);
 		gl.scissor(
-			parseInt(pixelPos.x - (pickWindowSize - 1) / 2),
-			parseInt(pixelPos.y - (pickWindowSize - 1) / 2),
-			parseInt(pickWindowSize),
-			parseInt(pickWindowSize)
+			~~(pixelPos.x - (pickWindowSize - 1) / 2),
+			~~(pixelPos.y - (pickWindowSize - 1) / 2),
+			~~pickWindowSize,
+			~~pickWindowSize
 		);
 
 		renderer.state.buffers.depth.setTest(pickMaterial.depthTest);
 		renderer.state.buffers.depth.setMask(pickMaterial.depthWrite);
 		renderer.state.setBlending(THREE.NoBlending);
 
-		//Render
-		renderer.setRenderTarget(pickState.renderTarget);
-		gl.clearColor(0, 0, 0, 0);
-		renderer.clear(true, true, true);
+		{ // RENDER
+			renderer.setRenderTarget(pickState.renderTarget);
+			gl.clearColor(0, 0, 0, 0);
+			renderer.clear(true, true, true);
 
-		let tmp = this.material;
-		this.material = pickMaterial;
+			let tmp = this.material;
+			this.material = pickMaterial;
 
-		pRenderer.renderOctree(renderer, this, nodes, camera, pickState.renderTarget);
+			pRenderer.renderOctree(renderer, this, nodes, camera, pickState.renderTarget);
 
-		this.material = tmp;
+			this.material = tmp;
+		}
 
 		let clamp = (number, min, max) => Math.min(Math.max(min, number), max);
 
-		let x = parseInt(clamp(pixelPos.x - (pickWindowSize - 1) / 2, 0, width));
-		let y = parseInt(clamp(pixelPos.y - (pickWindowSize - 1) / 2, 0, height));
-		let w = parseInt(Math.min(x + pickWindowSize, width) - x);
-		let h = parseInt(Math.min(y + pickWindowSize, height) - y);
+		let x = ~~(clamp(pixelPos.x - (pickWindowSize - 1) / 2, 0, width));
+		let y = ~~(clamp(pixelPos.y - (pickWindowSize - 1) / 2, 0, height));
+		let w = ~~(Math.min(x + pickWindowSize, width) - x);
+		let h = ~~(Math.min(y + pickWindowSize, height) - y);
 
 		let pixelCount = w * h;
 		let buffer = new Uint8Array(4 * pixelCount);
@@ -820,21 +795,83 @@ class PointCloudOctree extends PointCloudTree {
 			}
 		}
 
+		if (params.debug) { // open iframe showing picked pixels
+			let iframe = document.querySelector('#pickIframe');
+
+			if (!iframe) {
+				iframe = document.createElement('IFRAME');
+				iframe.id = 'pickIframe';
+				iframe.style.width = w + 'px';
+				iframe.style.height = h + 'px';
+				iframe.style.position = 'fixed';
+				iframe.style.zIndex = '99999';
+				iframe.style.top = '1px';
+				iframe.style.left = '1px';
+				iframe.style.transform = 'scaleY(-1)';
+				iframe.frameBorder = '0';
+				document.body.append(iframe);
+			}
+
+			let img = HelperUtils.pixelsArrayToImage(buffer, w, h);
+			iframe.src = img.src;
+		}
+
 		for (let hit of hits) {
+			let point = {};
+
 			if (!nodes[hit.pcIndex]) {
 				return null;
 			}
 
-			let point = HelperUtils.nodeToPoint(node, hit.pcIndex);
+			let node = nodes[hit.pcIndex];
+			let pc = node.sceneNode;
+			let geometry = node.geometryNode.geometry;
+
+			for (let attributeName in geometry.attributes) {
+				let attribute = geometry.attributes[attributeName];
+
+				if (attributeName === 'position') {
+					let x = attribute.array[3 * hit.pIndex + 0];
+					let y = attribute.array[3 * hit.pIndex + 1];
+					let z = attribute.array[3 * hit.pIndex + 2];
+
+					let position = new THREE.Vector3(x, y, z);
+					position.applyMatrix4(pc.matrixWorld);
+
+					point[attributeName] = position;
+				} else if (attributeName === 'indices') {
+				} else {
+					let values = attribute.array.slice(attribute.itemSize * hit.pIndex, attribute.itemSize * (hit.pIndex + 1));
+					let value;
+
+					if (attribute.potree) {
+						const { scale, offset } = attribute.potree;
+						values = values.map(v => v / scale + offset);
+					}
+
+					switch (attributeName) {
+						case 'color':
+							const rgb = [...values].map(v => v / 255);
+							value = new THREE.Color(...rgb);
+							break;
+						default:
+							value = values.length === 1 ? values[0] : values;
+							break;
+					}
+
+					point[attributeName] = value;
+				}
+
+			}
+
 			hit.point = point;
 		}
 
-		performance.measure("pick", "pick-start");
+		performance.mark("pick-end");
+		performance.measure("pick", "pick-start", "pick-end");
 
 		if (params.all) {
-			return hits
-				.sort((a, b) => a.distanceToCenter - b.distanceToCenter)
-				.map(hit => hit.point);
+			return hits.map(hit => hit.point);
 		} else {
 			if (hits.length === 0) {
 				return null;
@@ -843,39 +880,6 @@ class PointCloudOctree extends PointCloudTree {
 			}
 		}
 
-	};
-
-	/**
-	 * Looks for points in close proximity to the specified Ray, anywhere along
-	 * the entire length of the Ray.
-	 *
-	 * By default, all points within params.maxDistance (default: 0.5) of the Ray
-	 * are returned. Setting params.firstHitOnly to true will only return the
-	 * nearest point to the Ray's origin.
-	 */
-	pickAll(ray, params = {}) {
-		performance.mark('pickAll-start');
-
-		// TODO Optimise this!
-		const pointsOnRay = this.pointsOnRay(
-			this.visibleNodes,
-			ray,
-			params.maxDistance || 0.5,
-			params.recursive,
-		);
-
-		performance.measure('pickAll', 'pickAll-start');
-
-		if (params.firstHitOnly) {
-			const point = pointsOnRay
-				.map(point => Object.assign(point, { distanceToOrigin: point.position.distanceTo(ray.origin) }))
-				.sort((a, b) => a.distanceToOrigin - b.distanceToOrigin)
-				.shift();
-
-			return point;
-		}
-
-		return pointsOnRay;
 	}
 
 	*getFittedBoxGen(boxNode) {

@@ -178,6 +178,76 @@ class BasicGroup extends THREE.Mesh {
 
     return height;
   }
-};
+
+  /**
+   * Returns the nearest point to the specified {x,y} pixel position,
+   * e.g. mouse pointer coordinated, or null, if none
+   *
+   * @param {*} pixelPosition
+   * @param {THREE.Camera} camera
+   * @param {THREE.WebGLRenderer} renderer
+   * @param {Potree.PointCloudOctree[]} pointClouds
+   * @param {*} params
+   * @returns
+   */
+  getPointAt(pixelPosition, camera, renderer, params = {}) {
+    let pointClouds = this.pointclouds;
+    let pRenderer = this;
+
+    let normalisedPosition = {
+      x: (pixelPosition.x / renderer.domElement.offsetWidth) * 2 - 1,
+      y: -(pixelPosition.y / renderer.domElement.offsetHeight) * 2 + 1
+    };
+
+    let pickParams = {};
+
+    if (params.pickClipped) {
+      pickParams.pickClipped = params.pickClipped;
+    }
+
+    pickParams.debug = params.debug;
+
+    pickParams.x = pixelPosition.x;
+    pickParams.y = renderer.domElement.offsetHeight - pixelPosition.y;
+
+    let raycaster = new THREE.Raycaster();
+    raycaster.setFromCamera(normalisedPosition, camera);
+    let ray = raycaster.ray;
+
+    let selectedPointcloud = null;
+    let closestDistance = Infinity;
+    let closestIntersection = null;
+    let closestPoint = null;
+
+    for (let pointCloud of pointClouds) {
+      let point = pointCloud.pick(renderer, pRenderer, camera, ray, pickParams);
+
+      if (!point) {
+        continue;
+      }
+
+      let distance = camera.position.distanceTo(point.position);
+
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        selectedPointcloud = pointCloud;
+        closestIntersection = point.position;
+        closestPoint = point;
+      }
+    }
+
+    if (selectedPointcloud) {
+      return {
+        location: closestIntersection,
+        distance: closestDistance,
+        pointcloud: selectedPointcloud,
+        point: closestPoint,
+        ray,
+      };
+    } else {
+      return null;
+    }
+  };
+}
 
 export { BasicGroup };

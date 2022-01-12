@@ -1,8 +1,10 @@
 import * as THREE from 'three';
+import { PointCloudOctree, PointCloudOctreeNode } from '../PointCloudOctree';
 
-export class PointCloudMaterial {
+export class PointCloudMaterial extends THREE.RawShaderMaterial {
     static generateGradientTexture(gradient: any): any;
     static generateClassificationTexture(classification: any): any;
+    static makeOnBeforeRender(octree: PointCloudOctree, node: PointCloudOctreeNode, pcIndex?: number): (renderer: THREE.WebGLRenderer, scene: THREE.Scene, camera: THREE.Camera, geometry: THREE.BufferGeometry, material: THREE.Material, group: THREE.Group) => void;
     constructor(parameters?: {});
     visibleNodesTexture: any;
     _pointSizeType: number;
@@ -360,8 +362,8 @@ export class PointCloudMaterial {
     get near(): number;
     set far(arg: number);
     get far(): number;
-    set opacity(arg: number);
-    get opacity(): number;
+    // set opacity(arg: number);
+    // get opacity(): number;
     set pointColorType(arg: number);
     get pointColorType(): number;
     set pointSizeType(arg: number);

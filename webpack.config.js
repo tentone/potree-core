@@ -8,7 +8,7 @@ function resolve(name) {
 }
 
 module.exports = {
-  entry: path.resolve(__dirname, 'source/Main.js'),
+  entry: path.resolve(__dirname, 'src/Main.js'),
   devtool: 'inline-source-map',
   mode: 'production',
 
@@ -29,7 +29,7 @@ module.exports = {
       {
         test: /Worker\.js$/,
         loader: 'worker-loader',
-        include: [resolve('source')],
+        include: [resolve('src')],
         options: { inline: 'no-fallback' },
       },
     ],

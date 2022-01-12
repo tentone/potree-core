@@ -173,6 +173,7 @@ class Group extends BasicGroup {
     let worldView = new THREE.Matrix4();
     let mat4holder = new Float32Array(16);
 
+    let pcIndex = 0;
     for (let node of nodes) {
       if (Global.debug.allowedNodes !== undefined) {
         if (!Global.debug.allowedNodes.includes(node.name)) {
@@ -269,40 +270,7 @@ class Group extends BasicGroup {
 
       shader.setUniform1f("uLevel", level);
       shader.setUniform1f("uNodeSpacing", node.geometryNode.estimatedSpacing);
-      shader.setUniform1f("uPCIndex", material.clipPolygons.length);
-
-      /*
-      if(shadowMaps.length > 0)
-      {
-        let lShadowMap = shader.uniformLocations["uShadowMap[0]"];
-
-        shader.setUniform3f("uShadowColor", material.uniforms.uShadowColor.value);
-
-        let bindingStart = 5;
-        let bindingPoints = new Array(shadowMaps.length).fill(bindingStart).map((a, i) => (a + i));
-        gl.uniform1iv(lShadowMap, bindingPoints);
-
-        for(let i = 0; i < shadowMaps.length; i++)
-        {
-          let shadowMap = shadowMaps[i];
-          let bindingPoint = bindingPoints[i];
-          let glTexture = renderer.properties.get(shadowMap.target.texture).__webglTexture;
-
-          gl.activeTexture(gl[`TEXTURE${bindingPoint}`]);
-          gl.bindTexture(gl.TEXTURE_2D, glTexture);
-        }
-
-        let worldViewMatrices = shadowMaps.map(sm => sm.camera.matrixWorldInverse).map(view => new THREE.Matrix4().multiplyMatrices(view, world))
-
-        let flattenedMatrices = [].concat(...worldViewMatrices.map(c => c.elements));
-        let lWorldView = shader.uniformLocations["uShadowWorldView[0]"];
-        gl.uniformMatrix4fv(lWorldView, false, flattenedMatrices);
-
-        flattenedMatrices = [].concat(...shadowMaps.map(sm => sm.camera.projectionMatrix.elements));
-        let lProj = shader.uniformLocations["uShadowProj[0]"];
-        gl.uniformMatrix4fv(lProj, false, flattenedMatrices);
-      }
-      */
+      shader.setUniform1f("uPCIndex", pcIndex);
 
       let geometry = node.geometryNode.geometry;
       let webglBuffer = null;
@@ -322,6 +290,8 @@ class Group extends BasicGroup {
 
       gl.bindVertexArray(webglBuffer.vao);
       gl.drawArrays(gl.POINTS, 0, webglBuffer.numElements);
+
+      pcIndex++;
     }
 
     gl.bindVertexArray(null);
@@ -353,8 +323,7 @@ class Group extends BasicGroup {
     if (!this.shaders.has(material)) {
       shader = new Shader(gl, "pointcloud", material.vertexShader, material.fragmentShader);
       this.shaders.set(material, shader);
-    }
-    else {
+    } else {
       shader = this.shaders.get(material);
     }
 
@@ -460,28 +429,6 @@ class Group extends BasicGroup {
       let lClipBoxes = shader.uniformLocations["clipBoxes[0]"];
       gl.uniformMatrix4fv(lClipBoxes, false, material.uniforms.clipBoxes.value);
     }
-
-    //Clispheres
-    /*if(material.clipSpheres && material.clipSpheres.length > 0)
-    {
-      let clipSpheres = material.clipSpheres;
-      let matrices = [];
-      for(let clipSphere of clipSpheres)
-      {
-        let clipToWorld = clipSphere.matrixWorld;
-        let viewToWorld = camera.matrixWorld
-        let worldToClip = new THREE.Matrix4().getInverse(clipToWorld);
-
-        let viewToClip = new THREE.Matrix4().multiplyMatrices(worldToClip, viewToWorld);
-
-        matrices.push(viewToClip);
-      }
-
-      let flattenedMatrices = [].concat(...matrices.map(matrix => matrix.elements));
-
-      let lClipSpheres = shader.uniformLocations["uClipSpheres[0]"];
-      gl.uniformMatrix4fv(lClipSpheres, false, flattenedMatrices);
-    }*/
 
     shader.setUniform1f("size", material.size);
     shader.setUniform1f("maxSize", material.uniforms.maxSize.value);

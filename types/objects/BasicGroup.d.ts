@@ -15,6 +15,8 @@ export class BasicGroup extends Mesh {
     nodeSize: number;
     pointBudget: number;
     nodeLoadRate: number;
+    geometry: any;
+    visible: boolean;
     /**
      * Empty raycast method to avoid getting valid collision detection with the box geometry attached.
      */
@@ -35,7 +37,6 @@ export class BasicGroup extends Mesh {
      * The geometry its not visible and its only used for frustum culling.
      */
     recalculateBoxGeometry(): void;
-    geometry: any;
     /**
      * Add an object as children of this scene.
      *
@@ -56,5 +57,9 @@ export class BasicGroup extends Mesh {
      * Estimate the point cloud height at a given position.
      */
     estimateHeightAt(position: any): any;
-    visible: boolean;
+    /**
+     * Returns the nearest point to the specified {x,y} pixel position,
+     * e.g. mouse pointer coordinated, or null, if none
+     */
+    getPointAt(pixelPosition: { x: number, y: number; }, camera: THREE.Camera, renderer: THREE.WebGLRenderer, params?: any): any;
 }

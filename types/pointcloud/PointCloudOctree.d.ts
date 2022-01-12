@@ -88,16 +88,7 @@ export class PointCloudOctree extends PointCloudTree {
      * TODO: only draw pixels that are actually read with readPixels().
      *
      */
-    pick(viewer: { renderer: THREE.WebGLRenderer, pRenderer: BasicGroup; }, camera: any, ray: any, params?: {}): any;
-    /**
-     * Looks for points in close proximity to the specified Ray, anywhere along
-     * the entire length of the Ray.
-     *
-     * By default, all points within params.maxDistance (default: 0.5) of the Ray
-     * are returned. Setting params.firstHitOnly to true will only return the
-     * nearest point to the Ray's origin.
-     */
-    pickAll(ray: THREE.Ray, params?: { firstHitOnly?: boolean; maxDistance?: number; recursive?: boolean; });
+    pick(renderer: THREE.WebGLRenderer, pRenderer: BasicGroup, camera: any, ray: any, params?: {}): any;
     pickState: {
         renderTarget: any;
         material: PointCloudMaterial;

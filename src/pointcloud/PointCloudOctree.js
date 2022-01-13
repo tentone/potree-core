@@ -690,6 +690,8 @@ class PointCloudOctree extends PointCloudTree {
 		{ // update pick material
 			pickMaterial.pointSizeType = pointSizeType;
 			pickMaterial.shape = this.material.shape;
+			pickMaterial.hiddenClassifications = this.material.hiddenClassifications;
+			pickMaterial.hiddenPointSourceIDs = this.material.hiddenPointSourceIDs;
 
 			pickMaterial.size = pointSize;
 			pickMaterial.uniforms.minSize.value = this.material.uniforms.minSize.value;

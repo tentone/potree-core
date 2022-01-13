@@ -574,12 +574,14 @@ vec3 getColor()
 		color = getCompositeColor();
 	#endif
 
-	// if (pointSourceID == selectedPointSourceID)
-	// {
-	// 	color[0] = min(color[0] + 0.2, 1.0);
-	// 	color[1] = min(color[1] + 0.2, 1.0);
-	// 	color[2] = min(color[2] + 0.2, 1.0);
-	// }
+	#ifndef color_type_point_index
+		if (pointSourceID == selectedPointSourceID)
+		{
+			color[0] = min(color[0] + 0.2, 1.0);
+			color[1] = min(color[1] + 0.2, 1.0);
+			color[2] = min(color[2] + 0.2, 1.0);
+		}
+	#endif
 
 	return color;
 }

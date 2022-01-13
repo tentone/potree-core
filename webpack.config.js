@@ -30,7 +30,10 @@ module.exports = {
         test: /Worker\.js$/,
         loader: 'worker-loader',
         include: [resolve('src')],
-        options: { inline: 'no-fallback' },
+        options: {
+          inline: 'no-fallback',
+          publicPath: '/workers/'
+        },
       },
     ],
   },
@@ -54,4 +57,9 @@ module.exports = {
 
   externalsPresets: { node: true },
   externals: [nodeExternals()],
+
+  stats: {
+    children: true,
+  },
+
 };

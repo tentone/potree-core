@@ -1,8 +1,8 @@
 "use strict";
 
 // Force workers to be included
-import BinaryDecoderWorker from "../workers/BinaryDecoderWorker";
-// import LASLAZWorker from "../workers/LASLAZWorker";
+// import BinaryDecoderWorker from "../workers/BinaryDecoderWorker";
+import LASLAZWorker from "../workers/LASLAZWorker";
 import LASDecoderWorker from "../workers/LASDecoderWorker";
 // import GreyhoundBinaryDecoderWorker from "../workers/GreyhoundBinaryDecoderWorker";
 // import DEMWorker from "../workers/DEMWorker";
@@ -31,12 +31,16 @@ class WorkerManager {
 
 		switch (type) {
 			case 0:
-				return new BinaryDecoderWorker();
+				// return new BinaryDecoderWorker();
+				throw new Error('BinaryDecoderWorker not implemented');
 			case 1:
-				// return new LASLAZWorker();
-				throw new Error('LASLAZWorker not implemented');
+				return new LASLAZWorker();
+			// return new Worker(new URL('../workers/LASLAZWorker.js', import.meta.url));
+			// throw new Error('LASLAZWorker not implemented');
 			case 2:
 				return new LASDecoderWorker();
+			// return new Worker(new URL('../workers/LASDecoderWorker.js', import.meta.url));
+			// throw new Error('LASDecoderWorker not implemented');
 			case 3:
 				// return new GreyhoundBinaryDecoderWorker();
 				throw new Error('GreyhoundBinaryDecoderWorker not implemented');

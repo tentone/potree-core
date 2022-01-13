@@ -730,14 +730,17 @@ class PointCloudOctree extends PointCloudTree {
 		renderer.state.setBlending(THREE.NoBlending);
 
 		{ // RENDER
-			renderer.setRenderTarget(pickState.renderTarget);
-			gl.clearColor(0, 0, 0, 0);
-			renderer.clear(true, true, true);
-
 			let tmp = this.material;
-			this.material = pickMaterial;
 
-			pRenderer.renderOctree(renderer, this, nodes, camera, pickState.renderTarget);
+			try {
+				renderer.setRenderTarget(pickState.renderTarget);
+				gl.clearColor(0, 0, 0, 0);
+				renderer.clear(true, true, true);
+				this.material = pickMaterial;
+				pRenderer.renderOctree(renderer, this, nodes, camera, pickState.renderTarget);
+			} catch {
+				// TODO Handle render errors
+			}
 
 			this.material = tmp;
 		}

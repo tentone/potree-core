@@ -220,7 +220,13 @@ class BasicGroup extends THREE.Mesh {
     let closestPoint = null;
 
     for (let pointCloud of pointClouds) {
-      let point = pointCloud.pick(renderer, pRenderer, camera, ray, pickParams);
+      let point;
+
+      try {
+        point = pointCloud.pick(renderer, pRenderer, camera, ray, pickParams);
+      } catch (e) {
+        // We typically end up here if the point cloud hasn't been rendered yet, so
+      }
 
       if (!point) {
         continue;

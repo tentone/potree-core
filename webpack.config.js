@@ -30,10 +30,7 @@ module.exports = {
         test: /Worker\.js$/,
         loader: 'worker-loader',
         include: [resolve('src')],
-        options: {
-          inline: 'no-fallback',
-          publicPath: '/workers/'
-        },
+        options: { inline: 'no-fallback' },
       },
     ],
   },

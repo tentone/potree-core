@@ -167,7 +167,6 @@ class Group extends BasicGroup {
   renderNodes(renderer, octree, nodes, visibilityTextureData, camera, shader) {
     let gl = renderer.getContext();
     let material = octree.material;
-    let shadowMaps = [];
     let view = camera.matrixWorldInverse;
 
     let worldView = new THREE.Matrix4();

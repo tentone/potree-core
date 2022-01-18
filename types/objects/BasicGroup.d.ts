@@ -18,6 +18,10 @@ export class BasicGroup extends Mesh {
     geometry: any;
     visible: boolean;
     /**
+     * If false, attached box geometry size will be reduced to 0 to prevent it erasing non-Potree objects
+     */
+    boxGeometryEnabled: boolean;
+    /**
      * Empty raycast method to avoid getting valid collision detection with the box geometry attached.
      */
     raycast(raycaster: any, intersects: any): void;

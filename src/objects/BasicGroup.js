@@ -27,6 +27,9 @@ class BasicGroup extends THREE.Mesh {
     this.nodeSize = 30;
     this.pointBudget = 1e10; //TODO <NOT USED>
     this.nodeLoadRate = 2; //TODO <NOT USED>
+
+    // Added to prevent transparent non-Potree objects within box geometry being erased
+    this.boxGeometryEnabled = false;
   }
 
   /**
@@ -60,18 +63,21 @@ class BasicGroup extends THREE.Mesh {
    * The geometry its not visible and its only used for frustum culling.
    */
   recalculateBoxGeometry() {
-    var box = this.getBoundingBox();
+    if (this.boxGeometryEnabled) {
+      var box = this.getBoundingBox();
 
-    var size = box.getSize(new THREE.Vector3());
-    var center = box.getCenter(new THREE.Vector3());
+      var center = box.getCenter(new THREE.Vector3());
+      var matrix = new THREE.Matrix4();
+      matrix.makeTranslation(center.x, -center.z, center.y);
 
-    var matrix = new THREE.Matrix4();
-    matrix.makeTranslation(center.x, -center.z, center.y);
+      var size = box.getSize(new THREE.Vector3());
+      var geometry = new THREE.BoxBufferGeometry(size.x, size.z, size.y);
+      geometry.applyMatrix4(matrix);
 
-    var geometry = new THREE.BoxBufferGeometry(size.x, size.z, size.y);
-    geometry.applyMatrix4(matrix);
-
-    this.geometry = geometry;
+      this.geometry = geometry;
+    } else {
+      this.geometry = new THREE.BoxBufferGeometry(0, 0, 0);
+    }
   }
 
   /**
@@ -225,6 +231,7 @@ class BasicGroup extends THREE.Mesh {
       try {
         point = pointCloud.pick(renderer, pRenderer, camera, ray, pickParams);
       } catch (e) {
+        console.warn("PICK FAILED!", e);
         // We typically end up here if the point cloud hasn't been rendered yet, so
       }
 

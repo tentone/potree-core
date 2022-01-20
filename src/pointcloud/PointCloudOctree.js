@@ -668,20 +668,13 @@ class PointCloudOctree extends PointCloudTree {
 			let material = new PointCloudMaterial();
 			material.pointColorType = PointColorType.POINT_INDEX;
 
-			let renderTarget = new THREE.WebGLRenderTarget(
-				1, 1,
-				{
-					minFilter: THREE.LinearFilter,
-					magFilter: THREE.NearestFilter,
-					format: THREE.RGBAFormat
-				}
-			);
+			let renderTarget = new THREE.WebGLRenderTarget(1, 1, {
+				minFilter: THREE.LinearFilter,
+				magFilter: THREE.NearestFilter,
+				format: THREE.RGBAFormat
+			});
 
-			this.pickState = {
-				renderTarget: renderTarget,
-				material: material,
-				scene: scene
-			};
+			this.pickState = { renderTarget, material, scene };
 		};
 
 		let pickState = this.pickState;
@@ -729,8 +722,10 @@ class PointCloudOctree extends PointCloudTree {
 		renderer.state.buffers.depth.setMask(pickMaterial.depthWrite);
 		renderer.state.setBlending(THREE.NoBlending);
 
+		let prevRenderTarget = renderer.getRenderTarget();
+
 		{ // RENDER
-			let tmp = this.material;
+			let prevMaterial = this.material;
 
 			try {
 				renderer.setRenderTarget(pickState.renderTarget);
@@ -738,11 +733,11 @@ class PointCloudOctree extends PointCloudTree {
 				renderer.clear(true, true, true);
 				this.material = pickMaterial;
 				pRenderer.renderOctree(renderer, this, nodes, camera, pickState.renderTarget);
-			} catch {
-				// TODO Handle render errors
+			} catch (e) {
+				// TODO Handle render errors?
 			}
 
-			this.material = tmp;
+			this.material = prevMaterial;
 		}
 
 		let clamp = (number, min, max) => Math.min(Math.max(min, number), max);
@@ -757,7 +752,7 @@ class PointCloudOctree extends PointCloudTree {
 
 		gl.readPixels(x, y, pickWindowSize, pickWindowSize, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
 
-		renderer.setRenderTarget(null);
+		renderer.setRenderTarget(prevRenderTarget);
 		renderer.state.reset();
 		renderer.setScissorTest(false);
 		gl.disable(gl.SCISSOR_TEST);

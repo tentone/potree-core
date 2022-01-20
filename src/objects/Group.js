@@ -304,7 +304,6 @@ class Group extends BasicGroup {
     let viewInv = camera.matrixWorld;
     let proj = camera.projectionMatrix;
     let projInv = camera.projectionMatrixInverse;
-    let worldView = new THREE.Matrix4();
 
     let visibilityTextureData = null;
     let currentTextureBindingPoint = 0;

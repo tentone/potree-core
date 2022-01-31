@@ -31,8 +31,8 @@ class WorkerManager {
 
 		switch (type) {
 			case 0:
-				// return new BinaryDecoderWorker();
-				throw new Error('BinaryDecoderWorker not implemented');
+				return new BinaryDecoderWorker();
+			// throw new Error('BinaryDecoderWorker not implemented');
 			case 1:
 				return new LASLAZWorker();
 			// return new Worker(new URL('../workers/LASLAZWorker.js', import.meta.url));

@@ -50,12 +50,5 @@ module.exports = {
     sourceMapFilename: '[name].map',
     libraryTarget: 'commonjs',
   },
-  devtool: isDevelopment ? 'inline-source-map' : 'source-map',
-  externals: {
-    three: {
-      commonjs: 'three',
-      amd: 'three',
-      root: '_',
-    },
-  },
+  devtool: isDevelopment ? 'inline-source-map' : 'source-map'
 };

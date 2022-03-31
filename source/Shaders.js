@@ -94,7 +94,7 @@ bool isClipped(vec3 point) {
 
 #endif
 
-varying vec3 vColor;
+varying vec4 vColor;
 varying float vLogDepth;
 varying vec3 vViewPosition;
 varying float vRadius;
@@ -471,10 +471,11 @@ vec3 getCompositeColor()
 	return c;
 }
 
-vec3 getColor()
+vec4 getColor()
 {
 	vec3 color;
-	
+       float alpha = 1.0;
+
 	#ifdef color_type_rgb
 		color = getRGB();
 	#elif defined color_type_height
@@ -501,8 +502,9 @@ vec3 getColor()
 	#elif defined color_type_point_index
 		color = indices.rgb;
 	#elif defined color_type_classification
-		vec4 cl = getClassification(); 
+		vec4 cl = getClassification();
 		color = cl.rgb;
+               alpha = cl.a;
 	#elif defined color_type_return_number
 		color = getReturnNumber();
 	#elif defined color_type_source
@@ -514,8 +516,8 @@ vec3 getColor()
 	#elif defined color_type_composite
 		color = getCompositeColor();
 	#endif
-	
-	return color;
+
+	return vec4(color, alpha);
 }
 
 float getPointSize()
@@ -614,7 +616,7 @@ uniform float uPCIndex;
 uniform float uScreenWidth;
 uniform float uScreenHeight;
 
-varying vec3 vColor;
+varying vec4 vColor;
 varying float vLogDepth;
 varying vec3 vViewPosition;
 varying float vRadius;
@@ -623,7 +625,7 @@ varying vec3 vPosition;
 
 void main()
 {
-	vec3 color = vColor;
+	vec3 color = vColor.rgb;
 	float depth = gl_FragCoord.z;
 
 	#if defined circle_point_shape || defined paraboloid_point_shape
@@ -642,6 +644,9 @@ void main()
 	#if defined color_type_point_index
 		gl_FragColor = vec4(color, uPCIndex / 255.0);
 	#else
+               if (vColor.a == 0.0) {
+                      discard;
+               }
 		gl_FragColor = vec4(color, uOpacity);
 	#endif
 

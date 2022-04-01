@@ -1,6 +1,6 @@
 {
   "name": "@cognite/potree-core",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "Potree wrapper for threejs applications",
   "main": "dist/bundle.js",
   "repository": {

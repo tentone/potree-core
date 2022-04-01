@@ -1,4 +1,5 @@
 const path = require('path');
+const nodeExternals = require('webpack-node-externals');
 
 function resolve(name) {
   return path.resolve(__dirname, name);
@@ -31,12 +32,14 @@ const isDevelopment = getEnvArg(process.env, 'development', false);
 module.exports = {
   mode: isDevelopment ? 'development' : 'production',
   entry: "./source/Main.js",
+  externals: [nodeExternals()],
   module: {
     rules: [
       {
         test: /Worker\.js$/,
         loader: 'worker-loader',
         include: [resolve('source')],
+        exclude: /node_modules/,
         options: { inline: true, fallback: false },
       },
     ],
@@ -50,12 +53,5 @@ module.exports = {
     sourceMapFilename: '[name].map',
     libraryTarget: 'commonjs',
   },
-  devtool: isDevelopment ? 'inline-source-map' : 'source-map',
-  externals: {
-    three: {
-      commonjs: 'three',
-      amd: 'three',
-      root: '_',
-    },
-  },
+  devtool: isDevelopment ? 'inline-source-map' : 'source-map'
 };

@@ -1,18 +1,16 @@
 {
 	"name": "potree-core",
 	"version": "1.0.7",
-	"description": "Potree wrapper for threejs applications",
+	"description": "Potree wrapper for three.js applications",
 	"main": "build/potree.module.js",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/tentone/potree-core.git"
 	},
 	"scripts": {
-		"start": "npm run build && npm run serve",
-		"serve": "http-server .",
-		"build": "rollup -c && npm run closure",
-		"docs": "jsdoc -d docs source",
-		"closure": "java -jar node_modules/google-closure-compiler-java/compiler.jar --compilation_level SIMPLE --warning_level QUIET --formatting SINGLE_QUOTES --language_in ECMASCRIPT_2017 --language_out ECMASCRIPT_2017 --js build/potree.js --js_output_file build/potree.min.js",
+    "build": "webpack",
+    "start": "webpack --watch --env.development",
+    "docs": "jsdoc -d docs source",
 		"pub": "npm run build && npm publish --access public ."
 	},
 	"keywords": [
@@ -24,43 +22,15 @@
 	"author": "Tentone",
 	"license": "MIT",
 	"dependencies": {},
+  "peerDependencies": {},
 	"devDependencies": {
-		"http-server": "0.11.1",
-		"google-closure-compiler": "^20190301.0.0",
-		"jsdoc": "^3.5.0",
-		"rollup": "^1.0.0",
-		"rollup-plugin-strip": "^1.2.1"
+    "@types/three": "~0.139.0",
+    "three": "~0.139.2",
+    "cross-var": "~1.1.0",
+    "jsdoc": "~3.6.10",
+    "webpack": "~5.71.0",
+    "webpack-cli": "~4.9.2",
+    "worker-loader": "~3.0.8",
+    "webpack-node-externals": "~3.0.0"
 	}
-  "scripts": {
-    "build": "webpack",
-    "build:watch": "webpack --watch --env.development",
-    "docs": "jsdoc -d docs source",
-    "prebump": "yarn version --no-git-tag-version && yarn",
-    "bump": " yarn bump:commit && yarn bump:tag && yarn bump:push",
-    "bump:commit": "git add -A && cross-var git commit -m \"chore: bump version $npm_package_version\"",
-    "bump:tag": "cross-var git tag v$npm_package_version",
-    "bump:push": "git push -u origin head && git push --tags",
-    "release": "yarn build && yarn publish --non-interactive"
-  },
-  "keywords": [
-    "three",
-    "potree",
-    "3d",
-    "webgl"
-  ],
-  "files": [
-    "dist"
-  ],
-  "author": "Tentone",
-  "license": "MIT",
-  "dependencies": {"three": "0.138.3"},
-  "devDependencies": {
-    "cross-var": "^1.1.0",
-    "jsdoc": "^3.5.0",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^4.9.1",
-    "worker-loader": "^2.0.0",
-    "webpack-node-externals": "^1.7.2",
-    "@types/three": "0.138.0"
-  }
 }

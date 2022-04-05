@@ -1,5 +1,8 @@
 # Potree Core
 
+[![npm version](https://badge.fury.io/js/potree-core.svg)](https://badge.fury.io/js/potree-core)
+[![GitHub version](https://badge.fury.io/gh/tentone%2Fpotree-core.svg)](https://badge.fury.io/gh/tentone%2Fpotree-core)
+
  - This project is based on Potree V1.6.
  - Potree is a web based pouint cloud visualizer project created by Markus Schütz.
  - This project contains only the main parts of the potree project adapted to be more easily used as a independent library (I have only adapted code from the original repository).
@@ -185,10 +188,9 @@ document.body.onresize();
 
 
 ### Point Clouds
- - Use the Potree Converter tool to create point cloud data from LAS, ZLAS or BIN point cloud files
-    - https://github.com/potree/PotreeConverter/releases
-
-
+ - Use the (Potree Converter)[https://github.com/potree/PotreeConverter/releases] tool to create point cloud data from LAS, ZLAS or BIN point cloud files
+ - Potree Converter 1.8 creates a multi file structure with each node as an individual file.
+ - Potree Converter 2.1 creates a single file for all points and separates files for hierarchy index, its faster to create files. Requires a HTTP server configured for file streaming.
 
 
 

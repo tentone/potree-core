@@ -9,7 +9,7 @@
 	},
 	"scripts": {
     "build": "webpack",
-    "start": "webpack --watch --env.development",
+    "start": "webpack --watch",
     "docs": "jsdoc -d docs source",
 		"pub": "npm run build && npm publish --access public ."
 	},

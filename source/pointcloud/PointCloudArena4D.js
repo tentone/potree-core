@@ -1,8 +1,10 @@
 "use strict";
 
+import * as THREE from 'three';
+
 import {HelperUtils} from "../utils/HelperUtils.js";
 import {PointCloudTree, PointCloudTreeNode} from "./PointCloudTree.js";
-import {PointColorType, ClipTask} from "../Potree.js";
+import {PointColorType } from "../Potree.js";
 import {Global} from "../Global.js";
 import {PointCloudMaterial} from "./materials/PointCloudMaterial.js";
 import {TreeType, PointSizeType} from "../Potree.js";
@@ -376,7 +378,6 @@ class PointCloudArena4D extends PointCloudTree
 		var getVal = (a, b) => a !== undefined ? a : b;
 
 		var pickWindowSize = getVal(params.pickWindowSize, 17);
-		var pickOutsideClipRegion = getVal(params.pickOutsideClipRegion, false);
 
 		var size = renderer.getSize(new THREE.Vector3());
 
@@ -418,30 +419,6 @@ class PointCloudArena4D extends PointCloudTree
 
 		var pickState = this.pickState;
 		var pickMaterial = pickState.material;
-		pickMaterial.pointSizeType = pointSizeType;
-		pickMaterial.shape = this.material.shape;
-
-		pickMaterial.size = pointSize;
-		pickMaterial.uniforms.minSize.value = this.material.uniforms.minSize.value;
-		pickMaterial.uniforms.maxSize.value = this.material.uniforms.maxSize.value;
-		pickMaterial.classification = this.material.classification;
-		if(params.pickClipped)
-		{
-			pickMaterial.clipBoxes = this.material.clipBoxes;
-			if(this.material.clipTask === ClipTask.HIGHLIGHT)
-			{
-				pickMaterial.clipTask = ClipTask.NONE;
-			}
-			else
-			{
-				pickMaterial.clipTask = this.material.clipTask;
-			}
-		}
-		else
-		{
-			pickMaterial.clipBoxes = [];
-		}
-
 		this.updateMaterial(pickMaterial, nodes, camera, renderer);
 
 		pickState.renderTarget.setSize(width, height);

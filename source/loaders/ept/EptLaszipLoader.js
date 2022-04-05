@@ -1,8 +1,11 @@
 "use strict";
 
+import * as THREE from 'three';
+
 import {Global} from "../../Global.js";
 import {LASFile, LASDecoder} from "../LASLoader.js";
 import {WorkerManager} from "../../utils/WorkerManager.js";
+import {XHRFactory} from "../../XHRFactory.js";
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
@@ -23,7 +26,7 @@ class EptLaszipLoader
 
 		var url = node.url() + ".laz";
 
-		var xhr = new XMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open("GET", url, true);
 		xhr.responseType = "arraybuffer";
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");

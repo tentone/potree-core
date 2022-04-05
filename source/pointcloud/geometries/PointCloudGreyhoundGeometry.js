@@ -1,5 +1,7 @@
 "use strict";
 
+import * as THREE from 'three';
+
 import {GreyhoundLoader} from "../../loaders/GreyhoundLoader.js";
 import {Global} from "../../Global.js";
 import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";
@@ -320,7 +322,7 @@ PointCloudGreyhoundGeometryNode.prototype.loadHierarchyThenPoints = function()
 		}
 
 		var self = this;
-		var xhr = new XMLHttpRequest();
+		var xhr = XHRFactory.createXMLHttpRequest();
 		xhr.overrideMimeType("text/plain");
 		xhr.open("GET", hurl, true);
 		xhr.onload = function(event)

@@ -1,6 +1,9 @@
 Potree = { };
 
 onmessage = function(event) {
+  if (!event.data || !event.data.buffer) {
+    return;
+  }
 	let buffer = event.data.buffer;
 	let view = new DataView(buffer);
 	let schema = event.data.schema;

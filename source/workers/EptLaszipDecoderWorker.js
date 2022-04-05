@@ -1,5 +1,9 @@
 function readUsingDataView(event) {
-	performance.mark("laslaz-start");
+  performance.mark("laslaz-start");
+
+  if (!event.data || !event.data.buffer) {
+    return;
+  }
 
 	let buffer = event.data.buffer;
 	let numPoints = event.data.numPoints;

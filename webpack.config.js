@@ -25,5 +25,5 @@ module.exports = {
     sourceMapFilename: '[name].map',
     libraryTarget: 'commonjs',
   },
-  devtool: 'inline-source-map' // : 'source-map'
+  devtool: 'inline-source-map'
 };

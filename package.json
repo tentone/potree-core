@@ -8,9 +8,9 @@
 		"url": "https://github.com/tentone/potree-core.git"
 	},
 	"scripts": {
-    "build": "webpack",
-    "start": "webpack --watch",
-    "docs": "jsdoc -d docs source",
+		"build": "webpack",
+		"start": "webpack --watch",
+		"docs": "jsdoc -d docs source",
 		"pub": "npm run build && npm publish --access public ."
 	},
 	"keywords": [

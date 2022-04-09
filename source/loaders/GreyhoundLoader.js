@@ -11,12 +11,10 @@ function GreyhoundLoader(){}
 GreyhoundLoader.loadInfoJSON = function(url, callback){};
 
 /**
- * @return a point cloud octree with the root node data loaded.
- * loading of descendants happens asynchronously when they"re needed
  *
  * @param url
- * @param loadingFinishedListener executed after loading the binary has been
- * finished
+ * @param loadingFinishedListener executed after loading the binary has been finished
+ * @return a point cloud octree with the root node data loaded. loading of descendants happens asynchronously when they"re needed
  */
 GreyhoundLoader.load = function(url, callback)
 {

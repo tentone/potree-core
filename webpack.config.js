@@ -14,10 +14,8 @@ module.exports = {
         use: "raw-loader"
       },
       {
-        test: /\.worker\.js$/,
+        test: /\.worker\.js$/i,
         loader: 'worker-loader',
-        include: [path.resolve(__dirname, 'source')],
-        exclude: /node_modules/,
         options: {inline: true, fallback: false},
       },
     ],

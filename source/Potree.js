@@ -1,9 +1,7 @@
-
 import * as THREE from 'three';
-
 import { GreyhoundLoader } from "./loaders/GreyhoundLoader.js";
 import { POCLoader } from "./loaders/POCLoader.js";
-import { EptLoader } from "./loaders/EptLoader.js";
+import { EptLoader } from "./loaders/EPTLoader.js";
 import { PointCloudOctree } from "./pointcloud/PointCloudOctree.js";
 import { PointCloudArena4D } from "./pointcloud/PointCloudArena4D.js";
 import { PointCloudArena4DGeometry } from "./pointcloud/geometries/PointCloudArena4DGeometry.js";

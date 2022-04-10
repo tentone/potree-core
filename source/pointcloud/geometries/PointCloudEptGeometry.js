@@ -1,6 +1,4 @@
-
 import * as THREE from 'three';
-
 import {EptBinaryLoader} from "../../loaders/ept/EptBinaryLoader";
 import {EptLaszipLoader} from "../../loaders/ept/EptLaszipLoader";
 import {VersionUtils} from "../../utils/VersionUtils.js";

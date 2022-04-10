@@ -2,17 +2,23 @@ const path = require('path');
 const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
-  mode: 'development', //: 'production',
+  mode: 'development',
   entry: "./source/Main.js",
+  target: "web",
+  devtool: "inline-source-map",
   externals: [nodeExternals()],
   module: {
     rules: [
       {
-        test: /Worker\.js$/,
+        test: /\.glsl$/i,
+        use: "raw-loader"
+      },
+      {
+        test: /\.worker\.js$/,
         loader: 'worker-loader',
-        include: [path.resolve(__dirname,'source')],
+        include: [path.resolve(__dirname, 'source')],
         exclude: /node_modules/,
-        options: { inline: true, fallback: false },
+        options: {inline: true, fallback: false},
       },
     ],
   },
@@ -24,6 +30,5 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     sourceMapFilename: '[name].map',
     libraryTarget: 'commonjs',
-  },
-  devtool: 'inline-source-map'
+  }
 };

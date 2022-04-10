@@ -1,6 +1,4 @@
-
 import * as THREE from 'three';
-
 import {POCLoader} from "../../loaders/POCLoader.js";
 import {Global} from "../../Global.js";
 import {PointCloudTree, PointCloudTreeNode} from "../PointCloudTree.js";

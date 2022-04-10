@@ -1,11 +1,7 @@
-'use strict';
-
 /**
- * Migrated from Potree (https://github.com/potree/potree/blob/develop/src/XHRFactory.js)
- * by Lars Moastuen <@larsmoa>.
+ * Migrated from Potree (https://github.com/potree/potree/blob/develop/src/XHRFactory.js) by Lars Moastuen <@larsmoa>.
  */
-
-const XHRFactory = {
+export const XHRFactory = {
 	config: {
 		withCredentials: false,
 		customHeaders: [
@@ -50,5 +46,3 @@ const XHRFactory = {
 		return fetch(resource, options);
 	}
 };
-
-export {XHRFactory};

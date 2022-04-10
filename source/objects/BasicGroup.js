@@ -1,6 +1,4 @@
-
 import * as THREE from 'three';
-
 import { HelperUtils } from "../utils/HelperUtils.js";
 import { updatePointClouds } from "../Potree.js";
 import { PointCloudTree } from "../pointcloud/PointCloudTree.js";

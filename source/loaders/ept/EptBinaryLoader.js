@@ -1,6 +1,4 @@
-
 import * as THREE from 'three';
-
 import {Global} from "../../Global.js";
 import {WorkerManager} from "../../utils/WorkerManager.js";
 import {XHRFactory} from "../../XHRFactory.js";

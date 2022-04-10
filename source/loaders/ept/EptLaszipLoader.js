@@ -1,6 +1,4 @@
-
 import * as THREE from 'three';
-
 import {Global} from "../../Global.js";
 import {LASFile, LASDecoder} from "../LASLoader.js";
 import {WorkerManager} from "../../utils/WorkerManager.js";
@@ -12,9 +10,8 @@ import {XHRFactory} from "../../XHRFactory.js";
  *	https://github.com/verma/plasio
  *
  * Thanks to Uday Verma and Howard Butler
- *
  */
-class EptLaszipLoader
+export class EptLaszipLoader
 {
 	load(node)
 	{
@@ -122,7 +119,7 @@ class EptLaszipLoader
 	}
 };
 
-class EptLazBatcher
+export class EptLazBatcher
 {
 	constructor(node)
 	{

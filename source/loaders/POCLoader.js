@@ -1,6 +1,4 @@
-
 import * as THREE from 'three';
-
 import {BinaryLoader} from "./BinaryLoader.js";
 import {LASLAZLoader} from "./LASLAZLoader.js";
 import {PointAttributes, PointAttribute} from "../PointAttributes.js";

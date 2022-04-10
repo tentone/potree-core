@@ -1,6 +1,4 @@
-
 import * as THREE from 'three';
-
 import {HelperUtils} from "../utils/HelperUtils.js";
 import {PointCloudTree, PointCloudTreeNode} from "./PointCloudTree.js";
 import {PointColorType } from "../Potree.js";

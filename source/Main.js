@@ -52,7 +52,7 @@ export {GreyhoundLoader} from "./loaders/GreyhoundLoader.js";
 export {GreyhoundBinaryLoader} from "./loaders/GreyhoundBinaryLoader.js";
 export {POCLoader} from "./loaders/POCLoader.js";
 export {LASLAZLoader} from "./loaders/LASLAZLoader.js";
-export {EptLoader} from "./loaders/EptLoader.js";
+export {EptLoader} from "./loaders/EPTLoader.js";
 
 export {EptLaszipLoader} from "./loaders/ept/EptLaszipLoader.js";
 export {EptBinaryLoader} from "./loaders/ept/EptBinaryLoader.js";

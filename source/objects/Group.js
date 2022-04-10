@@ -1,6 +1,4 @@
-
 import * as THREE from 'three';
-
 import { BasicGroup } from "./BasicGroup.js";
 import { PointCloudTree } from "../pointcloud/PointCloudTree.js";
 import { PointSizeType, PointColorType } from "../Potree.js";

@@ -1,6 +1,6 @@
-
 import * as THREE from 'three';
-class Points
+
+export class Points
 {
 	constructor()
 	{
@@ -54,6 +54,4 @@ class Points
 
 		this.boundingBox.union(points.boundingBox);
 	}
-};
-
-export {Points};
+}

@@ -180,4 +180,3 @@ export class EptLazBatcher
 	};
 };
 
-export {EptLaszipLoader, EptLazBatcher};

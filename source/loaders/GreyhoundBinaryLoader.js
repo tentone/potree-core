@@ -1,4 +1,3 @@
-"use strict";
 
 import {PointAttributeNames} from "../PointAttributes.js";
 import {VersionUtils} from "../utils/VersionUtils.js";

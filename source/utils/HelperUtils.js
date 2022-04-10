@@ -1,7 +1,6 @@
-"use strict";
-
 import * as THREE from 'three';
-class HelperUtils
+
+export class HelperUtils
 {
 	/**
 	 * Craete a new data texture with a solid color.
@@ -51,6 +50,4 @@ class HelperUtils
 		
 		return boundingBox;
 	};
-};
-
-export {HelperUtils};
+}

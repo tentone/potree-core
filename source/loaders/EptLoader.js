@@ -1,4 +1,3 @@
-"use strict";
 
 import {PointCloudEptGeometry, PointCloudEptGeometryNode} from "../pointcloud/geometries/PointCloudEptGeometry.js";
 import { XHRFactory } from "../XHRFactory.js";

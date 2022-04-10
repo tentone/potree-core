@@ -1,4 +1,3 @@
-"use strict";
 
 import {XHRFactory} from "../XHRFactory.js";
 

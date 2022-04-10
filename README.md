@@ -163,9 +163,6 @@ document.body.onresize();
     - Base Object3D used to store and represent point cloud data.
     - These objects are created by the loader
 
-
-
-
 ### Notes
  - Since potree-core is mean to be used as library and not as a full software as potree some features are not available.
  - EDL shading is not supported by potree core (might be added later).
@@ -181,18 +178,20 @@ document.body.onresize();
     - JQuery, TWEEN and Proj4 dependencies
 
 
-
 ### Building
  - The project can be build running the commands `npm install` and `npm run build`.
 
-
-
-### Point Clouds
+### Potree Converter
  - Use the (Potree Converter)[https://github.com/potree/PotreeConverter/releases] tool to create point cloud data from LAS, ZLAS or BIN point cloud files
  - Potree Converter 1.8 creates a multi file structure with each node as an individual file.
  - Potree Converter 2.1 creates a single file for all points and separates files for hierarchy index, its faster to create files. Requires a HTTP server configured for file streaming.
+ - Tool to create hierarquical structure used for point-cloud rendering using potree-core.
+ - There are two main versions 2.1 witch generates 4 contained files with point data, hierarchy, 
+ - To generate a folder output from a input file run the command `.\PotreeConverter '..\input.laz' -o ../output`
 
-
-
+### TXT2LAS
+ - The potree converter tool only supports las and laz files, so textural file formats such as .pts, .xyz, have to be first converted into a supported format.
+ - The TXT2LAS tool from the (LASTools)[https://github.com/LAStools/LAStools] repository can be used for this effect.
+ - To run the tool use the command `.\txt2las64 -i input.pts -ipts -parse xyziRGB  -set_scale 0.001 0.001 0.001 -set_version 1.4 -o output.laz`
 
 

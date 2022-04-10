@@ -1,4 +1,3 @@
-"use strict";
 
 import {PointAttributes, PointAttribute} from "../PointAttributes.js";
 import {PointCloudGreyhoundGeometry, PointCloudGreyhoundGeometryNode} from "../pointcloud/geometries/PointCloudGreyhoundGeometry.js";

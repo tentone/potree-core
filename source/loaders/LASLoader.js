@@ -1,4 +1,3 @@
-"use strict";
 
 import {WorkerManager} from "../utils/WorkerManager.js";
 import {Global} from "../Global.js";

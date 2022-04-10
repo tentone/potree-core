@@ -1,13 +1,10 @@
-"use strict";
-
-// Force workers to be included
-import BinaryDecoderWorker from "../workers/BinaryDecoderWorker";
-//import LASLAZWorker from "../workers/LASLAZWorker";
-import LASDecoderWorker from "../workers/LASDecoderWorker";
-//import GreyhoundBinaryDecoderWorker from "../workers/GreyhoundBinaryDecoderWorker";
-import DEMWorker from "../workers/DEMWorker";
-import EptLaszipDecoderWorker from "../workers/EptLaszipDecoderWorker";
-import EptBinaryDecoderWorker from "../workers/EptBinaryDecoderWorker";
+import BinaryDecoderWorker from "../workers/BinaryDecoder.worker";
+//import LASLAZWorker from "../workers/LASLAZ.worker";
+import LASDecoderWorker from "../workers/LASDecoder.worker";
+//import GreyhoundBinaryDecoderWorker from "../workers/GreyhoundBinaryDecoder.worker";
+import DEMWorker from "../workers/DEM.worker";
+import EptLaszipDecoderWorker from "../workers/EptLaszipDecoder.worker";
+import EptBinaryDecoderWorker from "../workers/EptBinaryDecoder.worker";
 
 /**
  * The worker manager is responsible for creating and managing worker instances.

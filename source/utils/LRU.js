@@ -1,4 +1,3 @@
-"use strict";
 
 import {Global} from "../Global.js";
 

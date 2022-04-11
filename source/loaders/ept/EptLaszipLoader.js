@@ -15,7 +15,7 @@ export class EptLaszipLoader
 {
 	load(node)
 	{
-		if(node.loaded)
+		if (node.loaded)
 		{
 			return;
 		}
@@ -28,9 +28,9 @@ export class EptLaszipLoader
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
 		xhr.onreadystatechange = () =>
 		{
-			if(xhr.readyState === 4)
+			if (xhr.readyState === 4)
 			{
-				if(xhr.status === 200)
+				if (xhr.status === 200)
 				{
 					var buffer = xhr.response;
 					this.parse(node, buffer);
@@ -51,26 +51,26 @@ export class EptLaszipLoader
 		var handler = new EptLazBatcher(node);
 
 		lf.open()
-		.then(() =>
-		{
-			lf.isOpen = true;
-			return lf.getHeader();
-		})
-		.then((header) =>
-		{
-			var i = 0;
-			var np = header.pointsCount;
-
-			var toArray = (v) => [v.x, v.y, v.z];
-			var mins = toArray(node.key.b.min);
-			var maxs = toArray(node.key.b.max);
-
-			var read = () =>
+			.then(() =>
 			{
-				var p = lf.readData(1000000, 0, 1);
-				return p.then(function (data)
+				lf.isOpen = true;
+				return lf.getHeader();
+			})
+			.then((header) =>
+			{
+				var i = 0;
+				var np = header.pointsCount;
+
+				var toArray = (v) => {return [v.x, v.y, v.z];};
+				var mins = toArray(node.key.b.min);
+				var maxs = toArray(node.key.b.max);
+
+				var read = () =>
 				{
-					var d = new LASDecoder(
+					var p = lf.readData(1000000, 0, 1);
+					return p.then(function(data)
+					{
+						var d = new LASDecoder(
 							data.buffer,
 							header.pointsFormatId,
 							header.pointsStructSize,
@@ -79,43 +79,43 @@ export class EptLaszipLoader
 							header.offset,
 							mins,
 							maxs);
-					d.extraBytes = header.extraBytes;
-					d.pointsFormatId = header.pointsFormatId;
-					handler.push(d);
+						d.extraBytes = header.extraBytes;
+						d.pointsFormatId = header.pointsFormatId;
+						handler.push(d);
 
-					i += data.count;
+						i += data.count;
 
-					if(data.hasMoreData)
-					{
-						return read();
-					}
-					else
-					{
-						header.totalRead = i;
-						header.versionAsString = lf.versionAsString;
-						header.isCompressed = lf.isCompressed;
-						return null;
-					}
-				});
-			};
+						if (data.hasMoreData)
+						{
+							return read();
+						}
+						else
+						{
+							header.totalRead = i;
+							header.versionAsString = lf.versionAsString;
+							header.isCompressed = lf.isCompressed;
+							return null;
+						}
+					});
+				};
 
-			return read();
-		})
-		.then(() => lf.close())
-		.then(() => lf.isOpen = false)
-		.catch((err) =>
-		{
-			console.log("Error reading LAZ:", err);
-			if(lf.isOpen)
+				return read();
+			})
+			.then(() => {return lf.close();})
+			.then(() => {return lf.isOpen = false;})
+			.catch((err) =>
 			{
-				lf.close().then(() =>
+				console.log("Error reading LAZ:", err);
+				if (lf.isOpen)
 				{
-					lf.isOpen = false;
-					throw err;
-				});
-			}
-			else throw err;
-		});
+					lf.close().then(() =>
+					{
+						lf.isOpen = false;
+						throw err;
+					});
+				}
+				else {throw err;}
+			});
 	}
 };
 

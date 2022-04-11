@@ -1,4 +1,5 @@
-onmessage = function (event) {
+onmessage = function(event) 
+{
 	let boundingBox = event.data.boundingBox;
 	let position = new Float32Array(event.data.position);
 	let width = 64;
@@ -13,7 +14,8 @@ onmessage = function (event) {
 
 	let dem = new Float32Array(width * height);
 	dem.fill(-Infinity);
-	for (let i = 0; i < numPoints; i++) {
+	for (let i = 0; i < numPoints; i++) 
+	{
 		let x = position[3 * i + 0];
 		let y = position[3 * i + 1];
 		let z = position[3 * i + 2];

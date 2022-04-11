@@ -1,15 +1,15 @@
 import * as THREE from 'three';
-import {PointAttributeNames} from "./PointAttributes.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
 import {Global} from "../Global.js";
-import { XHRFactory } from '../XHRFactory.js';
-import { Version } from '../Version.js';
+import {XHRFactory} from '../XHRFactory.js';
+import {Version} from '../Version.js';
+import {PointAttributeNames} from "./PointAttributes.js";
 
 class BinaryLoader
 {
 	constructor(version, boundingBox, scale)
 	{
-		if(typeof(version) === "string")
+		if (typeof version === "string")
 		{
 			this.version = new Version(version);
 		}
@@ -24,14 +24,14 @@ class BinaryLoader
 
 	load(node)
 	{
-		if(node.loaded)
+		if (node.loaded)
 		{
 			return;
 		}
 
 		var url = node.getURL();
 
-		if(this.version.equalOrHigher("1.4"))
+		if (this.version.equalOrHigher("1.4"))
 		{
 			url += ".bin";
 		}
@@ -47,7 +47,7 @@ class BinaryLoader
 			{
 				self.parse(node, xhr.response);
 			}
-			catch(e)
+			catch (e)
 			{
 				Global.numNodesLoading--;
 				console.error("Potree: Exception thrown parsing points.", e);
@@ -67,7 +67,7 @@ class BinaryLoader
 		var pointAttributes = node.pcoGeometry.pointAttributes;
 		var numPoints = buffer.byteLength / node.pcoGeometry.pointAttributes.byteSize;
 
-		if(this.version.upTo("1.5"))
+		if (this.version.upTo("1.5"))
 		{
 			node.numPoints = numPoints;
 		}
@@ -89,7 +89,7 @@ class BinaryLoader
 		{
 			var data = e.data;
 
-			if(data.error !== undefined)
+			if (data.error !== undefined)
 			{
 				Global.numNodesLoading--;
 				console.error("Potree: Binary worker error.", data);
@@ -100,45 +100,45 @@ class BinaryLoader
 			var tightBoundingBox = new THREE.Box3(new THREE.Vector3().fromArray(data.tightBoundingBox.min), new THREE.Vector3().fromArray(data.tightBoundingBox.max));
 			var geometry = new THREE.BufferGeometry();
 
-			for(var property in buffers)
+			for (var property in buffers)
 			{
 				var buffer = buffers[property].buffer;
 
-				if(parseInt(property) === PointAttributeNames.POSITION_CARTESIAN)
+				if (parseInt(property) === PointAttributeNames.POSITION_CARTESIAN)
 				{
 					geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 				}
-				else if(parseInt(property) === PointAttributeNames.COLOR_PACKED)
+				else if (parseInt(property) === PointAttributeNames.COLOR_PACKED)
 				{
 					geometry.setAttribute("color", new THREE.BufferAttribute(new Uint8Array(buffer), 4, true));
 				}
-				else if(parseInt(property) === PointAttributeNames.INTENSITY)
+				else if (parseInt(property) === PointAttributeNames.INTENSITY)
 				{
 					geometry.setAttribute("intensity", new THREE.BufferAttribute(new Float32Array(buffer), 1));
 				}
-				else if(parseInt(property) === PointAttributeNames.CLASSIFICATION)
+				else if (parseInt(property) === PointAttributeNames.CLASSIFICATION)
 				{
 					geometry.setAttribute("classification", new THREE.BufferAttribute(new Uint8Array(buffer), 1));
 				}
-				else if(parseInt(property) === PointAttributeNames.NORMAL_SPHEREMAPPED)
+				else if (parseInt(property) === PointAttributeNames.NORMAL_SPHEREMAPPED)
 				{
 					geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 				}
-				else if(parseInt(property) === PointAttributeNames.NORMAL_OCT16)
+				else if (parseInt(property) === PointAttributeNames.NORMAL_OCT16)
 				{
 					geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 				}
-				else if(parseInt(property) === PointAttributeNames.NORMAL)
+				else if (parseInt(property) === PointAttributeNames.NORMAL)
 				{
 					geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(buffer), 3));
 				}
-				else if(parseInt(property) === PointAttributeNames.INDICES)
+				else if (parseInt(property) === PointAttributeNames.INDICES)
 				{
 					var bufferAttribute = new THREE.BufferAttribute(new Uint8Array(buffer), 4);
 					bufferAttribute.normalized = true;
 					geometry.setAttribute("indices", bufferAttribute);
 				}
-				else if(parseInt(property) === PointAttributeNames.SPACING)
+				else if (parseInt(property) === PointAttributeNames.SPACING)
 				{
 					var bufferAttribute = new THREE.BufferAttribute(new Float32Array(buffer), 1);
 					geometry.setAttribute("spacing", bufferAttribute);

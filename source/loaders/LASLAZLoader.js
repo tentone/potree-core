@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import {WorkerManager} from "../utils/WorkerManager.js";
-import { LASFile, LASDecoder} from "./LASLoader.js";
 import {Global} from "../Global.js";
 import {XHRFactory} from "../XHRFactory.js";
-import { Version } from '../Version.js';
+import {Version} from '../Version.js';
+import {LASFile, LASDecoder} from "./LASLoader.js";
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
@@ -16,7 +16,7 @@ class LASLAZLoader
 {
 	constructor(version)
 	{
-		if(typeof(version) === "string")
+		if (typeof version === "string")
 		{
 			this.version = new Version(version);
 		}
@@ -28,7 +28,7 @@ class LASLAZLoader
 
 	load(node)
 	{
-		if(node.loaded)
+		if (node.loaded)
 		{
 			return;
 		}
@@ -36,7 +36,7 @@ class LASLAZLoader
 		var pointAttributes = node.pcoGeometry.pointAttributes;
 		var url = node.getURL();
 
-		if(this.version.equalOrHigher("1.4"))
+		if (this.version.equalOrHigher("1.4"))
 		{
 			url += "." + pointAttributes.toLowerCase();
 		}
@@ -49,13 +49,13 @@ class LASLAZLoader
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
 		xhr.onload = function()
 		{
-			if(xhr.response instanceof ArrayBuffer)
+			if (xhr.response instanceof ArrayBuffer)
 			{
 				try
 				{
 					self.parse(node, xhr.response);
 				}
-				catch(e)
+				catch (e)
 				{
 					console.error("Potree: Exception thrown parsing points.", e);
 					Global.numNodesLoading--;
@@ -80,26 +80,26 @@ class LASLAZLoader
 		var lf = new LASFile(buffer);
 		var handler = new LASLAZBatcher(node);
 
-		lf.open() .then(msg =>
+		lf.open() .then((msg) =>
 		{
 			lf.isOpen = true;
 			return lf;
-		}).catch(msg =>
+		}).catch((msg) =>
 		{
 			console.log("Potree: Failed to open file.");
-		}).then(lf =>
+		}).then((lf) =>
 		{
 			return lf.getHeader().then(function(h)
 			{
 				return [lf, h];
 			});
-		}).then(v =>
+		}).then((v) =>
 		{
 			let lf = v[0];
 			let header = v[1];
 			let skip = 1;
 			let totalRead = 0;
-			let totalToRead = (skip <= 1 ? header.pointsCount : header.pointsCount / skip);
+			let totalToRead = skip <= 1 ? header.pointsCount : header.pointsCount / skip;
 
 			var reader = function()
 			{
@@ -117,7 +117,7 @@ class LASLAZLoader
 
 					totalRead += data.count;
 
-					if(data.hasMoreData)
+					if (data.hasMoreData)
 					{
 						return reader();
 					}
@@ -132,19 +132,19 @@ class LASLAZLoader
 			};
 
 			return reader();
-		}).then(v =>
+		}).then((v) =>
 		{
 			let lf = v[0];
 
-			//Close it
+			// Close it
 			return lf.close().then(function()
 			{
 				lf.isOpen = false;
 				return v.slice(1);
-			}).catch(e =>
+			}).catch((e) =>
 			{
-				//If there was a cancellation, make sure the file is closed, if the file is open close and then fail
-				if(lf.isOpen)
+				// If there was a cancellation, make sure the file is closed, if the file is open close and then fail
+				if (lf.isOpen)
 				{
 					return lf.close().then(function()
 					{
@@ -157,7 +157,7 @@ class LASLAZLoader
 		});
 	}
 
-	handle(node, url){}
+	handle(node, url) {}
 };
 
 class LASLAZBatcher
@@ -205,7 +205,7 @@ class LASLAZBatcher
 			geometry.setAttribute("returnNumber", new THREE.BufferAttribute(returnNumbers, 1));
 			geometry.setAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
 			geometry.setAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
-			//geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(numPoints * 3), 3));
+			// geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(numPoints * 3), 3));
 			geometry.setAttribute("indices", new THREE.BufferAttribute(indices, 4));
 			geometry.attributes.indices.normalized = true;
 

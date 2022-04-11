@@ -9,7 +9,7 @@ var Gradients = {
 		[5 / 6, new THREE.Color(1, 0.64, 0)],
 		[1, new THREE.Color(1, 0, 0)]
 	],
-	//From chroma spectral http://gka.github.io/chroma.js/
+	// From chroma spectral http://gka.github.io/chroma.js/
 	SPECTRAL: [
 		[0, new THREE.Color(0.3686, 0.3098, 0.6353)],
 		[0.1, new THREE.Color(0.1961, 0.5333, 0.7412)],

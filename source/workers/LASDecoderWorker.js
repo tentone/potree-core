@@ -1,9 +1,10 @@
 
 onmessage = function(event)
 {
-  if (!event.data || !event.data.buffer) {
-    return;
-  }
+	if (!event.data || !event.data.buffer) 
+	{
+		return;
+	}
 	var buffer = event.data.buffer;
 	var numPoints = event.data.numPoints;
 	var sourcePointSize = event.data.pointSize;
@@ -20,8 +21,8 @@ onmessage = function(event)
 
 	var tightBoundingBox =
 	{
-		min: [ Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY ],
-		max: [ Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY ]
+		min: [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY],
+		max: [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY]
 	};
 
 	var mean = [0, 0, 0];
@@ -44,7 +45,7 @@ onmessage = function(event)
 	
 	for (var i = 0; i < numPoints; i++)
 	{
-		//POSITION
+		// POSITION
 		var ux = sourceView.getInt32(i * sourcePointSize + 0, true);
 		var uy = sourceView.getInt32(i * sourcePointSize + 4, true);
 		var uz = sourceView.getInt32(i * sourcePointSize + 8, true);
@@ -69,28 +70,29 @@ onmessage = function(event)
 		tightBoundingBox.max[1] = Math.max(tightBoundingBox.max[1], y);
 		tightBoundingBox.max[2] = Math.max(tightBoundingBox.max[2], z);
 
-		//INTENSITY
+		// INTENSITY
 		var intensity = sourceView.getUint16(i * sourcePointSize + 12, true);
 		intensities[i] = intensity;
 
-		//RETURN NUMBER, stored in the first 3 bits - 00000111
-		//number of returns stored in next 3 bits   - 00111000
+		// RETURN NUMBER, stored in the first 3 bits - 00000111
+		// number of returns stored in next 3 bits   - 00111000
 		var returnNumberAndNumberOfReturns = sourceView.getUint8(i * sourcePointSize + 14, true);
 		var returnNumber = returnNumberAndNumberOfReturns & 0b0111;
 		var numberOfReturn = (returnNumberAndNumberOfReturns & 0b00111000) >> 3;
 		returnNumbers[i] = returnNumber;
 		numberOfReturns[i] = numberOfReturn;
 
-		//CLASSIFICATION
+		// CLASSIFICATION
 		var classification = sourceView.getUint8(i * sourcePointSize + 15, true);
 		classifications[i] = classification;
 
-		//POINT SOURCE ID
+		// POINT SOURCE ID
 		var pointSourceID = sourceView.getUint16(i * sourcePointSize + 18, true);
 		pointSourceIDs[i] = pointSourceID;
 
-		//COLOR, if available
-		if (pointFormatID === 2) {			
+		// COLOR, if available
+		if (pointFormatID === 2) 
+		{			
 			var r = sourceView.getUint16(i * sourcePointSize + 20, true) / 256;
 			var g = sourceView.getUint16(i * sourcePointSize + 22, true) / 256;
 			var b = sourceView.getUint16(i * sourcePointSize + 24, true) / 256;

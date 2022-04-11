@@ -34,25 +34,25 @@ class LRU
 
 	contains(node)
 	{
-		return this.items[node.id] == null;
+		return this.items[node.id] === null;
 	}
 
 	touch(node)
 	{
-		if(!node.loaded)
+		if (!node.loaded)
 		{
 			return;
 		}
 
 		var item;
 
-		if(this.items[node.id] == null)
+		if (this.items[node.id] === null)
 		{
 			// add to list
 			item = new LRUItem(node);
 			item.previous = this.last;
 			this.last = item;
-			if(item.previous !== null)
+			if (item.previous !== null)
 			{
 				item.previous.next = item;
 			}
@@ -60,7 +60,7 @@ class LRU
 			this.items[node.id] = item;
 			this.elements++;
 
-			if(this.first === null)
+			if (this.first === null)
 			{
 				this.first = item;
 			}
@@ -71,10 +71,10 @@ class LRU
 			// update in list
 			item = this.items[node.id];
 
-			if(item.previous === null)
+			if (item.previous === null)
 			{
 				// handle touch on first element
-				if(item.next !== null)
+				if (item.next !== null)
 				{
 					this.first = item.next;
 					this.first.previous = null;
@@ -84,7 +84,7 @@ class LRU
 					item.previous.next = item;
 				}
 			}
-			else if(item.next !== null)
+			else if (item.next !== null)
 			{
 				// handle touch on any other element
 				item.previous.next = item.next;
@@ -100,26 +100,26 @@ class LRU
 	remove(node)
 	{
 		var lruItem = this.items[node.id];
-		if(lruItem)
+		if (lruItem)
 		{
-			if(this.elements === 1)
+			if (this.elements === 1)
 			{
 				this.first = null;
 				this.last = null;
 			}
 			else
 			{
-				if(!lruItem.previous)
+				if (!lruItem.previous)
 				{
 					this.first = lruItem.next;
 					this.first.previous = null;
 				}
-				if(!lruItem.next)
+				if (!lruItem.next)
 				{
 					this.last = lruItem.previous;
 					this.last.next = null;
 				}
-				if(lruItem.previous && lruItem.next)
+				if (lruItem.previous && lruItem.next)
 				{
 					lruItem.previous.next = lruItem.next;
 					lruItem.next.previous = lruItem.previous;
@@ -134,7 +134,7 @@ class LRU
 
 	getLRUItem()
 	{
-		if(this.first === null)
+		if (this.first === null)
 		{
 			return null;
 		}
@@ -151,7 +151,7 @@ class LRU
 		while (curr !== null)
 		{
 			string += curr.node.id;
-			if(curr.next !== null)
+			if (curr.next !== null)
 			{
 				string += ", ";
 			}
@@ -165,12 +165,12 @@ class LRU
 
 	freeMemory()
 	{
-		if(this.elements <= 1)
+		if (this.elements <= 1)
 		{
 			return;
 		}
 
-		while(this.numPoints > Global.pointLoadLimit)
+		while (this.numPoints > Global.pointLoadLimit)
 		{
 			var element = this.first;
 			var node = element.node;
@@ -190,12 +190,12 @@ class LRU
 			current.dispose();
 			this.remove(current);
 
-			for(var key in current.children)
+			for (var key in current.children)
 			{
-				if(current.children.hasOwnProperty(key))
+				if (current.children.hasOwnProperty(key))
 				{
 					var child = current.children[key];
-					if(child.loaded)
+					if (child.loaded)
 					{
 						stack.push(current.children[key]);
 					}

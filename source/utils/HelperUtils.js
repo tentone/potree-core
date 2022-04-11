@@ -14,7 +14,7 @@ export class HelperUtils
 		var g = Math.floor(color.g * 255);
 		var b = Math.floor(color.b * 255);
 
-		for(var i = 0; i < size; i++)
+		for (var i = 0; i < size; i++)
 		{
 			data[i * 3] = r;
 			data[i * 3 + 1] = g;

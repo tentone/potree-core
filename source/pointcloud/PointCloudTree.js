@@ -8,19 +8,19 @@ class PointCloudTreeNode
 		this.needsTransformUpdate = true;
 	}
 
-	getChildren(){}
+	getChildren() {}
 
-	getBoundingBox(){}
+	getBoundingBox() {}
 
-	isLoaded(){}
+	isLoaded() {}
 
-	isGeometryNode(){}
+	isGeometryNode() {}
 
-	isTreeNode(){}
+	isTreeNode() {}
 
-	getLevel(){}
+	getLevel() {}
 
-	getBoundingSphere(){}
+	getBoundingSphere() {}
 };
 
 class PointCloudTree extends THREE.Object3D

@@ -1,9 +1,11 @@
-function readUsingDataView(event) {
-  performance.mark("laslaz-start");
+function readUsingDataView(event) 
+{
+	performance.mark("laslaz-start");
 
-  if (!event.data || !event.data.buffer) {
-    return;
-  }
+	if (!event.data || !event.data.buffer) 
+	{
+		return;
+	}
 
 	let buffer = event.data.buffer;
 	let numPoints = event.data.numPoints;
@@ -48,23 +50,26 @@ function readUsingDataView(event) {
 
 	// Point format 3 contains an 8-byte GpsTime before RGB values, so make
 	// sure we have the correct color offset.
-	let hasColor = pointFormat == 2 || pointFormat == 3;
-	let co = pointFormat == 2 ? 20 : 28;
+	let hasColor = pointFormat === 2 || pointFormat === 3;
+	let co = pointFormat === 2 ? 20 : 28;
 
 	// TODO This should be cached per-resource since this is an expensive check.
 	let twoByteColor = false;
-	if (hasColor) {
+	if (hasColor) 
+	{
 		let r, g, b, pos;
-		for (let i = 0; i < numPoints && !twoByteColor; ++i) {
+		for (let i = 0; i < numPoints && !twoByteColor; ++i) 
+		{
 			pos = i * pointSize;
-			r = sourceView.getUint16(pos + co, true)
-			g = sourceView.getUint16(pos + co + 2, true)
-			b = sourceView.getUint16(pos + co + 4, true)
-			if (r > 255 || g > 255 || b > 255) twoByteColor = true;
+			r = sourceView.getUint16(pos + co, true);
+			g = sourceView.getUint16(pos + co + 2, true);
+			b = sourceView.getUint16(pos + co + 4, true);
+			if (r > 255 || g > 255 || b > 255) {twoByteColor = true;}
 		}
 	}
 
-	for (let i = 0; i < numPoints; i++) {
+	for (let i = 0; i < numPoints; i++) 
+	{
 		// POSITION
 		let ux = sourceView.getInt32(i * pointSize + 0, true);
 		let uy = sourceView.getInt32(i * pointSize + 4, true);
@@ -111,12 +116,14 @@ function readUsingDataView(event) {
 		pointSourceIDs[i] = pointSourceID;
 
 		// COLOR, if available
-		if (hasColor) {
-			let r = sourceView.getUint16(i * pointSize + co, true)
-			let g = sourceView.getUint16(i * pointSize + co + 2, true)
-			let b = sourceView.getUint16(i * pointSize + co + 4, true)
+		if (hasColor) 
+		{
+			let r = sourceView.getUint16(i * pointSize + co, true);
+			let g = sourceView.getUint16(i * pointSize + co + 2, true);
+			let b = sourceView.getUint16(i * pointSize + co + 4, true);
 
-			if (twoByteColor) {
+			if (twoByteColor) 
+			{
 				r /= 256;
 				g /= 256;
 				b /= 256;
@@ -131,19 +138,20 @@ function readUsingDataView(event) {
 
 	let indices = new ArrayBuffer(numPoints * 4);
 	let iIndices = new Uint32Array(indices);
-	for (let i = 0; i < numPoints; i++) {
+	for (let i = 0; i < numPoints; i++) 
+	{
 		iIndices[i] = i;
 	}
 
 	performance.mark("laslaz-end");
 
-	//{ // print timings
+	// { // print timings
 	//	  performance.measure("laslaz", "laslaz-start", "laslaz-end");
 	//	  let measure = performance.getEntriesByType("measure")[0];
 	//	  let dpp = 1000 * measure.duration / numPoints;
 	//	  let debugMessage = `${measure.duration.toFixed(3)} ms, ${numPoints} points, ${dpp.toFixed(3)} µs / point`;
 	//	  console.log(debugMessage);
-	//}
+	// }
 	performance.clearMarks();
 	performance.clearMeasures();
 
@@ -173,7 +181,6 @@ function readUsingDataView(event) {
 
 	postMessage(message, transferables);
 };
-
 
 
 onmessage = readUsingDataView;

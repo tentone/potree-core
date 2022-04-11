@@ -2,12 +2,15 @@
 import {LRU} from "./utils/LRU.js";
 import {WorkerManager} from "./utils/WorkerManager.js";
 
-function getCurrentScript() {
-	if (document && document.currentScript) {
+function getCurrentScript() 
+{
+	if (document && document.currentScript) 
+	{
 		return document.currentScript;
 	}
 	const scripts = document.getElementsByTagName('script');
-	if (scripts && scripts.length) {
+	if (scripts && scripts.length) 
+	{
 		return scripts[scripts.length - 1].getAttribute('src');
 	}
 	return null;
@@ -16,11 +19,11 @@ function getCurrentScript() {
 function getBasePath()
 {
 	var currentScript = getCurrentScript();
-	if(currentScript && currentScript.src)
+	if (currentScript && currentScript.src)
 	{
 		var scriptPath = new URL(currentScript.src + "/..").href;
 
-		if(scriptPath.slice(-1) === "/")
+		if (scriptPath.slice(-1) === "/")
 		{
 			scriptPath = scriptPath.slice(0, -1);
 		}

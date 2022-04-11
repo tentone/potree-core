@@ -15,10 +15,10 @@ class DEM
 		this.version = 0;
 	}
 
-	//expands the tree to all nodes that intersect <box> at <level> returns the intersecting nodes at <level>
+	// expands the tree to all nodes that intersect <box> at <level> returns the intersecting nodes at <level>
 	expandAndFindByBox(box, level)
 	{
-		if(level === 0)
+		if (level === 0)
 		{
 			return [this.root];
 		}
@@ -26,12 +26,12 @@ class DEM
 		var result = [];
 		var stack = [this.root];
 
-		while(stack.length > 0)
+		while (stack.length > 0)
 		{
 			var node = stack.pop();
 			var nodeBoxSize = node.box.getSize(new THREE.Vector3());
 
-			//check which children intersect by transforming min/max to quadrants
+			// check which children intersect by transforming min/max to quadrants
 			var min = {
 				x: (box.min.x - node.box.min.x) / nodeBoxSize.x,
 				y: (box.min.y - node.box.min.y) / nodeBoxSize.y
@@ -47,26 +47,26 @@ class DEM
 			max.y = max.y < 0.5 ? 0 : 1;
 
 			var childIndices;
-			if(min.x === 0 && min.y === 0 && max.x === 1 && max.y === 1)
+			if (min.x === 0 && min.y === 0 && max.x === 1 && max.y === 1)
 			{
 				childIndices = [0, 1, 2, 3];
 			}
-			else if(min.x === max.x && min.y === max.y)
+			else if (min.x === max.x && min.y === max.y)
 			{
-				childIndices = [(min.x << 1) | min.y];
+				childIndices = [min.x << 1 | min.y];
 			}
 			else
 			{
-				childIndices = [(min.x << 1) | min.y, (max.x << 1) | max.y];
+				childIndices = [min.x << 1 | min.y, max.x << 1 | max.y];
 			}
 
-			for(var index of childIndices)
+			for (var index of childIndices)
 			{
-				if(node.children[index] === undefined)
+				if (node.children[index] === undefined)
 				{
 					var childBox = node.box.clone();
 
-					if((index & 2) > 0)
+					if ((index & 2) > 0)
 					{
 						childBox.min.x += nodeBoxSize.x / 2.0;
 					}
@@ -75,7 +75,7 @@ class DEM
 						childBox.max.x -= nodeBoxSize.x / 2.0;
 					}
 
-					if((index & 1) > 0)
+					if ((index & 1) > 0)
 					{
 						childBox.min.y += nodeBoxSize.y / 2.0;
 					}
@@ -90,7 +90,7 @@ class DEM
 
 				var child = node.children[index];
 
-				if(child.level < level)
+				if (child.level < level)
 				{
 					stack.push(child);
 				}
@@ -106,29 +106,29 @@ class DEM
 
 	childIndex(uv)
 	{
-		var [x, y] = uv.map(n => n < 0.5 ? 0 : 1);
+		var [x, y] = uv.map((n) => {return n < 0.5 ? 0 : 1;});
 
-		var index = (x << 1) | y;
+		var index = x << 1 | y;
 
 		return index;
 	}
 
 	height(position)
 	{
-		if(!this.root)
+		if (!this.root)
 		{
 			return 0;
 		}
 
 		var height = null;
 		var list = [this.root];
-		while(true)
+		while (true)
 		{
 			var node = list[list.length - 1];
 
 			var currentHeight = node.height(position);
 
-			if(currentHeight !== null)
+			if (currentHeight !== null)
 			{
 				height = currentHeight;
 			}
@@ -136,7 +136,7 @@ class DEM
 			var uv = node.uv(position);
 			var childIndex = this.childIndex(uv);
 
-			if(node.children[childIndex])
+			if (node.children[childIndex])
 			{
 				list.push(node.children[childIndex]);
 			}
@@ -151,8 +151,8 @@ class DEM
 
 	update(visibleNodes)
 	{
-		//check if point cloud transformation changed
-		if(this.matrix === null || !this.matrix.equals(this.pointcloud.matrixWorld))
+		// check if point cloud transformation changed
+		if (this.matrix === null || !this.matrix.equals(this.pointcloud.matrixWorld))
 		{
 			this.matrix = this.pointcloud.matrixWorld.clone();
 			this.boundingBox = this.pointcloud.boundingBox.clone().applyMatrix4(this.matrix);
@@ -160,22 +160,22 @@ class DEM
 			this.version++;
 		}
 
-		//find node to update
+		// find node to update
 		var node = null;
-		for(var vn of visibleNodes)
+		for (var vn of visibleNodes)
 		{
-			if(vn.demVersion === undefined || vn.demVersion < this.version)
+			if (vn.demVersion === undefined || vn.demVersion < this.version)
 			{
 				node = vn;
 				break;
 			}
 		}
-		if(node === null)
+		if (node === null)
 		{
 			return;
 		}
 
-		//update node
+		// update node
 		var projectedBox = node.getBoundingBox().clone().applyMatrix4(this.matrix);
 		var projectedBoxSize = projectedBox.getSize(new THREE.Vector3());
 
@@ -200,16 +200,16 @@ class DEM
 		{
 			var data = new Float32Array(e.data.dem.data);
 
-			for(var demNode of targetNodes)
+			for (var demNode of targetNodes)
 			{
 				var boxSize = demNode.box.getSize(new THREE.Vector3());
 
-				for(var i = 0; i < self.tileSize; i++)
+				for (var i = 0; i < self.tileSize; i++)
 				{
-					for(var j = 0; j < self.tileSize; j++)
+					for (var j = 0; j < self.tileSize; j++)
 					{
-						var u = (i / (self.tileSize - 1));
-						var v = (j / (self.tileSize - 1));
+						var u = i / (self.tileSize - 1);
+						var v = j / (self.tileSize - 1);
 
 						var x = demNode.box.min.x + u * boxSize.x;
 						var y = demNode.box.min.y + v * boxSize.y;
@@ -217,12 +217,12 @@ class DEM
 						var ix = self.tileSize * (x - projectedBox.min.x) / projectedBoxSize.x;
 						var iy = self.tileSize * (y - projectedBox.min.y) / projectedBoxSize.y;
 
-						if(ix < 0 || ix > self.tileSize)
+						if (ix < 0 || ix > self.tileSize)
 						{
 							continue;
 						}
 
-						if(iy < 0 || iy > self.tileSize)
+						if (iy < 0 || iy > self.tileSize)
 						{
 							continue;
 						}

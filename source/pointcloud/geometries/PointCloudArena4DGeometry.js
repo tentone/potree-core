@@ -47,12 +47,12 @@ class PointCloudArena4DGeometryNode
 	{
 		var children = [];
 
-		if(this.left)
+		if (this.left)
 		{
 			children.push(this.left);
 		}
 
-		if(this.right)
+		if (this.right)
 		{
 			children.push(this.right);
 		}
@@ -67,12 +67,12 @@ class PointCloudArena4DGeometryNode
 
 	load()
 	{
-		if(this.loaded || this.loading)
+		if (this.loaded || this.loading)
 		{
 			return;
 		}
 
-		if(Global.numNodesLoading >= Global.maxNodesLoading)
+		if (Global.numNodesLoading >= Global.maxNodesLoading)
 		{
 			return;
 		}
@@ -104,7 +104,7 @@ class PointCloudArena4DGeometryNode
 					PointAttribute.POSITION_CARTESIAN,
 					PointAttribute.RGBA_PACKED,
 					PointAttribute.INTENSITY,
-					PointAttribute.CLASSIFICATION,
+					PointAttribute.CLASSIFICATION
 				];
 
 				var position = new Float32Array(numPoints * 3);
@@ -116,7 +116,7 @@ class PointCloudArena4DGeometryNode
 
 				var tightBoundingBox = new THREE.Box3();
 
-				for(var i = 0; i < numPoints; i++)
+				for (var i = 0; i < numPoints; i++)
 				{
 					var x = sourceView.getFloat32(i * 17 + 0, true) + self.boundingBox.min.x;
 					var y = sourceView.getFloat32(i * 17 + 4, true) + self.boundingBox.min.y;
@@ -163,7 +163,7 @@ class PointCloudArena4DGeometryNode
 				self.loading = false;
 				Global.numNodesLoading--;
 			}
-			catch(e)
+			catch (e)
 			{
 				console.error("Potree: Exception thrown parsing points.", e);
 				Global.numNodesLoading--;
@@ -180,14 +180,14 @@ class PointCloudArena4DGeometryNode
 
 	dispose()
 	{
-		if(this.geometry && this.parent != null)
+		if (this.geometry && this.parent != null)
 		{
 			this.geometry.dispose();
 			this.geometry = null;
 			this.loaded = false;
 
-			//this.dispatchEvent( { type: "dispose" } );
-			for(var i = 0; i < this.oneTimeDisposeHandlers.length; i++)
+			// this.dispatchEvent( { type: "dispose" } );
+			for (var i = 0; i < this.oneTimeDisposeHandlers.length; i++)
 			{
 				var handler = this.oneTimeDisposeHandlers[i];
 				handler();
@@ -234,7 +234,7 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 		{
 			try
 			{
-				if(xhr.readyState === 4 && xhr.status === 200)
+				if (xhr.readyState === 4 && xhr.status === 200)
 				{
 					var response = JSON.parse(xhr.responseText);
 
@@ -249,7 +249,7 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 						new THREE.Vector3().fromArray(response.BoundingBox.slice(0, 3)),
 						new THREE.Vector3().fromArray(response.BoundingBox.slice(3, 6))
 					);
-					if(response.Spacing)
+					if (response.Spacing)
 					{
 						geometry.spacing = response.Spacing;
 					}
@@ -269,12 +269,12 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 
 					callback(geometry);
 				}
-				else if(xhr.readyState === 4)
+				else if (xhr.readyState === 4)
 				{
 					callback(null);
 				}
 			}
-			catch(e)
+			catch (e)
 			{
 				console.error(e.message);
 				callback(null);
@@ -295,7 +295,7 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 
 		xhr.onreadystatechange = () =>
 		{
-			if(!(xhr.readyState === 4 && xhr.status === 200))
+			if (!(xhr.readyState === 4 && xhr.status === 200))
 			{
 				return;
 			}
@@ -308,9 +308,9 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 
 			var levels = 0;
 
-			//TODO Debug: var start = new Date().getTime();
-			//read hierarchy
-			for(var i = 0; i < numNodes; i++)
+			// TODO Debug: var start = new Date().getTime();
+			// read hierarchy
+			for (var i = 0; i < numNodes; i++)
 			{
 				var mask = view.getUint8(i * 3 + 0, true);
 
@@ -320,15 +320,15 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 				var splitY = (mask & 8) > 0;
 				var splitZ = (mask & 16) > 0;
 				var split = null;
-				if(splitX)
+				if (splitX)
 				{
 					split = "X";
 				}
-				else if(splitY)
+				else if (splitY)
 				{
 					split = "Y";
 				}
-				if(splitZ)
+				if (splitZ)
 				{
 					split = "Z";
 				}
@@ -344,29 +344,28 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 				node.pcoGeometry = this;
 				node.level = stack.length;
 				levels = Math.max(levels, node.level);
-
 				
 
-				if(stack.length > 0)
+				if (stack.length > 0)
 				{
 					var parent = stack[stack.length - 1];
 					node.boundingBox = parent.boundingBox.clone();
 					var parentBBSize = parent.boundingBox.getSize(new THREE.Vector3());
 
-					if(parent.hasLeft && !parent.left)
+					if (parent.hasLeft && !parent.left)
 					{
 						parent.left = node;
 						parent.children.push(node);
 
-						if(parent.split === "X")
+						if (parent.split === "X")
 						{
 							node.boundingBox.max.x = node.boundingBox.min.x + parentBBSize.x / 2;
 						}
-						else if(parent.split === "Y")
+						else if (parent.split === "Y")
 						{
 							node.boundingBox.max.y = node.boundingBox.min.y + parentBBSize.y / 2;
 						}
-						else if(parent.split === "Z")
+						else if (parent.split === "Z")
 						{
 							node.boundingBox.max.z = node.boundingBox.min.z + parentBBSize.z / 2;
 						}
@@ -382,15 +381,15 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 						parent.right = node;
 						parent.children.push(node);
 
-						if(parent.split === "X")
+						if (parent.split === "X")
 						{
 							node.boundingBox.min.x = node.boundingBox.min.x + parentBBSize.x / 2;
 						}
-						else if(parent.split === "Y")
+						else if (parent.split === "Y")
 						{
 							node.boundingBox.min.y = node.boundingBox.min.y + parentBBSize.y / 2;
 						}
-						else if(parent.split === "Z")
+						else if (parent.split === "Z")
 						{
 							node.boundingBox.min.z = node.boundingBox.min.z + parentBBSize.z / 2;
 						}
@@ -413,15 +412,15 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 				}
 
 				var bbSize = node.boundingBox.getSize(new THREE.Vector3());
-				node.spacing = ((bbSize.x + bbSize.y + bbSize.z) / 3) / 75;
+				node.spacing = (bbSize.x + bbSize.y + bbSize.z) / 3 / 75;
 				node.estimatedSpacing = node.spacing;
 
 				stack.push(node);
 
-				if(node.isLeaf)
+				if (node.isLeaf)
 				{
 					var done = false;
-					while(!done && stack.length > 0)
+					while (!done && stack.length > 0)
 					{
 						stack.pop();
 
@@ -436,9 +435,7 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 			this.levels = levels;
 
 			this.dispatchEvent(
-			{
-				type: "hierarchy_loaded"
-			});
+				{type: "hierarchy_loaded"});
 		};
 
 		xhr.send(null);
@@ -446,11 +443,11 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 
 	get spacing()
 	{
-		if(this._spacing)
+		if (this._spacing)
 		{
 			return this._spacing;
 		}
-		else if(this.root)
+		else if (this.root)
 		{
 			return this.root.spacing;
 		}

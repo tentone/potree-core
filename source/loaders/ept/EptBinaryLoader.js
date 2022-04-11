@@ -7,7 +7,7 @@ class EptBinaryLoader
 {
 	load(node)
 	{
-		if(node.loaded) return;
+		if (node.loaded) {return;}
 
 		var url = node.url() + ".bin";
 		
@@ -17,9 +17,9 @@ class EptBinaryLoader
 		xhr.overrideMimeType("text/plain; charset=x-user-defined");
 		xhr.onreadystatechange = () =>
 		{
-			if(xhr.readyState === 4)
+			if (xhr.readyState === 4)
 			{
-				if(xhr.status === 200)
+				if (xhr.status === 200)
 				{
 					var buffer = xhr.response;
 					this.parse(node, buffer);
@@ -56,32 +56,32 @@ class EptBinaryLoader
 			var indices = new Uint8Array(e.data.indices);
 			g.setAttribute("indices", new THREE.BufferAttribute(indices, 4));
 
-			if(e.data.color)
+			if (e.data.color)
 			{
 				var color = new Uint8Array(e.data.color);
 				g.setAttribute("color", new THREE.BufferAttribute(color, 4, true));
 			}
-			if(e.data.intensity)
+			if (e.data.intensity)
 			{
 				var intensity = new Float32Array(e.data.intensity);
 				g.setAttribute("intensity", new THREE.BufferAttribute(intensity, 1));
 			}
-			if(e.data.classification)
+			if (e.data.classification)
 			{
 				var classification = new Uint8Array(e.data.classification);
 				g.setAttribute("classification", new THREE.BufferAttribute(classification, 1));
 			}
-			if(e.data.returnNumber)
+			if (e.data.returnNumber)
 			{
 				var returnNumber = new Uint8Array(e.data.returnNumber);
 				g.setAttribute("returnNumber", new THREE.BufferAttribute(returnNumber, 1));
 			}
-			if(e.data.numberOfReturns)
+			if (e.data.numberOfReturns)
 			{
 				var numberOfReturns = new Uint8Array(e.data.numberOfReturns);
 				g.setAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
 			}
-			if(e.data.pointSourceId)
+			if (e.data.pointSourceId)
 			{
 				var pointSourceId = new Uint16Array(e.data.pointSourceId);
 				g.setAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceId, 1));
@@ -99,7 +99,7 @@ class EptBinaryLoader
 			Global.workerPool.returnWorker(WorkerManager.EPT_BINARY_DECODER, worker);
 		};
 
-		var toArray = (v) => [v.x, v.y, v.z];
+		var toArray = (v) => {return [v.x, v.y, v.z];};
 		var message = {
 			buffer: buffer,
 			schema: node.ept.schema,

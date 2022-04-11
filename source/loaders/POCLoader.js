@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import {BinaryLoader} from "./BinaryLoader.js";
-import {LASLAZLoader} from "./LASLAZLoader.js";
-import {PointAttributes, PointAttribute} from "./PointAttributes.js";
 import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "../pointcloud/geometries/PointCloudOctreeGeometry.js";
 import {Global} from "../Global.js";
 import {XHRFactory} from "../XHRFactory.js";
-import { Version } from '../Version.js';
+import {Version} from '../Version.js';
+import {PointAttributes, PointAttribute} from "./PointAttributes.js";
+import {LASLAZLoader} from "./LASLAZLoader.js";
+import {BinaryLoader} from "./BinaryLoader.js";
 
 /**
  * @class Loads mno files and returns a PointcloudOctree
@@ -35,8 +35,8 @@ class POCLoader
 			var data = JSON.parse(xhr.responseText);
 			var version = new Version(data.version);
 
-			//Assume dir as absolute if it starts with http
-			if(data.octreeDir.indexOf("http") === 0)
+			// Assume dir as absolute if it starts with http
+			if (data.octreeDir.indexOf("http") === 0)
 			{
 				pco.octreeDir = data.octreeDir;
 			}
@@ -54,7 +54,7 @@ class POCLoader
 			var boundingBox = new THREE.Box3(min, max);
 			var tightBoundingBox = boundingBox.clone();
 
-			if(data.tightBoundingBox)
+			if (data.tightBoundingBox)
 			{
 				tightBoundingBox.min.copy(new THREE.Vector3(data.tightBoundingBox.lx, data.tightBoundingBox.ly, data.tightBoundingBox.lz));
 				tightBoundingBox.max.copy(new THREE.Vector3(data.tightBoundingBox.ux, data.tightBoundingBox.uy, data.tightBoundingBox.uz));
@@ -75,8 +75,8 @@ class POCLoader
 			pco.tightBoundingSphere = tightBoundingBox.getBoundingSphere(new THREE.Sphere());
 			pco.offset = offset;
 
-			//Select the appropiate loader
-			if(data.pointAttributes === "LAS" || data.pointAttributes === "LAZ")
+			// Select the appropiate loader
+			if (data.pointAttributes === "LAS" || data.pointAttributes === "LAZ")
 			{
 				pco.loader = new LASLAZLoader(data.version);
 			}
@@ -99,10 +99,10 @@ class POCLoader
 			pco.root.load();
 			nodes[name] = root;
 
-			//Load remaining hierarchy
-			if(version.upTo("1.4"))
+			// Load remaining hierarchy
+			if (version.upTo("1.4"))
 			{
-				for(var i = 1; i < data.hierarchy.length; i++)
+				for (var i = 1; i < data.hierarchy.length; i++)
 				{
 					var name = data.hierarchy[i][0];
 					var numPoints = data.hierarchy[i][1];
@@ -140,7 +140,7 @@ class POCLoader
 		var fpa = mno.pointAttributes;
 		var pa = new PointAttributes();
 
-		for(var i = 0; i < fpa.length; i++)
+		for (var i = 0; i < fpa.length; i++)
 		{
 			pa.add(PointAttribute[fpa[i]]);
 		}
@@ -154,7 +154,7 @@ class POCLoader
 		var max = aabb.max.clone();
 		var size = new THREE.Vector3().subVectors(max, min);
 
-		if((index & 0b0001) > 0)
+		if ((index & 0b0001) > 0)
 		{
 			min.z += size.z / 2;
 		}
@@ -163,7 +163,7 @@ class POCLoader
 			max.z -= size.z / 2;
 		}
 
-		if((index & 0b0010) > 0)
+		if ((index & 0b0010) > 0)
 		{
 			min.y += size.y / 2;
 		}
@@ -172,7 +172,7 @@ class POCLoader
 			max.y -= size.y / 2;
 		}
 
-		if((index & 0b0100) > 0)
+		if ((index & 0b0100) > 0)
 		{
 			min.x += size.x / 2;
 		}

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 var Shaders = {};
 
-//pointcloud.vs
+// pointcloud.vs
 Shaders.vertex = `
 precision highp float;
 precision highp int;
@@ -585,7 +585,7 @@ void main()
 	} 
 }`;
 
-//"pointcloud.fs"
+// "pointcloud.fs"
 Shaders.fragment = `
 
 #if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
@@ -666,7 +666,7 @@ void main()
 		#endif
 	#endif
 	
-	` + THREE.ShaderChunk.logdepthbuf_fragment +  `
+	` + THREE.ShaderChunk.logdepthbuf_fragment + `
 
 	#if defined weighted_splats
 		float distance = 2.0 * length(gl_PointCoord.xy - 0.5);

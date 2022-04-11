@@ -1,9 +1,9 @@
 
-import {PointAttributeNames} from "../PointAttributes.js";
-import {VersionUtils} from "../utils/VersionUtils.js";
+import {PointAttributeNames} from "./PointAttributes.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
 import {Global} from "../Global.js";
 import {XHRFactory} from "../XHRFactory.js";
+import { Version } from "../Version.js";
 
 class GreyhoundBinaryLoader
 {
@@ -11,7 +11,7 @@ class GreyhoundBinaryLoader
 	{
 		if(typeof(version) === "string")
 		{
-			this.version = new VersionUtils(version);
+			this.version = new Version(version);
 		}
 		else
 		{

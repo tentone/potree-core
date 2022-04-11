@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import {VersionUtils} from "../utils/VersionUtils.js";
 import {WorkerManager} from "../utils/WorkerManager.js";
-import {LASLoader, LAZLoader, LASFile, LASDecoder} from "./LASLoader.js";
+import { LASFile, LASDecoder} from "./LASLoader.js";
 import {Global} from "../Global.js";
 import {XHRFactory} from "../XHRFactory.js";
+import { Version } from '../Version.js';
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
@@ -18,7 +18,7 @@ class LASLAZLoader
 	{
 		if(typeof(version) === "string")
 		{
-			this.version = new VersionUtils(version);
+			this.version = new Version(version);
 		}
 		else
 		{

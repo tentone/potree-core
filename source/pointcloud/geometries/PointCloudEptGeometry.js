@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import {EptBinaryLoader} from "../../loaders/ept/EptBinaryLoader";
 import {EptLaszipLoader} from "../../loaders/ept/EptLaszipLoader";
-import {VersionUtils} from "../../utils/VersionUtils.js";
 import {PointCloudTreeNode} from "../PointCloudTree.js";
 import {Global} from "../../Global.js";
 import {XHRFactory} from "../../XHRFactory.js";
+import { Version } from '../../Version';
 
 class Utils
 {
@@ -62,7 +62,7 @@ class PointCloudEptGeometry
 		this.offset = Utils.toVector3([0, 0, 0]);
 		this.boundingSphere = Utils.sphereFrom(this.boundingBox);
 		this.tightBoundingSphere = Utils.sphereFrom(this.tightBoundingBox);
-		this.version = new VersionUtils("1.6");
+		this.version = new Version("1.6");
 
 		this.projection = null;
 		this.fallbackProjection = null;

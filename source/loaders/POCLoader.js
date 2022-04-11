@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import {BinaryLoader} from "./BinaryLoader.js";
 import {LASLAZLoader} from "./LASLAZLoader.js";
-import {PointAttributes, PointAttribute} from "../PointAttributes.js";
+import {PointAttributes, PointAttribute} from "./PointAttributes.js";
 import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "../pointcloud/geometries/PointCloudOctreeGeometry.js";
-import {VersionUtils} from "../utils/VersionUtils.js";
 import {Global} from "../Global.js";
 import {XHRFactory} from "../XHRFactory.js";
+import { Version } from '../Version.js';
 
 /**
  * @class Loads mno files and returns a PointcloudOctree
@@ -33,7 +33,7 @@ class POCLoader
 		xhr.onload = function()
 		{
 			var data = JSON.parse(xhr.responseText);
-			var version = new VersionUtils(data.version);
+			var version = new Version(data.version);
 
 			//Assume dir as absolute if it starts with http
 			if(data.octreeDir.indexOf("http") === 0)

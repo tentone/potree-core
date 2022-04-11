@@ -24,63 +24,21 @@ var PointAttributeNames =
  *
  * @class
  */
-var PointAttributeTypes =
-{
-	DATA_TYPE_DOUBLE:
-	{
-		ordinal: 0,
-		size: 8
-	},
-	DATA_TYPE_FLOAT:
-	{
-		ordinal: 1,
-		size: 4
-	},
-	DATA_TYPE_INT8:
-	{
-		ordinal: 2,
-		size: 1
-	},
-	DATA_TYPE_UINT8:
-	{
-		ordinal: 3,
-		size: 1
-	},
-	DATA_TYPE_INT16:
-	{
-		ordinal: 4,
-		size: 2
-	},
-	DATA_TYPE_UINT16:
-	{
-		ordinal: 5,
-		size: 2
-	},
-	DATA_TYPE_INT32:
-	{
-		ordinal: 6,
-		size: 4
-	},
-	DATA_TYPE_UINT32:
-	{
-		ordinal: 7,
-		size: 4
-	},
-	DATA_TYPE_INT64:
-	{
-		ordinal: 8,
-		size: 8
-	},
-	DATA_TYPE_UINT64:
-	{
-		ordinal: 9,
-		size: 8
-	}
+ const PointAttributeTypes = {
+	DATA_TYPE_DOUBLE: {ordinal: 0, name: "double", size: 8},
+	DATA_TYPE_FLOAT:  {ordinal: 1, name: "float",  size: 4},
+	DATA_TYPE_INT8:   {ordinal: 2, name: "int8",   size: 1},
+	DATA_TYPE_UINT8:  {ordinal: 3, name: "uint8",  size: 1},
+	DATA_TYPE_INT16:  {ordinal: 4, name: "int16",  size: 2},
+	DATA_TYPE_UINT16: {ordinal: 5, name: "uint16", size: 2},
+	DATA_TYPE_INT32:  {ordinal: 6, name: "int32",  size: 4},
+	DATA_TYPE_UINT32: {ordinal: 7, name: "uint32", size: 4},
+	DATA_TYPE_INT64:  {ordinal: 8, name: "int64",  size: 8},
+	DATA_TYPE_UINT64: {ordinal: 9, name: "uint64", size: 8}
 };
 
-var i = 0;
-for(var obj in PointAttributeTypes)
-{
+let i = 0;
+for (let obj in PointAttributeTypes) {
 	PointAttributeTypes[i] = PointAttributeTypes[obj];
 	i++;
 }
@@ -88,12 +46,16 @@ for(var obj in PointAttributeTypes)
 /**
  * A single point attribute such as color/normal/.. and its data format/number of elements/...
  */
-function PointAttribute(name, type, numElements)
-{
-	this.name = name;
-	this.type = type;
-	this.numElements = numElements;
-	this.byteSize = this.numElements * this.type.size;
+ class PointAttribute{
+
+	constructor(name, type, numElements){
+		this.name = name;
+		this.type = type;
+		this.numElements = numElements;
+		this.byteSize = this.numElements * this.type.size;
+		this.description = "";
+		this.range = [Infinity, -Infinity];
+	}
 };
 
 PointAttribute.POSITION_CARTESIAN = new PointAttribute(PointAttributeNames.POSITION_CARTESIAN, PointAttributeTypes.DATA_TYPE_FLOAT, 3);
@@ -116,58 +78,50 @@ PointAttribute.SPACING = new PointAttribute(PointAttributeNames.SPACING, PointAt
 /**
  * Ordered list of PointAttributes used to identify how points are aligned in a buffer.
  */
-function PointAttributes(pointAttributes)
-{
-	this.attributes = [];
-	this.byteSize = 0;
-	this.size = 0;
+class PointAttributes{
 
-	if(pointAttributes != null)
-	{
-		for(var i = 0; i < pointAttributes.length; i++)
-		{
-			var pointAttributeName = pointAttributes[i];
-			var pointAttribute = PointAttribute[pointAttributeName];
-			this.attributes.push(pointAttribute);
-			this.byteSize += pointAttribute.byteSize;
-			this.size++;
-		}
-	}
-};
+	constructor(pointAttributes){
+		this.attributes = [];
+		this.byteSize = 0;
+		this.size = 0;
+		this.vectors = [];
 
-PointAttributes.prototype.add = function(pointAttribute)
-{
-	this.attributes.push(pointAttribute);
-	this.byteSize += pointAttribute.byteSize;
-	this.size++;
-};
-
-PointAttributes.prototype.hasColors = function()
-{
-	for(var name in this.attributes)
-	{
-		var pointAttribute = this.attributes[name];
-		if(pointAttribute.name === PointAttributeNames.COLOR_PACKED)
-		{
-			return true;
+		if (pointAttributes != null) {
+			for (let i = 0; i < pointAttributes.length; i++) {
+				let pointAttributeName = pointAttributes[i];
+				let pointAttribute = PointAttribute[pointAttributeName];
+				this.attributes.push(pointAttribute);
+				this.byteSize += pointAttribute.byteSize;
+				this.size++;
+			}
 		}
 	}
 
-	return false;
-};
 
-PointAttributes.prototype.hasNormals = function()
-{
-	for(var name in this.attributes)
-	{
-		var pointAttribute = this.attributes[name];
-		if(pointAttribute === PointAttribute.NORMAL_SPHEREMAPPED || pointAttribute === PointAttribute.NORMAL_FLOATS || pointAttribute === PointAttribute.NORMAL || pointAttribute === PointAttribute.NORMAL_OCT16)
-		{
-			return true;
-		}
+	add(pointAttribute){
+		this.attributes.push(pointAttribute);
+		this.byteSize += pointAttribute.byteSize;
+		this.size++;
+	};
+
+	addVector(vector){
+		this.vectors.push(vector);
 	}
 
-	return false;
-};
+	hasNormals(){
+		for (let name in this.attributes) {
+			let pointAttribute = this.attributes[name];
+			if (
+				pointAttribute === PointAttribute.NORMAL_SPHEREMAPPED ||
+				pointAttribute === PointAttribute.NORMAL_FLOATS ||
+				pointAttribute === PointAttribute.NORMAL ||
+				pointAttribute === PointAttribute.NORMAL_OCT16) {
+				return true;
+			}
+		}
+
+		return false;
+	};
+}
 
 export {PointAttribute, PointAttributes, PointAttributeNames, PointAttributeTypes};

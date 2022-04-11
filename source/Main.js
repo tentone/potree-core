@@ -18,15 +18,14 @@ export {BinaryHeap} from "./lib/BinaryHeap.js";
 
 export {LRU} from "./utils/LRU.js";
 export {HelperUtils} from "./utils/HelperUtils.js";
-export {VersionUtils} from "./utils/VersionUtils.js";
+export {Version} from "./Version.js";
 export {WorkerManager} from "./utils/WorkerManager.js";
 
 export {
 	PointAttribute,
-	PointAttributes,
 	PointAttributeNames,
 	PointAttributeTypes
-} from "./PointAttributes.js";
+} from "./loaders/PointAttributes.js";
 
 export {Gradients} from "./Gradients.js";
 export {Points} from "./Points.js";

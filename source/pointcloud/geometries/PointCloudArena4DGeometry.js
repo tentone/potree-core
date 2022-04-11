@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {PointAttributes, PointAttribute} from "../../PointAttributes.js";
+import {PointAttributes, PointAttribute} from "./PointAttributes.js";
 import {Global} from "../../Global.js";
 import {XHRFactory} from "../../XHRFactory.js";
 

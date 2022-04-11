@@ -1,8 +1,8 @@
 
-import {PointAttributes, PointAttribute} from "../PointAttributes.js";
+import {PointAttributes, PointAttribute} from "./PointAttributes.js";
 import {PointCloudGreyhoundGeometry, PointCloudGreyhoundGeometryNode} from "../pointcloud/geometries/PointCloudGreyhoundGeometry.js";
+import { Version } from "../Version.js";
 import {GreyhoundBinaryLoader} from "./GreyhoundBinaryLoader.js";
-import {VersionUtils} from "../utils/VersionUtils.js";
 import {GreyhoundUtils} from "./GreyhoundUtils.js";
 
 function GreyhoundLoader(){}
@@ -51,7 +51,7 @@ GreyhoundLoader.load = function(url, callback)
 			}
 			*/
 			var greyhoundInfo = JSON.parse(data);
-			var version = new VersionUtils("1.4");
+			var version = new Version("1.4");
 
 			var bounds = greyhoundInfo.bounds;
 

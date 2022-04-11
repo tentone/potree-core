@@ -21,10 +21,7 @@ class BasicGroup extends THREE.Mesh {
 
     this.rotation.set(-Math.PI / 2, 0, 0);
 
-    // Frustrum culling with box geometry causes semi-transparent non-Potree objects to be cropped
-    // TODO Is there a better solution?
-    this.frustumCulled = false;
-
+    this.frustumCulled = true;
     this.pointclouds = [];
 
     this.nodeSize = 30;
@@ -76,6 +73,8 @@ class BasicGroup extends THREE.Mesh {
 
       this.geometry = geometry;
     } else {
+      // Frustrum culling with box geometry causes semi-transparent non-Potree objects to be cropped
+      // TODO Is there a better solution
       this.geometry = new THREE.BoxBufferGeometry(0, 0, 0);
     }
   }

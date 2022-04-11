@@ -1,6 +1,3 @@
-/**
- * Migrated from Potree (https://github.com/potree/potree/blob/develop/src/XHRFactory.js) by Lars Moastuen <@larsmoa>.
- */
 export const XHRFactory = {
 	config: {
 		withCredentials: false,
@@ -45,4 +42,4 @@ export const XHRFactory = {
 		};
 		return fetch(resource, options);
 	}
-};
+}

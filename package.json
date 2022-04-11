@@ -11,7 +11,9 @@
 		"build": "webpack",
 		"start": "webpack --watch",
 		"docs": "jsdoc -d docs source",
-		"pub": "npm run build && npm publish --access public ."
+		"pub": "npm run build && npm publish --access public .",
+		"lint": "eslint --ext .js source",
+		"lint-fix": "eslint --ext .js --fix source"
 	},
 	"keywords": [
 		"three",
@@ -22,7 +24,9 @@
 	"author": "Tentone",
 	"license": "MIT",
 	"dependencies": {},
-	"peerDependencies": {},
+	"peerDependencies": {
+		"three": "^0.120.0"
+	},
 	"devDependencies": {
 		"@types/three": "~0.139.0",
 		"three": "~0.139.2",
@@ -30,6 +34,9 @@
 		"jsdoc": "~3.6.10",
 		"webpack": "~5.71.0",
 		"webpack-cli": "~4.9.2",
-		"webpack-node-externals": "~3.0.0"
+		"webpack-node-externals": "~3.0.0",
+		"eslint": "~7.7.0",
+		"eslint-plugin-import": "~2.22.0",
+		"eslint-plugin-jsdoc": "~30.2.4"
 	}
 }

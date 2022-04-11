@@ -2,7 +2,7 @@
 import {PointCloudEptGeometry, PointCloudEptGeometryNode} from "../pointcloud/geometries/PointCloudEptGeometry.js";
 import { XHRFactory } from "../XHRFactory.js";
 
-export class EptLoader
+export class EPTLoader
 {
 	static async load(file, callback)
 	{

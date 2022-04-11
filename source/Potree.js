@@ -1,7 +1,6 @@
 import * as THREE from 'three';
-import { GreyhoundLoader } from "./loaders/GreyhoundLoader.js";
 import { POCLoader } from "./loaders/POCLoader.js";
-import { EptLoader } from "./loaders/EPTLoader.js";
+import { EPTLoader } from "./loaders/EPTLoader.js";
 import { PointCloudOctree } from "./pointcloud/PointCloudOctree.js";
 import { PointCloudArena4D } from "./pointcloud/PointCloudArena4D.js";
 import { PointCloudArena4DGeometry } from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
@@ -95,16 +94,9 @@ function loadPointCloud(path, name, callback) {
       });
   };
 
-  //Greyhound pointcloud server URL.
-  if (path.indexOf("greyhound://") === 0) {
-    GreyhoundLoader.load(path, function (geometry) {
-      if (geometry !== undefined) {
-        loaded(new PointCloudOctree(geometry));
-      }
-    });
-  }
+
   //Potree point cloud
-  else if (path.indexOf("cloud.js") > 0) {
+  if (path.indexOf("cloud.js") > 0) {
     POCLoader.load(path, function (geometry) {
       if (geometry !== undefined) {
         loaded(new PointCloudOctree(geometry));
@@ -112,7 +104,7 @@ function loadPointCloud(path, name, callback) {
     });
   }
   else if (path.indexOf('ept.json') > 0) {
-    EptLoader.load(path, function (geometry) {
+    EPTLoader.load(path, function (geometry) {
       if (geometry !== undefined) {
         loaded(new PointCloudOctree(geometry));
       }

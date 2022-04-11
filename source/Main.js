@@ -39,20 +39,15 @@ export {PointCloudOctree} from "./pointcloud/PointCloudOctree.js";
 
 export {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "./pointcloud/geometries/PointCloudOctreeGeometry.js";
 export {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
-export {PointCloudGreyhoundGeometry} from "./pointcloud/geometries/PointCloudGreyhoundGeometry.js";
 export {PointCloudEptGeometry, PointCloudEptGeometryNode} from "./pointcloud/geometries/PointCloudEptGeometry.js";
 
 export {PointCloudMaterial} from "./pointcloud/materials/PointCloudMaterial.js";
 
 export {LASLoader} from "./loaders/LASLoader.js";
 export {BinaryLoader} from "./loaders/BinaryLoader.js";
-export {GreyhoundUtils} from "./loaders/GreyhoundUtils.js";
-export {GreyhoundLoader} from "./loaders/GreyhoundLoader.js";
-export {GreyhoundBinaryLoader} from "./loaders/GreyhoundBinaryLoader.js";
 export {POCLoader} from "./loaders/POCLoader.js";
 export {LASLAZLoader} from "./loaders/LASLAZLoader.js";
-export {EptLoader} from "./loaders/EPTLoader.js";
-
+export {EPTLoader} from "./loaders/EPTLoader.js";
 export {EptLaszipLoader} from "./loaders/ept/EptLaszipLoader.js";
 export {EptBinaryLoader} from "./loaders/ept/EptBinaryLoader.js";
 

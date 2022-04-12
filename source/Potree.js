@@ -8,85 +8,85 @@ import {BinaryHeap} from "./lib/BinaryHeap.js";
 import {Global} from "./Global.js";
 import {Box3Helper, Frustum} from "three";
 
-var AttributeLocations =
-{
-	position: 0,
-	color: 1,
-	intensity: 2,
-	classification: 3,
-	returnNumber: 4,
-	numberOfReturns: 5,
-	pointSourceID: 6,
-	indices: 7,
-	normal: 8,
-	spacing: 9
-};
+const AttributeLocations =
+	{
+		position: 0,
+		color: 1,
+		intensity: 2,
+		classification: 3,
+		returnNumber: 4,
+		numberOfReturns: 5,
+		pointSourceID: 6,
+		indices: 7,
+		normal: 8,
+		spacing: 9
+	};
 
-var Classification =
-{
-	DEFAULT:
-  {
-  	0: new Vector4(0.5, 0.5, 0.5, 1.0),
-  	1: new Vector4(0.5, 0.5, 0.5, 1.0),
-  	2: new Vector4(0.63, 0.32, 0.18, 1.0),
-  	3: new Vector4(0.0, 1.0, 0.0, 1.0),
-  	4: new Vector4(0.0, 0.8, 0.0, 1.0),
-  	5: new Vector4(0.0, 0.6, 0.0, 1.0),
-  	6: new Vector4(1.0, 0.66, 0.0, 1.0),
-  	7: new Vector4(1.0, 0, 1.0, 1.0),
-  	8: new Vector4(1.0, 0, 0.0, 1.0),
-  	9: new Vector4(0.0, 0.0, 1.0, 1.0),
-  	12: new Vector4(1.0, 1.0, 0.0, 1.0),
-  	DEFAULT: new Vector4(0.3, 0.6, 0.6, 0.5)
-  }
-};
+const Classification =
+	{
+		DEFAULT:
+			{
+				0: new Vector4(0.5, 0.5, 0.5, 1.0),
+				1: new Vector4(0.5, 0.5, 0.5, 1.0),
+				2: new Vector4(0.63, 0.32, 0.18, 1.0),
+				3: new Vector4(0.0, 1.0, 0.0, 1.0),
+				4: new Vector4(0.0, 0.8, 0.0, 1.0),
+				5: new Vector4(0.0, 0.6, 0.0, 1.0),
+				6: new Vector4(1.0, 0.66, 0.0, 1.0),
+				7: new Vector4(1.0, 0, 1.0, 1.0),
+				8: new Vector4(1.0, 0, 0.0, 1.0),
+				9: new Vector4(0.0, 0.0, 1.0, 1.0),
+				12: new Vector4(1.0, 1.0, 0.0, 1.0),
+				DEFAULT: new Vector4(0.3, 0.6, 0.6, 0.5)
+			}
+	};
 
-var PointSizeType =
-{
-	FIXED: 0,
-	ATTENUATED: 1,
-	ADAPTIVE: 2
-};
+const PointSizeType =
+	{
+		FIXED: 0,
+		ATTENUATED: 1,
+		ADAPTIVE: 2
+	};
 
-var PointShape =
-{
-	SQUARE: 0,
-	CIRCLE: 1,
-	PARABOLOID: 2
-};
+const PointShape =
+	{
+		SQUARE: 0,
+		CIRCLE: 1,
+		PARABOLOID: 2
+	};
 
-var PointColorType =
-{
-	RGB: 0,
-	COLOR: 1,
-	DEPTH: 2,
-	HEIGHT: 3,
-	ELEVATION: 3,
-	INTENSITY: 4,
-	INTENSITY_GRADIENT: 5,
-	LOD: 6,
-	LEVEL_OF_DETAIL: 6,
-	POINT_INDEX: 7,
-	CLASSIFICATION: 8,
-	RETURN_NUMBER: 9,
-	SOURCE: 10,
-	NORMAL: 11,
-	PHONG: 12,
-	RGB_HEIGHT: 13,
-	COMPOSITE: 50
-};
+const PointColorType =
+	{
+		RGB: 0,
+		COLOR: 1,
+		DEPTH: 2,
+		HEIGHT: 3,
+		ELEVATION: 3,
+		INTENSITY: 4,
+		INTENSITY_GRADIENT: 5,
+		LOD: 6,
+		LEVEL_OF_DETAIL: 6,
+		POINT_INDEX: 7,
+		CLASSIFICATION: 8,
+		RETURN_NUMBER: 9,
+		SOURCE: 10,
+		NORMAL: 11,
+		PHONG: 12,
+		RGB_HEIGHT: 13,
+		COMPOSITE: 50
+	};
 
-var TreeType =
-{
-	OCTREE: 0,
-	KDTREE: 1
-};
+const TreeType =
+	{
+		OCTREE: 0,
+		KDTREE: 1
+	};
 
 function loadPointCloud(path, name, callback) 
 {
-	var loaded = function(pointcloud) 
+	const loaded = function(pointcloud)
 	{
-		if (name !== undefined) 
+		if (name !== undefined)
 		{
 			pointcloud.name = name;
 		}
@@ -139,23 +139,26 @@ function loadPointCloud(path, name, callback)
 
 function updateVisibility(pointclouds, camera, renderer, totalPointBudget) 
 {
-	var numVisibleNodes = 0;
-	var numVisiblePoints = 0;
-	var numVisiblePointsInPointclouds = new Map(pointclouds.map((pc) => {return [pc, 0];}));
-	var visibleNodes = [];
-	var visibleGeometry = [];
-	var unloadedGeometry = [];
-	var lowestSpacing = Infinity;
+	let numVisibleNodes = 0;
+	let numVisiblePoints = 0;
+	const numVisiblePointsInPointclouds = new Map(pointclouds.map((pc) =>
+	{
+		return [pc, 0];
+	}));
+	const visibleNodes = [];
+	const visibleGeometry = [];
+	const unloadedGeometry = [];
+	let lowestSpacing = Infinity;
 
 	// Calculate object space frustum and cam pos and setup priority queue
-	var structures = updateVisibilityStructures(pointclouds, camera, renderer);
-	var frustums = structures.frustums;
-	var camObjPositions = structures.camObjPositions;
-	var priorityQueue = structures.priorityQueue;
+	const structures = updateVisibilityStructures(pointclouds, camera, renderer);
+	const frustums = structures.frustums;
+	const camObjPositions = structures.camObjPositions;
+	const priorityQueue = structures.priorityQueue;
 
-	var loadedToGPUThisFrame = 0;
-	var domWidth = renderer.domElement.clientWidth;
-	var domHeight = renderer.domElement.clientHeight;
+	let loadedToGPUThisFrame = 0;
+	const domWidth = renderer.domElement.clientWidth;
+	const domHeight = renderer.domElement.clientHeight;
 
 	// Check if pointcloud has been transformed, some code will only be executed if changes have been detected
 	if (!Global.pointcloudTransformVersion) 
@@ -163,7 +166,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 		Global.pointcloudTransformVersion = new Map();
 	}
 
-	var pointcloudTransformVersion = Global.pointcloudTransformVersion;
+	const pointcloudTransformVersion = Global.pointcloudTransformVersion;
 
 	for (var i = 0; i < pointclouds.length; i++) 
 	{
@@ -186,7 +189,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 		}
 		else 
 		{
-			var version = pointcloudTransformVersion.get(pointcloud);
+			const version = pointcloudTransformVersion.get(pointcloud);
 			if (!version.transform.equals(pointcloud.matrixWorld)) 
 			{
 				version.number++;
@@ -204,19 +207,19 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 	// Process priority queue
 	while (priorityQueue.size() > 0) 
 	{
-		var element = priorityQueue.pop();
-		var node = element.node;
-		var parent = element.parent;
+		const element = priorityQueue.pop();
+		let node = element.node;
+		const parent = element.parent;
 		var pointcloud = pointclouds[element.pointcloud];
-		var box = node.getBoundingBox();
-		var frustum = frustums[element.pointcloud];
-		var camObjPos = camObjPositions[element.pointcloud];
+		const box = node.getBoundingBox();
+		const frustum = frustums[element.pointcloud];
+		const camObjPos = camObjPositions[element.pointcloud];
 
-		var insideFrustum = frustum.intersectsBox(box);
-		var maxLevel = pointcloud.maxLevel || Infinity;
-		var level = node.getLevel();
+		const insideFrustum = frustum.intersectsBox(box);
+		const maxLevel = pointcloud.maxLevel || Infinity;
+		const level = node.getLevel();
 
-		var visible = insideFrustum;
+		let visible = insideFrustum;
 		// Within 'global' total budget?
 		visible = visible && numVisiblePoints + node.getNumPoints() <= totalPointBudget;
 		// Within budget of the point cloud?
@@ -240,7 +243,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 		numVisibleNodes++;
 		numVisiblePoints += node.getNumPoints();
 
-		var numVisiblePointsInPointcloud = numVisiblePointsInPointclouds.get(pointcloud);
+		const numVisiblePointsInPointcloud = numVisiblePointsInPointclouds.get(pointcloud);
 		numVisiblePointsInPointclouds.set(pointcloud, numVisiblePointsInPointcloud + node.getNumPoints());
 
 		pointcloud.numVisibleNodes++;
@@ -275,7 +278,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 				node._transformVersion = -1;
 			}
 
-			var transformVersion = pointcloudTransformVersion.get(pointcloud);
+			const transformVersion = pointcloudTransformVersion.get(pointcloud);
 			if (node._transformVersion !== transformVersion.number) 
 			{
 				node.sceneNode.updateMatrix();
@@ -285,7 +288,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 
 			if (pointcloud.showBoundingBox && !node.boundingBoxNode && node.getBoundingBox) 
 			{
-				var boxHelper = new Box3Helper(node.getBoundingBox());
+				const boxHelper = new Box3Helper(node.getBoundingBox());
 				boxHelper.matrixAutoUpdate = false;
 				pointcloud.boundingBoxNodes.push(boxHelper);
 				node.boundingBoxNode = boxHelper;
@@ -303,24 +306,24 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 		}
 
 		// Add child nodes to priorityQueue
-		var children = node.getChildren();
+		const children = node.getChildren();
 		for (var i = 0; i < children.length; i++) 
 		{
-			var child = children[i];
-			var weight = 0;
+			const child = children[i];
+			let weight = 0;
 
 			// Perspective camera
 			if (camera.isPerspectiveCamera) 
 			{
-				var sphere = child.getBoundingSphere(new Sphere());
-				var center = sphere.center;
+				const sphere = child.getBoundingSphere(new Sphere());
+				const center = sphere.center;
 				var distance = sphere.center.distanceTo(camObjPos);
 
-				var radius = sphere.radius;
-				var fov = camera.fov * Math.PI / 180;
-				var slope = Math.tan(fov / 2);
-				var projFactor = 0.5 * domHeight / (slope * distance);
-				var screenPixelRadius = radius * projFactor;
+				const radius = sphere.radius;
+				const fov = camera.fov * Math.PI / 180;
+				const slope = Math.tan(fov / 2);
+				const projFactor = 0.5 * domHeight / (slope * distance);
+				const screenPixelRadius = radius * projFactor;
 
 				// If pixel radius bellow minimum discard
 				if (screenPixelRadius < pointcloud.minimumNodePixelSize) 
@@ -340,9 +343,9 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 			else 
 			{
 				// TODO <IMPROVE VISIBILITY>
-				var bb = child.getBoundingBox();
+				const bb = child.getBoundingBox();
 				var distance = child.getBoundingSphere(new Sphere()).center.distanceTo(camObjPos);
-				var diagonal = bb.max.clone().sub(bb.min).length();
+				const diagonal = bb.max.clone().sub(bb.min).length();
 				weight = diagonal / distance;
 			}
 
@@ -357,11 +360,17 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 	}
 
 	// Update DEM
-	var candidates = pointclouds.filter((p) => {return p.generateDEM && p.dem instanceof DEM;});
+	const candidates = pointclouds.filter((p) =>
+	{
+		return p.generateDEM && p.dem instanceof DEM;
+	});
 
 	for (var pointcloud of candidates) 
 	{
-		var updatingNodes = pointcloud.visibleNodes.filter((n) => {return n.getLevel() <= Global.maxDEMLevel;});
+		const updatingNodes = pointcloud.visibleNodes.filter((n) =>
+		{
+			return n.getLevel() <= Global.maxDEMLevel;
+		});
 		pointcloud.dem.update(updatingNodes);
 	}
 
@@ -379,9 +388,9 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 
 function updatePointClouds(pointclouds, camera, renderer, totalPointBudget) 
 {
-	var result = updateVisibility(pointclouds, camera, renderer, totalPointBudget);
+	const result = updateVisibility(pointclouds, camera, renderer, totalPointBudget);
 
-	for (var i = 0; i < pointclouds.length; i++) 
+	for (let i = 0; i < pointclouds.length; i++)
 	{
 		pointclouds[i].updateMaterial(pointclouds[i].material, camera, renderer);
 		pointclouds[i].updateVisibleBounds();
@@ -394,16 +403,16 @@ function updatePointClouds(pointclouds, camera, renderer, totalPointBudget)
 
 function updateVisibilityStructures(pointclouds, camera, renderer) 
 {
-	var frustums = [];
-	var camObjPositions = [];
-	var priorityQueue = new BinaryHeap(function(x) 
+	const frustums = [];
+	const camObjPositions = [];
+	const priorityQueue = new BinaryHeap(function(x)
 	{
 		return 1 / x.weight;
 	});
 
-	for (var i = 0; i < pointclouds.length; i++) 
+	for (let i = 0; i < pointclouds.length; i++)
 	{
-		var pointcloud = pointclouds[i];
+		const pointcloud = pointclouds[i];
 
 		if (!pointcloud.initialized()) 
 		{
@@ -418,26 +427,26 @@ function updateVisibilityStructures(pointclouds, camera, renderer)
 
 		// Frustum in object space
 		camera.updateMatrixWorld();
-		var frustum = new Frustum();
-		var viewI = camera.matrixWorldInverse;
-		var world = pointcloud.matrixWorld;
+		const frustum = new Frustum();
+		const viewI = camera.matrixWorldInverse;
+		const world = pointcloud.matrixWorld;
 
 		// Use close near plane for frustum intersection
-		var frustumCam = camera.clone();
+		const frustumCam = camera.clone();
 		frustumCam.near = camera.near; // Math.min(camera.near, 0.1);
 		frustumCam.updateProjectionMatrix();
-		var proj = camera.projectionMatrix;
+		const proj = camera.projectionMatrix;
 
-		var fm = new Matrix4().multiply(proj).multiply(viewI).multiply(world);
+		const fm = new Matrix4().multiply(proj).multiply(viewI).multiply(world);
 		frustum.setFromProjectionMatrix(fm);
 		frustums.push(frustum);
 
 		// Camera position in object space
-		var view = camera.matrixWorld;
+		const view = camera.matrixWorld;
 		// var worldI = new Matrix4().getInverse(world);
-		var worldI = world.clone().invert();
-		var camMatrixObject = new Matrix4().multiply(worldI).multiply(view);
-		var camObjPos = new Vector3().setFromMatrixPosition(camMatrixObject);
+		const worldI = world.clone().invert();
+		const camMatrixObject = new Matrix4().multiply(worldI).multiply(view);
+		const camObjPos = new Vector3().setFromMatrixPosition(camMatrixObject);
 		camObjPositions.push(camObjPos);
 
 		if (pointcloud.visible && pointcloud.root !== null) 
@@ -456,7 +465,7 @@ function updateVisibilityStructures(pointclouds, camera, renderer)
 			pointcloud.hideDescendants(pointcloud.root.sceneNode);
 		}
 
-		for (var j = 0; j < pointcloud.boundingBoxNodes.length; j++) 
+		for (let j = 0; j < pointcloud.boundingBoxNodes.length; j++)
 		{
 			pointcloud.boundingBoxNodes[j].visible = false;
 		}

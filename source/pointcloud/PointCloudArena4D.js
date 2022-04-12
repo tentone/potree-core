@@ -1,4 +1,4 @@
-import {Vector3, Vector2, Sphere, Points, NoBlending, VertexColors, NearestFilter, PointCloud, Scene, WebGLRenderTarget} from "three";
+import {Vector3, Vector2, Sphere, Points, NoBlending, NearestFilter, Scene, WebGLRenderTarget} from "three";
 import {HelperUtils} from "../utils/HelperUtils.js";
 import {Global} from "../Global.js";
 import {TreeType, PointSizeType, PointColorType} from "../Potree.js";

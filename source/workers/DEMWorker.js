@@ -16,7 +16,7 @@ onmessage = function(event)
 	dem.fill(-Infinity);
 	for (let i = 0; i < numPoints; i++) 
 	{
-		let x = position[3 * i + 0];
+		let x = position[3 * i];
 		let y = position[3 * i + 1];
 		let z = position[3 * i + 2];
 

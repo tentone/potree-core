@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import {Vector3, Box3, DataTexture, NearestFilter, RGBAFormat} from "three";
 
 export class HelperUtils
 {
@@ -7,23 +7,23 @@ export class HelperUtils
 	 */
 	static generateDataTexture(width, height, color)
 	{
-		var size = width * height;
-		var data = new Uint8Array(4 * width * height);
+		const size = width * height;
+		const data = new Uint8Array(4 * width * height);
 
-		var r = Math.floor(color.r * 255);
-		var g = Math.floor(color.g * 255);
-		var b = Math.floor(color.b * 255);
+		const r = Math.floor(color.r * 255);
+		const g = Math.floor(color.g * 255);
+		const b = Math.floor(color.b * 255);
 
-		for (var i = 0; i < size; i++)
+		for (let i = 0; i < size; i++)
 		{
 			data[i * 3] = r;
 			data[i * 3 + 1] = g;
 			data[i * 3 + 2] = b;
 		}
 
-		var texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
+		const texture = new DataTexture(data, width, height, RGBAFormat);
 		texture.needsUpdate = true;
-		texture.magFilter = THREE.NearestFilter;
+		texture.magFilter = NearestFilter;
 
 		return texture;
 	};
@@ -33,19 +33,19 @@ export class HelperUtils
 	 */
 	static computeTransformedBoundingBox(box, transform)
 	{
-		var vertices = [
-			new THREE.Vector3(box.min.x, box.min.y, box.min.z).applyMatrix4(transform),
-			new THREE.Vector3(box.min.x, box.min.y, box.min.z).applyMatrix4(transform),
-			new THREE.Vector3(box.max.x, box.min.y, box.min.z).applyMatrix4(transform),
-			new THREE.Vector3(box.min.x, box.max.y, box.min.z).applyMatrix4(transform),
-			new THREE.Vector3(box.min.x, box.min.y, box.max.z).applyMatrix4(transform),
-			new THREE.Vector3(box.min.x, box.max.y, box.max.z).applyMatrix4(transform),
-			new THREE.Vector3(box.max.x, box.max.y, box.min.z).applyMatrix4(transform),
-			new THREE.Vector3(box.max.x, box.min.y, box.max.z).applyMatrix4(transform),
-			new THREE.Vector3(box.max.x, box.max.y, box.max.z).applyMatrix4(transform)
+		const vertices = [
+			new Vector3(box.min.x, box.min.y, box.min.z).applyMatrix4(transform),
+			new Vector3(box.min.x, box.min.y, box.min.z).applyMatrix4(transform),
+			new Vector3(box.max.x, box.min.y, box.min.z).applyMatrix4(transform),
+			new Vector3(box.min.x, box.max.y, box.min.z).applyMatrix4(transform),
+			new Vector3(box.min.x, box.min.y, box.max.z).applyMatrix4(transform),
+			new Vector3(box.min.x, box.max.y, box.max.z).applyMatrix4(transform),
+			new Vector3(box.max.x, box.max.y, box.min.z).applyMatrix4(transform),
+			new Vector3(box.max.x, box.min.y, box.max.z).applyMatrix4(transform),
+			new Vector3(box.max.x, box.max.y, box.max.z).applyMatrix4(transform)
 		];
 
-		var boundingBox = new THREE.Box3();
+		const boundingBox = new Box3();
 		boundingBox.setFromPoints(vertices);
 		
 		return boundingBox;

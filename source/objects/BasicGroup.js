@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import {Vector3, Box3, BufferGeometry, Object3D, Mesh, Matrix4, BoxBufferGeometry, Ray, MeshBasicMaterial} from "three";
 import {HelperUtils} from "../utils/HelperUtils.js";
 import {updatePointClouds} from "../Potree.js";
 import {PointCloudTree} from "../pointcloud/PointCloudTree.js";
@@ -8,15 +8,15 @@ import {PointCloudTree} from "../pointcloud/PointCloudTree.js";
  * 
  * The object can be used a normal Object3D.
  * 
- * It is based on THREE.Mesh and automatically updates the point cloud based on visibility.
+ * It is based on Mesh and automatically updates the point cloud based on visibility.
  * 
- * Also takes care of geometry ajustments to allow the point clouds to be frustum culled.
+ * Also takes care of geometry adjustments to allow the point clouds to be frustum culled.
  */
-class BasicGroup extends THREE.Mesh 
+class BasicGroup extends Mesh 
 {
 	constructor() 
 	{
-		super(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({opacity: 0.0, wireframe: false, transparent: true}));
+		super(new BufferGeometry(), new MeshBasicMaterial({opacity: 0.0, wireframe: false, transparent: true}));
 
 		this.rotation.set(-Math.PI / 2, 0, 0);
 
@@ -48,7 +48,7 @@ class BasicGroup extends THREE.Mesh
 	 */
 	onBeforeRender(renderer, scene, camera, geometry, material, group) 
 	{
-		for (var i = 0; i < this.pointclouds.length; i++) 
+		for (let i = 0; i < this.pointclouds.length; i++)
 		{
 			this.pointclouds[i].minimumNodePixelSize = this.nodeSize;
 		}
@@ -63,15 +63,15 @@ class BasicGroup extends THREE.Mesh
 	 */
 	recalculateBoxGeometry() 
 	{
-		var box = this.getBoundingBox();
+		const box = this.getBoundingBox();
 
-		var size = box.getSize(new THREE.Vector3());
-		var center = box.getCenter(new THREE.Vector3());
+		const size = box.getSize(new Vector3());
+		const center = box.getCenter(new Vector3());
 
-		var matrix = new THREE.Matrix4();
+		const matrix = new Matrix4();
 		matrix.makeTranslation(center.x, -center.z, center.y);
 
-		var geometry = new THREE.BoxBufferGeometry(size.x, size.z, size.y);
+		const geometry = new BoxBufferGeometry(size.x, size.z, size.y);
 		geometry.applyMatrix4(matrix);
 
 		this.geometry = geometry;
@@ -84,7 +84,7 @@ class BasicGroup extends THREE.Mesh
 	 */
 	add(object) 
 	{
-		THREE.Object3D.prototype.add.call(this, object);
+		Object3D.prototype.add.call(this, object);
 
 		if (object instanceof PointCloudTree) 
 		{
@@ -102,11 +102,11 @@ class BasicGroup extends THREE.Mesh
 	 */
 	remove(object) 
 	{
-		THREE.Object3D.prototype.remove.call(this, object);
+		Object3D.prototype.remove.call(this, object);
 
 		if (object instanceof PointCloudTree) 
 		{
-			var index = this.pointclouds.indexOf(object);
+			const index = this.pointclouds.indexOf(object);
 			if (index !== -1) 
 			{
 				this.pointclouds.splice(index, 1);
@@ -120,16 +120,16 @@ class BasicGroup extends THREE.Mesh
 	 */
 	getBoundingBox() 
 	{
-		var box = new THREE.Box3();
+		const box = new Box3();
 
 		this.updateMatrixWorld(true);
 
-		for (var i = 0; i < this.pointclouds.length; i++) 
+		for (let i = 0; i < this.pointclouds.length; i++)
 		{
-			var pointcloud = this.pointclouds[i];
+			const pointcloud = this.pointclouds[i];
 			pointcloud.updateMatrixWorld(true);
-			var pointcloudBox = pointcloud.pcoGeometry.tightBoundingBox ? pointcloud.pcoGeometry.tightBoundingBox : pointcloud.boundingBox;
-			var boxWorld = HelperUtils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
+			const pointcloudBox = pointcloud.pcoGeometry.tightBoundingBox ? pointcloud.pcoGeometry.tightBoundingBox : pointcloud.boundingBox;
+			const boxWorld = HelperUtils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
 			box.union(boxWorld);
 		}
 
@@ -141,36 +141,36 @@ class BasicGroup extends THREE.Mesh
 	 */
 	estimateHeightAt(position) 
 	{
-		var height = null;
-		var fromSpacing = Infinity;
+		let height = null;
+		let fromSpacing = Infinity;
 
-		for (var pointcloud of this.pointclouds) 
+		for (let pointcloud of this.pointclouds)
 		{
 			if (pointcloud.root.geometryNode === undefined) 
 			{
 				continue;
 			}
 
-			var pHeight = null;
-			var pFromSpacing = Infinity;
+			let pHeight = null;
+			let pFromSpacing = Infinity;
 
-			var lpos = position.clone().sub(pointcloud.position);
+			const lpos = position.clone().sub(pointcloud.position);
 			lpos.z = 0;
-			var ray = new THREE.Ray(lpos, new THREE.Vector3(0, 0, 1));
+			const ray = new Ray(lpos, new Vector3(0, 0, 1));
 
-			var stack = [pointcloud.root];
+			const stack = [pointcloud.root];
 			while (stack.length > 0) 
 			{
-				var node = stack.pop();
-				var box = node.getBoundingBox();
-				var inside = ray.intersectBox(box);
+				const node = stack.pop();
+				const box = node.getBoundingBox();
+				const inside = ray.intersectBox(box);
 
 				if (!inside) 
 				{
 					continue;
 				}
 
-				var h = node.geometryNode.mean.z + pointcloud.position.z + node.geometryNode.boundingBox.min.z;
+				const h = node.geometryNode.mean.z + pointcloud.position.z + node.geometryNode.boundingBox.min.z;
 
 				if (node.geometryNode.spacing <= pFromSpacing) 
 				{
@@ -178,9 +178,9 @@ class BasicGroup extends THREE.Mesh
 					pFromSpacing = node.geometryNode.spacing;
 				}
 
-				for (var index of Object.keys(node.children)) 
+				for (let index of Object.keys(node.children))
 				{
-					var child = node.children[index];
+					const child = node.children[index];
 					if (child.geometryNode) 
 					{
 						stack.push(node.children[index]);

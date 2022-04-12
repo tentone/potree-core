@@ -1,18 +1,18 @@
-import * as THREE from 'three';
+import {Matrix4, DataTexture, CanvasTexture, AlwaysDepth, NoBlending, AdditiveBlending, LessEqualDepth,  VertexColors, Color, NearestFilter, ShaderMaterial} from "three";
 import {HelperUtils} from "../../utils/HelperUtils.js";
 import {Gradients} from "../../Gradients.js";
 import {Shaders} from "../../Shaders.js";
 import {TreeType, PointColorType, PointSizeType, PointShape, Classification} from "../../Potree.js";
 
-class PointCloudMaterial extends THREE.ShaderMaterial
+class PointCloudMaterial extends ShaderMaterial
 {
 	constructor(parameters = {})
 	{
 		super();
 
-		this.visibleNodesTexture = HelperUtils.generateDataTexture(2048, 1, new THREE.Color(0xffffff));
-		this.visibleNodesTexture.minFilter = THREE.NearestFilter;
-		this.visibleNodesTexture.magFilter = THREE.NearestFilter;
+		this.visibleNodesTexture = HelperUtils.generateDataTexture(2048, 1, new Color(0xffffff));
+		this.visibleNodesTexture.minFilter = NearestFilter;
+		this.visibleNodesTexture.magFilter = NearestFilter;
 
 		var getValid = function(a, b)
 		{
@@ -53,8 +53,8 @@ class PointCloudMaterial extends THREE.ShaderMaterial
 
 		this.uniforms =
 		{
-			projectionMatrix: { value: new THREE.Matrix4() },
-			uViewInv: { value: new THREE.Matrix4() },
+			projectionMatrix: { value: new Matrix4() },
+			uViewInv: { value: new Matrix4() },
 			clipPlanes: { value: [] },
 			level: {type: "f", value: 0.0},
 			vnStart: {type: "f", value: 0.0},
@@ -65,7 +65,7 @@ class PointCloudMaterial extends THREE.ShaderMaterial
 			uOctreeSpacing: {type: "f", value: 0.0 },
 			near: {type: "f", value: 0.1},
 			far: {type: "f", value: 1.0},
-			uColor: {type: "c", value: new THREE.Color( 0xffffff )},
+			uColor: {type: "c", value: new Color( 0xffffff )},
 			uOpacity: {type: "f", value: 1.0},
 			size: {type: "f", value: pointSize},
 			minSize: {type: "f", value: minSize},
@@ -101,7 +101,7 @@ class PointCloudMaterial extends THREE.ShaderMaterial
 		this.defaultAttributeValues.indices = [0, 0, 0, 0];
 
 		this.defines = this.getDefines();
-		this.vertexColors = THREE.VertexColors;
+		this.vertexColors = VertexColors;
 
 		this.vertexShader = Shaders.vertex;
 		this.fragmentShader = Shaders.fragment;
@@ -134,24 +134,24 @@ class PointCloudMaterial extends THREE.ShaderMaterial
 
 		if(this.opacity === 1.0)
 		{
-			this.blending = THREE.NoBlending;
+			this.blending = NoBlending;
 			this.transparent = false;
 			this.depthTest = true;
 			this.depthWrite = true;
-			this.depthFunc = THREE.LessEqualDepth;
+			this.depthFunc = LessEqualDepth;
 		}
 		else
 		{
-			this.blending = THREE.AdditiveBlending;
+			this.blending = AdditiveBlending;
 			this.transparent = true;
 			this.depthTest = false;
 			this.depthWrite = true;
-			this.depthFunc = THREE.AlwaysDepth;
+			this.depthFunc = AlwaysDepth;
 		}
 
 		if(this.weighted)
 		{
-			this.blending = THREE.AdditiveBlending;
+			this.blending = AdditiveBlending;
 			this.transparent = true;
 			this.depthTest = true;
 			this.depthWrite = false;
@@ -854,9 +854,9 @@ class PointCloudMaterial extends THREE.ShaderMaterial
 		context.fillStyle = ctxGradient;
 		context.fill();
 
-		var texture = new THREE.CanvasTexture(canvas);
+		var texture = new CanvasTexture(canvas);
 		texture.needsUpdate = true;
-		texture.minFilter = THREE.LinearFilter;
+		texture.minFilter = LinearFilter;
 
 		return texture;
 	}
@@ -885,15 +885,15 @@ class PointCloudMaterial extends THREE.ShaderMaterial
 				{
 					color = classification.DEFAULT;
 				}
-				data[4 * i + 0] = 255 * color.x;
+				data[4 * i] = 255 * color.x;
 				data[4 * i + 1] = 255 * color.y;
 				data[4 * i + 2] = 255 * color.z;
 				data[4 * i + 3] = 255 * color.w;
 			}
 		}
-		var texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
-		texture.magFilter = THREE.NearestFilter;
-		texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping;
+		var texture = new DataTexture(data, width, height, RGBAFormat);
+		texture.magFilter = NearestFilter;
+		texture.wrapS = texture.wrapT = ClampToEdgeWrapping;
 		texture.needsUpdate = true;
 		return texture;
 	}

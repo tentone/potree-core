@@ -16,7 +16,7 @@ const typedArrayMapping = {
 	"double": Float64Array
 };
 
-Potree = {};
+let Potree = {};
 
 onmessage = function(event) 
 {
@@ -55,18 +55,18 @@ onmessage = function(event)
 
 				if (version.newerThan('1.3')) 
 				{
-					x = view.getUint32(inOffset + j * pointAttributes.byteSize + 0, true) * scale;
+					x = view.getUint32(inOffset + j * pointAttributes.byteSize, true) * scale;
 					y = view.getUint32(inOffset + j * pointAttributes.byteSize + 4, true) * scale;
 					z = view.getUint32(inOffset + j * pointAttributes.byteSize + 8, true) * scale;
 				}
 				else 
 				{
-					x = view.getFloat32(j * pointAttributes.byteSize + 0, true) + nodeOffset[0];
+					x = view.getFloat32(j * pointAttributes.byteSize, true) + nodeOffset[0];
 					y = view.getFloat32(j * pointAttributes.byteSize + 4, true) + nodeOffset[1];
 					z = view.getFloat32(j * pointAttributes.byteSize + 8, true) + nodeOffset[2];
 				}
 
-				positions[3 * j + 0] = x;
+				positions[3 * j] = x;
 				positions[3 * j + 1] = y;
 				positions[3 * j + 2] = z;
 
@@ -92,7 +92,7 @@ onmessage = function(event)
 
 			for (let j = 0; j < numPoints; j++) 
 			{
-				colors[4 * j + 0] = view.getUint8(inOffset + j * pointAttributes.byteSize + 0);
+				colors[4 * j] = view.getUint8(inOffset + j * pointAttributes.byteSize);
 				colors[4 * j + 1] = view.getUint8(inOffset + j * pointAttributes.byteSize + 1);
 				colors[4 * j + 2] = view.getUint8(inOffset + j * pointAttributes.byteSize + 2);
 			}
@@ -106,7 +106,7 @@ onmessage = function(event)
 
 			for (let j = 0; j < numPoints; j++) 
 			{
-				let bx = view.getUint8(inOffset + j * pointAttributes.byteSize + 0);
+				let bx = view.getUint8(inOffset + j * pointAttributes.byteSize);
 				let by = view.getUint8(inOffset + j * pointAttributes.byteSize + 1);
 
 				let ex = bx / 255;
@@ -126,7 +126,7 @@ onmessage = function(event)
 				ny = ny * 2;
 				nz = nz * 2 - 1;
 
-				normals[3 * j + 0] = nx;
+				normals[3 * j] = nx;
 				normals[3 * j + 1] = ny;
 				normals[3 * j + 2] = nz;
 			}
@@ -140,7 +140,7 @@ onmessage = function(event)
 
 			for (let j = 0; j < numPoints; j++) 
 			{
-				let bx = view.getUint8(inOffset + j * pointAttributes.byteSize + 0);
+				let bx = view.getUint8(inOffset + j * pointAttributes.byteSize);
 				let by = view.getUint8(inOffset + j * pointAttributes.byteSize + 1);
 
 				let u = bx / 255 * 2 - 1;
@@ -166,7 +166,7 @@ onmessage = function(event)
 				y = y / length;
 				z = z / length;
 				
-				normals[3 * j + 0] = x;
+				normals[3 * j] = x;
 				normals[3 * j + 1] = y;
 				normals[3 * j + 2] = z;
 			}
@@ -180,11 +180,11 @@ onmessage = function(event)
 
 			for (let j = 0; j < numPoints; j++) 
 			{
-				let x = view.getFloat32(inOffset + j * pointAttributes.byteSize + 0, true);
+				let x = view.getFloat32(inOffset + j * pointAttributes.byteSize, true);
 				let y = view.getFloat32(inOffset + j * pointAttributes.byteSize + 4, true);
 				let z = view.getFloat32(inOffset + j * pointAttributes.byteSize + 8, true);
 				
-				normals[3 * j + 0] = x;
+				normals[3 * j] = x;
 				normals[3 * j + 1] = y;
 				normals[3 * j + 2] = z;
 			}
@@ -197,7 +197,7 @@ onmessage = function(event)
 			let f32 = new Float32Array(buff);
 
 			let TypedArray = typedArrayMapping[pointAttribute.type.name];
-			preciseBuffer = new TypedArray(numPoints);
+			const preciseBuffer = new TypedArray(numPoints);
 
 			let [min, max] = [Infinity, -Infinity];
 			let [offset, scale] = [0, 1];

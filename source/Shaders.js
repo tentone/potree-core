@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import {ShaderChunk} from "three";
 
 var Shaders = {};
 
@@ -7,8 +7,8 @@ Shaders.vertex = `
 precision highp float;
 precision highp int;
 
-` + THREE.ShaderChunk.common + `
-` + THREE.ShaderChunk.logdepthbuf_pars_vertex + `
+` + ShaderChunk.common + `
+` + ShaderChunk.logdepthbuf_pars_vertex + `
 
 // attribute vec3 position;
 // attribute vec3 color;
@@ -564,7 +564,7 @@ void main()
 	float pointSize = getPointSize();
 	gl_PointSize = pointSize;
 	vPointSize = pointSize;
-	` + THREE.ShaderChunk.logdepthbuf_vertex + `
+	` + ShaderChunk.logdepthbuf_vertex + `
 
 	//COLOR
 	vColor = getColor();
@@ -595,8 +595,8 @@ Shaders.fragment = `
 precision highp float;
 precision highp int;
 
-` + THREE.ShaderChunk.common + `
-` + THREE.ShaderChunk.logdepthbuf_pars_fragment + `
+` + ShaderChunk.common + `
+` + ShaderChunk.logdepthbuf_pars_fragment + `
 
 // uniform mat4 viewMatrix;
 uniform mat4 uViewInv;
@@ -666,7 +666,7 @@ void main()
 		#endif
 	#endif
 	
-	` + THREE.ShaderChunk.logdepthbuf_fragment + `
+	` + ShaderChunk.logdepthbuf_fragment + `
 
 	#if defined weighted_splats
 		float distance = 2.0 * length(gl_PointCoord.xy - 0.5);

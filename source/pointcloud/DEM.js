@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import {Vector3} from "three";
 import {WorkerManager} from "../utils/WorkerManager.js";
 import {Global} from "../Global.js";
 import {DEMNode} from "./DEMNode.js";
@@ -23,20 +23,20 @@ class DEM
 			return [this.root];
 		}
 
-		var result = [];
-		var stack = [this.root];
+		const result = [];
+		const stack = [this.root];
 
 		while (stack.length > 0)
 		{
-			var node = stack.pop();
-			var nodeBoxSize = node.box.getSize(new THREE.Vector3());
+			const node = stack.pop();
+			const nodeBoxSize = node.box.getSize(new Vector3());
 
 			// check which children intersect by transforming min/max to quadrants
-			var min = {
+			const min = {
 				x: (box.min.x - node.box.min.x) / nodeBoxSize.x,
 				y: (box.min.y - node.box.min.y) / nodeBoxSize.y
 			};
-			var max = {
+			const max = {
 				x: (box.max.x - node.box.max.x) / nodeBoxSize.x,
 				y: (box.max.y - node.box.max.y) / nodeBoxSize.y
 			};
@@ -46,7 +46,7 @@ class DEM
 			max.x = max.x < 0.5 ? 0 : 1;
 			max.y = max.y < 0.5 ? 0 : 1;
 
-			var childIndices;
+			let childIndices;
 			if (min.x === 0 && min.y === 0 && max.x === 1 && max.y === 1)
 			{
 				childIndices = [0, 1, 2, 3];
@@ -60,11 +60,11 @@ class DEM
 				childIndices = [min.x << 1 | min.y, max.x << 1 | max.y];
 			}
 
-			for (var index of childIndices)
+			for (let index of childIndices)
 			{
 				if (node.children[index] === undefined)
 				{
-					var childBox = node.box.clone();
+					const childBox = node.box.clone();
 
 					if ((index & 2) > 0)
 					{
@@ -106,9 +106,12 @@ class DEM
 
 	childIndex(uv)
 	{
-		var [x, y] = uv.map((n) => {return n < 0.5 ? 0 : 1;});
+		let [x, y] = uv.map((n) =>
+		{
+			return n < 0.5 ? 0 : 1;
+		});
 
-		var index = x << 1 | y;
+		const index = x << 1 | y;
 
 		return index;
 	}
@@ -120,21 +123,21 @@ class DEM
 			return 0;
 		}
 
-		var height = null;
-		var list = [this.root];
+		let height = null;
+		const list = [this.root];
 		while (true)
 		{
-			var node = list[list.length - 1];
+			const node = list[list.length - 1];
 
-			var currentHeight = node.height(position);
+			const currentHeight = node.height(position);
 
 			if (currentHeight !== null)
 			{
 				height = currentHeight;
 			}
 
-			var uv = node.uv(position);
-			var childIndex = this.childIndex(uv);
+			const uv = node.uv(position);
+			const childIndex = this.childIndex(uv);
 
 			if (node.children[childIndex])
 			{
@@ -161,8 +164,8 @@ class DEM
 		}
 
 		// find node to update
-		var node = null;
-		for (var vn of visibleNodes)
+		let node = null;
+		for (let vn of visibleNodes)
 		{
 			if (vn.demVersion === undefined || vn.demVersion < this.version)
 			{
@@ -176,46 +179,46 @@ class DEM
 		}
 
 		// update node
-		var projectedBox = node.getBoundingBox().clone().applyMatrix4(this.matrix);
-		var projectedBoxSize = projectedBox.getSize(new THREE.Vector3());
+		const projectedBox = node.getBoundingBox().clone().applyMatrix4(this.matrix);
+		const projectedBoxSize = projectedBox.getSize(new Vector3());
 
-		var targetNodes = this.expandAndFindByBox(projectedBox, node.getLevel());
+		const targetNodes = this.expandAndFindByBox(projectedBox, node.getLevel());
 		node.demVersion = this.version;
 
-		var position = node.geometryNode.geometry.attributes.position.array;
-		var message =
-		{
-			boundingBox:
+		const position = node.geometryNode.geometry.attributes.position.array;
+		const message =
 			{
-				min: node.getBoundingBox().min.toArray(),
-				max: node.getBoundingBox().max.toArray()
-			},
-			position: new Float32Array(position).buffer
-		};
-		var transferables = [message.position];
+				boundingBox:
+					{
+						min: node.getBoundingBox().min.toArray(),
+						max: node.getBoundingBox().max.toArray()
+					},
+				position: new Float32Array(position).buffer
+			};
+		const transferables = [message.position];
 
-		var self = this;
+		const self = this;
 
 		Global.workerPool.runTask(WorkerManager.DEM, function(e)
 		{
-			var data = new Float32Array(e.data.dem.data);
+			const data = new Float32Array(e.data.dem.data);
 
-			for (var demNode of targetNodes)
+			for (let demNode of targetNodes)
 			{
-				var boxSize = demNode.box.getSize(new THREE.Vector3());
+				const boxSize = demNode.box.getSize(new Vector3());
 
-				for (var i = 0; i < self.tileSize; i++)
+				for (let i = 0; i < self.tileSize; i++)
 				{
-					for (var j = 0; j < self.tileSize; j++)
+					for (let j = 0; j < self.tileSize; j++)
 					{
-						var u = i / (self.tileSize - 1);
-						var v = j / (self.tileSize - 1);
+						const u = i / (self.tileSize - 1);
+						const v = j / (self.tileSize - 1);
 
-						var x = demNode.box.min.x + u * boxSize.x;
-						var y = demNode.box.min.y + v * boxSize.y;
+						const x = demNode.box.min.x + u * boxSize.x;
+						const y = demNode.box.min.y + v * boxSize.y;
 
-						var ix = self.tileSize * (x - projectedBox.min.x) / projectedBoxSize.x;
-						var iy = self.tileSize * (y - projectedBox.min.y) / projectedBoxSize.y;
+						let ix = self.tileSize * (x - projectedBox.min.x) / projectedBoxSize.x;
+						let iy = self.tileSize * (y - projectedBox.min.y) / projectedBoxSize.y;
 
 						if (ix < 0 || ix > self.tileSize)
 						{

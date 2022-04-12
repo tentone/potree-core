@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import {Vector3, Sphere, Matrix4, Vector4} from "three";
 import {POCLoader} from "./loaders/POCLoader.js";
 import {EPTLoader} from "./loaders/EPTLoader.js";
 import {PointCloudOctree} from "./pointcloud/PointCloudOctree.js";
@@ -6,6 +6,7 @@ import {PointCloudArena4D} from "./pointcloud/PointCloudArena4D.js";
 import {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
 import {BinaryHeap} from "./lib/BinaryHeap.js";
 import {Global} from "./Global.js";
+import {Box3Helper, Frustum} from "three";
 
 var AttributeLocations =
 {
@@ -25,18 +26,18 @@ var Classification =
 {
 	DEFAULT:
   {
-  	0: new THREE.Vector4(0.5, 0.5, 0.5, 1.0),
-  	1: new THREE.Vector4(0.5, 0.5, 0.5, 1.0),
-  	2: new THREE.Vector4(0.63, 0.32, 0.18, 1.0),
-  	3: new THREE.Vector4(0.0, 1.0, 0.0, 1.0),
-  	4: new THREE.Vector4(0.0, 0.8, 0.0, 1.0),
-  	5: new THREE.Vector4(0.0, 0.6, 0.0, 1.0),
-  	6: new THREE.Vector4(1.0, 0.66, 0.0, 1.0),
-  	7: new THREE.Vector4(1.0, 0, 1.0, 1.0),
-  	8: new THREE.Vector4(1.0, 0, 0.0, 1.0),
-  	9: new THREE.Vector4(0.0, 0.0, 1.0, 1.0),
-  	12: new THREE.Vector4(1.0, 1.0, 0.0, 1.0),
-  	DEFAULT: new THREE.Vector4(0.3, 0.6, 0.6, 0.5)
+  	0: new Vector4(0.5, 0.5, 0.5, 1.0),
+  	1: new Vector4(0.5, 0.5, 0.5, 1.0),
+  	2: new Vector4(0.63, 0.32, 0.18, 1.0),
+  	3: new Vector4(0.0, 1.0, 0.0, 1.0),
+  	4: new Vector4(0.0, 0.8, 0.0, 1.0),
+  	5: new Vector4(0.0, 0.6, 0.0, 1.0),
+  	6: new Vector4(1.0, 0.66, 0.0, 1.0),
+  	7: new Vector4(1.0, 0, 1.0, 1.0),
+  	8: new Vector4(1.0, 0, 0.0, 1.0),
+  	9: new Vector4(0.0, 0.0, 1.0, 1.0),
+  	12: new Vector4(1.0, 1.0, 0.0, 1.0),
+  	DEFAULT: new Vector4(0.3, 0.6, 0.6, 0.5)
   }
 };
 
@@ -284,7 +285,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 
 			if (pointcloud.showBoundingBox && !node.boundingBoxNode && node.getBoundingBox) 
 			{
-				var boxHelper = new THREE.Box3Helper(node.getBoundingBox());
+				var boxHelper = new Box3Helper(node.getBoundingBox());
 				boxHelper.matrixAutoUpdate = false;
 				pointcloud.boundingBoxNodes.push(boxHelper);
 				node.boundingBoxNode = boxHelper;
@@ -311,7 +312,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 			// Perspective camera
 			if (camera.isPerspectiveCamera) 
 			{
-				var sphere = child.getBoundingSphere(new THREE.Sphere());
+				var sphere = child.getBoundingSphere(new Sphere());
 				var center = sphere.center;
 				var distance = sphere.center.distanceTo(camObjPos);
 
@@ -340,7 +341,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 			{
 				// TODO <IMPROVE VISIBILITY>
 				var bb = child.getBoundingBox();
-				var distance = child.getBoundingSphere(new THREE.Sphere()).center.distanceTo(camObjPos);
+				var distance = child.getBoundingSphere(new Sphere()).center.distanceTo(camObjPos);
 				var diagonal = bb.max.clone().sub(bb.min).length();
 				weight = diagonal / distance;
 			}
@@ -417,7 +418,7 @@ function updateVisibilityStructures(pointclouds, camera, renderer)
 
 		// Frustum in object space
 		camera.updateMatrixWorld();
-		var frustum = new THREE.Frustum();
+		var frustum = new Frustum();
 		var viewI = camera.matrixWorldInverse;
 		var world = pointcloud.matrixWorld;
 
@@ -427,16 +428,16 @@ function updateVisibilityStructures(pointclouds, camera, renderer)
 		frustumCam.updateProjectionMatrix();
 		var proj = camera.projectionMatrix;
 
-		var fm = new THREE.Matrix4().multiply(proj).multiply(viewI).multiply(world);
+		var fm = new Matrix4().multiply(proj).multiply(viewI).multiply(world);
 		frustum.setFromProjectionMatrix(fm);
 		frustums.push(frustum);
 
 		// Camera position in object space
 		var view = camera.matrixWorld;
-		// var worldI = new THREE.Matrix4().getInverse(world);
+		// var worldI = new Matrix4().getInverse(world);
 		var worldI = world.clone().invert();
-		var camMatrixObject = new THREE.Matrix4().multiply(worldI).multiply(view);
-		var camObjPos = new THREE.Vector3().setFromMatrixPosition(camMatrixObject);
+		var camMatrixObject = new Matrix4().multiply(worldI).multiply(view);
+		var camObjPos = new Vector3().setFromMatrixPosition(camMatrixObject);
 		camObjPositions.push(camObjPos);
 
 		if (pointcloud.visible && pointcloud.root !== null) 

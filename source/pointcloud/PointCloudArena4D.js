@@ -1,9 +1,10 @@
-import * as THREE from 'three';
+import {Vector3, Vector2, Sphere, Points, NoBlending, VertexColors, NearestFilter, PointCloud, Scene, WebGLRenderTarget} from "three";
 import {HelperUtils} from "../utils/HelperUtils.js";
 import {Global} from "../Global.js";
 import {TreeType, PointSizeType, PointColorType} from "../Potree.js";
 import {PointCloudMaterial} from "./materials/PointCloudMaterial.js";
 import {PointCloudTree, PointCloudTreeNode} from "./PointCloudTree.js";
+
 
 class PointCloudArena4DNode extends PointCloudTreeNode
 {
@@ -71,7 +72,7 @@ class PointCloudArena4DNode extends PointCloudTreeNode
 		}
 
 		var node = new PointCloudArena4DNode();
-		var sceneNode = THREE.PointCloud(geometryNode.geometry, this.kdtree.material);
+		var sceneNode = PointCloud(geometryNode.geometry, this.kdtree.material);
 		sceneNode.visible = false;
 
 		node.kdtree = this.kdtree;
@@ -137,7 +138,7 @@ class PointCloudArena4D extends PointCloudTree
 		this.boundingSphere = this.pcoGeometry.boundingSphere;
 		this.material = new PointCloudMaterial(
 			{
-				vertexColors: THREE.VertexColors,
+				vertexColors: VertexColors,
 				size: 0.05,
 				treeType: TreeType.KDTREE
 			});
@@ -185,7 +186,7 @@ class PointCloudArena4D extends PointCloudTree
 	{
 		var node = new PointCloudArena4DNode();
 
-		var sceneNode = new THREE.Points(geometryNode.geometry, this.material);
+		var sceneNode = new Points(geometryNode.geometry, this.material);
 		sceneNode.frustumCulled = true;
 		sceneNode.onBeforeRender = (_this, scene, camera, geometry, material, group) =>
 		{
@@ -275,7 +276,7 @@ class PointCloudArena4D extends PointCloudTree
 		}
 
 		// material.uniforms.octreeSize.value = this.boundingBox.size().x;
-		var bbSize = this.boundingBox.getSize(new THREE.Vector3());
+		var bbSize = this.boundingBox.getSize(new Vector3());
 		material.bbSize = [bbSize.x, bbSize.y, bbSize.z];
 	}
 
@@ -348,7 +349,7 @@ class PointCloudArena4D extends PointCloudTree
 		for (var i = 0; i < nodes.length; i++)
 		{
 			var node = nodes[i];
-			var sphere = node.getBoundingSphere(new THREE.Sphere()).clone().applyMatrix4(node.sceneNode.matrixWorld);
+			var sphere = node.getBoundingSphere(new Sphere()).clone().applyMatrix4(node.sceneNode.matrixWorld);
 			// TODO Unused: var box = node.getBoundingBox().clone().applyMatrix4(node.sceneNode.matrixWorld);
 
 			if (_ray.intersectsSphere(sphere))
@@ -375,7 +376,7 @@ class PointCloudArena4D extends PointCloudTree
 
 		var pickWindowSize = getVal(params.pickWindowSize, 17);
 
-		var size = renderer.getSize(new THREE.Vector3());
+		var size = renderer.getSize(new Vector3());
 
 		var width = Math.ceil(getVal(params.width, size.width));
 		var height = Math.ceil(getVal(params.height, size.height));
@@ -392,17 +393,17 @@ class PointCloudArena4D extends PointCloudTree
 
 		if (!this.pickState)
 		{
-			var scene = new THREE.Scene();
+			var scene = new Scene();
 
 			var material = new PointCloudMaterial();
 			material.pointColorType = PointColorType.POINT_INDEX;
 
-			var renderTarget = new THREE.WebGLRenderTarget(
+			var renderTarget = new WebGLRenderTarget(
 				1, 1,
 				{
-					minFilter: THREE.LinearFilter,
-					magFilter: THREE.NearestFilter,
-					format: THREE.RGBAFormat
+					minFilter: LinearFilter,
+					magFilter: NearestFilter,
+					format: RGBAFormat
 				}
 			);
 
@@ -419,7 +420,7 @@ class PointCloudArena4D extends PointCloudTree
 
 		pickState.renderTarget.setSize(width, height);
 
-		var pixelPos = new THREE.Vector2(params.x, params.y);
+		var pixelPos = new Vector2(params.x, params.y);
 
 		var gl = renderer.getContext();
 		gl.enable(gl.SCISSOR_TEST);
@@ -427,7 +428,7 @@ class PointCloudArena4D extends PointCloudTree
 
 		renderer.state.buffers.depth.setTest(pickMaterial.depthTest);
 		renderer.state.buffers.depth.setMask(pickMaterial.depthWrite);
-		renderer.state.setBlending(THREE.NoBlending);
+		renderer.state.setBlending(NoBlending);
 
 		renderer.clearTarget(pickState.renderTarget, true, true, true);
 		renderer.setRenderTarget(pickState.renderTarget);
@@ -526,11 +527,11 @@ class PointCloudArena4D extends PointCloudTree
 
 				if (attributeName === "position")
 				{
-					var x = attribute.array[3 * hit.pIndex + 0];
+					var x = attribute.array[3 * hit.pIndex];
 					var y = attribute.array[3 * hit.pIndex + 1];
 					var z = attribute.array[3 * hit.pIndex + 2];
 
-					var position = new THREE.Vector3(x, y, z);
+					var position = new Vector3(x, y, z);
 					position.applyMatrix4(pc.matrixWorld);
 
 					point[attributeName] = position;
@@ -628,7 +629,7 @@ class PointCloudArena4D extends PointCloudTree
 				b3 = 4;
 			}
 
-			data[i * 3 + 0] = b1;
+			data[i * 3] = b1;
 			data[i * 3 + 1] = b2;
 			data[i * 3 + 2] = b3;
 		}

@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import {Sphere, EventDispatcher} from "three";
 import {POCLoader} from "../../loaders/POCLoader.js";
 import {Global} from "../../Global.js";
 import {PointCloudTreeNode} from "../PointCloudTree.js";
@@ -32,7 +32,7 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 		this.pcoGeometry = pcoGeometry;
 		this.geometry = null;
 		this.boundingBox = boundingBox;
-		this.boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
+		this.boundingSphere = boundingBox.getBoundingSphere(new Sphere());
 		this.children = {};
 		this.numPoints = 0;
 		this.level = null;
@@ -294,6 +294,6 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 
 PointCloudOctreeGeometryNode.IDCount = 0;
 
-Object.assign(PointCloudOctreeGeometryNode.prototype, THREE.EventDispatcher.prototype);
+Object.assign(PointCloudOctreeGeometryNode.prototype, EventDispatcher.prototype);
 
 export {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode};

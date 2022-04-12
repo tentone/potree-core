@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import {Vector3, Box3, BufferAttribute, BufferGeometry} from "three";
 import {WorkerManager} from "../utils/WorkerManager.js";
 import {Global} from "../Global.js";
 import {XHRFactory} from "../XHRFactory.js";
@@ -186,7 +186,7 @@ class LASLAZBatcher
 		var worker = Global.workerPool.getWorker(WorkerManager.LAS_DECODER);
 		worker.onmessage = function(e)
 		{
-			var geometry = new THREE.BufferGeometry();
+			var geometry = new BufferGeometry();
 			var numPoints = data.pointsCount;
 
 			var positions = new Float32Array(e.data.position);
@@ -198,21 +198,21 @@ class LASLAZBatcher
 			var pointSourceIDs = new Uint16Array(e.data.pointSourceID);
 			var indices = new Uint8Array(e.data.indices);
 
-			geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-			geometry.setAttribute("color", new THREE.BufferAttribute(colors, 4, true));
-			geometry.setAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
-			geometry.setAttribute("classification", new THREE.BufferAttribute(classifications, 1));
-			geometry.setAttribute("returnNumber", new THREE.BufferAttribute(returnNumbers, 1));
-			geometry.setAttribute("numberOfReturns", new THREE.BufferAttribute(numberOfReturns, 1));
-			geometry.setAttribute("pointSourceID", new THREE.BufferAttribute(pointSourceIDs, 1));
-			// geometry.setAttribute("normal", new THREE.BufferAttribute(new Float32Array(numPoints * 3), 3));
-			geometry.setAttribute("indices", new THREE.BufferAttribute(indices, 4));
+			geometry.setAttribute("position", new BufferAttribute(positions, 3));
+			geometry.setAttribute("color", new BufferAttribute(colors, 4, true));
+			geometry.setAttribute("intensity", new BufferAttribute(intensities, 1));
+			geometry.setAttribute("classification", new BufferAttribute(classifications, 1));
+			geometry.setAttribute("returnNumber", new BufferAttribute(returnNumbers, 1));
+			geometry.setAttribute("numberOfReturns", new BufferAttribute(numberOfReturns, 1));
+			geometry.setAttribute("pointSourceID", new BufferAttribute(pointSourceIDs, 1));
+			// geometry.setAttribute("normal", new BufferAttribute(new Float32Array(numPoints * 3), 3));
+			geometry.setAttribute("indices", new BufferAttribute(indices, 4));
 			geometry.attributes.indices.normalized = true;
 
-			var tightBoundingBox = new THREE.Box3
+			var tightBoundingBox = new Box3
 			(
-				new THREE.Vector3().fromArray(e.data.tightBoundingBox.min),
-				new THREE.Vector3().fromArray(e.data.tightBoundingBox.max)
+				new Vector3().fromArray(e.data.tightBoundingBox.min),
+				new Vector3().fromArray(e.data.tightBoundingBox.max)
 			);
 
 			geometry.boundingBox = self.node.boundingBox;
@@ -223,7 +223,7 @@ class LASLAZBatcher
 			self.node.loaded = true;
 			self.node.loading = false;
 			Global.numNodesLoading--;
-			self.node.mean = new THREE.Vector3(...e.data.mean);
+			self.node.mean = new Vector3(...e.data.mean);
 
 			Global.workerPool.returnWorker(WorkerManager.LAS_DECODER, worker);
 		};

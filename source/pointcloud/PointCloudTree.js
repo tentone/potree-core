@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import {Object3D} from "three";
 import {DEM} from "./DEM.js";
 
 class PointCloudTreeNode
@@ -23,7 +23,7 @@ class PointCloudTreeNode
 	getBoundingSphere() {}
 };
 
-class PointCloudTree extends THREE.Object3D
+class PointCloudTree extends Object3D
 {
 	constructor()
 	{

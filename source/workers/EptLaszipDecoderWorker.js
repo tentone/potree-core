@@ -71,15 +71,15 @@ function readUsingDataView(event)
 	for (let i = 0; i < numPoints; i++) 
 	{
 		// POSITION
-		let ux = sourceView.getInt32(i * pointSize + 0, true);
+		let ux = sourceView.getInt32(0, true);
 		let uy = sourceView.getInt32(i * pointSize + 4, true);
 		let uz = sourceView.getInt32(i * pointSize + 8, true);
 
-		x = ux * scale[0] + offset[0] - event.data.mins[0];
-		y = uy * scale[1] + offset[1] - event.data.mins[1];
-		z = uz * scale[2] + offset[2] - event.data.mins[2];
+		const x = ux * scale[0] + offset[0] - event.data.mins[0];
+		const y = uy * scale[1] + offset[1] - event.data.mins[1];
+		const z = uz * scale[2] + offset[2] - event.data.mins[2];
 
-		positions[3 * i + 0] = x;
+		positions[0] = x;
 		positions[3 * i + 1] = y;
 		positions[3 * i + 2] = z;
 
@@ -96,8 +96,7 @@ function readUsingDataView(event)
 		tightBoundingBox.max[2] = Math.max(tightBoundingBox.max[2], z);
 
 		// INTENSITY
-		let intensity = sourceView.getUint16(i * pointSize + 12, true);
-		intensities[i] = intensity;
+		intensities[i] = sourceView.getUint16(i * pointSize + 12, true);
 
 		// RETURN NUMBER, stored in the first 3 bits - 00000111
 		// number of returns stored in next 3 bits	 - 00111000
@@ -108,12 +107,10 @@ function readUsingDataView(event)
 		numberOfReturns[i] = numberOfReturn;
 
 		// CLASSIFICATION
-		let classification = sourceView.getUint8(i * pointSize + 15, true);
-		classifications[i] = classification;
+		classifications[i] = sourceView.getUint8(i * pointSize + 15, true);
 
 		// POINT SOURCE ID
-		let pointSourceID = sourceView.getUint16(i * pointSize + 18, true);
-		pointSourceIDs[i] = pointSourceID;
+		pointSourceIDs[i] = sourceView.getUint16(i * pointSize + 18, true);
 
 		// COLOR, if available
 		if (hasColor) 
@@ -129,7 +126,7 @@ function readUsingDataView(event)
 				b /= 256;
 			}
 
-			colors[4 * i + 0] = r;
+			colors[0] = r;
 			colors[4 * i + 1] = g;
 			colors[4 * i + 2] = b;
 			colors[4 * i + 3] = 255;

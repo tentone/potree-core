@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import {Vector4} from "three";
 import { BasicGroup } from "./BasicGroup.js";
 import { PointCloudTree } from "../pointcloud/PointCloudTree.js";
 import { PointSizeType, PointColorType } from "../Potree.js";
@@ -16,62 +16,62 @@ class Group extends BasicGroup {
   onBeforeRender(renderer, scene, camera, geometry, material, group) {
     super.onBeforeRender(renderer, scene, camera, geometry, material, group);
 
-    var result = this.fetchOctrees();
-		var gl = renderer.getContext();
-		if(gl.bindVertexArray === undefined)
+    const result = this.fetchOctrees();
+    const gl = renderer.getContext();
+    if(gl.bindVertexArray === undefined)
 		{
 			this.getExtensions(gl)
 		}
 
-    for (var octree of result.octrees) {
-      var nodes = octree.visibleNodes;
+    for (let octree of result.octrees) {
+      const nodes = octree.visibleNodes;
       this.prepareOcttree(renderer, octree, nodes, camera);
     }
   }
 
   fetchOctrees() {
-    var octrees = [];
-    var stack = [this];
+    const octrees = [];
+    const stack = [this];
 
     while (stack.length > 0) {
-      var node = stack.pop();
+      const node = stack.pop();
 
       if (node instanceof PointCloudTree) {
         octrees.push(node);
         continue;
       }
 
-      var visibleChildren = node.children.filter(c => c.visible);
+      const visibleChildren = node.children.filter(c => c.visible);
       stack.push(...visibleChildren);
     }
 
-    var result =
-    {
-      octrees: octrees
-    };
+    const result =
+        {
+          octrees: octrees
+        };
 
     return result;
   }
 
   prepareOcttree(renderer, octree, nodes, camera) {
-    var material = octree.material;
-    var viewInv = camera.matrixWorld;
-    var proj = camera.projectionMatrix;
+    const material = octree.material;
+    const viewInv = camera.matrixWorld;
+    const proj = camera.projectionMatrix;
 
-    var visibilityTextureData = null;
+    let visibilityTextureData = null;
 
     if (material.pointSizeType === PointSizeType.ADAPTIVE || material.pointColorType === PointColorType.LOD) {
       visibilityTextureData = octree.computeVisibilityTextureData(nodes, camera);
 
-      var vnt = material.visibleNodesTexture;
+      const vnt = material.visibleNodesTexture;
       vnt.image.data.set(visibilityTextureData.data);
       vnt.needsUpdate = true;
     }
 
     // Clip planes
-    var numClippingPlanes = (material.clipping && material.clippingPlanes && material.clippingPlanes.length) ? material.clippingPlanes.length : 0;
-    var clipPlanesChanged = material.defines['num_clipplanes'] !== numClippingPlanes;
-    var clippingPlanes = [];
+    const numClippingPlanes = (material.clipping && material.clippingPlanes && material.clippingPlanes.length) ? material.clippingPlanes.length : 0;
+    const clipPlanesChanged = material.defines['num_clipplanes'] !== numClippingPlanes;
+    let clippingPlanes = [];
     if (clipPlanesChanged) {
       material.defines = {
         ...material.defines,
@@ -80,10 +80,10 @@ class Group extends BasicGroup {
       material.needsUpdate = true;
     }
     if (numClippingPlanes > 0) {
-      var planes = material.clippingPlanes;
-      var flattenedPlanes = new Array(4 * material.clippingPlanes.length);
-      for (var i = 0; i < planes.length; i++) {
-        flattenedPlanes[4*i + 0] = planes[i].normal.x;
+      const planes = material.clippingPlanes;
+      const flattenedPlanes = new Array(4 * material.clippingPlanes.length);
+      for (let i = 0; i < planes.length; i++) {
+        flattenedPlanes[4 * i] = planes[i].normal.x;
         flattenedPlanes[4*i + 1] = planes[i].normal.y;
         flattenedPlanes[4*i + 2] = planes[i].normal.z;
         flattenedPlanes[4*i + 3] = planes[i].constant;
@@ -91,7 +91,7 @@ class Group extends BasicGroup {
       clippingPlanes = flattenedPlanes;
     }
 
-    const clippingPlanesAsVec4Array = material.clippingPlanes ? material.clippingPlanes.map(x => new THREE.Vector4(x.normal.x, x.normal.y, x.normal.z, x.constant)) : [];
+    const clippingPlanesAsVec4Array = material.clippingPlanes ? material.clippingPlanes.map(x => new Vector4(x.normal.x, x.normal.y, x.normal.z, x.constant)) : [];
     material.uniforms.projectionMatrix.value.copy(proj);
     material.uniforms.uViewInv.value.copy(viewInv);
     material.uniforms.clipPlanes.value = clippingPlanesAsVec4Array;

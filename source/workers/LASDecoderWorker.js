@@ -46,7 +46,7 @@ onmessage = function(event)
 	for (var i = 0; i < numPoints; i++)
 	{
 		// POSITION
-		var ux = sourceView.getInt32(i * sourcePointSize + 0, true);
+		var ux = sourceView.getInt32(i * sourcePointSize, true);
 		var uy = sourceView.getInt32(i * sourcePointSize + 4, true);
 		var uz = sourceView.getInt32(i * sourcePointSize + 8, true);
 
@@ -54,7 +54,7 @@ onmessage = function(event)
 		var y = uy * scale[1] + offset[1] - event.data.mins[1];
 		var z = uz * scale[2] + offset[2] - event.data.mins[2];
 
-		positions[3 * i + 0] = x;
+		positions[3 * i] = x;
 		positions[3 * i + 1] = y;
 		positions[3 * i + 2] = z;
 
@@ -97,7 +97,7 @@ onmessage = function(event)
 			var g = sourceView.getUint16(i * sourcePointSize + 22, true) / 256;
 			var b = sourceView.getUint16(i * sourcePointSize + 24, true) / 256;
 
-			colors[4 * i + 0] = r;
+			colors[4 * i] = r;
 			colors[4 * i + 1] = g;
 			colors[4 * i + 2] = b;
 			colors[4 * i + 3] = 255;

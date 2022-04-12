@@ -1,6 +1,7 @@
-import * as THREE from 'three';
+import {Vector3, Box3, BufferAttribute, BufferGeometry, Sphere} from "three";
 import {Global} from "../../Global.js";
 import {XHRFactory} from "../../XHRFactory.js";
+import {PointAttributes} from "../../loaders/PointAttributes";
 
 class PointCloudArena4DGeometryNode
 {
@@ -114,11 +115,11 @@ class PointCloudArena4DGeometryNode
 				var indices = new ArrayBuffer(numPoints * 4);
 				var u32Indices = new Uint32Array(indices);
 
-				var tightBoundingBox = new THREE.Box3();
+				var tightBoundingBox = new Box3();
 
 				for (var i = 0; i < numPoints; i++)
 				{
-					var x = sourceView.getFloat32(i * 17 + 0, true) + self.boundingBox.min.x;
+					var x = sourceView.getFloat32(i * 17, true) + self.boundingBox.min.x;
 					var y = sourceView.getFloat32(i * 17 + 4, true) + self.boundingBox.min.y;
 					var z = sourceView.getFloat32(i * 17 + 8, true) + self.boundingBox.min.z;
 
@@ -130,13 +131,13 @@ class PointCloudArena4DGeometryNode
 
 					var classification = sourceView.getUint8(i * 17 + 16, true);
 
-					tightBoundingBox.expandByPoint(new THREE.Vector3(x, y, z));
+					tightBoundingBox.expandByPoint(new Vector3(x, y, z));
 
-					position[i * 3 + 0] = x;
+					position[i * 3] = x;
 					position[i * 3 + 1] = y;
 					position[i * 3 + 2] = z;
 
-					color[i * 4 + 0] = r;
+					color[i * 4] = r;
 					color[i * 4 + 1] = g;
 					color[i * 4 + 2] = b;
 					color[i * 4 + 3] = 255;
@@ -147,13 +148,13 @@ class PointCloudArena4DGeometryNode
 					u32Indices[i] = i;
 				}
 
-				var geometry = new THREE.BufferGeometry();
-				geometry.setAttribute("position", new THREE.BufferAttribute(position, 3));
-				geometry.setAttribute("color", new THREE.BufferAttribute(color, 4, true));
-				geometry.setAttribute("intensity", new THREE.BufferAttribute(intensities, 1));
-				geometry.setAttribute("classification", new THREE.BufferAttribute(classifications, 1));
+				var geometry = new BufferGeometry();
+				geometry.setAttribute("position", new BufferAttribute(position, 3));
+				geometry.setAttribute("color", new BufferAttribute(color, 4, true));
+				geometry.setAttribute("intensity", new BufferAttribute(intensities, 1));
+				geometry.setAttribute("classification", new BufferAttribute(classifications, 1));
 				{
-					var bufferAttribute = new THREE.BufferAttribute(new Uint8Array(indices), 4, true);
+					var bufferAttribute = new BufferAttribute(new Uint8Array(indices), 4, true);
 					geometry.setAttribute("indices", bufferAttribute);
 				}
 
@@ -180,7 +181,7 @@ class PointCloudArena4DGeometryNode
 
 	dispose()
 	{
-		if (this.geometry && this.parent != null)
+		if (this.geometry && this.parent !== null)
 		{
 			this.geometry.dispose();
 			this.geometry = null;
@@ -202,7 +203,7 @@ class PointCloudArena4DGeometryNode
 	}
 };
 
-class PointCloudArena4DGeometry extends THREE.EventDispatcher
+class PointCloudArena4DGeometry extends EventDispatcher
 {
 	constructor()
 	{
@@ -245,9 +246,9 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 					geometry.numNodes = response.Nodes;
 					geometry.numPoints = response.Points;
 					geometry.version = response.Version;
-					geometry.boundingBox = new THREE.Box3(
-						new THREE.Vector3().fromArray(response.BoundingBox.slice(0, 3)),
-						new THREE.Vector3().fromArray(response.BoundingBox.slice(3, 6))
+					geometry.boundingBox = new Box3(
+						new Vector3().fromArray(response.BoundingBox.slice(0, 3)),
+						new Vector3().fromArray(response.BoundingBox.slice(3, 6))
 					);
 					if (response.Spacing)
 					{
@@ -260,10 +261,10 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 					geometry.boundingBox.max.add(offset);
 					geometry.offset = offset;
 
-					var center = new THREE.Vector3();
+					var center = new Vector3();
 					geometry.boundingBox.getCenter(center);
-					var radius = geometry.boundingBox.getSize(new THREE.Vector3()).length() / 2;
-					geometry.boundingSphere = new THREE.Sphere(center, radius);
+					var radius = geometry.boundingBox.getSize(new Vector3()).length() / 2;
+					geometry.boundingSphere = new Sphere(center, radius);
 
 					geometry.loadHierarchy();
 
@@ -312,7 +313,7 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 			// read hierarchy
 			for (var i = 0; i < numNodes; i++)
 			{
-				var mask = view.getUint8(i * 3 + 0, true);
+				var mask = view.getUint8(i * 3, true);
 
 				var hasLeft = (mask & 1) > 0;
 				var hasRight = (mask & 2) > 0;
@@ -350,7 +351,7 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 				{
 					var parent = stack[stack.length - 1];
 					node.boundingBox = parent.boundingBox.clone();
-					var parentBBSize = parent.boundingBox.getSize(new THREE.Vector3());
+					var parentBBSize = parent.boundingBox.getSize(new Vector3());
 
 					if (parent.hasLeft && !parent.left)
 					{
@@ -371,10 +372,10 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 						}
 
 						
-						var center = new THREE.Vector3();
+						var center = new Vector3();
 						node.boundingBox.getCenter(center);
-						var radius = node.boundingBox.getSize(new THREE.Vector3()).length() / 2;
-						node.boundingSphere = new THREE.Sphere(center, radius);
+						var radius = node.boundingBox.getSize(new Vector3()).length() / 2;
+						node.boundingSphere = new Sphere(center, radius);
 					}
 					else
 					{
@@ -394,10 +395,10 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 							node.boundingBox.min.z = node.boundingBox.min.z + parentBBSize.z / 2;
 						}
 
-						var center = new THREE.Vector3();
+						var center = new Vector3();
 						node.boundingBox.getCenter(center);
-						var radius = node.boundingBox.getSize(new THREE.Vector3()).length() / 2;
-						node.boundingSphere = new THREE.Sphere(center, radius);
+						var radius = node.boundingBox.getSize(new Vector3()).length() / 2;
+						node.boundingSphere = new Sphere(center, radius);
 					}
 				}
 				else
@@ -405,13 +406,13 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 					root = node;
 					root.boundingBox = this.boundingBox.clone();
 
-					var center = new THREE.Vector3();
+					var center = new Vector3();
 					root.boundingBox.getCenter(center);
-					var radius = root.boundingBox.getSize(new THREE.Vector3()).length() / 2;
-					root.boundingSphere = new THREE.Sphere(center, radius);
+					var radius = root.boundingBox.getSize(new Vector3()).length() / 2;
+					root.boundingSphere = new Sphere(center, radius);
 				}
 
-				var bbSize = node.boundingBox.getSize(new THREE.Vector3());
+				var bbSize = node.boundingBox.getSize(new Vector3());
 				node.spacing = (bbSize.x + bbSize.y + bbSize.z) / 3 / 75;
 				node.estimatedSpacing = node.spacing;
 
@@ -426,7 +427,7 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 
 						var top = stack[stack.length - 1];
 
-						done = stack.length > 0 && top.hasRight && top.right == null;
+						done = stack.length > 0 && top.hasRight && top.right === null;
 					}
 				}
 			}
@@ -457,6 +458,6 @@ class PointCloudArena4DGeometry extends THREE.EventDispatcher
 	{
 		this._spacing = value;
 	}
-};
+}
 
 export {PointCloudArena4DGeometry, PointCloudArena4DGeometryNode};

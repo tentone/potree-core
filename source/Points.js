@@ -1,12 +1,11 @@
-
-import * as THREE from "three";
+import {Box3} from "three";
 
 export class Points 
 {
 	
 	constructor() 
 	{
-		this.boundingBox = new THREE.Box3();
+		this.boundingBox = new Box3();
 		this.numPoints = 0;
 		this.data = {};
 	}

@@ -91,7 +91,7 @@ class PointAttributes
 		this.size = 0;
 		this.vectors = [];
 
-		if (pointAttributes != null) 
+		if (pointAttributes !== null)
 		{
 			for (let i = 0; i < pointAttributes.length; i++) 
 			{

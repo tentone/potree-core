@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import {Vector3, Box3, Sphere} from "three";
 import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "../pointcloud/geometries/PointCloudOctreeGeometry.js";
 import {Global} from "../Global.js";
 import {XHRFactory} from "../XHRFactory.js";
@@ -49,15 +49,15 @@ class POCLoader
 			pco.hierarchyStepSize = data.hierarchyStepSize;
 			pco.pointAttributes = data.pointAttributes;
 
-			var min = new THREE.Vector3(data.boundingBox.lx, data.boundingBox.ly, data.boundingBox.lz);
-			var max = new THREE.Vector3(data.boundingBox.ux, data.boundingBox.uy, data.boundingBox.uz);
-			var boundingBox = new THREE.Box3(min, max);
+			var min = new Vector3(data.boundingBox.lx, data.boundingBox.ly, data.boundingBox.lz);
+			var max = new Vector3(data.boundingBox.ux, data.boundingBox.uy, data.boundingBox.uz);
+			var boundingBox = new Box3(min, max);
 			var tightBoundingBox = boundingBox.clone();
 
 			if (data.tightBoundingBox)
 			{
-				tightBoundingBox.min.copy(new THREE.Vector3(data.tightBoundingBox.lx, data.tightBoundingBox.ly, data.tightBoundingBox.lz));
-				tightBoundingBox.max.copy(new THREE.Vector3(data.tightBoundingBox.ux, data.tightBoundingBox.uy, data.tightBoundingBox.uz));
+				tightBoundingBox.min.copy(new Vector3(data.tightBoundingBox.lx, data.tightBoundingBox.ly, data.tightBoundingBox.lz));
+				tightBoundingBox.max.copy(new Vector3(data.tightBoundingBox.ux, data.tightBoundingBox.uy, data.tightBoundingBox.uz));
 			}
 
 			var offset = min.clone();
@@ -71,8 +71,8 @@ class POCLoader
 			pco.projection = data.projection;
 			pco.boundingBox = boundingBox;
 			pco.tightBoundingBox = tightBoundingBox;
-			pco.boundingSphere = boundingBox.getBoundingSphere(new THREE.Sphere());
-			pco.tightBoundingSphere = tightBoundingBox.getBoundingSphere(new THREE.Sphere());
+			pco.boundingSphere = boundingBox.getBoundingSphere(new Sphere());
+			pco.tightBoundingSphere = tightBoundingBox.getBoundingSphere(new Sphere());
 			pco.offset = offset;
 
 			// Select the appropiate loader
@@ -152,7 +152,7 @@ class POCLoader
 	{
 		var min = aabb.min.clone();
 		var max = aabb.max.clone();
-		var size = new THREE.Vector3().subVectors(max, min);
+		var size = new Vector3().subVectors(max, min);
 
 		if ((index & 0b0001) > 0)
 		{
@@ -181,7 +181,7 @@ class POCLoader
 			max.x -= size.x / 2;
 		}
 
-		return new THREE.Box3(min, max);
+		return new Box3(min, max);
 	}
 }
 

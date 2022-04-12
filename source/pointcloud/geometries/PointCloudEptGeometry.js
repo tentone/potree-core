@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import {Vector3, Box3, Sphere} from "three";
 import {EptBinaryLoader} from "../../loaders/ept/EptBinaryLoader";
 import {EptLaszipLoader} from "../../loaders/ept/EptLaszipLoader";
 import {PointCloudTreeNode} from "../PointCloudTree.js";
@@ -10,24 +10,24 @@ class Utils
 {
 	static toVector3(v, offset)
 	{
-		return new THREE.Vector3().fromArray(v, offset || 0);
+		return new Vector3().fromArray(v, offset || 0);
 	}
 
 	static toBox3(b)
 	{
-		return new THREE.Box3(Utils.toVector3(b), Utils.toVector3(b, 3));
+		return new Box3(Utils.toVector3(b), Utils.toVector3(b, 3));
 	};
 
 	static findDim(schema, name)
 	{
-		var dim = schema.find((dim) => dim.name == name);
+		var dim = schema.find((dim) => dim.name === name);
 		if(!dim) throw new Error("Failed to find " + name + " in schema");
 		return dim;
 	}
 
 	static sphereFrom(b)
 	{
-		return b.getBoundingSphere(new THREE.Sphere());
+		return b.getBoundingSphere(new Sphere());
 	}
 };
 
@@ -85,7 +85,7 @@ class PointCloudEptGeometry
 		let hierarchyType = info.hierarchyType || "json";
 
 		let dataType = info.dataType || "laszip";
-		this.loader = dataType == "binary" ? new EptBinaryLoader() : new EptLaszipLoader();
+		this.loader = dataType === "binary" ? new EptBinaryLoader() : new EptLaszipLoader();
 	}
 };
 
@@ -110,7 +110,7 @@ class EptKey
 	{
 		let min = this.b.min.clone();
 		let max = this.b.max.clone();
-		let dst = new THREE.Vector3().subVectors(max, min);
+		let dst = new Vector3().subVectors(max, min);
 
 		if(a) min.x += dst.x / 2;
 		else max.x -= dst.x / 2;
@@ -123,7 +123,7 @@ class EptKey
 
 		return new EptKey(
 				this.ept,
-				new THREE.Box3(min, max),
+				new Box3(min, max),
 				this.d + 1,
 				this.x * 2 + a,
 				this.y * 2 + b,

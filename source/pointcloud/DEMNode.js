@@ -1,4 +1,4 @@
-import * as THREE from 'three';//
+import {Vector3} from "three";//
 //index is in order xyzxyzxyz
 class DEMNode
 {
@@ -20,23 +20,23 @@ class DEMNode
 	{
 		this.mipMap = [this.data];
 
-		var sourceSize = this.tileSize;
-		var mipSize = parseInt(sourceSize / 2);
-		var mipSource = this.data;
+		let sourceSize = this.tileSize;
+		let mipSize = parseInt(sourceSize / 2);
+		let mipSource = this.data;
 		while(mipSize > 1)
 		{
-			var mipData = new Float32Array(mipSize * mipSize);
+			const mipData = new Float32Array(mipSize * mipSize);
 
-			for(var i = 0; i < mipSize; i++)
+			for(let i = 0; i < mipSize; i++)
 			{
-				for(var j = 0; j < mipSize; j++)
+				for(let j = 0; j < mipSize; j++)
 				{
-					var h00 = mipSource[2 * i + 0 + 2 * j * sourceSize];
-					var h01 = mipSource[2 * i + 0 + 2 * j * sourceSize + sourceSize];
-					var h10 = mipSource[2 * i + 1 + 2 * j * sourceSize];
-					var h11 = mipSource[2 * i + 1 + 2 * j * sourceSize + sourceSize];
+					const h00 = mipSource[2 * i + 0 + 2 * j * sourceSize];
+					const h01 = mipSource[2 * i + 0 + 2 * j * sourceSize + sourceSize];
+					const h10 = mipSource[2 * i + 1 + 2 * j * sourceSize];
+					const h11 = mipSource[2 * i + 1 + 2 * j * sourceSize + sourceSize];
 
-					var [height, weight] = [0, 0];
+					let [height, weight] = [0, 0];
 
 					if(isFinite(h00))
 					{
@@ -80,41 +80,41 @@ class DEMNode
 
 	uv(position)
 	{
-		var boxSize = this.box.getSize(new THREE.Vector3());
+		const boxSize = this.box.getSize(new Vector3());
 
-		var u = (position.x - this.box.min.x) / boxSize.x;
-		var v = (position.y - this.box.min.y) / boxSize.y;
+		const u = (position.x - this.box.min.x) / boxSize.x;
+		const v = (position.y - this.box.min.y) / boxSize.y;
 
 		return [u, v];
 	}
 
 	heightAtMipMapLevel(position, mipMapLevel)
 	{
-		var uv = this.uv(position);
+		const uv = this.uv(position);
 
-		var tileSize = parseInt(this.tileSize / parseInt(2 ** mipMapLevel));
-		var data = this.mipMap[mipMapLevel];
+		const tileSize = parseInt(this.tileSize / parseInt(2 ** mipMapLevel));
+		const data = this.mipMap[mipMapLevel];
 
-		var i = Math.min(uv[0] * tileSize, tileSize - 1);
-		var j = Math.min(uv[1] * tileSize, tileSize - 1);
+		const i = Math.min(uv[0] * tileSize, tileSize - 1);
+		const j = Math.min(uv[1] * tileSize, tileSize - 1);
 
-		var a = i % 1;
-		var b = j % 1;
+		const a = i % 1;
+		const b = j % 1;
 
-		var [i0, i1] = [Math.floor(i), Math.ceil(i)];
-		var [j0, j1] = [Math.floor(j), Math.ceil(j)];
+		let [i0, i1] = [Math.floor(i), Math.ceil(i)];
+		let [j0, j1] = [Math.floor(j), Math.ceil(j)];
 
-		var h00 = data[i0 + tileSize * j0];
-		var h01 = data[i0 + tileSize * j1];
-		var h10 = data[i1 + tileSize * j0];
-		var h11 = data[i1 + tileSize * j1];
+		const h00 = data[i0 + tileSize * j0];
+		const h01 = data[i0 + tileSize * j1];
+		const h10 = data[i1 + tileSize * j0];
+		const h11 = data[i1 + tileSize * j1];
 
-		var wh00 = isFinite(h00) ? (1 - a) * (1 - b) : 0;
-		var wh01 = isFinite(h01) ? (1 - a) * b : 0;
-		var wh10 = isFinite(h10) ? a * (1 - b) : 0;
-		var wh11 = isFinite(h11) ? a * b : 0;
+		let wh00 = isFinite(h00) ? (1 - a) * (1 - b) : 0;
+		let wh01 = isFinite(h01) ? (1 - a) * b : 0;
+		let wh10 = isFinite(h10) ? a * (1 - b) : 0;
+		let wh11 = isFinite(h11) ? a * b : 0;
 
-		var wsum = wh00 + wh01 + wh10 + wh11;
+		const wsum = wh00 + wh01 + wh10 + wh11;
 		wh00 = wh00 / wsum;
 		wh01 = wh01 / wsum;
 		wh10 = wh10 / wsum;
@@ -125,7 +125,7 @@ class DEMNode
 			return null;
 		}
 
-		var h = 0;
+		let h = 0;
 
 		if(isFinite(h00)) h += h00 * wh00;
 		if(isFinite(h01)) h += h01 * wh01;
@@ -137,9 +137,9 @@ class DEMNode
 
 	height(position)
 	{
-		var h = null;
+		let h = null;
 
-		for(var i = 0; i < this.mipMap.length; i++)
+		for(let i = 0; i < this.mipMap.length; i++)
 		{
 			h = this.heightAtMipMapLevel(position, i);
 
@@ -156,7 +156,7 @@ class DEMNode
 	{
 		handler(this, level);
 
-		for(var child of this.children.filter(c => c !== undefined))
+		for(let child of this.children.filter(c => c !== undefined))
 		{
 			child.traverse(handler, level + 1);
 		}

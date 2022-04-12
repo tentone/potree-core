@@ -18,10 +18,10 @@ function getCurrentScript()
 
 function getBasePath()
 {
-	var currentScript = getCurrentScript();
+	const currentScript = getCurrentScript();
 	if (currentScript && currentScript.src)
 	{
-		var scriptPath = new URL(currentScript.src + "/..").href;
+		let scriptPath = new URL(currentScript.src + "/..").href;
 
 		if (scriptPath.slice(-1) === "/")
 		{
@@ -38,19 +38,19 @@ function getBasePath()
 	return "";
 }
 
-var Global = 
-{
-	debug: {},
-	workerPath: getBasePath(),
-	maxNodesLoadGPUFrame: 20,
-	maxDEMLevel: 0,
-	maxNodesLoading: navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4,
-	pointLoadLimit: 1e10,
-	numNodesLoading: 0,
-	measureTimings: false,
-	workerPool: new WorkerManager(),
-	lru: new LRU(),
-	pointcloudTransformVersion: undefined
-};
+const Global =
+	{
+		debug: {},
+		workerPath: getBasePath(),
+		maxNodesLoadGPUFrame: 20,
+		maxDEMLevel: 0,
+		maxNodesLoading: navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4,
+		pointLoadLimit: 1e10,
+		numNodesLoading: 0,
+		measureTimings: false,
+		workerPool: new WorkerManager(),
+		lru: new LRU(),
+		pointcloudTransformVersion: undefined
+	};
 
 export {Global};

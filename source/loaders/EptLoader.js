@@ -6,12 +6,12 @@ export class EPTLoader
 {
 	static async load(file, callback)
 	{
-		var response = await XHRFactory.fetch(file);
-		var json = await response.json();
-		var url = file.substr(0, file.lastIndexOf("ept.json"));
+		const response = await XHRFactory.fetch(file);
+		const json = await response.json();
+		const url = file.substr(0, file.lastIndexOf("ept.json"));
 
-		var geometry = new PointCloudEptGeometry(url, json);
-		var root = new PointCloudEptGeometryNode(geometry);
+		const geometry = new PointCloudEptGeometry(url, json);
+		const root = new PointCloudEptGeometryNode(geometry);
 		geometry.root = root;
 		geometry.root.load();
 

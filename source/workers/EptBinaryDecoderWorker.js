@@ -22,7 +22,7 @@ onmessage = function(event)
 	let dimOffset = (name) => 
 	{
 		let offset = 0;
-		for (var i = 0; i < schema.length; ++i) 
+		for (let i = 0; i < schema.length; ++i)
 		{
 			if (schema[i].name === name) {return offset;}
 			offset += schema[i].size;
@@ -175,7 +175,7 @@ onmessage = function(event)
 			bounds.max[1] = Math.max(bounds.max[1], y);
 			bounds.max[2] = Math.max(bounds.max[2], z);
 
-			xyz[3 * i + 0] = x;
+			xyz[3 * i] = x;
 			xyz[3 * i + 1] = y;
 			xyz[3 * i + 2] = z;
 		}
@@ -193,7 +193,7 @@ onmessage = function(event)
 				b /= 256;
 			}
 
-			rgb[4 * i + 0] = r;
+			rgb[4 * i] = r;
 			rgb[4 * i + 1] = g;
 			rgb[4 * i + 2] = b;
 		}

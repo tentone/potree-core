@@ -113,6 +113,6 @@ class EptBinaryLoader
 
 		worker.postMessage(message, [message.buffer]);
 	}
-};
+}
 
 export {EptBinaryLoader};

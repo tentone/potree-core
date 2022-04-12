@@ -160,6 +160,6 @@ class BinaryLoader
 			Global.numNodesLoading--;
 		}, message, [message.buffer]);
 	};
-};
+}
 
 export {BinaryLoader};

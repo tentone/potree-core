@@ -42,22 +42,22 @@ class DEMNode
 					{
 						height += h00;
 						weight += 1;
-					};
+					}
 					if(isFinite(h01))
 					{
 						height += h01;
 						weight += 1;
-					};
+					}
 					if(isFinite(h10))
 					{
 						height += h10;
 						weight += 1;
-					};
+					}
 					if(isFinite(h11))
 					{
 						height += h11;
 						weight += 1;
-					};
+					}
 
 					height = height / weight;
 
@@ -161,6 +161,6 @@ class DEMNode
 			child.traverse(handler, level + 1);
 		}
 	}
-};
+}
 
 export {DEMNode}

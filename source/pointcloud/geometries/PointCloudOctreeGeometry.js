@@ -18,7 +18,7 @@ class PointCloudOctreeGeometry
 		this.hierarchyStepSize = -1;
 		this.loader = null;
 	}
-};
+}
 
 class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 {

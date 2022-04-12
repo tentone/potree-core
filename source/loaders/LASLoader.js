@@ -86,7 +86,7 @@ function parseLASHeader(arraybuffer)
 function LASLoader(arraybuffer)
 {
 	this.arraybuffer = arraybuffer;
-};
+}
 
 LASLoader.prototype.open = function()
 {
@@ -204,7 +204,7 @@ function LAZLoader(arraybuffer)
 			}
 		}, req);
 	};
-};
+}
 
 LAZLoader.prototype.open = function()
 {
@@ -297,7 +297,7 @@ function LASFile(arraybuffer)
 	}
 
 	this.loader = this.isCompressed ? new LAZLoader(this.arraybuffer) : new LASLoader(this.arraybuffer);
-};
+}
 
 LASFile.prototype.determineFormat = function()
 {
@@ -352,7 +352,7 @@ function LASDecoder(buffer, pointFormatID, pointSize, pointsCount, scale, offset
 	this.offset = offset;
 	this.mins = mins;
 	this.maxs = maxs;
-};
+}
 
 LASDecoder.prototype.getPoint = function(index)
 {

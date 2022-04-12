@@ -29,7 +29,7 @@ class Utils
 	{
 		return b.getBoundingSphere(new Sphere());
 	}
-};
+}
 
 class PointCloudEptGeometry
 {
@@ -87,7 +87,7 @@ class PointCloudEptGeometry
 		let dataType = info.dataType || "laszip";
 		this.loader = dataType === "binary" ? new EptBinaryLoader() : new EptLaszipLoader();
 	}
-};
+}
 
 class EptKey
 {

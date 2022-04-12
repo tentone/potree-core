@@ -59,7 +59,7 @@ class PointAttribute
 		this.description = "";
 		this.range = [Infinity, -Infinity];
 	}
-};
+}
 
 PointAttribute.POSITION_CARTESIAN = new PointAttribute(PointAttributeNames.POSITION_CARTESIAN, PointAttributeTypes.DATA_TYPE_FLOAT, 3);
 PointAttribute.RGBA_PACKED = new PointAttribute(PointAttributeNames.COLOR_PACKED, PointAttributeTypes.DATA_TYPE_INT8, 4);

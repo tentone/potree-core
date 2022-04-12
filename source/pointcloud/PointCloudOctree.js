@@ -117,7 +117,7 @@ class PointCloudOctreeNode extends PointCloudTreeNode
 	{
 		return this.geometryNode.name;
 	}
-};
+}
 
 class PointCloudOctree extends PointCloudTree
 {
@@ -766,7 +766,7 @@ class PointCloudOctree extends PointCloudTree
 				material: material,
 				scene: scene
 			};
-		};
+		}
 
 		var pickState = this.pickState;
 		var pickMaterial = pickState.material;
@@ -1086,6 +1086,6 @@ class PointCloudOctree extends PointCloudTree
 
 		return node;
 	}
-};
+}
 
 export {PointCloudOctree, PointCloudOctreeNode};

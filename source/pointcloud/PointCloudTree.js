@@ -21,7 +21,7 @@ class PointCloudTreeNode
 	getLevel() {}
 
 	getBoundingSphere() {}
-};
+}
 
 class PointCloudTree extends Object3D
 {
@@ -36,6 +36,6 @@ class PointCloudTree extends Object3D
 	{
 		return this.root !== null;
 	}
-};
+}
 
 export {PointCloudTree, PointCloudTreeNode};

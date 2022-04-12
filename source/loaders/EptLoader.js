@@ -1,6 +1,5 @@
-
 import {PointCloudEptGeometry, PointCloudEptGeometryNode} from "../pointcloud/geometries/PointCloudEptGeometry.js";
-import { XHRFactory } from "../XHRFactory.js";
+import {XHRFactory} from "../XHRFactory.js";
 
 export class EPTLoader
 {

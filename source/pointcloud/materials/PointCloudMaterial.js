@@ -920,6 +920,6 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms[name].value = from.uniforms[name].value;
 		}
 	}
-};
+}
 
 export {PointCloudMaterial};

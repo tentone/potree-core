@@ -197,6 +197,6 @@ class BasicGroup extends Mesh
 
 		return height;
 	}
-};
+}
 
 export {BasicGroup};

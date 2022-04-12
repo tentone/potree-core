@@ -201,7 +201,7 @@ class PointCloudArena4DGeometryNode
 	{
 		return this.numPoints;
 	}
-};
+}
 
 class PointCloudArena4DGeometry extends EventDispatcher
 {

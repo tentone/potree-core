@@ -120,7 +120,7 @@ export class EptLaszipLoader
 				else {throw err;}
 			});
 	}
-};
+}
 
 export class EptLazBatcher
 {
@@ -181,5 +181,5 @@ export class EptLazBatcher
 
 		worker.postMessage(message, [message.buffer]);
 	};
-};
+}
 

@@ -22,13 +22,9 @@ export class Version
 		{
 			return true;
 		}
-		else if (this.versionMajor === v.versionMajor && this.versionMinor > v.versionMinor) 
+		else
 		{
-			return true;
-		}
-		else 
-		{
-			return false;
+			return this.versionMajor === v.versionMajor && this.versionMinor > v.versionMinor;
 		}
 	}
 
@@ -40,13 +36,9 @@ export class Version
 		{
 			return true;
 		}
-		else if (this.versionMajor === v.versionMajor && this.versionMinor >= v.versionMinor) 
+		else
 		{
-			return true;
-		}
-		else 
-		{
-			return false;
+			return this.versionMajor === v.versionMajor && this.versionMinor >= v.versionMinor;
 		}
 	}
 

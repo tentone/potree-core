@@ -177,7 +177,7 @@ function readUsingDataView(event)
 	];
 
 	postMessage(message, transferables);
-};
+}
 
 
 onmessage = readUsingDataView;

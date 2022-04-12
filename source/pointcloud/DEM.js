@@ -242,6 +242,6 @@ class DEM
 			}
 		}, message, transferables);
 	}
-};
+}
 
 export {DEM};

@@ -99,7 +99,7 @@ class PointCloudArena4DNode extends PointCloudTreeNode
 
 		return children;
 	}
-};
+}
 
 class PointCloudArena4D extends PointCloudTree
 {
@@ -412,7 +412,7 @@ class PointCloudArena4D extends PointCloudTree
 				material: material,
 				scene: scene
 			};
-		};
+		}
 
 		var pickState = this.pickState;
 		var pickMaterial = pickState.material;
@@ -657,6 +657,6 @@ class PointCloudArena4D extends PointCloudTree
 			return 0;
 		}
 	}
-};
+}
 
 export {PointCloudArena4D, PointCloudArena4DNode};

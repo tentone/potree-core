@@ -158,7 +158,7 @@ class LASLAZLoader
 	}
 
 	handle(node, url) {}
-};
+}
 
 class LASLAZBatcher
 {
@@ -230,6 +230,6 @@ class LASLAZBatcher
 
 		worker.postMessage(message, [message.buffer]);
 	};
-};
+}
 
 export {LASLAZLoader};

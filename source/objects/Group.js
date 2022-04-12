@@ -119,6 +119,6 @@ class Group extends BasicGroup {
     material.uniforms.logDepthBufFC.value = renderer.capabilities.logarithmicDepthBuffer ? 2.0 / (Math.log(camera.far + 1.0) / Math.LN2) : undefined;
     material.uniformsNeedUpdate = true;
   }
-};
+}
 
 export { Group };

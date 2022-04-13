@@ -1,7 +1,7 @@
-import {Vector3} from "three";
-import {WorkerManager} from "../utils/WorkerManager.js";
-import {Global} from "../Global.js";
-import {DEMNode} from "./DEMNode.js";
+import {Vector3} from 'three';
+import {WorkerManager} from '../utils/WorkerManager.js';
+import {Global} from '../Global.js';
+import {DEMNode} from './DEMNode.js';
 
 export class DEM
 {
@@ -159,7 +159,7 @@ export class DEM
 		{
 			this.matrix = this.pointcloud.matrixWorld.clone();
 			this.boundingBox = this.pointcloud.boundingBox.clone().applyMatrix4(this.matrix);
-			this.root = new DEMNode("r", this.boundingBox, this.tileSize);
+			this.root = new DEMNode('r', this.boundingBox, this.tileSize);
 			this.version++;
 		}
 

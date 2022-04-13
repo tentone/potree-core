@@ -26,19 +26,19 @@ class WorkerManager
 		switch (type) 
 		{
 		case WorkerManager.BINARY_DECODER:
-			return new Worker(new URL("../workers/BinaryDecoderWorker.js", import.meta.url));
+			return new Worker(new URL('../workers/BinaryDecoderWorker.js', import.meta.url));
 		case WorkerManager.LAS_LAZ:
-			return new Worker(new URL("../workers/LASLAZWorker.js", import.meta.url));
+			return new Worker(new URL('../workers/LASLAZWorker.js', import.meta.url));
 		case WorkerManager.LAS_DECODER:
-			return new Worker(new URL("../workers/LASDecoderWorker.js", import.meta.url));
+			return new Worker(new URL('../workers/LASDecoderWorker.js', import.meta.url));
 		case WorkerManager.DEM:
-			return new Worker(new URL("../workers/DEMWorker.js", import.meta.url));
+			return new Worker(new URL('../workers/DEMWorker.js', import.meta.url));
 		case WorkerManager.EPT_LAS_ZIP_DECODER:
-			return new Worker(new URL("../workers/EptLaszipDecoderWorker.js", import.meta.url));
+			return new Worker(new URL('../workers/EptLaszipDecoderWorker.js', import.meta.url));
 		case WorkerManager.EPT_BINARY_DECODER:
-			return new Worker(new URL("../workers/EptBinaryDecoderWorker.js", import.meta.url));
+			return new Worker(new URL('../workers/EptBinaryDecoderWorker.js', import.meta.url));
 		default:
-			throw new Error("Unknown worker type.");
+			throw new Error('Unknown worker type.');
 		}
 	}
 

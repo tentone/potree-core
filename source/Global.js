@@ -1,6 +1,6 @@
 
-import {LRU} from "./utils/LRU.js";
-import {WorkerManager} from "./utils/WorkerManager.js";
+import {LRU} from './utils/LRU.js';
+import {WorkerManager} from './utils/WorkerManager.js';
 
 function getCurrentScript() 
 {
@@ -21,9 +21,9 @@ function getBasePath()
 	const currentScript = getCurrentScript();
 	if (currentScript && currentScript.src)
 	{
-		let scriptPath = new URL(currentScript.src + "/..").href;
+		let scriptPath = new URL(currentScript.src + '/..').href;
 
-		if (scriptPath.slice(-1) === "/")
+		if (scriptPath.slice(-1) === '/')
 		{
 			scriptPath = scriptPath.slice(0, -1);
 		}
@@ -32,10 +32,10 @@ function getBasePath()
 	}
 	else
 	{
-		console.error("Potree: Was unable to find its script path using document.currentScript.");
+		console.error('Potree: Was unable to find its script path using document.currentScript.');
 	}
 
-	return "";
+	return '';
 }
 
 export const Global = {

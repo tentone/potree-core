@@ -1,8 +1,8 @@
-import {Matrix4, DataTexture, CanvasTexture, AlwaysDepth, NoBlending, AdditiveBlending, LessEqualDepth, VertexColors, Color, NearestFilter, ShaderMaterial} from "three";
-import {HelperUtils} from "../../utils/HelperUtils.js";
-import {Gradients} from "../../Gradients.js";
-import {Shaders} from "../../Shaders.js";
-import {TreeType, PointColorType, PointSizeType, PointShape, Classification} from "../../Potree.js";
+import {Matrix4, DataTexture, CanvasTexture, AlwaysDepth, NoBlending, AdditiveBlending, LessEqualDepth, VertexColors, Color, NearestFilter, ShaderMaterial} from 'three';
+import {HelperUtils} from '../../utils/HelperUtils.js';
+import {Gradients} from '../../Gradients.js';
+import {Shaders} from '../../Shaders.js';
+import {TreeType, PointColorType, PointSizeType, PointShape, Classification} from '../../Potree.js';
 
 class PointCloudMaterial extends ShaderMaterial
 {
@@ -56,42 +56,42 @@ class PointCloudMaterial extends ShaderMaterial
 			projectionMatrix: {value: new Matrix4()},
 			uViewInv: {value: new Matrix4()},
 			clipPlanes: {value: []},
-			level: {type: "f", value: 0.0},
-			vnStart: {type: "f", value: 0.0},
-			spacing: {type: "f", value: 1.0},
-			fov: {type: "f", value: 1.0},
-			uScreenWidth: {type: "f", value: 1.0},
-			uScreenHeight: {type: "f", value: 1.0},
-			uOctreeSpacing: {type: "f", value: 0.0},
-			near: {type: "f", value: 0.1},
-			far: {type: "f", value: 1.0},
-			uColor: {type: "c", value: new Color( 0xffffff )},
-			uOpacity: {type: "f", value: 1.0},
-			size: {type: "f", value: pointSize},
-			minSize: {type: "f", value: minSize},
-			maxSize: {type: "f", value: maxSize},
-			octreeSize: {type: "f", value: 0},
-			bbSize: {type: "fv", value: [0, 0, 0]},
-			elevationRange: {type: "2fv", value: [0, 0]},
-			visibleNodes: {type: "t", value: this.visibleNodesTexture},
-			gradient: {type: "t", value: this.gradientTexture},
-			classificationLUT: {type: "t", value: null},
-			diffuse: {type: "fv", value: [1, 1, 1]},
-			transition: {type: "f", value: 0.5},
-			intensityRange: {type: "fv", value: [0, 65000]},
-			intensityGamma: {type: "f", value: 1},
-			intensityContrast: {type: "f", value: 0},
-			intensityBrightness: {type: "f", value: 0},
-			rgbGamma: {type: "f", value: 1},
-			rgbBrightness: {type: "f", value: 0},
-			uTransition: {type: "f", value: 0},
-			wRGB: {type: "f", value: 1},
-			wIntensity: {type: "f", value: 0},
-			wElevation: {type: "f", value: 0},
-			wClassification: {type: "f", value: 0},
-			wReturnNumber: {type: "f", value: 0},
-			wSourceID: {type: "f", value: 0},
-			logDepthBufFC: {type: "f", value: 0},
+			level: {type: 'f', value: 0.0},
+			vnStart: {type: 'f', value: 0.0},
+			spacing: {type: 'f', value: 1.0},
+			fov: {type: 'f', value: 1.0},
+			uScreenWidth: {type: 'f', value: 1.0},
+			uScreenHeight: {type: 'f', value: 1.0},
+			uOctreeSpacing: {type: 'f', value: 0.0},
+			near: {type: 'f', value: 0.1},
+			far: {type: 'f', value: 1.0},
+			uColor: {type: 'c', value: new Color( 0xffffff )},
+			uOpacity: {type: 'f', value: 1.0},
+			size: {type: 'f', value: pointSize},
+			minSize: {type: 'f', value: minSize},
+			maxSize: {type: 'f', value: maxSize},
+			octreeSize: {type: 'f', value: 0},
+			bbSize: {type: 'fv', value: [0, 0, 0]},
+			elevationRange: {type: '2fv', value: [0, 0]},
+			visibleNodes: {type: 't', value: this.visibleNodesTexture},
+			gradient: {type: 't', value: this.gradientTexture},
+			classificationLUT: {type: 't', value: null},
+			diffuse: {type: 'fv', value: [1, 1, 1]},
+			transition: {type: 'f', value: 0.5},
+			intensityRange: {type: 'fv', value: [0, 65000]},
+			intensityGamma: {type: 'f', value: 1},
+			intensityContrast: {type: 'f', value: 0},
+			intensityBrightness: {type: 'f', value: 0},
+			rgbGamma: {type: 'f', value: 1},
+			rgbBrightness: {type: 'f', value: 0},
+			uTransition: {type: 'f', value: 0},
+			wRGB: {type: 'f', value: 1},
+			wIntensity: {type: 'f', value: 0},
+			wElevation: {type: 'f', value: 0},
+			wClassification: {type: 'f', value: 0},
+			wReturnNumber: {type: 'f', value: 0},
+			wSourceID: {type: 'f', value: 0},
+			logDepthBufFC: {type: 'f', value: 0},
 			uPCIndex: {value: 0.0}
 		};
 
@@ -268,7 +268,7 @@ class PointCloudMaterial extends ShaderMaterial
 		this.uniforms.classificationLUT.value = this.classificationTexture;
 		this.dispatchEvent(
 			{
-				type: "material_property_changed",
+				type: 'material_property_changed',
 				target: this
 			});
 	}
@@ -383,12 +383,12 @@ class PointCloudMaterial extends ShaderMaterial
 				this.updateMaterial();
 				this.dispatchEvent(
 					{
-						type: "opacity_changed",
+						type: 'opacity_changed',
 						target: this
 					});
 				this.dispatchEvent(
 					{
-						type: "material_property_changed",
+						type: 'material_property_changed',
 						target: this
 					});
 			}
@@ -408,12 +408,12 @@ class PointCloudMaterial extends ShaderMaterial
 			this.updateMaterial();
 			this.dispatchEvent(
 				{
-					type: "point_color_type_changed",
+					type: 'point_color_type_changed',
 					target: this
 				});
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -432,12 +432,12 @@ class PointCloudMaterial extends ShaderMaterial
 			this.updateMaterial();
 			this.dispatchEvent(
 				{
-					type: "point_size_type_changed",
+					type: 'point_size_type_changed',
 					target: this
 				});
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -455,12 +455,12 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.uColor.value.copy(value);
 			this.dispatchEvent(
 				{
-					type: "color_changed",
+					type: 'color_changed',
 					target: this
 				});
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -479,12 +479,12 @@ class PointCloudMaterial extends ShaderMaterial
 			this.updateMaterial();
 			this.dispatchEvent(
 				{
-					type: "point_shape_changed",
+					type: 'point_shape_changed',
 					target: this
 				});
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -526,12 +526,12 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.size.value = value;
 			this.dispatchEvent(
 				{
-					type: "point_size_changed",
+					type: 'point_size_changed',
 					target: this
 				});
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -552,7 +552,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this._defaultElevationRangeChanged = true;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -610,7 +610,7 @@ class PointCloudMaterial extends ShaderMaterial
 
 		this.dispatchEvent(
 			{
-				type: "material_property_changed",
+				type: 'material_property_changed',
 				target: this
 			});
 	}
@@ -627,7 +627,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.intensityGamma.value = value;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -645,7 +645,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.intensityContrast.value = value;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -663,7 +663,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.intensityBrightness.value = value;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -681,7 +681,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.rgbGamma.value = value;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -717,7 +717,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.rgbBrightness.value = value;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -735,7 +735,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.wRGB.value = value;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -753,7 +753,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.wIntensity.value = value;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -771,7 +771,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.wElevation.value = value;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -789,7 +789,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.wClassification.value = value;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -807,7 +807,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.wReturnNumber.value = value;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -825,7 +825,7 @@ class PointCloudMaterial extends ShaderMaterial
 			this.uniforms.wSourceID.value = value;
 			this.dispatchEvent(
 				{
-					type: "material_property_changed",
+					type: 'material_property_changed',
 					target: this
 				});
 		}
@@ -836,12 +836,12 @@ class PointCloudMaterial extends ShaderMaterial
 		var size = 64;
 
 		// Create canvas
-		var canvas = document.createElement("canvas");
+		var canvas = document.createElement('canvas');
 		canvas.width = size;
 		canvas.height = size;
 
 		// Get context
-		var context = canvas.getContext("2d");
+		var context = canvas.getContext('2d');
 
 		// Draw gradient
 		context.rect(0, 0, size, size);
@@ -849,7 +849,7 @@ class PointCloudMaterial extends ShaderMaterial
 		for (var i = 0; i < gradient.length; i++)
 		{
 			var step = gradient[i];
-			ctxGradient.addColorStop(step[0], "#" + step[1].getHexString());
+			ctxGradient.addColorStop(step[0], '#' + step[1].getHexString());
 		}
 		context.fillStyle = ctxGradient;
 		context.fill();

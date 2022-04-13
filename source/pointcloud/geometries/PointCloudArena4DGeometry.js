@@ -1,7 +1,7 @@
-import {Vector3, Box3, BufferAttribute, BufferGeometry, Sphere} from "three";
-import {Global} from "../../Global.js";
-import {XHRFactory} from "../../XHRFactory.js";
-import {PointAttributes} from "../../loaders/PointAttributes";
+import {Vector3, Box3, BufferAttribute, BufferGeometry, Sphere} from 'three';
+import {Global} from '../../Global.js';
+import {XHRFactory} from '../../XHRFactory.js';
+import {PointAttributes} from '../../loaders/PointAttributes';
 
 class PointCloudArena4DGeometryNode
 {
@@ -83,12 +83,12 @@ class PointCloudArena4DGeometryNode
 		Global.numNodesLoading++;
 
 		var self = this;
-		var url = this.pcoGeometry.url + "?node=" + this.number;
+		var url = this.pcoGeometry.url + '?node=' + this.number;
 		
 		var xhr = XHRFactory.createXMLHttpRequest();
-		xhr.overrideMimeType("text/plain");
-		xhr.open("GET", url, true);
-		xhr.responseType = "arraybuffer";
+		xhr.overrideMimeType('text/plain');
+		xhr.open('GET', url, true);
+		xhr.responseType = 'arraybuffer';
 		xhr.onload = function()
 		{
 			try
@@ -149,13 +149,13 @@ class PointCloudArena4DGeometryNode
 				}
 
 				var geometry = new BufferGeometry();
-				geometry.setAttribute("position", new BufferAttribute(position, 3));
-				geometry.setAttribute("color", new BufferAttribute(color, 4, true));
-				geometry.setAttribute("intensity", new BufferAttribute(intensities, 1));
-				geometry.setAttribute("classification", new BufferAttribute(classifications, 1));
+				geometry.setAttribute('position', new BufferAttribute(position, 3));
+				geometry.setAttribute('color', new BufferAttribute(color, 4, true));
+				geometry.setAttribute('intensity', new BufferAttribute(intensities, 1));
+				geometry.setAttribute('classification', new BufferAttribute(classifications, 1));
 				{
 					var bufferAttribute = new BufferAttribute(new Uint8Array(indices), 4, true);
-					geometry.setAttribute("indices", bufferAttribute);
+					geometry.setAttribute('indices', bufferAttribute);
 				}
 
 				self.geometry = geometry;
@@ -166,7 +166,7 @@ class PointCloudArena4DGeometryNode
 			}
 			catch (e)
 			{
-				console.error("Potree: Exception thrown parsing points.", e);
+				console.error('Potree: Exception thrown parsing points.', e);
 				Global.numNodesLoading--;
 			}
 
@@ -174,7 +174,7 @@ class PointCloudArena4DGeometryNode
 		xhr.onerror = function()
 		{
 			Global.numNodesLoading--;
-			console.log("Potree: Failed to load file, " + xhr.status + ", file: " + url);
+			console.log('Potree: Failed to load file, ' + xhr.status + ', file: ' + url);
 		};
 		xhr.send(null);
 	}
@@ -220,16 +220,16 @@ class PointCloudArena4DGeometry extends EventDispatcher
 		this.levels = 0;
 		this._spacing = null;
 		this.pointAttributes = new PointAttributes([
-			"POSITION_CARTESIAN",
-			"COLOR_PACKED"
+			'POSITION_CARTESIAN',
+			'COLOR_PACKED'
 		]);
 	}
 
 	static load(url, callback)
 	{
 		var xhr = XHRFactory.createXMLHttpRequest();
-		xhr.overrideMimeType("text/plain");
-		xhr.open("GET", url + "?info", true);
+		xhr.overrideMimeType('text/plain');
+		xhr.open('GET', url + '?info', true);
 
 		xhr.onreadystatechange = function()
 		{
@@ -287,12 +287,12 @@ class PointCloudArena4DGeometry extends EventDispatcher
 
 	loadHierarchy()
 	{
-		var url = this.url + "?tree";
+		var url = this.url + '?tree';
 		
 		var xhr = XHRFactory.createXMLHttpRequest();
-		xhr.overrideMimeType("text/plain");
-		xhr.open("GET", url, true);
-		xhr.responseType = "arraybuffer";
+		xhr.overrideMimeType('text/plain');
+		xhr.open('GET', url, true);
+		xhr.responseType = 'arraybuffer';
 
 		xhr.onreadystatechange = () =>
 		{
@@ -323,15 +323,15 @@ class PointCloudArena4DGeometry extends EventDispatcher
 				var split = null;
 				if (splitX)
 				{
-					split = "X";
+					split = 'X';
 				}
 				else if (splitY)
 				{
-					split = "Y";
+					split = 'Y';
 				}
 				if (splitZ)
 				{
-					split = "Z";
+					split = 'Z';
 				}
 
 				var node = new PointCloudArena4DGeometryNode();
@@ -358,15 +358,15 @@ class PointCloudArena4DGeometry extends EventDispatcher
 						parent.left = node;
 						parent.children.push(node);
 
-						if (parent.split === "X")
+						if (parent.split === 'X')
 						{
 							node.boundingBox.max.x = node.boundingBox.min.x + parentBBSize.x / 2;
 						}
-						else if (parent.split === "Y")
+						else if (parent.split === 'Y')
 						{
 							node.boundingBox.max.y = node.boundingBox.min.y + parentBBSize.y / 2;
 						}
-						else if (parent.split === "Z")
+						else if (parent.split === 'Z')
 						{
 							node.boundingBox.max.z = node.boundingBox.min.z + parentBBSize.z / 2;
 						}
@@ -382,15 +382,15 @@ class PointCloudArena4DGeometry extends EventDispatcher
 						parent.right = node;
 						parent.children.push(node);
 
-						if (parent.split === "X")
+						if (parent.split === 'X')
 						{
 							node.boundingBox.min.x = node.boundingBox.min.x + parentBBSize.x / 2;
 						}
-						else if (parent.split === "Y")
+						else if (parent.split === 'Y')
 						{
 							node.boundingBox.min.y = node.boundingBox.min.y + parentBBSize.y / 2;
 						}
-						else if (parent.split === "Z")
+						else if (parent.split === 'Z')
 						{
 							node.boundingBox.min.z = node.boundingBox.min.z + parentBBSize.z / 2;
 						}
@@ -436,7 +436,7 @@ class PointCloudArena4DGeometry extends EventDispatcher
 			this.levels = levels;
 
 			this.dispatchEvent(
-				{type: "hierarchy_loaded"});
+				{type: 'hierarchy_loaded'});
 		};
 
 		xhr.send(null);

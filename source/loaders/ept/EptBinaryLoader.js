@@ -1,7 +1,7 @@
-import {Vector3, Box3, BufferAttribute, BufferGeometry} from "three";
-import {Global} from "../../Global.js";
-import {WorkerManager} from "../../utils/WorkerManager.js";
-import {XHRFactory} from "../../XHRFactory.js";
+import {Vector3, Box3, BufferAttribute, BufferGeometry} from 'three';
+import {Global} from '../../Global.js';
+import {WorkerManager} from '../../utils/WorkerManager.js';
+import {XHRFactory} from '../../XHRFactory.js';
 
 class EptBinaryLoader
 {
@@ -9,12 +9,12 @@ class EptBinaryLoader
 	{
 		if (node.loaded) {return;}
 
-		const url = node.url() + ".bin";
+		const url = node.url() + '.bin';
 
 		const xhr = XHRFactory.createXMLHttpRequest();
-		xhr.open("GET", url, true);
-		xhr.responseType = "arraybuffer";
-		xhr.overrideMimeType("text/plain; charset=x-user-defined");
+		xhr.open('GET', url, true);
+		xhr.responseType = 'arraybuffer';
+		xhr.overrideMimeType('text/plain; charset=x-user-defined');
 		xhr.onreadystatechange = () =>
 		{
 			if (xhr.readyState === 4)
@@ -26,7 +26,7 @@ class EptBinaryLoader
 				}
 				else
 				{
-					console.log("Failed " + url + ": " + xhr.status);
+					console.log('Failed ' + url + ': ' + xhr.status);
 				}
 			}
 		};
@@ -37,7 +37,7 @@ class EptBinaryLoader
 		}
 		catch (e)
 		{
-			console.log("Failed request: " + e);
+			console.log('Failed request: ' + e);
 		}
 	}
 
@@ -51,40 +51,40 @@ class EptBinaryLoader
 			const numPoints = e.data.numPoints;
 
 			const position = new Float32Array(e.data.position);
-			g.setAttribute("position", new BufferAttribute(position, 3));
+			g.setAttribute('position', new BufferAttribute(position, 3));
 
 			const indices = new Uint8Array(e.data.indices);
-			g.setAttribute("indices", new BufferAttribute(indices, 4));
+			g.setAttribute('indices', new BufferAttribute(indices, 4));
 
 			if (e.data.color)
 			{
 				const color = new Uint8Array(e.data.color);
-				g.setAttribute("color", new BufferAttribute(color, 4, true));
+				g.setAttribute('color', new BufferAttribute(color, 4, true));
 			}
 			if (e.data.intensity)
 			{
 				const intensity = new Float32Array(e.data.intensity);
-				g.setAttribute("intensity", new BufferAttribute(intensity, 1));
+				g.setAttribute('intensity', new BufferAttribute(intensity, 1));
 			}
 			if (e.data.classification)
 			{
 				const classification = new Uint8Array(e.data.classification);
-				g.setAttribute("classification", new BufferAttribute(classification, 1));
+				g.setAttribute('classification', new BufferAttribute(classification, 1));
 			}
 			if (e.data.returnNumber)
 			{
 				const returnNumber = new Uint8Array(e.data.returnNumber);
-				g.setAttribute("returnNumber", new BufferAttribute(returnNumber, 1));
+				g.setAttribute('returnNumber', new BufferAttribute(returnNumber, 1));
 			}
 			if (e.data.numberOfReturns)
 			{
 				const numberOfReturns = new Uint8Array(e.data.numberOfReturns);
-				g.setAttribute("numberOfReturns", new BufferAttribute(numberOfReturns, 1));
+				g.setAttribute('numberOfReturns', new BufferAttribute(numberOfReturns, 1));
 			}
 			if (e.data.pointSourceId)
 			{
 				const pointSourceId = new Uint16Array(e.data.pointSourceId);
-				g.setAttribute("pointSourceID", new BufferAttribute(pointSourceId, 1));
+				g.setAttribute('pointSourceID', new BufferAttribute(pointSourceId, 1));
 			}
 
 			g.attributes.indices.normalized = true;

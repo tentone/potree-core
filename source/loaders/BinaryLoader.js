@@ -1,15 +1,15 @@
-import {Vector3, Box3, BufferAttribute, BufferGeometry} from "three";
-import {WorkerManager} from "../utils/WorkerManager.js";
-import {Global} from "../Global.js";
+import {Vector3, Box3, BufferAttribute, BufferGeometry} from 'three';
+import {WorkerManager} from '../utils/WorkerManager.js';
+import {Global} from '../Global.js';
 import {XHRFactory} from '../XHRFactory.js';
 import {Version} from '../Version.js';
-import {PointAttributeNames} from "./PointAttributes.js";
+import {PointAttributeNames} from './PointAttributes.js';
 
 class BinaryLoader
 {
 	constructor(version, boundingBox, scale)
 	{
-		if (typeof version === "string")
+		if (typeof version === 'string')
 		{
 			this.version = new Version(version);
 		}
@@ -31,16 +31,16 @@ class BinaryLoader
 
 		let url = node.getURL();
 
-		if (this.version.equalOrHigher("1.4"))
+		if (this.version.equalOrHigher('1.4'))
 		{
-			url += ".bin";
+			url += '.bin';
 		}
 
 		const self = this;
 		const xhr = XHRFactory.createXMLHttpRequest();
-		xhr.open("GET", url, true);
-		xhr.responseType = "arraybuffer";
-		xhr.overrideMimeType("text/plain; charset=x-user-defined");
+		xhr.open('GET', url, true);
+		xhr.responseType = 'arraybuffer';
+		xhr.overrideMimeType('text/plain; charset=x-user-defined');
 		xhr.onload = function()
 		{
 			try
@@ -50,13 +50,13 @@ class BinaryLoader
 			catch (e)
 			{
 				Global.numNodesLoading--;
-				console.error("Potree: Exception thrown parsing points.", e);
+				console.error('Potree: Exception thrown parsing points.', e);
 			}
 		};
 		xhr.onerror = function(event)
 		{
 			Global.numNodesLoading--;
-			console.error("Potree: Failed to load file.", xhr, url);
+			console.error('Potree: Failed to load file.', xhr, url);
 		};
 
 		xhr.send(null);
@@ -67,7 +67,7 @@ class BinaryLoader
 		const pointAttributes = node.pcoGeometry.pointAttributes;
 		const numPoints = buffer.byteLength / node.pcoGeometry.pointAttributes.byteSize;
 
-		if (this.version.upTo("1.5"))
+		if (this.version.upTo('1.5'))
 		{
 			node.numPoints = numPoints;
 		}
@@ -92,7 +92,7 @@ class BinaryLoader
 			if (data.error !== undefined)
 			{
 				Global.numNodesLoading--;
-				console.error("Potree: Binary worker error.", data);
+				console.error('Potree: Binary worker error.', data);
 				return;
 			}
 
@@ -106,42 +106,42 @@ class BinaryLoader
 
 				if (parseInt(property) === PointAttributeNames.POSITION_CARTESIAN)
 				{
-					geometry.setAttribute("position", new BufferAttribute(new Float32Array(buffer), 3));
+					geometry.setAttribute('position', new BufferAttribute(new Float32Array(buffer), 3));
 				}
 				else if (parseInt(property) === PointAttributeNames.COLOR_PACKED)
 				{
-					geometry.setAttribute("color", new BufferAttribute(new Uint8Array(buffer), 4, true));
+					geometry.setAttribute('color', new BufferAttribute(new Uint8Array(buffer), 4, true));
 				}
 				else if (parseInt(property) === PointAttributeNames.INTENSITY)
 				{
-					geometry.setAttribute("intensity", new BufferAttribute(new Float32Array(buffer), 1));
+					geometry.setAttribute('intensity', new BufferAttribute(new Float32Array(buffer), 1));
 				}
 				else if (parseInt(property) === PointAttributeNames.CLASSIFICATION)
 				{
-					geometry.setAttribute("classification", new BufferAttribute(new Uint8Array(buffer), 1));
+					geometry.setAttribute('classification', new BufferAttribute(new Uint8Array(buffer), 1));
 				}
 				else if (parseInt(property) === PointAttributeNames.NORMAL_SPHEREMAPPED)
 				{
-					geometry.setAttribute("normal", new BufferAttribute(new Float32Array(buffer), 3));
+					geometry.setAttribute('normal', new BufferAttribute(new Float32Array(buffer), 3));
 				}
 				else if (parseInt(property) === PointAttributeNames.NORMAL_OCT16)
 				{
-					geometry.setAttribute("normal", new BufferAttribute(new Float32Array(buffer), 3));
+					geometry.setAttribute('normal', new BufferAttribute(new Float32Array(buffer), 3));
 				}
 				else if (parseInt(property) === PointAttributeNames.NORMAL)
 				{
-					geometry.setAttribute("normal", new BufferAttribute(new Float32Array(buffer), 3));
+					geometry.setAttribute('normal', new BufferAttribute(new Float32Array(buffer), 3));
 				}
 				else if (parseInt(property) === PointAttributeNames.INDICES)
 				{
 					var bufferAttribute = new BufferAttribute(new Uint8Array(buffer), 4);
 					bufferAttribute.normalized = true;
-					geometry.setAttribute("indices", bufferAttribute);
+					geometry.setAttribute('indices', bufferAttribute);
 				}
 				else if (parseInt(property) === PointAttributeNames.SPACING)
 				{
 					var bufferAttribute = new BufferAttribute(new Float32Array(buffer), 1);
-					geometry.setAttribute("spacing", bufferAttribute);
+					geometry.setAttribute('spacing', bufferAttribute);
 				}
 			}
 

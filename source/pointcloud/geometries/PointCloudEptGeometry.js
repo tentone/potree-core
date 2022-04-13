@@ -1,9 +1,9 @@
-import {Vector3, Box3, Sphere} from "three";
-import {EptBinaryLoader} from "../../loaders/ept/EptBinaryLoader";
-import {EptLaszipLoader} from "../../loaders/ept/EptLaszipLoader";
-import {PointCloudTreeNode} from "../PointCloudTree.js";
-import {Global} from "../../Global.js";
-import {XHRFactory} from "../../XHRFactory.js";
+import {Vector3, Box3, Sphere} from 'three';
+import {EptBinaryLoader} from '../../loaders/ept/EptBinaryLoader';
+import {EptLaszipLoader} from '../../loaders/ept/EptLaszipLoader';
+import {PointCloudTreeNode} from '../PointCloudTree.js';
+import {Global} from '../../Global.js';
+import {XHRFactory} from '../../XHRFactory.js';
 import {Version} from '../../Version';
 
 class Utils
@@ -21,7 +21,7 @@ class Utils
 	static findDim(schema, name)
 	{
 		var dim = schema.find((dim) => {return dim.name === name;});
-		if (!dim) {throw new Error("Failed to find " + name + " in schema");}
+		if (!dim) {throw new Error('Failed to find ' + name + ' in schema');}
 		return dim;
 	}
 
@@ -41,9 +41,9 @@ class PointCloudEptGeometry
 		let boundsConforming = info.boundsConforming;
 
 		let xyz = [
-			Utils.findDim(schema, "X"),
-			Utils.findDim(schema, "Y"),
-			Utils.findDim(schema, "Z")
+			Utils.findDim(schema, 'X'),
+			Utils.findDim(schema, 'Y'),
+			Utils.findDim(schema, 'Z')
 		];
 		let scale = xyz.map((d) => {return d.scale || 1;});
 		let offset = xyz.map((d) => {return d.offset || 0;});
@@ -53,7 +53,7 @@ class PointCloudEptGeometry
 
 		this.url = url;
 		this.info = info;
-		this.type = "ept";
+		this.type = 'ept';
 
 		this.schema = schema;
 		this.span = info.span || info.ticks;
@@ -62,14 +62,14 @@ class PointCloudEptGeometry
 		this.offset = Utils.toVector3([0, 0, 0]);
 		this.boundingSphere = Utils.sphereFrom(this.boundingBox);
 		this.tightBoundingSphere = Utils.sphereFrom(this.tightBoundingBox);
-		this.version = new Version("1.6");
+		this.version = new Version('1.6');
 
 		this.projection = null;
 		this.fallbackProjection = null;
 
 		if (info.srs && info.srs.horizontal)
 		{
-			this.projection = info.srs.authority + ":" + info.srs.horizontal;
+			this.projection = info.srs.authority + ':' + info.srs.horizontal;
 		}
 
 		if (info.srs.wkt)
@@ -78,14 +78,14 @@ class PointCloudEptGeometry
 			else {this.fallbackProjection = info.srs.wkt;}
 		}
 
-		this.pointAttributes = "LAZ";
+		this.pointAttributes = 'LAZ';
 		this.spacing =
 			(this.boundingBox.max.x - this.boundingBox.min.x) / this.span;
 
-		let hierarchyType = info.hierarchyType || "json";
+		let hierarchyType = info.hierarchyType || 'json';
 
-		let dataType = info.dataType || "laszip";
-		this.loader = dataType === "binary" ? new EptBinaryLoader() : new EptLaszipLoader();
+		let dataType = info.dataType || 'laszip';
+		this.loader = dataType === 'binary' ? new EptBinaryLoader() : new EptLaszipLoader();
 	}
 }
 
@@ -103,7 +103,7 @@ class EptKey
 
 	name()
 	{
-		return this.d + "-" + this.x + "-" + this.y + "-" + this.z;
+		return this.d + '-' + this.x + '-' + this.y + '-' + this.z;
 	}
 
 	step(a, b, c)
@@ -197,7 +197,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 	getBoundingBox() {return this.boundingBox;}
 
-	url() {return this.ept.url + "ept-data/" + this.filename();}
+	url() {return this.ept.url + 'ept-data/' + this.filename();}
 
 	getNumPoints() {return this.numPoints;}
 
@@ -261,8 +261,8 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 		// lexicographically before 9 (for example), do a deep sort.
 		var keys = Object.keys(hier).sort((a, b) => 
 		{
-			let [da, xa, ya, za] = a.split("-").map((n) => {return parseInt(n, 10);});
-			let [db, xb, yb, zb] = b.split("-").map((n) => {return parseInt(n, 10);});
+			let [da, xa, ya, za] = a.split('-').map((n) => {return parseInt(n, 10);});
+			let [db, xb, yb, zb] = b.split('-').map((n) => {return parseInt(n, 10);});
 			if (da < db) {return -1;} if (da > db) {return 1;}
 			if (xa < xb) {return -1;} if (xa > xb) {return 1;}
 			if (ya < yb) {return -1;} if (ya > yb) {return 1;}
@@ -272,10 +272,10 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 		keys.forEach((v) => 
 		{
-			let [d, x, y, z] = v.split("-").map((n) => {return parseInt(n, 10);});
+			let [d, x, y, z] = v.split('-').map((n) => {return parseInt(n, 10);});
 			let a = x & 1, b = y & 1, c = z & 1;
 			let parentName =
-				d - 1 + "-" + (x >> 1) + "-" + (y >> 1) + "-" + (z >> 1);
+				d - 1 + '-' + (x >> 1) + '-' + (y >> 1) + '-' + (z >> 1);
 
 			let parentNode = nodes[parentName];
 			if (!parentNode) {return;}
@@ -313,7 +313,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 	toPotreeName(d, x, y, z)
 	{
-		var name = "r";
+		var name = 'r';
 
 		for (var i = 0; i < d; ++i)
 		{

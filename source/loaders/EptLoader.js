@@ -1,5 +1,5 @@
-import {PointCloudEptGeometry, PointCloudEptGeometryNode} from "../pointcloud/geometries/PointCloudEptGeometry.js";
-import {XHRFactory} from "../XHRFactory.js";
+import {PointCloudEptGeometry, PointCloudEptGeometryNode} from '../pointcloud/geometries/PointCloudEptGeometry.js';
+import {XHRFactory} from '../XHRFactory.js';
 
 export class EPTLoader
 {
@@ -7,7 +7,7 @@ export class EPTLoader
 	{
 		const response = await XHRFactory.fetch(file);
 		const json = await response.json();
-		const url = file.substr(0, file.lastIndexOf("ept.json"));
+		const url = file.substr(0, file.lastIndexOf('ept.json'));
 
 		const geometry = new PointCloudEptGeometry(url, json);
 		const root = new PointCloudEptGeometryNode(geometry);

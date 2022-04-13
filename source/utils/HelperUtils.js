@@ -1,4 +1,4 @@
-import {Vector3, Box3, DataTexture, NearestFilter, RGBAFormat} from "three";
+import {Vector3, Box3, DataTexture, NearestFilter, RGBAFormat} from 'three';
 
 export class HelperUtils
 {

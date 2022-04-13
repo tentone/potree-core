@@ -1,11 +1,11 @@
-import {Vector3, Sphere, Matrix4, Vector4, Box3Helper, Frustum} from "three";
-import {POCLoader} from "./loaders/POCLoader.js";
-import {EPTLoader} from "./loaders/EPTLoader.js";
-import {PointCloudOctree} from "./pointcloud/PointCloudOctree.js";
-import {PointCloudArena4D} from "./pointcloud/PointCloudArena4D.js";
-import {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
-import {BinaryHeap} from "./lib/BinaryHeap.js";
-import {Global} from "./Global.js";
+import {Vector3, Sphere, Matrix4, Vector4, Box3Helper, Frustum} from 'three';
+import {POCLoader} from './loaders/POCLoader.js';
+import {EPTLoader} from './loaders/EPTLoader.js';
+import {PointCloudOctree} from './pointcloud/PointCloudOctree.js';
+import {PointCloudArena4D} from './pointcloud/PointCloudArena4D.js';
+import {PointCloudArena4DGeometry} from './pointcloud/geometries/PointCloudArena4DGeometry.js';
+import {BinaryHeap} from './lib/BinaryHeap.js';
+import {Global} from './Global.js';
 
 const AttributeLocations =
 	{
@@ -92,14 +92,14 @@ function loadPointCloud(path, name, callback)
 
 		callback(
 			{
-				type: "pointcloud_loaded",
+				type: 'pointcloud_loaded',
 				pointcloud: pointcloud
 			});
 	};
 
 
 	// Potree point cloud
-	if (path.indexOf("cloud.js") > 0) 
+	if (path.indexOf('cloud.js') > 0) 
 	{
 		POCLoader.load(path, function(geometry) 
 		{
@@ -120,7 +120,7 @@ function loadPointCloud(path, name, callback)
 		});
 	}
 	// Arena 4D point cloud
-	else if (path.indexOf(".vpc") > 0) 
+	else if (path.indexOf('.vpc') > 0) 
 	{
 		PointCloudArena4DGeometry.load(path, function(geometry) 
 		{
@@ -132,7 +132,7 @@ function loadPointCloud(path, name, callback)
 	}
 	else 
 	{
-		throw new Error("Potree: Failed to load point cloud from URL " + path);
+		throw new Error('Potree: Failed to load point cloud from URL ' + path);
 	}
 }
 
@@ -196,7 +196,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 
 				pointcloud.dispatchEvent(
 					{
-						type: "transformation_changed",
+						type: 'transformation_changed',
 						target: pointcloud
 					});
 			}

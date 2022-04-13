@@ -1,41 +1,41 @@
 
-import {WorkerManager} from "../utils/WorkerManager.js";
-import {Global} from "../Global.js";
+import {WorkerManager} from '../utils/WorkerManager.js';
+import {Global} from '../Global.js';
 
 var pointFormatReaders =
 [
 	function(dv)
 	{
 		return {
-			"position": [dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
-			"intensity": dv.getUint16(12, true),
-			"classification": dv.getUint8(16, true)
+			'position': [dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
+			'intensity': dv.getUint16(12, true),
+			'classification': dv.getUint8(16, true)
 		};
 	},
 	function(dv)
 	{
 		return {
-			"position": [dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
-			"intensity": dv.getUint16(12, true),
-			"classification": dv.getUint8(16, true)
+			'position': [dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
+			'intensity': dv.getUint16(12, true),
+			'classification': dv.getUint8(16, true)
 		};
 	},
 	function(dv)
 	{
 		return {
-			"position": [dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
-			"intensity": dv.getUint16(12, true),
-			"classification": dv.getUint8(16, true),
-			"color": [dv.getUint16(20, true), dv.getUint16(22, true), dv.getUint16(24, true)]
+			'position': [dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
+			'intensity': dv.getUint16(12, true),
+			'classification': dv.getUint8(16, true),
+			'color': [dv.getUint16(20, true), dv.getUint16(22, true), dv.getUint16(24, true)]
 		};
 	},
 	function(dv)
 	{
 		return {
-			"position": [dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
-			"intensity": dv.getUint16(12, true),
-			"classification": dv.getUint8(16, true),
-			"color": [dv.getUint16(28, true), dv.getUint16(30, true), dv.getUint16(32, true)]
+			'position': [dv.getInt32(0, true), dv.getInt32(4, true), dv.getInt32(8, true)],
+			'intensity': dv.getUint16(12, true),
+			'classification': dv.getUint8(16, true),
+			'color': [dv.getUint16(28, true), dv.getUint16(30, true), dv.getUint16(32, true)]
 		};
 	}
 ];
@@ -122,7 +122,7 @@ LASLoader.prototype.readData = function(count, offset, skip)
 		setTimeout(function()
 		{
 			if (!self.header)
-			{return rej(new Error("Cannot start reading data till a header request is issued"));}
+			{return rej(new Error('Cannot start reading data till a header request is issued'));}
 
 			var start;
 			if (skip <= 1)
@@ -212,11 +212,11 @@ LAZLoader.prototype.open = function()
 	var self = this;
 	return new Promise(function(res, rej)
 	{
-		self.dorr({type: "open", arraybuffer: self.arraybuffer}, function(r)
+		self.dorr({type: 'open', arraybuffer: self.arraybuffer}, function(r)
 		{
 			if (r.status !== 1)
 			{
-				return rej(new Error("Failed to open file"));
+				return rej(new Error('Failed to open file'));
 			}
 
 			res(true);
@@ -234,7 +234,7 @@ LAZLoader.prototype.getHeader = function()
 		{
 			if (r.status !== 1)
 			{
-				return rej(new Error("Failed to get header"));
+				return rej(new Error('Failed to get header'));
 			}
 
 			res(r.header);
@@ -251,7 +251,7 @@ LAZLoader.prototype.readData = function(count, offset, skip)
 		self.dorr({type: 'read', count: count, offset: offset, skip: skip}, function(r)
 		{
 			if (r.status !== 1)
-			{return rej(new Error("Failed to read data"));}
+			{return rej(new Error('Failed to read data'));}
 			res({
 				buffer: r.buffer,
 				count: r.count,
@@ -271,7 +271,7 @@ LAZLoader.prototype.close = function()
 		{
 			if (r.status !== 1)
 			{
-				return rej(new Error("Failed to close file"));
+				return rej(new Error('Failed to close file'));
 			}
 
 			res(true);
@@ -287,13 +287,13 @@ function LASFile(arraybuffer)
 	this.determineVersion();
 	if (this.version > 12)
 	{
-		throw new Error("Only file versions <= 1.2 are supported at this time");
+		throw new Error('Only file versions <= 1.2 are supported at this time');
 	}
 
 	this.determineFormat();
 	if (pointFormatReaders[this.formatId] === undefined)
 	{
-		throw new Error("The point format ID is not supported");
+		throw new Error('The point format ID is not supported');
 	}
 
 	this.loader = this.isCompressed ? new LAZLoader(this.arraybuffer) : new LASLoader(this.arraybuffer);
@@ -307,7 +307,7 @@ LASFile.prototype.determineFormat = function()
 
 	if (bit_7 === 1 && bit_6 === 1)
 	{
-		throw new Error("Old style compression not supported");
+		throw new Error('Old style compression not supported');
 	}
 
 	this.formatId = formatId & 0x3f;
@@ -318,7 +318,7 @@ LASFile.prototype.determineVersion = function()
 {
 	var ver = new Int8Array(this.arraybuffer, 24, 2);
 	this.version = ver[0] * 10 + ver[1];
-	this.versionAsString = ver[0] + "." + ver[1];
+	this.versionAsString = ver[0] + '.' + ver[1];
 };
 
 LASFile.prototype.open = function()
@@ -358,7 +358,7 @@ LASDecoder.prototype.getPoint = function(index)
 {
 	if (index < 0 || index >= this.pointsCount)
 	{
-		throw new Error("Point index out of range");
+		throw new Error('Point index out of range');
 	}
 
 	return this.decoder(new DataView(this.arrayb, index * this.pointSize, this.pointSize));

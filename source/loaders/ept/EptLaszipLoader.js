@@ -1,8 +1,8 @@
-import {Vector3, Box3, BufferAttribute, BufferGeometry} from "three";
-import {Global} from "../../Global.js";
-import {LASFile, LASDecoder} from "../LASLoader.js";
-import {WorkerManager} from "../../utils/WorkerManager.js";
-import {XHRFactory} from "../../XHRFactory.js";
+import {Vector3, Box3, BufferAttribute, BufferGeometry} from 'three';
+import {Global} from '../../Global.js';
+import {LASFile, LASDecoder} from '../LASLoader.js';
+import {WorkerManager} from '../../utils/WorkerManager.js';
+import {XHRFactory} from '../../XHRFactory.js';
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
@@ -20,12 +20,12 @@ export class EptLaszipLoader
 			return;
 		}
 
-		const url = node.url() + ".laz";
+		const url = node.url() + '.laz';
 
 		const xhr = XHRFactory.createXMLHttpRequest();
-		xhr.open("GET", url, true);
-		xhr.responseType = "arraybuffer";
-		xhr.overrideMimeType("text/plain; charset=x-user-defined");
+		xhr.open('GET', url, true);
+		xhr.responseType = 'arraybuffer';
+		xhr.overrideMimeType('text/plain; charset=x-user-defined');
 		xhr.onreadystatechange = () =>
 		{
 			if (xhr.readyState === 4)
@@ -37,7 +37,7 @@ export class EptLaszipLoader
 				}
 				else
 				{
-					console.log("Failed " + url + ": " + xhr.status);
+					console.log('Failed ' + url + ': ' + xhr.status);
 				}
 			}
 		};
@@ -108,7 +108,7 @@ export class EptLaszipLoader
 			.then(() => {return lf.isOpen = false;})
 			.catch((err) =>
 			{
-				console.log("Error reading LAZ:", err);
+				console.log('Error reading LAZ:', err);
 				if (lf.isOpen)
 				{
 					lf.close().then(() =>
@@ -148,14 +148,14 @@ export class EptLazBatcher
 			const pointSourceIDs = new Uint16Array(e.data.pointSourceID);
 			const indices = new Uint8Array(e.data.indices);
 
-			g.setAttribute("position", new BufferAttribute(positions, 3));
-			g.setAttribute("color", new BufferAttribute(colors, 4, true));
-			g.setAttribute("intensity", new BufferAttribute(intensities, 1));
-			g.setAttribute("classification", new BufferAttribute(classifications, 1));
-			g.setAttribute("returnNumber", new BufferAttribute(returnNumbers, 1));
-			g.setAttribute("numberOfReturns", new BufferAttribute(numberOfReturns, 1));
-			g.setAttribute("pointSourceID", new BufferAttribute(pointSourceIDs, 1));
-			g.setAttribute("indices", new BufferAttribute(indices, 4));
+			g.setAttribute('position', new BufferAttribute(positions, 3));
+			g.setAttribute('color', new BufferAttribute(colors, 4, true));
+			g.setAttribute('intensity', new BufferAttribute(intensities, 1));
+			g.setAttribute('classification', new BufferAttribute(classifications, 1));
+			g.setAttribute('returnNumber', new BufferAttribute(returnNumbers, 1));
+			g.setAttribute('numberOfReturns', new BufferAttribute(numberOfReturns, 1));
+			g.setAttribute('pointSourceID', new BufferAttribute(pointSourceIDs, 1));
+			g.setAttribute('indices', new BufferAttribute(indices, 4));
 			g.attributes.indices.normalized = true;
 
 			const tightBoundingBox = new Box3(

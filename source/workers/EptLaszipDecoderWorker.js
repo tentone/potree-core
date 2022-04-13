@@ -1,6 +1,6 @@
 function readUsingDataView(event) 
 {
-	performance.mark("laslaz-start");
+	performance.mark('laslaz-start');
 
 	if (!event.data || !event.data.buffer) 
 	{
@@ -140,7 +140,7 @@ function readUsingDataView(event)
 		iIndices[i] = i;
 	}
 
-	performance.mark("laslaz-end");
+	performance.mark('laslaz-end');
 
 	// { // print timings
 	//	  performance.measure("laslaz", "laslaz-start", "laslaz-end");

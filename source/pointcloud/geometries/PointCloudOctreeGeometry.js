@@ -1,8 +1,8 @@
-import {Sphere, EventDispatcher} from "three";
-import {POCLoader} from "../../loaders/POCLoader.js";
-import {Global} from "../../Global.js";
-import {PointCloudTreeNode} from "../PointCloudTree.js";
-import {XHRFactory} from "../../XHRFactory.js";
+import {Sphere, EventDispatcher} from 'three';
+import {POCLoader} from '../../loaders/POCLoader.js';
+import {Global} from '../../Global.js';
+import {PointCloudTreeNode} from '../PointCloudTree.js';
+import {XHRFactory} from '../../XHRFactory.js';
 
 class PointCloudOctreeGeometry
 {
@@ -87,20 +87,20 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 
 	getURL()
 	{
-		var url = "";
+		var url = '';
 		var version = this.pcoGeometry.loader.version;
 
-		if (version.equalOrHigher("1.5"))
+		if (version.equalOrHigher('1.5'))
 		{
-			url = this.pcoGeometry.octreeDir + "/" + this.getHierarchyPath() + "/" + this.name;
+			url = this.pcoGeometry.octreeDir + '/' + this.getHierarchyPath() + '/' + this.name;
 		}
-		else if (version.equalOrHigher("1.4"))
+		else if (version.equalOrHigher('1.4'))
 		{
-			url = this.pcoGeometry.octreeDir + "/" + this.name;
+			url = this.pcoGeometry.octreeDir + '/' + this.name;
 		}
-		else if (version.upTo("1.3"))
+		else if (version.upTo('1.3'))
 		{
-			url = this.pcoGeometry.octreeDir + "/" + this.name;
+			url = this.pcoGeometry.octreeDir + '/' + this.name;
 		}
 
 		return url;
@@ -108,14 +108,14 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 
 	getHierarchyPath()
 	{
-		var path = "r/";
+		var path = 'r/';
 		var hierarchyStepSize = this.pcoGeometry.hierarchyStepSize;
 		var indices = this.name.substr(1);
 
 		var numParts = Math.floor(indices.length / hierarchyStepSize);
 		for (var i = 0; i < numParts; i++)
 		{
-			path += indices.substr(i * hierarchyStepSize, hierarchyStepSize) + "/";
+			path += indices.substr(i * hierarchyStepSize, hierarchyStepSize) + '/';
 		}
 
 		path = path.slice(0, -1);
@@ -141,7 +141,7 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 
 		try
 		{
-			if (this.pcoGeometry.loader.version.equalOrHigher("1.5"))
+			if (this.pcoGeometry.loader.version.equalOrHigher('1.5'))
 			{
 				if (this.level % this.pcoGeometry.hierarchyStepSize === 0 && this.hasChildren)
 				{
@@ -160,7 +160,7 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 		catch (e)
 		{
 			Global.numNodesLoading--;
-			console.error("Potree: Exception thrown loading points file.", e);
+			console.error('Potree: Exception thrown loading points file.', e);
 		}
 
 	}
@@ -242,11 +242,11 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 		
 		if (node.level % node.pcoGeometry.hierarchyStepSize === 0)
 		{
-			var hurl = node.pcoGeometry.octreeDir + "/" + node.getHierarchyPath() + "/" + node.name + ".hrc";
+			var hurl = node.pcoGeometry.octreeDir + '/' + node.getHierarchyPath() + '/' + node.name + '.hrc';
 			var xhr = XHRFactory.createXMLHttpRequest();
-			xhr.open("GET", hurl, true);
-			xhr.responseType = "arraybuffer";
-			xhr.overrideMimeType("text/plain; charset=x-user-defined");
+			xhr.open('GET', hurl, true);
+			xhr.responseType = 'arraybuffer';
+			xhr.overrideMimeType('text/plain; charset=x-user-defined');
 			xhr.onload = function(event)
 			{
 				try
@@ -256,13 +256,13 @@ class PointCloudOctreeGeometryNode extends PointCloudTreeNode
 				catch (e)
 				{
 					Global.numNodesLoading--;
-					console.error("Potree: Exception thrown parsing points.", e);
+					console.error('Potree: Exception thrown parsing points.', e);
 				}
 			};
 			xhr.onerror = function(event)
 			{
 				Global.numNodesLoading--;
-				console.error("Potree: Failed to load file.", xhr.status, hurl, event);
+				console.error('Potree: Failed to load file.', xhr.status, hurl, event);
 			};
 			xhr.send(null);
 		}

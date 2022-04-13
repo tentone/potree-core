@@ -1,4 +1,4 @@
-import {Box3} from "three";
+import {Box3} from 'three';
 
 export class Points 
 {

@@ -1,10 +1,10 @@
-import {Vector3, Box3, Line3, Points, Box2, Sphere, Object3D, Matrix4, NoBlending, NearestFilter, Ray, Vector4, Scene, Vector2, WebGLRenderTarget} from "three";
-import {HelperUtils} from "../utils/HelperUtils.js";
-import {PointColorType} from "../Potree.js";
-import {Global} from "../Global.js";
-import {PointCloudOctreeGeometryNode} from "./geometries/PointCloudOctreeGeometry.js";
-import {PointCloudTree, PointCloudTreeNode} from "./PointCloudTree.js";
-import {PointCloudMaterial} from "./materials/PointCloudMaterial.js";
+import {Vector3, Box3, Line3, Points, Box2, Sphere, Object3D, Matrix4, NoBlending, NearestFilter, Ray, Vector4, Scene, Vector2, WebGLRenderTarget} from 'three';
+import {HelperUtils} from '../utils/HelperUtils.js';
+import {PointColorType} from '../Potree.js';
+import {Global} from '../Global.js';
+import {PointCloudOctreeGeometryNode} from './geometries/PointCloudOctreeGeometry.js';
+import {PointCloudTree, PointCloudTreeNode} from './PointCloudTree.js';
+import {PointCloudMaterial} from './materials/PointCloudMaterial.js';
 
 class PointCloudOctreeNode extends PointCloudTreeNode
 {
@@ -77,7 +77,7 @@ class PointCloudOctreeNode extends PointCloudTreeNode
 
 		var buffer = this.geometryNode.buffer;
 
-		var posOffset = buffer.offset("position");
+		var posOffset = buffer.offset('position');
 		var stride = buffer.stride;
 		var view = new DataView(buffer.data);
 
@@ -143,7 +143,7 @@ class PointCloudOctree extends PointCloudTree
 		this.visibleGeometry = [];
 		this.generateDEM = false;
 		this.profileRequests = [];
-		this.name = "";
+		this.name = '';
 
 		this.tempVector3 = new Vector3();
 
@@ -170,7 +170,7 @@ class PointCloudOctree extends PointCloudTree
 			this.name = name;
 			this.dispatchEvent(
 				{
-					type: "name_changed",
+					type: 'name_changed',
 					name: name,
 					pointcloud: this
 				});
@@ -297,7 +297,7 @@ class PointCloudOctree extends PointCloudTree
 	{
 		if (Global.measureTimings)
 		{
-			performance.mark("computeVisibilityTextureData-start");
+			performance.mark('computeVisibilityTextureData-start');
 		}
 
 		var data = new Uint8Array(nodes.length * 4);
@@ -444,8 +444,8 @@ class PointCloudOctree extends PointCloudTree
 
 		if (Global.measureTimings)
 		{
-			performance.mark("computeVisibilityTextureData-end");
-			performance.measure("render.computeVisibilityTextureData", "computeVisibilityTextureData-start", "computeVisibilityTextureData-end");
+			performance.mark('computeVisibilityTextureData-end');
+			performance.measure('render.computeVisibilityTextureData', 'computeVisibilityTextureData-start', 'computeVisibilityTextureData-end');
 		}
 
 		return {
@@ -723,7 +723,7 @@ class PointCloudOctree extends PointCloudTree
 		var renderer = viewer.renderer;
 		var pRenderer = viewer.pRenderer;
 
-		performance.mark("pick-start");
+		performance.mark('pick-start');
 
 		var getVal = (a, b) => {return a !== undefined ? a : b;};
 
@@ -889,7 +889,7 @@ class PointCloudOctree extends PointCloudTree
 			{
 				var attribute = geometry.attributes[attributeName];
 
-				if (attributeName === "position")
+				if (attributeName === 'position')
 				{
 					var x = attribute.array[3 * hit.pIndex];
 					var y = attribute.array[3 * hit.pIndex + 1];
@@ -925,8 +925,8 @@ class PointCloudOctree extends PointCloudTree
 			hit.point = point;
 		}
 
-		performance.mark("pick-end");
-		performance.measure("pick", "pick-start", "pick-end");
+		performance.mark('pick-end');
+		performance.measure('pick', 'pick-start', 'pick-end');
 
 		if (params.all)
 		{
@@ -962,7 +962,7 @@ class PointCloudOctree extends PointCloudTree
 
 			var buffer = node.geometryNode.buffer;
 
-			var posOffset = buffer.offset("position");
+			var posOffset = buffer.offset('position');
 			var stride = buffer.stride;
 			var view = new DataView(buffer.data);
 
@@ -1021,7 +1021,7 @@ class PointCloudOctree extends PointCloudTree
 
 			var buffer = node.geometryNode.buffer;
 
-			var posOffset = buffer.offset("position");
+			var posOffset = buffer.offset('position');
 			var stride = buffer.stride;
 			var view = new DataView(buffer.data);
 
@@ -1073,7 +1073,7 @@ class PointCloudOctree extends PointCloudTree
 		var node = null;
 		for (var char of name)
 		{
-			if (char === "r")
+			if (char === 'r')
 			{
 				node = this.root;
 			}

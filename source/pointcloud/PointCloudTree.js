@@ -1,5 +1,5 @@
-import {Object3D} from "three";
-import {DEM} from "./DEM.js";
+import {Object3D} from 'three';
+import {DEM} from './DEM.js';
 
 class PointCloudTreeNode
 {

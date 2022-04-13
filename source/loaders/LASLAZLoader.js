@@ -1,9 +1,9 @@
-import {Vector3, Box3, BufferAttribute, BufferGeometry} from "three";
-import {WorkerManager} from "../utils/WorkerManager.js";
-import {Global} from "../Global.js";
-import {XHRFactory} from "../XHRFactory.js";
+import {Vector3, Box3, BufferAttribute, BufferGeometry} from 'three';
+import {WorkerManager} from '../utils/WorkerManager.js';
+import {Global} from '../Global.js';
+import {XHRFactory} from '../XHRFactory.js';
 import {Version} from '../Version.js';
-import {LASFile, LASDecoder} from "./LASLoader.js";
+import {LASFile, LASDecoder} from './LASLoader.js';
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz
@@ -16,7 +16,7 @@ class LASLAZLoader
 {
 	constructor(version)
 	{
-		if (typeof version === "string")
+		if (typeof version === 'string')
 		{
 			this.version = new Version(version);
 		}
@@ -36,17 +36,17 @@ class LASLAZLoader
 		var pointAttributes = node.pcoGeometry.pointAttributes;
 		var url = node.getURL();
 
-		if (this.version.equalOrHigher("1.4"))
+		if (this.version.equalOrHigher('1.4'))
 		{
-			url += "." + pointAttributes.toLowerCase();
+			url += '.' + pointAttributes.toLowerCase();
 		}
 
 		var self = this;
 
 		var xhr = XHRFactory.createXMLHttpRequest();
-		xhr.open("GET", url, true);
-		xhr.responseType = "arraybuffer";
-		xhr.overrideMimeType("text/plain; charset=x-user-defined");
+		xhr.open('GET', url, true);
+		xhr.responseType = 'arraybuffer';
+		xhr.overrideMimeType('text/plain; charset=x-user-defined');
 		xhr.onload = function()
 		{
 			if (xhr.response instanceof ArrayBuffer)
@@ -57,20 +57,20 @@ class LASLAZLoader
 				}
 				catch (e)
 				{
-					console.error("Potree: Exception thrown parsing points.", e);
+					console.error('Potree: Exception thrown parsing points.', e);
 					Global.numNodesLoading--;
 				}
 			}
 			else
 			{
 				Global.numNodesLoading--;
-				console.log("Potree: LASLAZLoader xhr response is not a ArrayBuffer.");
+				console.log('Potree: LASLAZLoader xhr response is not a ArrayBuffer.');
 			}
 		};
 		xhr.onerror = function()
 		{
 			Global.numNodesLoading--;
-			console.log("Potree: LASLAZLoader failed to load file, " + xhr.status + ", file: " + url);
+			console.log('Potree: LASLAZLoader failed to load file, ' + xhr.status + ', file: ' + url);
 		};
 		xhr.send(null);
 	}
@@ -86,7 +86,7 @@ class LASLAZLoader
 			return lf;
 		}).catch((msg) =>
 		{
-			console.log("Potree: Failed to open file.");
+			console.log('Potree: Failed to open file.');
 		}).then((lf) =>
 		{
 			return lf.getHeader().then(function(h)
@@ -198,15 +198,15 @@ class LASLAZBatcher
 			var pointSourceIDs = new Uint16Array(e.data.pointSourceID);
 			var indices = new Uint8Array(e.data.indices);
 
-			geometry.setAttribute("position", new BufferAttribute(positions, 3));
-			geometry.setAttribute("color", new BufferAttribute(colors, 4, true));
-			geometry.setAttribute("intensity", new BufferAttribute(intensities, 1));
-			geometry.setAttribute("classification", new BufferAttribute(classifications, 1));
-			geometry.setAttribute("returnNumber", new BufferAttribute(returnNumbers, 1));
-			geometry.setAttribute("numberOfReturns", new BufferAttribute(numberOfReturns, 1));
-			geometry.setAttribute("pointSourceID", new BufferAttribute(pointSourceIDs, 1));
+			geometry.setAttribute('position', new BufferAttribute(positions, 3));
+			geometry.setAttribute('color', new BufferAttribute(colors, 4, true));
+			geometry.setAttribute('intensity', new BufferAttribute(intensities, 1));
+			geometry.setAttribute('classification', new BufferAttribute(classifications, 1));
+			geometry.setAttribute('returnNumber', new BufferAttribute(returnNumbers, 1));
+			geometry.setAttribute('numberOfReturns', new BufferAttribute(numberOfReturns, 1));
+			geometry.setAttribute('pointSourceID', new BufferAttribute(pointSourceIDs, 1));
 			// geometry.setAttribute("normal", new BufferAttribute(new Float32Array(numPoints * 3), 3));
-			geometry.setAttribute("indices", new BufferAttribute(indices, 4));
+			geometry.setAttribute('indices', new BufferAttribute(indices, 4));
 			geometry.attributes.indices.normalized = true;
 
 			var tightBoundingBox = new Box3

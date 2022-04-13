@@ -1,4 +1,4 @@
-import {Global} from "../Global.js";
+import {Global} from '../Global.js';
 
 export class LRUItem
 {
@@ -145,7 +145,7 @@ export class LRU
 
 	toString()
 	{
-		var string = "{ ";
+		var string = '{ ';
 		var curr = this.first;
 
 		while (curr !== null)
@@ -153,13 +153,13 @@ export class LRU
 			string += curr.node.id;
 			if (curr.next !== null)
 			{
-				string += ", ";
+				string += ', ';
 			}
 			curr = curr.next;
 		}
 
-		string += "}";
-		string += "(" + this.size() + ")";
+		string += '}';
+		string += '(' + this.size() + ')';
 		return string;
 	}
 

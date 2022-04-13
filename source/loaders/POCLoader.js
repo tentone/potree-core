@@ -1,11 +1,11 @@
-import {Vector3, Box3, Sphere} from "three";
-import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from "../pointcloud/geometries/PointCloudOctreeGeometry.js";
-import {Global} from "../Global.js";
-import {XHRFactory} from "../XHRFactory.js";
+import {Vector3, Box3, Sphere} from 'three';
+import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from '../pointcloud/geometries/PointCloudOctreeGeometry.js';
+import {Global} from '../Global.js';
+import {XHRFactory} from '../XHRFactory.js';
 import {Version} from '../Version.js';
-import {PointAttributes, PointAttribute} from "./PointAttributes.js";
-import {LASLAZLoader} from "./LASLAZLoader.js";
-import {BinaryLoader} from "./BinaryLoader.js";
+import {PointAttributes, PointAttribute} from './PointAttributes.js';
+import {LASLAZLoader} from './LASLAZLoader.js';
+import {BinaryLoader} from './BinaryLoader.js';
 
 /**
  * @class Loads mno files and returns a PointcloudOctree
@@ -28,21 +28,21 @@ class POCLoader
 		pco.url = url;
 		
 		var xhr = XHRFactory.createXMLHttpRequest();
-		xhr.overrideMimeType("text/plain");
-		xhr.open("GET", url, true);
+		xhr.overrideMimeType('text/plain');
+		xhr.open('GET', url, true);
 		xhr.onload = function()
 		{
 			var data = JSON.parse(xhr.responseText);
 			var version = new Version(data.version);
 
 			// Assume dir as absolute if it starts with http
-			if (data.octreeDir.indexOf("http") === 0)
+			if (data.octreeDir.indexOf('http') === 0)
 			{
 				pco.octreeDir = data.octreeDir;
 			}
 			else
 			{
-				pco.octreeDir = url + "/../" + data.octreeDir;
+				pco.octreeDir = url + '/../' + data.octreeDir;
 			}
 
 			pco.spacing = data.spacing;
@@ -76,7 +76,7 @@ class POCLoader
 			pco.offset = offset;
 
 			// Select the appropiate loader
-			if (data.pointAttributes === "LAS" || data.pointAttributes === "LAZ")
+			if (data.pointAttributes === 'LAS' || data.pointAttributes === 'LAZ')
 			{
 				pco.loader = new LASLAZLoader(data.version);
 			}
@@ -87,20 +87,20 @@ class POCLoader
 			}
 
 			var nodes = {};
-			var name = "r";
+			var name = 'r';
 
 			var root = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
 			root.level = 0;
 			root.hasChildren = true;
 			root.spacing = pco.spacing;
-			root.numPoints = version.upTo("1.5") ? data.hierarchy[0][1] : 0;
+			root.numPoints = version.upTo('1.5') ? data.hierarchy[0][1] : 0;
 
 			pco.root = root;
 			pco.root.load();
 			nodes[name] = root;
 
 			// Load remaining hierarchy
-			if (version.upTo("1.4"))
+			if (version.upTo('1.4'))
 			{
 				for (var i = 1; i < data.hierarchy.length; i++)
 				{
@@ -128,7 +128,7 @@ class POCLoader
 		xhr.onerror = function(event)
 		{
 			Global.numNodesLoading--;
-			console.log("Potree: loading file failed.", url, event);
+			console.log('Potree: loading file failed.', url, event);
 			callback();
 		};
 

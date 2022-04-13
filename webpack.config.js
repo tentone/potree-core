@@ -15,13 +15,11 @@ module.exports = {
 			}
 		]
 	},
-	resolve: {
-		extensions: [ '.js' ],
-	},
+	resolve: {extensions: ['.js']},
 	output: {
 		filename: 'bundle.js',
 		path: path.resolve(__dirname, 'dist'),
 		sourceMapFilename: '[name].map',
-		libraryTarget: 'commonjs',
+		libraryTarget: 'commonjs'
 	}
 };

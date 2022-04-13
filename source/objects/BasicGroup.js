@@ -1,7 +1,7 @@
-import {Vector3, Box3, BufferGeometry, Object3D, Mesh, Matrix4, BoxBufferGeometry, Ray, MeshBasicMaterial} from "three";
-import {HelperUtils} from "../utils/HelperUtils.js";
-import {updatePointClouds} from "../Potree.js";
-import {PointCloudTree} from "../pointcloud/PointCloudTree.js";
+import {Vector3, Box3, BufferGeometry, Object3D, Mesh, Matrix4, BoxBufferGeometry, Ray, MeshBasicMaterial} from 'three';
+import {HelperUtils} from '../utils/HelperUtils.js';
+import {updatePointClouds} from '../Potree.js';
+import {PointCloudTree} from '../pointcloud/PointCloudTree.js';
 
 /**
  * Potree object is a wrapper to use Potree alongside other THREE based frameworks.

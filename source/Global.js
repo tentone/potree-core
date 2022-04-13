@@ -38,19 +38,17 @@ function getBasePath()
 	return "";
 }
 
-const Global =
-	{
-		debug: {},
-		workerPath: getBasePath(),
-		maxNodesLoadGPUFrame: 20,
-		maxDEMLevel: 0,
-		maxNodesLoading: navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4,
-		pointLoadLimit: 1e10,
-		numNodesLoading: 0,
-		measureTimings: false,
-		workerPool: new WorkerManager(),
-		lru: new LRU(),
-		pointcloudTransformVersion: undefined
-	};
+export const Global = {
+	debug: {},
+	workerPath: getBasePath(),
+	maxNodesLoadGPUFrame: 20,
+	maxDEMLevel: 0,
+	maxNodesLoading: navigator.hardwareConcurrency !== undefined ? navigator.hardwareConcurrency : 4,
+	pointLoadLimit: 1e10,
+	numNodesLoading: 0,
+	measureTimings: false,
+	workerPool: new WorkerManager(),
+	lru: new LRU(),
+	pointcloudTransformVersion: undefined
+};
 
-export {Global};

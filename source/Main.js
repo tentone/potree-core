@@ -21,11 +21,7 @@ export {HelperUtils} from "./utils/HelperUtils.js";
 export {Version} from "./Version.js";
 export {WorkerManager} from "./utils/WorkerManager.js";
 
-export {
-	PointAttribute,
-	PointAttributeNames,
-	PointAttributeTypes
-} from "./loaders/PointAttributes.js";
+export {PointAttribute, PointAttributeNames, PointAttributeTypes} from "./loaders/PointAttributes.js";
 
 export {Gradients} from "./Gradients.js";
 export {Points} from "./Points.js";

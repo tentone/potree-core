@@ -1,6 +1,6 @@
 import {Global} from "../Global.js";
 
-class LRUItem
+export class LRUItem
 {
 	constructor(node)
 	{
@@ -13,7 +13,7 @@ class LRUItem
 /**
  * @class A doubly-linked-list of the least recently used elements.
  */
-class LRU
+export class LRU
 {
 	constructor()
 	{
@@ -204,5 +204,3 @@ class LRU
 		}
 	}
 }
-
-export {LRU, LRUItem};

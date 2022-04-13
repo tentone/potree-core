@@ -1,4 +1,4 @@
-import {Vector3, Sphere, Matrix4, Vector4} from "three";
+import {Vector3, Sphere, Matrix4, Vector4, Box3Helper, Frustum} from "three";
 import {POCLoader} from "./loaders/POCLoader.js";
 import {EPTLoader} from "./loaders/EPTLoader.js";
 import {PointCloudOctree} from "./pointcloud/PointCloudOctree.js";
@@ -6,7 +6,6 @@ import {PointCloudArena4D} from "./pointcloud/PointCloudArena4D.js";
 import {PointCloudArena4DGeometry} from "./pointcloud/geometries/PointCloudArena4DGeometry.js";
 import {BinaryHeap} from "./lib/BinaryHeap.js";
 import {Global} from "./Global.js";
-import {Box3Helper, Frustum} from "three";
 
 const AttributeLocations =
 	{

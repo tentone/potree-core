@@ -1,6 +1,8 @@
-import {Vector3} from "three";//
-//index is in order xyzxyzxyz
-class DEMNode
+import {Vector3} from "three";
+
+// index is in order xyzxyzxyz
+
+export class DEMNode
 {
 	constructor(name, box, tileSize)
 	{
@@ -23,13 +25,13 @@ class DEMNode
 		let sourceSize = this.tileSize;
 		let mipSize = parseInt(sourceSize / 2);
 		let mipSource = this.data;
-		while(mipSize > 1)
+		while (mipSize > 1)
 		{
 			const mipData = new Float32Array(mipSize * mipSize);
 
-			for(let i = 0; i < mipSize; i++)
+			for (let i = 0; i < mipSize; i++)
 			{
-				for(let j = 0; j < mipSize; j++)
+				for (let j = 0; j < mipSize; j++)
 				{
 					const h00 = mipSource[2 * i + 0 + 2 * j * sourceSize];
 					const h01 = mipSource[2 * i + 0 + 2 * j * sourceSize + sourceSize];
@@ -38,22 +40,22 @@ class DEMNode
 
 					let [height, weight] = [0, 0];
 
-					if(isFinite(h00))
+					if (isFinite(h00))
 					{
 						height += h00;
 						weight += 1;
 					}
-					if(isFinite(h01))
+					if (isFinite(h01))
 					{
 						height += h01;
 						weight += 1;
 					}
-					if(isFinite(h10))
+					if (isFinite(h10))
 					{
 						height += h10;
 						weight += 1;
 					}
-					if(isFinite(h11))
+					if (isFinite(h11))
 					{
 						height += h11;
 						weight += 1;
@@ -61,8 +63,8 @@ class DEMNode
 
 					height = height / weight;
 
-					//var hs = [h00, h01, h10, h11].filter(h => isFinite(h));
-					//var height = hs.reduce((a, v, i) => a + v, 0) / hs.length;
+					// var hs = [h00, h01, h10, h11].filter(h => isFinite(h));
+					// var height = hs.reduce((a, v, i) => a + v, 0) / hs.length;
 
 					mipData[i + j * mipSize] = height;
 				}
@@ -120,17 +122,17 @@ class DEMNode
 		wh10 = wh10 / wsum;
 		wh11 = wh11 / wsum;
 
-		if(wsum === 0)
+		if (wsum === 0)
 		{
 			return null;
 		}
 
 		let h = 0;
 
-		if(isFinite(h00)) h += h00 * wh00;
-		if(isFinite(h01)) h += h01 * wh01;
-		if(isFinite(h10)) h += h10 * wh10;
-		if(isFinite(h11)) h += h11 * wh11;
+		if (isFinite(h00)) {h += h00 * wh00;}
+		if (isFinite(h01)) {h += h01 * wh01;}
+		if (isFinite(h10)) {h += h10 * wh10;}
+		if (isFinite(h11)) {h += h11 * wh11;}
 
 		return h;
 	}
@@ -139,11 +141,11 @@ class DEMNode
 	{
 		let h = null;
 
-		for(let i = 0; i < this.mipMap.length; i++)
+		for (let i = 0; i < this.mipMap.length; i++)
 		{
 			h = this.heightAtMipMapLevel(position, i);
 
-			if(h !== null)
+			if (h !== null)
 			{
 				return h;
 			}
@@ -156,11 +158,10 @@ class DEMNode
 	{
 		handler(this, level);
 
-		for(let child of this.children.filter(c => c !== undefined))
+		for (let child of this.children.filter((c) => {return c !== undefined;}))
 		{
 			child.traverse(handler, level + 1);
 		}
 	}
 }
 
-export {DEMNode}

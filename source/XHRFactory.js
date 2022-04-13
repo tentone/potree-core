@@ -2,22 +2,27 @@ export const XHRFactory = {
 	config: {
 		withCredentials: false,
 		customHeaders: [
-			{ header: null, value: null }
+			{header: null, value: null}
 		]
 	},
 
-	createXMLHttpRequest: function () {
+	createXMLHttpRequest: function() 
+	{
 		let xhr = new XMLHttpRequest();
 
 		if (this.config.customHeaders &&
 			Array.isArray(this.config.customHeaders) &&
-			this.config.customHeaders.length > 0) {
+			this.config.customHeaders.length > 0) 
+		{
 			let baseOpen = xhr.open;
 			let customHeaders = this.config.customHeaders;
-			xhr.open = function () {
+			xhr.open = function() 
+			{
 				baseOpen.apply(this, [].slice.call(arguments));
-				customHeaders.forEach(function (customHeader) {
-					if (!!customHeader.header && !!customHeader.value) {
+				customHeaders.forEach(function(customHeader) 
+				{
+					if (Boolean(customHeader.header) && Boolean(customHeader.value)) 
+					{
 						xhr.setRequestHeader(customHeader.header, customHeader.value);
 					}
 				});
@@ -27,19 +32,23 @@ export const XHRFactory = {
 		return xhr;
 	},
 
-	fetch: async function(resource) {
+	fetch: async function(resource) 
+	{
 		const headers = new Headers();
-		if (this.config.customHeaders) {
-			this.config.customHeaders.forEach(function (customHeader) {
-				if (!!customHeader.header && !!customHeader.value) {
+		if (this.config.customHeaders) 
+		{
+			this.config.customHeaders.forEach(function(customHeader) 
+			{
+				if (Boolean(customHeader.header) && Boolean(customHeader.value)) 
+				{
 					headers.append(customHeader.header, customHeader.value);
 				}
 			});
 		}
 		const options = {
-			headers,
+			headers: headers,
 			credentials: XHRFactory.config.withCredentials ? 'include' : 'same-origin'
 		};
 		return fetch(resource, options);
 	}
-}
+};

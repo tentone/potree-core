@@ -3,7 +3,7 @@ import {WorkerManager} from "../utils/WorkerManager.js";
 import {Global} from "../Global.js";
 import {DEMNode} from "./DEMNode.js";
 
-class DEM
+export class DEM
 {
 	constructor(pointcloud)
 	{
@@ -243,5 +243,3 @@ class DEM
 		}, message, transferables);
 	}
 }
-
-export {DEM};

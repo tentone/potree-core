@@ -3,8 +3,8 @@ module.exports = {
 	root: true,
 	parserOptions: {
 		sourceType: "module",
-		ecmaVersion: 2015,
-		ecmaFeatures: {modules: true}
+		ecmaVersion: 2020,
+		ecmaFeatures: {impliedStrict: true}
 	},
 	plugins: ["import", "jsdoc"],
 	rules: {

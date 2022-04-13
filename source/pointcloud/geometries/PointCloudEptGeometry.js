@@ -4,7 +4,7 @@ import {EptLaszipLoader} from "../../loaders/ept/EptLaszipLoader";
 import {PointCloudTreeNode} from "../PointCloudTree.js";
 import {Global} from "../../Global.js";
 import {XHRFactory} from "../../XHRFactory.js";
-import { Version } from '../../Version';
+import {Version} from '../../Version';
 
 class Utils
 {
@@ -20,8 +20,8 @@ class Utils
 
 	static findDim(schema, name)
 	{
-		var dim = schema.find((dim) => dim.name === name);
-		if(!dim) throw new Error("Failed to find " + name + " in schema");
+		var dim = schema.find((dim) => {return dim.name === name;});
+		if (!dim) {throw new Error("Failed to find " + name + " in schema");}
 		return dim;
 	}
 
@@ -45,8 +45,8 @@ class PointCloudEptGeometry
 			Utils.findDim(schema, "Y"),
 			Utils.findDim(schema, "Z")
 		];
-		let scale = xyz.map((d) => d.scale || 1);
-		let offset = xyz.map((d) => d.offset || 0);
+		let scale = xyz.map((d) => {return d.scale || 1;});
+		let offset = xyz.map((d) => {return d.offset || 0;});
 
 		this.eptScale = Utils.toVector3(scale);
 		this.eptOffset = Utils.toVector3(offset);
@@ -67,15 +67,15 @@ class PointCloudEptGeometry
 		this.projection = null;
 		this.fallbackProjection = null;
 
-		if(info.srs && info.srs.horizontal)
+		if (info.srs && info.srs.horizontal)
 		{
 			this.projection = info.srs.authority + ":" + info.srs.horizontal;
 		}
 
-		if(info.srs.wkt)
+		if (info.srs.wkt)
 		{
-			if(!this.projection) this.projection = info.srs.wkt;
-			else this.fallbackProjection = info.srs.wkt;
+			if (!this.projection) {this.projection = info.srs.wkt;}
+			else {this.fallbackProjection = info.srs.wkt;}
 		}
 
 		this.pointAttributes = "LAZ";
@@ -112,22 +112,22 @@ class EptKey
 		let max = this.b.max.clone();
 		let dst = new Vector3().subVectors(max, min);
 
-		if(a) min.x += dst.x / 2;
-		else max.x -= dst.x / 2;
+		if (a) {min.x += dst.x / 2;}
+		else {max.x -= dst.x / 2;}
 
-		if(b) min.y += dst.y / 2;
-		else max.y -= dst.y / 2;
+		if (b) {min.y += dst.y / 2;}
+		else {max.y -= dst.y / 2;}
 
-		if(c) min.z += dst.z / 2;
-		else max.z -= dst.z / 2;
+		if (c) {min.z += dst.z / 2;}
+		else {max.z -= dst.z / 2;}
 
 		return new EptKey(
-				this.ept,
-				new Box3(min, max),
-				this.d + 1,
-				this.x * 2 + a,
-				this.y * 2 + b,
-				this.z * 2 + c);
+			this.ept,
+			new Box3(min, max),
+			this.d + 1,
+			this.x * 2 + a,
+			this.y * 2 + b,
+			this.z * 2 + c);
 	}
 
 	children()
@@ -140,7 +140,7 @@ class EptKey
 				for (var c = 0; c < 2; ++c)
 				{
 					var add = this.step(a, b, c).name();
-					if(!result.includes(add)) result = result.concat(add);
+					if (!result.includes(add)) {result = result.concat(add);}
 				}
 			}
 		}
@@ -150,17 +150,18 @@ class EptKey
 
 class PointCloudEptGeometryNode extends PointCloudTreeNode
 {
-	constructor(ept, b, d, x, y, z) {
+	constructor(ept, b, d, x, y, z) 
+	{
 		super();
 
 		this.ept = ept;
 		this.key = new EptKey(
-				this.ept,
-				b || this.ept.boundingBox,
-				d || 0,
-				x,
-				y,
-				z);
+			this.ept,
+			b || this.ept.boundingBox,
+			d || 0,
+			x,
+			y,
+			z);
 
 		this.id = PointCloudEptGeometryNode.IDCount++;
 		this.geometry = null;
@@ -184,22 +185,32 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 		this.index = parseInt(this.name.charAt(this.name.length - 1));
 	}
 
-	isGeometryNode(){return true;}
-	getLevel(){return this.level;}
-	isTreeNode(){return false;}
-	isLoaded(){return this.loaded;}
-	getBoundingSphere(){return this.boundingSphere;}
-	getBoundingBox(){return this.boundingBox;}
-	url(){return this.ept.url + "ept-data/" + this.filename();}
-	getNumPoints(){return this.numPoints;}
-	filename(){return this.key.name();}
+	isGeometryNode() {return true;}
+
+	getLevel() {return this.level;}
+
+	isTreeNode() {return false;}
+
+	isLoaded() {return this.loaded;}
+
+	getBoundingSphere() {return this.boundingSphere;}
+
+	getBoundingBox() {return this.boundingBox;}
+
+	url() {return this.ept.url + "ept-data/" + this.filename();}
+
+	getNumPoints() {return this.numPoints;}
+
+	filename() {return this.key.name();}
 
 	getChildren()
 	{
 		let children = [];
 
-		for (let i = 0; i < 8; i++) {
-			if(this.children[i]) {
+		for (let i = 0; i < 8; i++) 
+		{
+			if (this.children[i]) 
+			{
 				children.push(this.children[i]);
 			}
 		}
@@ -215,7 +226,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 	load()
 	{
-		if(this.loaded || this.loading || Global.numNodesLoading >= Global.maxNodesLoading)
+		if (this.loaded || this.loading || Global.numNodesLoading >= Global.maxNodesLoading)
 		{
 			return;
 		}
@@ -223,7 +234,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 		this.loading = true;
 		Global.numNodesLoading++;
 
-		if(this.numPoints === -1)
+		if (this.numPoints === -1)
 		{
 			this.loadHierarchy();
 		}
@@ -248,35 +259,37 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 		// Since we want to traverse top-down, and 10 comes
 		// lexicographically before 9 (for example), do a deep sort.
-		var keys = Object.keys(hier).sort((a, b) => {
-			let [da, xa, ya, za] = a.split("-").map((n) => parseInt(n, 10));
-			let [db, xb, yb, zb] = b.split("-").map((n) => parseInt(n, 10));
-			if(da < db) return -1; if(da > db) return 1;
-			if(xa < xb) return -1; if(xa > xb) return 1;
-			if(ya < yb) return -1; if(ya > yb) return 1;
-			if(za < zb) return -1; if(za > zb) return 1;
+		var keys = Object.keys(hier).sort((a, b) => 
+		{
+			let [da, xa, ya, za] = a.split("-").map((n) => {return parseInt(n, 10);});
+			let [db, xb, yb, zb] = b.split("-").map((n) => {return parseInt(n, 10);});
+			if (da < db) {return -1;} if (da > db) {return 1;}
+			if (xa < xb) {return -1;} if (xa > xb) {return 1;}
+			if (ya < yb) {return -1;} if (ya > yb) {return 1;}
+			if (za < zb) {return -1;} if (za > zb) {return 1;}
 			return 0;
 		});
 
-		keys.forEach((v) => {
-			let [d, x, y, z] = v.split("-").map((n) => parseInt(n, 10));
+		keys.forEach((v) => 
+		{
+			let [d, x, y, z] = v.split("-").map((n) => {return parseInt(n, 10);});
 			let a = x & 1, b = y & 1, c = z & 1;
 			let parentName =
-				(d - 1) + "-" + (x >> 1) + "-" + (y >> 1) + "-" + (z >> 1);
+				d - 1 + "-" + (x >> 1) + "-" + (y >> 1) + "-" + (z >> 1);
 
 			let parentNode = nodes[parentName];
-			if(!parentNode) return;
+			if (!parentNode) {return;}
 			parentNode.hasChildren = true;
 
 			let key = parentNode.key.step(a, b, c);
 
 			let node = new PointCloudEptGeometryNode(
-					this.ept,
-					key.b,
-					key.d,
-					key.x,
-					key.y,
-					key.z);
+				this.ept,
+				key.b,
+				key.d,
+				key.x,
+				key.y,
+				key.z);
 
 			node.level = d;
 			node.numPoints = hier[v];
@@ -308,9 +321,9 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 			var mask = 1 << shift;
 			var step = 0;
 
-			if(x & mask) step += 4;
-			if(y & mask) step += 2;
-			if(z & mask) step += 1;
+			if (x & mask) {step += 4;}
+			if (y & mask) {step += 2;}
+			if (z & mask) {step += 1;}
 
 			name += step;
 		}
@@ -320,7 +333,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 	dispose()
 	{
-		if(this.geometry && this.parent != null)
+		if (this.geometry && this.parent !== null)
 		{
 			this.geometry.dispose();
 			this.geometry = null;

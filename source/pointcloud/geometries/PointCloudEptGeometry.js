@@ -20,7 +20,7 @@ class Utils
 
 	static findDim(schema, name)
 	{
-		var dim = schema.find((dim) => {return dim.name === name;});
+		const dim = schema.find((dim) => {return dim.name === name;});
 		if (!dim) {throw new Error('Failed to find ' + name + ' in schema');}
 		return dim;
 	}
@@ -35,18 +35,18 @@ class PointCloudEptGeometry
 {
 	constructor(url, info)
 	{
-		let version = info.version;
-		let schema = info.schema;
-		let bounds = info.bounds;
-		let boundsConforming = info.boundsConforming;
+		const version = info.version;
+		const schema = info.schema;
+		const bounds = info.bounds;
+		const boundsConforming = info.boundsConforming;
 
-		let xyz = [
+		const xyz = [
 			Utils.findDim(schema, 'X'),
 			Utils.findDim(schema, 'Y'),
 			Utils.findDim(schema, 'Z')
 		];
-		let scale = xyz.map((d) => {return d.scale || 1;});
-		let offset = xyz.map((d) => {return d.offset || 0;});
+		const scale = xyz.map((d) => {return d.scale || 1;});
+		const offset = xyz.map((d) => {return d.offset || 0;});
 
 		this.eptScale = Utils.toVector3(scale);
 		this.eptOffset = Utils.toVector3(offset);
@@ -82,9 +82,9 @@ class PointCloudEptGeometry
 		this.spacing =
 			(this.boundingBox.max.x - this.boundingBox.min.x) / this.span;
 
-		let hierarchyType = info.hierarchyType || 'json';
+		const hierarchyType = info.hierarchyType || 'json';
 
-		let dataType = info.dataType || 'laszip';
+		const dataType = info.dataType || 'laszip';
 		this.loader = dataType === 'binary' ? new EptBinaryLoader() : new EptLaszipLoader();
 	}
 }
@@ -108,9 +108,9 @@ class EptKey
 
 	step(a, b, c)
 	{
-		let min = this.b.min.clone();
-		let max = this.b.max.clone();
-		let dst = new Vector3().subVectors(max, min);
+		const min = this.b.min.clone();
+		const max = this.b.max.clone();
+		const dst = new Vector3().subVectors(max, min);
 
 		if (a) {min.x += dst.x / 2;}
 		else {max.x -= dst.x / 2;}
@@ -132,14 +132,14 @@ class EptKey
 
 	children()
 	{
-		var result = [];
-		for (var a = 0; a < 2; ++a)
+		let result = [];
+		for (let a = 0; a < 2; ++a)
 		{
-			for (var b = 0; b < 2; ++b)
+			for (let b = 0; b < 2; ++b)
 			{
-				for (var c = 0; c < 2; ++c)
+				for (let c = 0; c < 2; ++c)
 				{
-					var add = this.step(a, b, c).name();
+					const add = this.step(a, b, c).name();
 					if (!result.includes(add)) {result = result.concat(add);}
 				}
 			}
@@ -180,7 +180,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 		this.loading = false;
 		this.oneTimeDisposeHandlers = [];
 
-		let k = this.key;
+		const k = this.key;
 		this.name = this.toPotreeName(k.d, k.x, k.y, k.z);
 		this.index = parseInt(this.name.charAt(this.name.length - 1));
 	}
@@ -205,7 +205,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 	getChildren()
 	{
-		let children = [];
+		const children = [];
 
 		for (let i = 0; i < 8; i++) 
 		{
@@ -248,21 +248,21 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 	async loadHierarchy()
 	{
-		let nodes = { };
+		const nodes = { };
 		nodes[this.filename()] = this;
 		this.hasChildren = false;
 
-		let eptHierarchyFile = `${this.ept.url}ept-hierarchy/${this.filename()}.json`;
+		const eptHierarchyFile = `${this.ept.url}ept-hierarchy/${this.filename()}.json`;
 
-		let response = await XHRFactory.fetch(eptHierarchyFile);
-		let hier = await response.json();
+		const response = await XHRFactory.fetch(eptHierarchyFile);
+		const hier = await response.json();
 
 		// Since we want to traverse top-down, and 10 comes
 		// lexicographically before 9 (for example), do a deep sort.
-		var keys = Object.keys(hier).sort((a, b) => 
+		const keys = Object.keys(hier).sort((a, b) => 
 		{
-			let [da, xa, ya, za] = a.split('-').map((n) => {return parseInt(n, 10);});
-			let [db, xb, yb, zb] = b.split('-').map((n) => {return parseInt(n, 10);});
+			const [da, xa, ya, za] = a.split('-').map((n) => {return parseInt(n, 10);});
+			const [db, xb, yb, zb] = b.split('-').map((n) => {return parseInt(n, 10);});
 			if (da < db) {return -1;} if (da > db) {return 1;}
 			if (xa < xb) {return -1;} if (xa > xb) {return 1;}
 			if (ya < yb) {return -1;} if (ya > yb) {return 1;}
@@ -272,18 +272,18 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 		keys.forEach((v) => 
 		{
-			let [d, x, y, z] = v.split('-').map((n) => {return parseInt(n, 10);});
-			let a = x & 1, b = y & 1, c = z & 1;
-			let parentName =
+			const [d, x, y, z] = v.split('-').map((n) => {return parseInt(n, 10);});
+			const a = x & 1, b = y & 1, c = z & 1;
+			const parentName =
 				d - 1 + '-' + (x >> 1) + '-' + (y >> 1) + '-' + (z >> 1);
 
-			let parentNode = nodes[parentName];
+			const parentNode = nodes[parentName];
 			if (!parentNode) {return;}
 			parentNode.hasChildren = true;
 
-			let key = parentNode.key.step(a, b, c);
+			const key = parentNode.key.step(a, b, c);
 
-			let node = new PointCloudEptGeometryNode(
+			const node = new PointCloudEptGeometryNode(
 				this.ept,
 				key.b,
 				key.d,
@@ -313,13 +313,13 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 
 	toPotreeName(d, x, y, z)
 	{
-		var name = 'r';
+		let name = 'r';
 
-		for (var i = 0; i < d; ++i)
+		for (let i = 0; i < d; ++i)
 		{
-			var shift = d - i - 1;
-			var mask = 1 << shift;
-			var step = 0;
+			const shift = d - i - 1;
+			const mask = 1 << shift;
+			let step = 0;
 
 			if (x & mask) {step += 4;}
 			if (y & mask) {step += 2;}
@@ -342,7 +342,7 @@ class PointCloudEptGeometryNode extends PointCloudTreeNode
 			// this.dispatchEvent( { type: "dispose" } );
 			for (let i = 0; i < this.oneTimeDisposeHandlers.length; i++)
 			{
-				let handler = this.oneTimeDisposeHandlers[i];
+				const handler = this.oneTimeDisposeHandlers[i];
 				handler();
 			}
 			

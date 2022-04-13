@@ -100,7 +100,7 @@ class BinaryLoader
 			const tightBoundingBox = new Box3(new Vector3().fromArray(data.tightBoundingBox.min), new Vector3().fromArray(data.tightBoundingBox.max));
 			const geometry = new BufferGeometry();
 
-			for (let property in buffers)
+			for (const property in buffers)
 			{
 				const buffer = buffers[property].buffer;
 

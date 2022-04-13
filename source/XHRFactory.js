@@ -8,14 +8,14 @@ export const XHRFactory = {
 
 	createXMLHttpRequest: function() 
 	{
-		let xhr = new XMLHttpRequest();
+		const xhr = new XMLHttpRequest();
 
 		if (this.config.customHeaders &&
 			Array.isArray(this.config.customHeaders) &&
 			this.config.customHeaders.length > 0) 
 		{
-			let baseOpen = xhr.open;
-			let customHeaders = this.config.customHeaders;
+			const baseOpen = xhr.open;
+			const customHeaders = this.config.customHeaders;
 			xhr.open = function() 
 			{
 				baseOpen.apply(this, [].slice.call(arguments));

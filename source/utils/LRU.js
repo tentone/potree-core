@@ -44,7 +44,7 @@ export class LRU
 			return;
 		}
 
-		var item;
+		let item;
 
 		if (this.items[node.id] === null)
 		{
@@ -99,7 +99,7 @@ export class LRU
 
 	remove(node)
 	{
-		var lruItem = this.items[node.id];
+		const lruItem = this.items[node.id];
 		if (lruItem)
 		{
 			if (this.elements === 1)
@@ -138,15 +138,15 @@ export class LRU
 		{
 			return null;
 		}
-		var lru = this.first;
+		const lru = this.first;
 
 		return lru.node;
 	}
 
 	toString()
 	{
-		var string = '{ ';
-		var curr = this.first;
+		let string = '{ ';
+		let curr = this.first;
 
 		while (curr !== null)
 		{
@@ -172,29 +172,29 @@ export class LRU
 
 		while (this.numPoints > Global.pointLoadLimit)
 		{
-			var element = this.first;
-			var node = element.node;
+			const element = this.first;
+			const node = element.node;
 			this.disposeDescendants(node);
 		}
 	}
 
 	disposeDescendants(node)
 	{
-		var stack = [];
+		const stack = [];
 		stack.push(node);
 
 		while (stack.length > 0)
 		{
-			var current = stack.pop();
+			const current = stack.pop();
 
 			current.dispose();
 			this.remove(current);
 
-			for (var key in current.children)
+			for (const key in current.children)
 			{
 				if (current.children.hasOwnProperty(key))
 				{
-					var child = current.children[key];
+					const child = current.children[key];
 					if (child.loaded)
 					{
 						stack.push(current.children[key]);

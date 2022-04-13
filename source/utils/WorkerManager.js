@@ -55,9 +55,9 @@ class WorkerManager
 	 */
 	runTask(type, onMessage, message, transfer) 
 	{
-		var self = this;
+		const self = this;
 
-		var worker = this.getWorker(type);
+		const worker = this.getWorker(type);
 		worker.onmessage = function(event) 
 		{
 			onMessage(event);

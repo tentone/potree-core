@@ -33,17 +33,17 @@ class LASLAZLoader
 			return;
 		}
 
-		var pointAttributes = node.pcoGeometry.pointAttributes;
-		var url = node.getURL();
+		const pointAttributes = node.pcoGeometry.pointAttributes;
+		let url = node.getURL();
 
 		if (this.version.equalOrHigher('1.4'))
 		{
 			url += '.' + pointAttributes.toLowerCase();
 		}
 
-		var self = this;
+		const self = this;
 
-		var xhr = XHRFactory.createXMLHttpRequest();
+		const xhr = XHRFactory.createXMLHttpRequest();
 		xhr.open('GET', url, true);
 		xhr.responseType = 'arraybuffer';
 		xhr.overrideMimeType('text/plain; charset=x-user-defined');
@@ -77,8 +77,8 @@ class LASLAZLoader
 
 	parse(node, buffer)
 	{
-		var lf = new LASFile(buffer);
-		var handler = new LASLAZBatcher(node);
+		const lf = new LASFile(buffer);
+		const handler = new LASLAZBatcher(node);
 
 		lf.open() .then((msg) =>
 		{
@@ -95,15 +95,15 @@ class LASLAZLoader
 			});
 		}).then((v) =>
 		{
-			let lf = v[0];
-			let header = v[1];
-			let skip = 1;
+			const lf = v[0];
+			const header = v[1];
+			const skip = 1;
 			let totalRead = 0;
-			let totalToRead = skip <= 1 ? header.pointsCount : header.pointsCount / skip;
+			const totalToRead = skip <= 1 ? header.pointsCount : header.pointsCount / skip;
 
 			var reader = function()
 			{
-				let p = lf.readData(1000000, 0, skip);
+				const p = lf.readData(1000000, 0, skip);
 
 				return p.then(function(data)
 				{
@@ -134,7 +134,7 @@ class LASLAZLoader
 			return reader();
 		}).then((v) =>
 		{
-			let lf = v[0];
+			const lf = v[0];
 
 			// Close it
 			return lf.close().then(function()
@@ -169,9 +169,9 @@ class LASLAZBatcher
 
 	push(data)
 	{
-		var self = this;
+		const self = this;
 
-		var message =
+		const message =
 		{
 			buffer: data.arrayb,
 			numPoints: data.pointsCount,
@@ -183,20 +183,20 @@ class LASLAZBatcher
 			maxs: data.maxs
 		};
 
-		var worker = Global.workerPool.getWorker(WorkerManager.LAS_DECODER);
+		const worker = Global.workerPool.getWorker(WorkerManager.LAS_DECODER);
 		worker.onmessage = function(e)
 		{
-			var geometry = new BufferGeometry();
-			var numPoints = data.pointsCount;
+			const geometry = new BufferGeometry();
+			const numPoints = data.pointsCount;
 
-			var positions = new Float32Array(e.data.position);
-			var colors = new Uint8Array(e.data.color);
-			var intensities = new Float32Array(e.data.intensity);
-			var classifications = new Uint8Array(e.data.classification);
-			var returnNumbers = new Uint8Array(e.data.returnNumber);
-			var numberOfReturns = new Uint8Array(e.data.numberOfReturns);
-			var pointSourceIDs = new Uint16Array(e.data.pointSourceID);
-			var indices = new Uint8Array(e.data.indices);
+			const positions = new Float32Array(e.data.position);
+			const colors = new Uint8Array(e.data.color);
+			const intensities = new Float32Array(e.data.intensity);
+			const classifications = new Uint8Array(e.data.classification);
+			const returnNumbers = new Uint8Array(e.data.returnNumber);
+			const numberOfReturns = new Uint8Array(e.data.numberOfReturns);
+			const pointSourceIDs = new Uint16Array(e.data.pointSourceID);
+			const indices = new Uint8Array(e.data.indices);
 
 			geometry.setAttribute('position', new BufferAttribute(positions, 3));
 			geometry.setAttribute('color', new BufferAttribute(colors, 4, true));
@@ -209,7 +209,7 @@ class LASLAZBatcher
 			geometry.setAttribute('indices', new BufferAttribute(indices, 4));
 			geometry.attributes.indices.normalized = true;
 
-			var tightBoundingBox = new Box3
+			const tightBoundingBox = new Box3
 			(
 				new Vector3().fromArray(e.data.tightBoundingBox.min),
 				new Vector3().fromArray(e.data.tightBoundingBox.max)

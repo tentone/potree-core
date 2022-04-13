@@ -24,16 +24,16 @@ class POCLoader
 	 */
 	static load(url, callback)
 	{
-		var pco = new PointCloudOctreeGeometry();
+		const pco = new PointCloudOctreeGeometry();
 		pco.url = url;
 		
-		var xhr = XHRFactory.createXMLHttpRequest();
+		const xhr = XHRFactory.createXMLHttpRequest();
 		xhr.overrideMimeType('text/plain');
 		xhr.open('GET', url, true);
 		xhr.onload = function()
 		{
-			var data = JSON.parse(xhr.responseText);
-			var version = new Version(data.version);
+			const data = JSON.parse(xhr.responseText);
+			const version = new Version(data.version);
 
 			// Assume dir as absolute if it starts with http
 			if (data.octreeDir.indexOf('http') === 0)
@@ -49,10 +49,10 @@ class POCLoader
 			pco.hierarchyStepSize = data.hierarchyStepSize;
 			pco.pointAttributes = data.pointAttributes;
 
-			var min = new Vector3(data.boundingBox.lx, data.boundingBox.ly, data.boundingBox.lz);
-			var max = new Vector3(data.boundingBox.ux, data.boundingBox.uy, data.boundingBox.uz);
+			const min = new Vector3(data.boundingBox.lx, data.boundingBox.ly, data.boundingBox.lz);
+			const max = new Vector3(data.boundingBox.ux, data.boundingBox.uy, data.boundingBox.uz);
 			var boundingBox = new Box3(min, max);
-			var tightBoundingBox = boundingBox.clone();
+			const tightBoundingBox = boundingBox.clone();
 
 			if (data.tightBoundingBox)
 			{
@@ -60,7 +60,7 @@ class POCLoader
 				tightBoundingBox.max.copy(new Vector3(data.tightBoundingBox.ux, data.tightBoundingBox.uy, data.tightBoundingBox.uz));
 			}
 
-			var offset = min.clone();
+			const offset = min.clone();
 
 			boundingBox.min.sub(offset);
 			boundingBox.max.sub(offset);
@@ -86,10 +86,10 @@ class POCLoader
 				pco.pointAttributes = new PointAttributes(pco.pointAttributes);
 			}
 
-			var nodes = {};
+			const nodes = {};
 			var name = 'r';
 
-			var root = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
+			const root = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
 			root.level = 0;
 			root.hasChildren = true;
 			root.spacing = pco.spacing;
@@ -102,17 +102,17 @@ class POCLoader
 			// Load remaining hierarchy
 			if (version.upTo('1.4'))
 			{
-				for (var i = 1; i < data.hierarchy.length; i++)
+				for (let i = 1; i < data.hierarchy.length; i++)
 				{
 					var name = data.hierarchy[i][0];
-					var numPoints = data.hierarchy[i][1];
-					var index = parseInt(name.charAt(name.length - 1));
-					var parentName = name.substring(0, name.length - 1);
-					var parentNode = nodes[parentName];
-					var level = name.length - 1;
+					const numPoints = data.hierarchy[i][1];
+					const index = parseInt(name.charAt(name.length - 1));
+					const parentName = name.substring(0, name.length - 1);
+					const parentNode = nodes[parentName];
+					const level = name.length - 1;
 					var boundingBox = POCLoader.createChildAABB(parentNode.boundingBox, index);
 
-					var node = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
+					const node = new PointCloudOctreeGeometryNode(name, pco, boundingBox);
 					node.level = level;
 					node.numPoints = numPoints;
 					node.spacing = pco.spacing / Math.pow(2, level);
@@ -137,10 +137,10 @@ class POCLoader
 
 	static loadPointAttributes(mno)
 	{
-		var fpa = mno.pointAttributes;
-		var pa = new PointAttributes();
+		const fpa = mno.pointAttributes;
+		const pa = new PointAttributes();
 
-		for (var i = 0; i < fpa.length; i++)
+		for (let i = 0; i < fpa.length; i++)
 		{
 			pa.add(PointAttribute[fpa[i]]);
 		}
@@ -150,9 +150,9 @@ class POCLoader
 
 	static createChildAABB(aabb, index)
 	{
-		var min = aabb.min.clone();
-		var max = aabb.max.clone();
-		var size = new Vector3().subVectors(max, min);
+		const min = aabb.min.clone();
+		const max = aabb.max.clone();
+		const size = new Vector3().subVectors(max, min);
 
 		if ((index & 0b0001) > 0)
 		{

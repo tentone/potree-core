@@ -54,9 +54,9 @@ class PointCloudOctreeNode extends PointCloudTreeNode
 
 	getChildren()
 	{
-		var children = [];
+		const children = [];
 
-		for (var i = 0; i < 8; i++)
+		for (let i = 0; i < 8; i++)
 		{
 			if (this.children[i])
 			{
@@ -75,23 +75,23 @@ class PointCloudOctreeNode extends PointCloudTreeNode
 			return null;
 		}
 
-		var buffer = this.geometryNode.buffer;
+		const buffer = this.geometryNode.buffer;
 
-		var posOffset = buffer.offset('position');
-		var stride = buffer.stride;
-		var view = new DataView(buffer.data);
+		const posOffset = buffer.offset('position');
+		const stride = buffer.stride;
+		const view = new DataView(buffer.data);
 
-		var worldToBox = new Matrix4().getInverse(boxNode.matrixWorld);
-		var objectToBox = new Matrix4().multiplyMatrices(worldToBox, this.sceneNode.matrixWorld);
+		const worldToBox = new Matrix4().getInverse(boxNode.matrixWorld);
+		const objectToBox = new Matrix4().multiplyMatrices(worldToBox, this.sceneNode.matrixWorld);
 
-		var inBox = [];
+		const inBox = [];
 
-		var pos = new Vector4();
-		for (var i = 0; i < buffer.numElements; i++)
+		const pos = new Vector4();
+		for (let i = 0; i < buffer.numElements; i++)
 		{
-			var x = view.getFloat32(i * stride + posOffset + 0, true);
-			var y = view.getFloat32(i * stride + posOffset + 4, true);
-			var z = view.getFloat32(i * stride + posOffset + 8, true);
+			const x = view.getFloat32(i * stride + posOffset + 0, true);
+			const y = view.getFloat32(i * stride + posOffset + 4, true);
+			const z = view.getFloat32(i * stride + posOffset + 8, true);
 
 			pos.set(x, y, z, 1);
 			pos.applyMatrix4(objectToBox);
@@ -147,13 +147,13 @@ class PointCloudOctree extends PointCloudTree
 
 		this.tempVector3 = new Vector3();
 
-		var box = [this.pcoGeometry.tightBoundingBox, this.getBoundingBoxWorld()].find((v) => {return v !== undefined;});
+		let box = [this.pcoGeometry.tightBoundingBox, this.getBoundingBoxWorld()].find((v) => {return v !== undefined;});
 
 		this.updateMatrixWorld(true);
 		box = HelperUtils.computeTransformedBoundingBox(box, this.matrixWorld);
 
-		var bMin = box.min.z;
-		var bMax = box.max.z;
+		const bMin = box.min.z;
+		const bMax = box.max.z;
 		this.material.heightMin = bMin;
 		this.material.heightMax = bMax;
 
@@ -184,21 +184,21 @@ class PointCloudOctree extends PointCloudTree
 
 	toTreeNode(geometryNode, parent)
 	{
-		var node = new PointCloudOctreeNode();
-		var sceneNode = new Points(geometryNode.geometry, this.material);
+		const node = new PointCloudOctreeNode();
+		const sceneNode = new Points(geometryNode.geometry, this.material);
 		sceneNode.name = geometryNode.name;
 		sceneNode.position.copy(geometryNode.boundingBox.min);
 		sceneNode.frustumCulled = true;
 		sceneNode.onBeforeRender = (renderer, scene, camera, geometry, material, group) =>
 		{
-			var vnStart = null;
+			let vnStart = null;
 			if (this.visibleNodeTextureOffsets)
 			{
 				vnStart = this.visibleNodeTextureOffsets.get(node);
 			}
 
-			var pcIndex = node.pcIndex ? node.pcIndex : this.visibleNodes.indexOf(node);
-			var level = geometryNode.getLevel();
+			const pcIndex = node.pcIndex ? node.pcIndex : this.visibleNodes.indexOf(node);
+			const level = geometryNode.getLevel();
 	
 			material.uniforms.level.value = level;
 			material.uniforms.vnStart.value = vnStart;
@@ -210,7 +210,7 @@ class PointCloudOctree extends PointCloudTree
 		node.sceneNode = sceneNode;
 		node.pointcloud = this;
 		node.children = {};
-		for (var key in geometryNode.children)
+		for (const key in geometryNode.children)
 		{
 			node.children[key] = geometryNode.children[key];
 		}
@@ -222,14 +222,14 @@ class PointCloudOctree extends PointCloudTree
 		}
 		else
 		{
-			var childIndex = parseInt(geometryNode.name[geometryNode.name.length - 1]);
+			const childIndex = parseInt(geometryNode.name[geometryNode.name.length - 1]);
 			parent.sceneNode.add(sceneNode);
 			parent.children[childIndex] = node;
 		}
 
-		var disposeListener = function()
+		const disposeListener = function()
 		{
-			var childIndex = parseInt(geometryNode.name[geometryNode.name.length - 1]);
+			const childIndex = parseInt(geometryNode.name[geometryNode.name.length - 1]);
 			parent.sceneNode.remove(node.sceneNode);
 			parent.children[childIndex] = geometryNode;
 		};
@@ -241,15 +241,15 @@ class PointCloudOctree extends PointCloudTree
 
 	updateVisibleBounds()
 	{
-		var leafNodes = [];
+		const leafNodes = [];
 		for (var i = 0; i < this.visibleNodes.length; i++)
 		{
 			var node = this.visibleNodes[i];
-			var isLeaf = true;
+			let isLeaf = true;
 
-			for (var j = 0; j < node.children.length; j++)
+			for (let j = 0; j < node.children.length; j++)
 			{
-				var child = node.children[j];
+				const child = node.children[j];
 				if (child instanceof PointCloudOctreeNode)
 				{
 					isLeaf = isLeaf && !child.sceneNode.visible;
@@ -279,8 +279,8 @@ class PointCloudOctree extends PointCloudTree
 
 	updateMaterial(material, camera, renderer)
 	{
-		var octtreeSpacing = this.pcoGeometry.spacing * Math.max(this.scale.x, this.scale.y, this.scale.z);
-		var octreeSize = this.pcoGeometry.boundingBox.getSize(new Vector3()).x;
+		const octtreeSpacing = this.pcoGeometry.spacing * Math.max(this.scale.x, this.scale.y, this.scale.z);
+		const octreeSize = this.pcoGeometry.boundingBox.getSize(new Vector3()).x;
 
 		material.uniforms.fov.value = camera.fov * (Math.PI / 180);
 		material.uniforms.uScreenWidth.value = renderer.domElement.clientWidth;
@@ -300,17 +300,17 @@ class PointCloudOctree extends PointCloudTree
 			performance.mark('computeVisibilityTextureData-start');
 		}
 
-		var data = new Uint8Array(nodes.length * 4);
-		var visibleNodeTextureOffsets = new Map();
+		const data = new Uint8Array(nodes.length * 4);
+		const visibleNodeTextureOffsets = new Map();
 
 		// copy array
 		nodes = nodes.slice();
 
 		// sort by level and index, e.g. r, r0, r3, r4, r01, r07, r30, ...
-		var sort = function(a, b)
+		const sort = function(a, b)
 		{
-			var na = a.geometryNode.name;
-			var nb = b.geometryNode.name;
+			const na = a.geometryNode.name;
+			const nb = b.geometryNode.name;
 			if (na.length !== nb.length) {return na.length - nb.length;}
 			if (na < nb) {return -1;}
 			if (na > nb) {return 1;}
@@ -319,23 +319,23 @@ class PointCloudOctree extends PointCloudTree
 		nodes.sort(sort);
 
 		// code sample taken from js src/math/Ray.js
-		var v1 = new Vector3();
-		var intersectSphereBack = (ray, sphere) =>
+		const v1 = new Vector3();
+		const intersectSphereBack = (ray, sphere) =>
 		{
 			v1.subVectors(sphere.center, ray.origin);
-			var tca = v1.dot(ray.direction);
-			var d2 = v1.dot(v1) - tca * tca;
-			var radius2 = sphere.radius * sphere.radius;
+			const tca = v1.dot(ray.direction);
+			const d2 = v1.dot(v1) - tca * tca;
+			const radius2 = sphere.radius * sphere.radius;
 
 			if (d2 > radius2)
 			{
 				return null;
 			}
 
-			var thc = Math.sqrt(radius2 - d2);
+			const thc = Math.sqrt(radius2 - d2);
 
 			// t1 = second intersect point - exit point on back of sphere
-			var t1 = tca + thc;
+			const t1 = tca + thc;
 
 			if (t1 < 0)
 			{
@@ -345,8 +345,8 @@ class PointCloudOctree extends PointCloudTree
 			return t1;
 		};
 
-		var lodRanges = new Map();
-		var leafNodeLodRanges = new Map();
+		const lodRanges = new Map();
+		const leafNodeLodRanges = new Map();
 
 		for (var i = 0; i < nodes.length; i++)
 		{
@@ -354,7 +354,7 @@ class PointCloudOctree extends PointCloudTree
 
 			visibleNodeTextureOffsets.set(node, i);
 
-			var children = [];
+			const children = [];
 			for (var j = 0; j < 8; j++)
 			{
 				var child = node.children[j];
@@ -372,12 +372,12 @@ class PointCloudOctree extends PointCloudTree
 			for (var j = 0; j < children.length; j++)
 			{
 				var child = children[j];
-				var index = parseInt(child.geometryNode.name.substr(-1));
+				const index = parseInt(child.geometryNode.name.substr(-1));
 				data[i * 4] += Math.pow(2, index);
 
 				if (j === 0)
 				{
-					var vArrayIndex = nodes.indexOf(child, i);
+					const vArrayIndex = nodes.indexOf(child, i);
 
 					data[i * 4 + 1] = vArrayIndex - i >> 8;
 					data[i * 4 + 2] = (vArrayIndex - i) % 256;
@@ -386,16 +386,16 @@ class PointCloudOctree extends PointCloudTree
 
 			// TODO performance optimization
 			// for some reason, this part can be extremely slow in chrome during a debugging session, but not during profiling
-			var bBox = node.getBoundingBox().clone();
+			const bBox = node.getBoundingBox().clone();
 			// bBox.applyMatrix4(node.sceneNode.matrixWorld);
 			// bBox.applyMatrix4(camera.matrixWorldInverse);
-			var bSphere = bBox.getBoundingSphere(new Sphere());
+			const bSphere = bBox.getBoundingSphere(new Sphere());
 			bSphere.applyMatrix4(node.sceneNode.matrixWorld);
 			bSphere.applyMatrix4(camera.matrixWorldInverse);
 
-			var ray = new Ray(camera.position, camera.getWorldDirection(this.tempVector3));
+			const ray = new Ray(camera.position, camera.getWorldDirection(this.tempVector3));
 			var distance = intersectSphereBack(ray, bSphere);
-			var distance2 = bSphere.center.distanceTo(camera.position) + bSphere.radius;
+			const distance2 = bSphere.center.distanceTo(camera.position) + bSphere.radius;
 			if (distance === null)
 			{
 				distance = distance2;
@@ -408,8 +408,8 @@ class PointCloudOctree extends PointCloudTree
 			}
 			else
 			{
-				var prevDistance = lodRanges.get(node.getLevel());
-				var newDistance = Math.max(prevDistance, distance);
+				const prevDistance = lodRanges.get(node.getLevel());
+				const newDistance = Math.max(prevDistance, distance);
 				lodRanges.set(node.getLevel(), newDistance);
 			}
 
@@ -425,7 +425,7 @@ class PointCloudOctree extends PointCloudTree
 
 		for (var [node, value] of leafNodeLodRanges)
 		{
-			var level = node.getLevel();
+			const level = node.getLevel();
 			var distance = value.distance;
 			var i = value.i;
 
@@ -433,7 +433,7 @@ class PointCloudOctree extends PointCloudTree
 			{
 				continue;
 			}
-			for (var [lod, range] of lodRanges)
+			for (const [lod, range] of lodRanges)
 			{
 				if (distance < range * 1.2)
 				{
@@ -456,19 +456,19 @@ class PointCloudOctree extends PointCloudTree
 
 	nodeIntersectsProfile(node, profile)
 	{
-		var bbWorld = node.boundingBox.clone().applyMatrix4(this.matrixWorld);
-		var bsWorld = bbWorld.getBoundingSphere(new Sphere());
+		const bbWorld = node.boundingBox.clone().applyMatrix4(this.matrixWorld);
+		const bsWorld = bbWorld.getBoundingSphere(new Sphere());
 
-		var intersects = false;
+		let intersects = false;
 
-		for (var i = 0; i < profile.points.length - 1; i++)
+		for (let i = 0; i < profile.points.length - 1; i++)
 		{
 
-			var start = new Vector3(profile.points[i].x, profile.points[i].y, bsWorld.center.z);
-			var end = new Vector3(profile.points[i + 1].x, profile.points[i + 1].y, bsWorld.center.z);
+			const start = new Vector3(profile.points[i].x, profile.points[i].y, bsWorld.center.z);
+			const end = new Vector3(profile.points[i + 1].x, profile.points[i + 1].y, bsWorld.center.z);
 
-			var closest = new Line3(start, end).closestPointToPoint(bsWorld.center, true);
-			var distance = closest.distanceTo(bsWorld.center);
+			const closest = new Line3(start, end).closestPointToPoint(bsWorld.center, true);
+			const distance = closest.distanceTo(bsWorld.center);
 
 			intersects = intersects || distance < bsWorld.radius + profile.width;
 		}
@@ -478,15 +478,15 @@ class PointCloudOctree extends PointCloudTree
 
 	nodesOnRay(nodes, ray)
 	{
-		var nodesOnRay = [];
+		const nodesOnRay = [];
 
-		var _ray = ray.clone();
-		for (var i = 0; i < nodes.length; i++)
+		const _ray = ray.clone();
+		for (let i = 0; i < nodes.length; i++)
 		{
-			var node = nodes[i];
+			const node = nodes[i];
 			// var inverseWorld = new Matrix4().getInverse(node.matrixWorld);
 			// var sphere = node.getBoundingSphere(new Sphere()).clone().applyMatrix4(node.sceneNode.matrixWorld);
-			var sphere = node.getBoundingSphere(new Sphere()).clone().applyMatrix4(this.matrixWorld);
+			const sphere = node.getBoundingSphere(new Sphere()).clone().applyMatrix4(this.matrixWorld);
 
 			if (_ray.intersectsSphere(sphere))
 			{
@@ -520,7 +520,7 @@ class PointCloudOctree extends PointCloudTree
 
 	hideDescendants(object)
 	{
-		var stack = [];
+		const stack = [];
 		for (var i = 0; i < object.children.length; i++)
 		{
 			var child = object.children[i];
@@ -551,9 +551,9 @@ class PointCloudOctree extends PointCloudTree
 	{
 		this.position.set(0, 0, 0);
 		this.updateMatrixWorld(true);
-		var box = this.boundingBox;
-		var transform = this.matrixWorld;
-		var tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
+		const box = this.boundingBox;
+		const transform = this.matrixWorld;
+		const tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
 
 		this.position.set(0, 0, 0).sub(tBox.getCenter(new Vector3()));
 	};
@@ -561,18 +561,18 @@ class PointCloudOctree extends PointCloudTree
 	moveToGroundPlane()
 	{
 		this.updateMatrixWorld(true);
-		var box = this.boundingBox;
-		var transform = this.matrixWorld;
-		var tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
+		const box = this.boundingBox;
+		const transform = this.matrixWorld;
+		const tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
 		this.position.y += -tBox.min.y;
 	};
 
 	getBoundingBoxWorld()
 	{
 		this.updateMatrixWorld(true);
-		var box = this.boundingBox;
-		var transform = this.matrixWorld;
-		var tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
+		const box = this.boundingBox;
+		const transform = this.matrixWorld;
+		const tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
 
 		return tBox;
 	};
@@ -605,7 +605,7 @@ class PointCloudOctree extends PointCloudTree
 			// return request;
 		}
 
-		var points = {
+		const points = {
 			segments: [],
 			boundingBox: new Box3(),
 			projectedBoundingBox: new Box2()
@@ -616,7 +616,7 @@ class PointCloudOctree extends PointCloudTree
 		{
 			var start = profile.points[i];
 			var end = profile.points[i + 1];
-			var ps = this.getProfile(start, end, profile.width, maxDepth);
+			const ps = this.getProfile(start, end, profile.width, maxDepth);
 
 			var segment = {
 				start: start,
@@ -632,25 +632,25 @@ class PointCloudOctree extends PointCloudTree
 		}
 
 		// add projection functions to the segments
-		var mileage = new Vector3();
+		const mileage = new Vector3();
 		for (var i = 0; i < points.segments.length; i++)
 		{
 			var segment = points.segments[i];
 			var start = segment.start;
 			var end = segment.end;
 
-			var project = (function(_start, _end, _mileage, _boundingBox)
+			const project = (function(_start, _end, _mileage, _boundingBox)
 			{
-				var start = _start;
-				var end = _end;
-				var mileage = _mileage;
-				var boundingBox = _boundingBox;
+				const start = _start;
+				const end = _end;
+				const mileage = _mileage;
+				const boundingBox = _boundingBox;
 
-				var xAxis = new Vector3(1, 0, 0);
-				var dir = new Vector3().subVectors(end, start);
+				const xAxis = new Vector3(1, 0, 0);
+				const dir = new Vector3().subVectors(end, start);
 				dir.y = 0;
 				dir.normalize();
-				var alpha = Math.acos(xAxis.dot(dir));
+				let alpha = Math.acos(xAxis.dot(dir));
 				if (dir.z > 0)
 				{
 					alpha = -alpha;
@@ -658,11 +658,11 @@ class PointCloudOctree extends PointCloudTree
 
 				return function(position)
 				{
-					var toOrigin = new Matrix4().makeTranslation(-start.x, -boundingBox.min.y, -start.z);
-					var alignWithX = new Matrix4().makeRotationY(-alpha);
-					var applyMileage = new Matrix4().makeTranslation(mileage.x, 0, 0);
+					const toOrigin = new Matrix4().makeTranslation(-start.x, -boundingBox.min.y, -start.z);
+					const alignWithX = new Matrix4().makeRotationY(-alpha);
+					const applyMileage = new Matrix4().makeTranslation(mileage.x, 0, 0);
 
-					var pos = position.clone();
+					const pos = position.clone();
 					pos.applyMatrix4(toOrigin);
 					pos.applyMatrix4(alignWithX);
 					pos.applyMatrix4(applyMileage);
@@ -720,24 +720,24 @@ class PointCloudOctree extends PointCloudTree
 	 */
 	pick(viewer, camera, ray, params = {})
 	{
-		var renderer = viewer.renderer;
-		var pRenderer = viewer.pRenderer;
+		const renderer = viewer.renderer;
+		const pRenderer = viewer.pRenderer;
 
 		performance.mark('pick-start');
 
-		var getVal = (a, b) => {return a !== undefined ? a : b;};
+		const getVal = (a, b) => {return a !== undefined ? a : b;};
 
-		var pickWindowSize = getVal(params.pickWindowSize, 17);
+		const pickWindowSize = getVal(params.pickWindowSize, 17);
 
-		var size = renderer.getSize(new Vector3());
+		const size = renderer.getSize(new Vector3());
 
-		var width = Math.ceil(getVal(params.width, size.width));
-		var height = Math.ceil(getVal(params.height, size.height));
+		const width = Math.ceil(getVal(params.width, size.width));
+		const height = Math.ceil(getVal(params.height, size.height));
 
-		var pointSizeType = getVal(params.pointSizeType, this.material.pointSizeType);
-		var pointSize = getVal(params.pointSize, this.material.size);
+		const pointSizeType = getVal(params.pointSizeType, this.material.pointSizeType);
+		const pointSize = getVal(params.pointSize, this.material.size);
 
-		var nodes = this.nodesOnRay(this.visibleNodes, ray);
+		const nodes = this.nodesOnRay(this.visibleNodes, ray);
 
 		if (nodes.length === 0)
 		{
@@ -746,12 +746,12 @@ class PointCloudOctree extends PointCloudTree
 
 		if (!this.pickState)
 		{
-			var scene = new Scene();
+			const scene = new Scene();
 
-			var material = new PointCloudMaterial();
+			const material = new PointCloudMaterial();
 			material.pointColorType = PointColorType.POINT_INDEX;
 
-			var renderTarget = new WebGLRenderTarget(
+			const renderTarget = new WebGLRenderTarget(
 				1, 1,
 				{
 					minFilter: LinearFilter,
@@ -767,8 +767,8 @@ class PointCloudOctree extends PointCloudTree
 			};
 		}
 
-		var pickState = this.pickState;
-		var pickMaterial = pickState.material;
+		const pickState = this.pickState;
+		const pickMaterial = pickState.material;
 
 		// Update pick material
 		pickMaterial.pointSizeType = pointSizeType;
@@ -785,9 +785,9 @@ class PointCloudOctree extends PointCloudTree
 
 		pickState.renderTarget.setSize(width, height);
 
-		var pixelPos = new Vector2(params.x, params.y);
+		const pixelPos = new Vector2(params.x, params.y);
 
-		var gl = renderer.getContext();
+		const gl = renderer.getContext();
 		gl.enable(gl.SCISSOR_TEST);
 		gl.scissor(parseInt(pixelPos.x - (pickWindowSize - 1) / 2), parseInt(pixelPos.y - (pickWindowSize - 1) / 2), parseInt(pickWindowSize), parseInt(pickWindowSize));
 
@@ -800,22 +800,22 @@ class PointCloudOctree extends PointCloudTree
 		gl.clearColor(0, 0, 0, 0);
 		renderer.clearTarget(pickState.renderTarget, true, true, true);
 
-		var tmp = this.material;
+		const tmp = this.material;
 		this.material = pickMaterial;
 
 		pRenderer.renderOctree(this, nodes, camera, pickState.renderTarget);
 
 		this.material = tmp;
 
-		var clamp = (number, min, max) => {return Math.min(Math.max(min, number), max);};
+		const clamp = (number, min, max) => {return Math.min(Math.max(min, number), max);};
 
 		var x = parseInt(clamp(pixelPos.x - (pickWindowSize - 1) / 2, 0, width));
 		var y = parseInt(clamp(pixelPos.y - (pickWindowSize - 1) / 2, 0, height));
-		var w = parseInt(Math.min(x + pickWindowSize, width) - x);
-		var h = parseInt(Math.min(y + pickWindowSize, height) - y);
+		const w = parseInt(Math.min(x + pickWindowSize, width) - x);
+		const h = parseInt(Math.min(y + pickWindowSize, height) - y);
 
-		var pixelCount = w * h;
-		var buffer = new Uint8Array(4 * pixelCount);
+		const pixelCount = w * h;
+		const buffer = new Uint8Array(4 * pixelCount);
 
 		gl.readPixels(x, y, pickWindowSize, pickWindowSize, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
 
@@ -824,23 +824,23 @@ class PointCloudOctree extends PointCloudTree
 		renderer.setScissorTest(false);
 		gl.disable(gl.SCISSOR_TEST);
 
-		var pixels = buffer;
-		var ibuffer = new Uint32Array(buffer.buffer);
+		const pixels = buffer;
+		const ibuffer = new Uint32Array(buffer.buffer);
 
 		// find closest hit inside pixelWindow boundaries
-		var min = Number.MAX_VALUE;
-		var hits = [];
+		const min = Number.MAX_VALUE;
+		const hits = [];
 
-		for (var u = 0; u < pickWindowSize; u++)
+		for (let u = 0; u < pickWindowSize; u++)
 		{
-			for (var v = 0; v < pickWindowSize; v++)
+			for (let v = 0; v < pickWindowSize; v++)
 			{
-				var offset = u + v * pickWindowSize;
-				var distance = Math.pow(u - (pickWindowSize - 1) / 2, 2) + Math.pow(v - (pickWindowSize - 1) / 2, 2);
+				const offset = u + v * pickWindowSize;
+				const distance = Math.pow(u - (pickWindowSize - 1) / 2, 2) + Math.pow(v - (pickWindowSize - 1) / 2, 2);
 
-				var pcIndex = pixels[4 * offset + 3];
+				const pcIndex = pixels[4 * offset + 3];
 				pixels[4 * offset + 3] = 0;
-				var pIndex = ibuffer[offset];
+				const pIndex = ibuffer[offset];
 
 				if (!(pcIndex === 0 && pIndex === 0) && pcIndex !== undefined && pIndex !== undefined)
 				{
@@ -874,28 +874,28 @@ class PointCloudOctree extends PointCloudTree
 
 		for (var hit of hits)
 		{
-			var point = {};
+			const point = {};
 
 			if (!nodes[hit.pcIndex])
 			{
 				return null;
 			}
 
-			var node = nodes[hit.pcIndex];
-			var pc = node.sceneNode;
-			var geometry = node.geometryNode.geometry;
+			const node = nodes[hit.pcIndex];
+			const pc = node.sceneNode;
+			const geometry = node.geometryNode.geometry;
 
-			for (var attributeName in geometry.attributes)
+			for (const attributeName in geometry.attributes)
 			{
-				var attribute = geometry.attributes[attributeName];
+				const attribute = geometry.attributes[attributeName];
 
 				if (attributeName === 'position')
 				{
 					var x = attribute.array[3 * hit.pIndex];
 					var y = attribute.array[3 * hit.pIndex + 1];
-					var z = attribute.array[3 * hit.pIndex + 2];
+					const z = attribute.array[3 * hit.pIndex + 2];
 
-					var position = new Vector3(x, y, z);
+					const position = new Vector3(x, y, z);
 					position.applyMatrix4(pc.matrixWorld);
 
 					point[attributeName] = position;
@@ -950,30 +950,30 @@ class PointCloudOctree extends PointCloudTree
 
 	*getFittedBoxGen(boxNode)
 	{
-		var shrinkedLocalBounds = new Box3();
-		var worldToBox = new Matrix4().getInverse(boxNode.matrixWorld);
+		const shrinkedLocalBounds = new Box3();
+		const worldToBox = new Matrix4().getInverse(boxNode.matrixWorld);
 
-		for (var node of this.visibleNodes)
+		for (const node of this.visibleNodes)
 		{
 			if (!node.sceneNode)
 			{
 				continue;
 			}
 
-			var buffer = node.geometryNode.buffer;
+			const buffer = node.geometryNode.buffer;
 
-			var posOffset = buffer.offset('position');
-			var stride = buffer.stride;
-			var view = new DataView(buffer.data);
+			const posOffset = buffer.offset('position');
+			const stride = buffer.stride;
+			const view = new DataView(buffer.data);
 
-			var objectToBox = new Matrix4().multiplyMatrices(worldToBox, node.sceneNode.matrixWorld);
+			const objectToBox = new Matrix4().multiplyMatrices(worldToBox, node.sceneNode.matrixWorld);
 
-			var pos = new Vector4();
-			for (var i = 0; i < buffer.numElements; i++)
+			const pos = new Vector4();
+			for (let i = 0; i < buffer.numElements; i++)
 			{
-				var x = view.getFloat32(i * stride + posOffset + 0, true);
-				var y = view.getFloat32(i * stride + posOffset + 4, true);
-				var z = view.getFloat32(i * stride + posOffset + 8, true);
+				const x = view.getFloat32(i * stride + posOffset + 0, true);
+				const y = view.getFloat32(i * stride + posOffset + 4, true);
+				const z = view.getFloat32(i * stride + posOffset + 8, true);
 
 				pos.set(x, y, z, 1);
 				pos.applyMatrix4(objectToBox);
@@ -994,14 +994,14 @@ class PointCloudOctree extends PointCloudTree
 		}
 
 
-		var fittedPosition = shrinkedLocalBounds.getCenter(new Vector3()).applyMatrix4(boxNode.matrixWorld);
+		const fittedPosition = shrinkedLocalBounds.getCenter(new Vector3()).applyMatrix4(boxNode.matrixWorld);
 
-		var fitted = new Object3D();
+		const fitted = new Object3D();
 		fitted.position.copy(fittedPosition);
 		fitted.scale.copy(boxNode.scale);
 		fitted.rotation.copy(boxNode.rotation);
 
-		var ds = new Vector3().subVectors(shrinkedLocalBounds.max, shrinkedLocalBounds.min);
+		const ds = new Vector3().subVectors(shrinkedLocalBounds.max, shrinkedLocalBounds.min);
 		fitted.scale.multiply(ds);
 
 		yield fitted;
@@ -1009,30 +1009,30 @@ class PointCloudOctree extends PointCloudTree
 
 	getFittedBox(boxNode, maxLevel = Infinity)
 	{
-		var shrinkedLocalBounds = new Box3();
-		var worldToBox = new Matrix4().getInverse(boxNode.matrixWorld);
+		const shrinkedLocalBounds = new Box3();
+		const worldToBox = new Matrix4().getInverse(boxNode.matrixWorld);
 
-		for (var node of this.visibleNodes)
+		for (const node of this.visibleNodes)
 		{
 			if (!node.sceneNode || node.getLevel() > maxLevel)
 			{
 				continue;
 			}
 
-			var buffer = node.geometryNode.buffer;
+			const buffer = node.geometryNode.buffer;
 
-			var posOffset = buffer.offset('position');
-			var stride = buffer.stride;
-			var view = new DataView(buffer.data);
+			const posOffset = buffer.offset('position');
+			const stride = buffer.stride;
+			const view = new DataView(buffer.data);
 
-			var objectToBox = new Matrix4().multiplyMatrices(worldToBox, node.sceneNode.matrixWorld);
+			const objectToBox = new Matrix4().multiplyMatrices(worldToBox, node.sceneNode.matrixWorld);
 
-			var pos = new Vector4();
-			for (var i = 0; i < buffer.numElements; i++)
+			const pos = new Vector4();
+			for (let i = 0; i < buffer.numElements; i++)
 			{
-				var x = view.getFloat32(i * stride + posOffset + 0, true);
-				var y = view.getFloat32(i * stride + posOffset + 4, true);
-				var z = view.getFloat32(i * stride + posOffset + 8, true);
+				const x = view.getFloat32(i * stride + posOffset + 0, true);
+				const y = view.getFloat32(i * stride + posOffset + 4, true);
+				const z = view.getFloat32(i * stride + posOffset + 8, true);
 
 				pos.set(x, y, z, 1);
 				pos.applyMatrix4(objectToBox);
@@ -1050,14 +1050,14 @@ class PointCloudOctree extends PointCloudTree
 			}
 		}
 
-		var fittedPosition = shrinkedLocalBounds.getCenter(new Vector3()).applyMatrix4(boxNode.matrixWorld);
+		const fittedPosition = shrinkedLocalBounds.getCenter(new Vector3()).applyMatrix4(boxNode.matrixWorld);
 
-		var fitted = new Object3D();
+		const fitted = new Object3D();
 		fitted.position.copy(fittedPosition);
 		fitted.scale.copy(boxNode.scale);
 		fitted.rotation.copy(boxNode.rotation);
 
-		var ds = new Vector3().subVectors(shrinkedLocalBounds.max, shrinkedLocalBounds.min);
+		const ds = new Vector3().subVectors(shrinkedLocalBounds.max, shrinkedLocalBounds.min);
 		fitted.scale.multiply(ds);
 
 		return fitted;
@@ -1070,8 +1070,8 @@ class PointCloudOctree extends PointCloudTree
 
 	find(name)
 	{
-		var node = null;
-		for (var char of name)
+		let node = null;
+		for (const char of name)
 		{
 			if (char === 'r')
 			{

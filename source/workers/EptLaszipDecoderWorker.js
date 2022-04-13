@@ -7,17 +7,17 @@ function readUsingDataView(event)
 		return;
 	}
 
-	let buffer = event.data.buffer;
-	let numPoints = event.data.numPoints;
-	let pointSize = event.data.pointSize;
-	let pointFormat = event.data.pointFormatID;
-	let scale = event.data.scale;
-	let offset = event.data.offset;
+	const buffer = event.data.buffer;
+	const numPoints = event.data.numPoints;
+	const pointSize = event.data.pointSize;
+	const pointFormat = event.data.pointFormatID;
+	const scale = event.data.scale;
+	const offset = event.data.offset;
 
-	let sourceUint8 = new Uint8Array(buffer);
-	let sourceView = new DataView(buffer);
+	const sourceUint8 = new Uint8Array(buffer);
+	const sourceView = new DataView(buffer);
 
-	let tightBoundingBox = {
+	const tightBoundingBox = {
 		min: [
 			Number.POSITIVE_INFINITY,
 			Number.POSITIVE_INFINITY,
@@ -30,28 +30,28 @@ function readUsingDataView(event)
 		]
 	};
 
-	let mean = [0, 0, 0];
+	const mean = [0, 0, 0];
 
-	let pBuff = new ArrayBuffer(numPoints * 3 * 4);
-	let cBuff = new ArrayBuffer(numPoints * 4);
-	let iBuff = new ArrayBuffer(numPoints * 4);
-	let clBuff = new ArrayBuffer(numPoints);
-	let rnBuff = new ArrayBuffer(numPoints);
-	let nrBuff = new ArrayBuffer(numPoints);
-	let psBuff = new ArrayBuffer(numPoints * 2);
+	const pBuff = new ArrayBuffer(numPoints * 3 * 4);
+	const cBuff = new ArrayBuffer(numPoints * 4);
+	const iBuff = new ArrayBuffer(numPoints * 4);
+	const clBuff = new ArrayBuffer(numPoints);
+	const rnBuff = new ArrayBuffer(numPoints);
+	const nrBuff = new ArrayBuffer(numPoints);
+	const psBuff = new ArrayBuffer(numPoints * 2);
 
-	let positions = new Float32Array(pBuff);
-	let colors = new Uint8Array(cBuff);
-	let intensities = new Float32Array(iBuff);
-	let classifications = new Uint8Array(clBuff);
-	let returnNumbers = new Uint8Array(rnBuff);
-	let numberOfReturns = new Uint8Array(nrBuff);
-	let pointSourceIDs = new Uint16Array(psBuff);
+	const positions = new Float32Array(pBuff);
+	const colors = new Uint8Array(cBuff);
+	const intensities = new Float32Array(iBuff);
+	const classifications = new Uint8Array(clBuff);
+	const returnNumbers = new Uint8Array(rnBuff);
+	const numberOfReturns = new Uint8Array(nrBuff);
+	const pointSourceIDs = new Uint16Array(psBuff);
 
 	// Point format 3 contains an 8-byte GpsTime before RGB values, so make
 	// sure we have the correct color offset.
-	let hasColor = pointFormat === 2 || pointFormat === 3;
-	let co = pointFormat === 2 ? 20 : 28;
+	const hasColor = pointFormat === 2 || pointFormat === 3;
+	const co = pointFormat === 2 ? 20 : 28;
 
 	// TODO This should be cached per-resource since this is an expensive check.
 	let twoByteColor = false;
@@ -71,9 +71,9 @@ function readUsingDataView(event)
 	for (let i = 0; i < numPoints; i++) 
 	{
 		// POSITION
-		let ux = sourceView.getInt32(0, true);
-		let uy = sourceView.getInt32(i * pointSize + 4, true);
-		let uz = sourceView.getInt32(i * pointSize + 8, true);
+		const ux = sourceView.getInt32(0, true);
+		const uy = sourceView.getInt32(i * pointSize + 4, true);
+		const uz = sourceView.getInt32(i * pointSize + 8, true);
 
 		const x = ux * scale[0] + offset[0] - event.data.mins[0];
 		const y = uy * scale[1] + offset[1] - event.data.mins[1];
@@ -100,9 +100,9 @@ function readUsingDataView(event)
 
 		// RETURN NUMBER, stored in the first 3 bits - 00000111
 		// number of returns stored in next 3 bits	 - 00111000
-		let returnNumberAndNumberOfReturns = sourceView.getUint8(i * pointSize + 14, true);
-		let returnNumber = returnNumberAndNumberOfReturns & 0b0111;
-		let numberOfReturn = (returnNumberAndNumberOfReturns & 0b00111000) >> 3;
+		const returnNumberAndNumberOfReturns = sourceView.getUint8(i * pointSize + 14, true);
+		const returnNumber = returnNumberAndNumberOfReturns & 0b0111;
+		const numberOfReturn = (returnNumberAndNumberOfReturns & 0b00111000) >> 3;
 		returnNumbers[i] = returnNumber;
 		numberOfReturns[i] = numberOfReturn;
 
@@ -133,8 +133,8 @@ function readUsingDataView(event)
 		}
 	}
 
-	let indices = new ArrayBuffer(numPoints * 4);
-	let iIndices = new Uint32Array(indices);
+	const indices = new ArrayBuffer(numPoints * 4);
+	const iIndices = new Uint32Array(indices);
 	for (let i = 0; i < numPoints; i++) 
 	{
 		iIndices[i] = i;
@@ -152,7 +152,7 @@ function readUsingDataView(event)
 	performance.clearMarks();
 	performance.clearMeasures();
 
-	let message = {
+	const message = {
 		mean: mean,
 		position: pBuff,
 		color: cBuff,
@@ -165,7 +165,7 @@ function readUsingDataView(event)
 		indices: indices
 	};
 
-	let transferables = [
+	const transferables = [
 		message.position,
 		message.color,
 		message.intensity,

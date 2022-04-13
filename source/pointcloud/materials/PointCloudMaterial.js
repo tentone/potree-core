@@ -14,15 +14,15 @@ class PointCloudMaterial extends ShaderMaterial
 		this.visibleNodesTexture.minFilter = NearestFilter;
 		this.visibleNodesTexture.magFilter = NearestFilter;
 
-		var getValid = function(a, b)
+		const getValid = function(a, b)
 		{
 			return a !== undefined ? a : b;
 		};
 
-		var pointSize = getValid(parameters.size, 1.0);
-		var minSize = getValid(parameters.minSize, 2.0);
-		var maxSize = getValid(parameters.maxSize, 50.0);
-		var treeType = getValid(parameters.treeType, TreeType.OCTREE);
+		const pointSize = getValid(parameters.size, 1.0);
+		const minSize = getValid(parameters.minSize, 2.0);
+		const maxSize = getValid(parameters.maxSize, 50.0);
+		const treeType = getValid(parameters.treeType, TreeType.OCTREE);
 
 		this._pointSizeType = PointSizeType.FIXED;
 		this._shape = PointShape.SQUARE;
@@ -202,7 +202,7 @@ class PointCloudMaterial extends ShaderMaterial
 		treeTypes[TreeType.OCTREE] = {tree_type_octree: true};
 		treeTypes[TreeType.KDTREE] = {tree_type_kdtree: true};
 
-		var defines = {
+		const defines = {
 			...pointSizeTypes[this.pointSizeType], 
 			...pointShapes[this.shape],
 			...pointColorTypes[this._pointColorType],
@@ -234,13 +234,13 @@ class PointCloudMaterial extends ShaderMaterial
 
 	set classification(value)
 	{
-		var copy = {};
+		const copy = {};
 		for (var key of Object.keys(value))
 		{
 			copy[key] = value[key].clone();
 		}
 
-		var isEqual = false;
+		let isEqual = false;
 		if (this._classification === undefined)
 		{
 			isEqual = false;
@@ -544,7 +544,7 @@ class PointCloudMaterial extends ShaderMaterial
 
 	set elevationRange(value)
 	{
-		var changed = this.uniforms.elevationRange.value[0] !== value[0] ||
+		const changed = this.uniforms.elevationRange.value[0] !== value[0] ||
 			this.uniforms.elevationRange.value[1] !== value[1];
 		if (changed)
 		{
@@ -833,28 +833,28 @@ class PointCloudMaterial extends ShaderMaterial
 
 	static generateGradientTexture(gradient)
 	{
-		var size = 64;
+		const size = 64;
 
 		// Create canvas
-		var canvas = document.createElement('canvas');
+		const canvas = document.createElement('canvas');
 		canvas.width = size;
 		canvas.height = size;
 
 		// Get context
-		var context = canvas.getContext('2d');
+		const context = canvas.getContext('2d');
 
 		// Draw gradient
 		context.rect(0, 0, size, size);
-		var ctxGradient = context.createLinearGradient(0, 0, size, size);
-		for (var i = 0; i < gradient.length; i++)
+		const ctxGradient = context.createLinearGradient(0, 0, size, size);
+		for (let i = 0; i < gradient.length; i++)
 		{
-			var step = gradient[i];
+			const step = gradient[i];
 			ctxGradient.addColorStop(step[0], '#' + step[1].getHexString());
 		}
 		context.fillStyle = ctxGradient;
 		context.fill();
 
-		var texture = new CanvasTexture(canvas);
+		const texture = new CanvasTexture(canvas);
 		texture.needsUpdate = true;
 		texture.minFilter = LinearFilter;
 
@@ -863,15 +863,15 @@ class PointCloudMaterial extends ShaderMaterial
 
 	static generateClassificationTexture(classification)
 	{
-		var width = 256;
-		var height = 256;
-		var size = width * height;
-		var data = new Uint8Array(4 * size);
-		for (var x = 0; x < width; x++)
+		const width = 256;
+		const height = 256;
+		const size = width * height;
+		const data = new Uint8Array(4 * size);
+		for (let x = 0; x < width; x++)
 		{
-			for (var y = 0; y < height; y++)
+			for (let y = 0; y < height; y++)
 			{
-				var i = x + width * y;
+				const i = x + width * y;
 				var color;
 				if (classification[x])
 				{
@@ -891,7 +891,7 @@ class PointCloudMaterial extends ShaderMaterial
 				data[4 * i + 3] = 255 * color.w;
 			}
 		}
-		var texture = new DataTexture(data, width, height, RGBAFormat);
+		const texture = new DataTexture(data, width, height, RGBAFormat);
 		texture.magFilter = NearestFilter;
 		texture.wrapS = texture.wrapT = ClampToEdgeWrapping;
 		texture.needsUpdate = true;
@@ -915,7 +915,7 @@ class PointCloudMaterial extends ShaderMaterial
 
 	copyFrom(from)
 	{
-		for (var name of this.uniforms)
+		for (const name of this.uniforms)
 		{
 			this.uniforms[name].value = from.uniforms[name].value;
 		}

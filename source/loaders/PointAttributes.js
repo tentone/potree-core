@@ -1,5 +1,5 @@
 
-var PointAttributeNames =
+const PointAttributeNames =
 {
 	POSITION_CARTESIAN: 0, // float x, y, z,
 	COLOR_PACKED: 1, // byte r, g, b, a, I: [0,1]
@@ -38,7 +38,7 @@ const PointAttributeTypes = {
 };
 
 let i = 0;
-for (let obj in PointAttributeTypes) 
+for (const obj in PointAttributeTypes) 
 {
 	PointAttributeTypes[i] = PointAttributeTypes[obj];
 	i++;
@@ -95,8 +95,8 @@ class PointAttributes
 		{
 			for (let i = 0; i < pointAttributes.length; i++) 
 			{
-				let pointAttributeName = pointAttributes[i];
-				let pointAttribute = PointAttribute[pointAttributeName];
+				const pointAttributeName = pointAttributes[i];
+				const pointAttribute = PointAttribute[pointAttributeName];
 				this.attributes.push(pointAttribute);
 				this.byteSize += pointAttribute.byteSize;
 				this.size++;
@@ -119,9 +119,9 @@ class PointAttributes
 
 	hasNormals()
 	{
-		for (let name in this.attributes) 
+		for (const name in this.attributes) 
 		{
-			let pointAttribute = this.attributes[name];
+			const pointAttribute = this.attributes[name];
 			if (
 				pointAttribute === PointAttribute.NORMAL_SPHEREMAPPED ||
 				pointAttribute === PointAttribute.NORMAL_FLOATS ||

@@ -144,7 +144,7 @@ class BasicGroup extends Mesh
 		let height = null;
 		let fromSpacing = Infinity;
 
-		for (let pointcloud of this.pointclouds)
+		for (const pointcloud of this.pointclouds)
 		{
 			if (pointcloud.root.geometryNode === undefined) 
 			{
@@ -178,7 +178,7 @@ class BasicGroup extends Mesh
 					pFromSpacing = node.geometryNode.spacing;
 				}
 
-				for (let index of Object.keys(node.children))
+				for (const index of Object.keys(node.children))
 				{
 					const child = node.children[index];
 					if (child.geometryNode) 

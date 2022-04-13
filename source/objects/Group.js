@@ -26,7 +26,7 @@ class Group extends BasicGroup
 			this.getExtensions(gl);
 		}
 
-		for (let octree of result.octrees) 
+		for (const octree of result.octrees) 
 		{
 			const nodes = octree.visibleNodes;
 			this.prepareOcttree(renderer, octree, nodes, camera);

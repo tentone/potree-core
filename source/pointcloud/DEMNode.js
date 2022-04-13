@@ -103,8 +103,8 @@ export class DEMNode
 		const a = i % 1;
 		const b = j % 1;
 
-		let [i0, i1] = [Math.floor(i), Math.ceil(i)];
-		let [j0, j1] = [Math.floor(j), Math.ceil(j)];
+		const [i0, i1] = [Math.floor(i), Math.ceil(i)];
+		const [j0, j1] = [Math.floor(j), Math.ceil(j)];
 
 		const h00 = data[i0 + tileSize * j0];
 		const h01 = data[i0 + tileSize * j1];
@@ -158,7 +158,7 @@ export class DEMNode
 	{
 		handler(this, level);
 
-		for (let child of this.children.filter((c) => {return c !== undefined;}))
+		for (const child of this.children.filter((c) => {return c !== undefined;}))
 		{
 			child.traverse(handler, level + 1);
 		}

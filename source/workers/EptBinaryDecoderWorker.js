@@ -6,20 +6,20 @@ onmessage = function(event)
 	{
 		return;
 	}
-	let buffer = event.data.buffer;
-	let view = new DataView(buffer);
-	let schema = event.data.schema;
-	let scale = event.data.scale;
-	let offset = event.data.offset;
-	let mins = event.data.mins;
+	const buffer = event.data.buffer;
+	const view = new DataView(buffer);
+	const schema = event.data.schema;
+	const scale = event.data.scale;
+	const offset = event.data.offset;
+	const mins = event.data.mins;
 
-	let dimensions = schema.reduce((p, c) => 
+	const dimensions = schema.reduce((p, c) => 
 	{
 		p[c.name] = c;
 		return p;
 	}, { });
 
-	let dimOffset = (name) => 
+	const dimOffset = (name) => 
 	{
 		let offset = 0;
 		for (let i = 0; i < schema.length; ++i)
@@ -30,11 +30,11 @@ onmessage = function(event)
 		return undefined;
 	};
 
-	let getExtractor = (name) => 
+	const getExtractor = (name) => 
 	{
-		let offset = dimOffset(name);
-		let type = dimensions[name].type;
-		let size = dimensions[name].size;
+		const offset = dimOffset(name);
+		const type = dimensions[name].type;
+		const size = dimensions[name].size;
 
 		if (type === 'signed') 
 		{
@@ -65,12 +65,12 @@ onmessage = function(event)
 			}
 		}
 
-		let str = JSON.stringify(dimensions[name]);
+		const str = JSON.stringify(dimensions[name]);
 		throw new Error(`Invalid dimension specification for ${name}: ${str}`);
 	};
 
-	let pointSize = schema.reduce((p, c) => {return p + c.size;}, 0);
-	let numPoints = buffer.byteLength / pointSize;
+	const pointSize = schema.reduce((p, c) => {return p + c.size;}, 0);
+	const numPoints = buffer.byteLength / pointSize;
 
 	let xyzBuffer, rgbBuffer, intensityBuffer, classificationBuffer,
 		returnNumberBuffer, numberOfReturnsBuffer, pointSourceIdBuffer;
@@ -147,8 +147,8 @@ onmessage = function(event)
 		pointSourceIdExtractor = getExtractor('PointSourceId');
 	}
 
-	let mean = [0, 0, 0];
-	let bounds = {
+	const mean = [0, 0, 0];
+	const bounds = {
 		min: [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE],
 		max: [-Number.MAX_VALUE, -Number.MAX_VALUE, -Number.MAX_VALUE]
 	};
@@ -156,7 +156,7 @@ onmessage = function(event)
 	let x, y, z, r, g, b;
 	for (let i = 0; i < numPoints; ++i) 
 	{
-		let pos = i * pointSize;
+		const pos = i * pointSize;
 		if (xyz) 
 		{
 			x = xyzExtractor[0](pos) * scale.x + offset.x - mins[0];
@@ -205,14 +205,14 @@ onmessage = function(event)
 		if (pointSourceId) {pointSourceId[i] = pointSourceIdExtractor(pos);}
 	}
 
-	let indicesBuffer = new ArrayBuffer(numPoints * 4);
-	let indices = new Uint32Array(indicesBuffer);
+	const indicesBuffer = new ArrayBuffer(numPoints * 4);
+	const indices = new Uint32Array(indicesBuffer);
 	for (let i = 0; i < numPoints; ++i) 
 	{
 		indices[i] = i;
 	}
 
-	let message = {
+	const message = {
 		numPoints: numPoints,
 		tightBoundingBox: bounds,
 		mean: mean,
@@ -227,7 +227,7 @@ onmessage = function(event)
 		indices: indicesBuffer
 	};
 
-	let transferables = [
+	const transferables = [
 		message.position,
 		message.color,
 		message.intensity,

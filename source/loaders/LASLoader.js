@@ -2,7 +2,7 @@
 import {WorkerManager} from '../utils/WorkerManager.js';
 import {Global} from '../Global.js';
 
-var pointFormatReaders =
+const pointFormatReaders =
 [
 	function(dv)
 	{
@@ -43,16 +43,16 @@ var pointFormatReaders =
 function readAs(buf, Type, offset, count)
 {
 	count = count === undefined || count === 0 ? 1 : count;
-	var sub = buf.slice(offset, offset + Type.BYTES_PER_ELEMENT * count);
+	const sub = buf.slice(offset, offset + Type.BYTES_PER_ELEMENT * count);
 
-	var r = new Type(sub);
+	const r = new Type(sub);
 	if (count === undefined || count === 1)
 	{
 		return r[0];
 	}
 
-	var ret = [];
-	for (var i = 0 ; i < count ; i ++)
+	const ret = [];
+	for (let i = 0 ; i < count ; i ++)
 	{
 		ret.push(r[i]);
 	}
@@ -62,18 +62,18 @@ function readAs(buf, Type, offset, count)
 
 function parseLASHeader(arraybuffer)
 {
-	var data = {};
+	const data = {};
 
 	data.pointsOffset = readAs(arraybuffer, Uint32Array, 32*3);
 	data.pointsFormatId = readAs(arraybuffer, Uint8Array, 32*3+8);
 	data.pointsStructSize = readAs(arraybuffer, Uint16Array, 32*3+8+1);
 	data.pointsCount = readAs(arraybuffer, Uint32Array, 32*3 + 11);
 
-	var start = 32*3 + 35;
+	let start = 32*3 + 35;
 	data.scale = readAs(arraybuffer, Float64Array, start, 3); start += 24; // 8*3
 	data.offset = readAs(arraybuffer, Float64Array, start, 3); start += 24;
 
-	var bounds = readAs(arraybuffer, Float64Array, start, 6); start += 48; // 8*6;
+	const bounds = readAs(arraybuffer, Float64Array, start, 6); start += 48; // 8*6;
 	data.maxs = [bounds[0], bounds[2], bounds[4]];
 	data.mins = [bounds[1], bounds[3], bounds[5]];
 
@@ -101,7 +101,7 @@ LASLoader.prototype.open = function()
 
 LASLoader.prototype.getHeader = function()
 {
-	var self = this;
+	const self = this;
 
 	return new Promise(function(res, rej)
 	{
@@ -115,7 +115,7 @@ LASLoader.prototype.getHeader = function()
 
 LASLoader.prototype.readData = function(count, offset, skip)
 {
-	var self = this;
+	const self = this;
 
 	return new Promise(function(res, rej)
 	{
@@ -124,12 +124,12 @@ LASLoader.prototype.readData = function(count, offset, skip)
 			if (!self.header)
 			{return rej(new Error('Cannot start reading data till a header request is issued'));}
 
-			var start;
+			let start;
 			if (skip <= 1)
 			{
 				count = Math.min(count, self.header.pointsCount - self.readOffset);
 				start = self.header.pointsOffset + self.readOffset * self.header.pointsStructSize;
-				var end = start + count * self.header.pointsStructSize;
+				const end = start + count * self.header.pointsStructSize;
 				res(
 					{
 						buffer: self.arraybuffer.slice(start, end),
@@ -140,18 +140,18 @@ LASLoader.prototype.readData = function(count, offset, skip)
 			}
 			else
 			{
-				var pointsToRead = Math.min(count * skip, self.header.pointsCount - self.readOffset);
-				var bufferSize = Math.ceil(pointsToRead / skip);
-				var pointsRead = 0;
+				const pointsToRead = Math.min(count * skip, self.header.pointsCount - self.readOffset);
+				const bufferSize = Math.ceil(pointsToRead / skip);
+				let pointsRead = 0;
 
-				var buf = new Uint8Array(bufferSize * self.header.pointsStructSize);
+				const buf = new Uint8Array(bufferSize * self.header.pointsStructSize);
 
-				for (var i = 0 ; i < pointsToRead ; i++)
+				for (let i = 0 ; i < pointsToRead ; i++)
 				{
 					if (i % skip === 0)
 					{
 						start = self.header.pointsOffset + self.readOffset * self.header.pointsStructSize;
-						var src = new Uint8Array(self.arraybuffer, start, self.header.pointsStructSize);
+						const src = new Uint8Array(self.arraybuffer, start, self.header.pointsStructSize);
 
 						buf.set(src, pointsRead * self.header.pointsStructSize);
 						pointsRead ++;
@@ -173,7 +173,7 @@ LASLoader.prototype.readData = function(count, offset, skip)
 
 LASLoader.prototype.close = function()
 {
-	var self = this;
+	const self = this;
 	return new Promise(function(res, rej)
 	{
 		self.arraybuffer = null;
@@ -186,7 +186,7 @@ LASLoader.prototype.close = function()
 //
 function LAZLoader(arraybuffer)
 {
-	var self = this;
+	const self = this;
 
 	this.arraybuffer = arraybuffer;
 	this.nextCB = null;
@@ -209,7 +209,7 @@ function LAZLoader(arraybuffer)
 LAZLoader.prototype.open = function()
 {
 	// nothing needs to be done to open this file
-	var self = this;
+	const self = this;
 	return new Promise(function(res, rej)
 	{
 		self.dorr({type: 'open', arraybuffer: self.arraybuffer}, function(r)
@@ -226,7 +226,7 @@ LAZLoader.prototype.open = function()
 
 LAZLoader.prototype.getHeader = function()
 {
-	var self = this;
+	const self = this;
 
 	return new Promise(function(res, rej)
 	{
@@ -244,7 +244,7 @@ LAZLoader.prototype.getHeader = function()
 
 LAZLoader.prototype.readData = function(count, offset, skip)
 {
-	var self = this;
+	const self = this;
 
 	return new Promise(function(res, rej)
 	{
@@ -263,7 +263,7 @@ LAZLoader.prototype.readData = function(count, offset, skip)
 
 LAZLoader.prototype.close = function()
 {
-	var self = this;
+	const self = this;
 
 	return new Promise(function(res, rej)
 	{
@@ -301,9 +301,9 @@ function LASFile(arraybuffer)
 
 LASFile.prototype.determineFormat = function()
 {
-	var formatId = readAs(this.arraybuffer, Uint8Array, 32*3+8);
-	var bit_7 = (formatId & 0x80) >> 7;
-	var bit_6 = (formatId & 0x40) >> 6;
+	const formatId = readAs(this.arraybuffer, Uint8Array, 32*3+8);
+	const bit_7 = (formatId & 0x80) >> 7;
+	const bit_6 = (formatId & 0x40) >> 6;
 
 	if (bit_7 === 1 && bit_6 === 1)
 	{
@@ -316,7 +316,7 @@ LASFile.prototype.determineFormat = function()
 
 LASFile.prototype.determineVersion = function()
 {
-	var ver = new Int8Array(this.arraybuffer, 24, 2);
+	const ver = new Int8Array(this.arraybuffer, 24, 2);
 	this.version = ver[0] * 10 + ver[1];
 	this.versionAsString = ver[0] + '.' + ver[1];
 };

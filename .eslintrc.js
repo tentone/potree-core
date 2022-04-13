@@ -83,7 +83,7 @@ module.exports = {
 		'object-shorthand': ['error', 'never'],
 		'one-var': ['off', 'never'],
 		'prefer-arrow/prefer-arrow-functions': 'off',
-		'prefer-const': 'off',
+		'prefer-const': 'error',
 		'prefer-object-spread': 'off',
 		'rest-spread-spacing': ['error', 'never'],
 		'no-useless-call': 'error',

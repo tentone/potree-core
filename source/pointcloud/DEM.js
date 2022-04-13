@@ -60,7 +60,7 @@ export class DEM
 				childIndices = [min.x << 1 | min.y, max.x << 1 | max.y];
 			}
 
-			for (let index of childIndices)
+			for (const index of childIndices)
 			{
 				if (node.children[index] === undefined)
 				{
@@ -106,7 +106,7 @@ export class DEM
 
 	childIndex(uv)
 	{
-		let [x, y] = uv.map((n) =>
+		const [x, y] = uv.map((n) =>
 		{
 			return n < 0.5 ? 0 : 1;
 		});
@@ -165,7 +165,7 @@ export class DEM
 
 		// find node to update
 		let node = null;
-		for (let vn of visibleNodes)
+		for (const vn of visibleNodes)
 		{
 			if (vn.demVersion === undefined || vn.demVersion < this.version)
 			{
@@ -203,7 +203,7 @@ export class DEM
 		{
 			const data = new Float32Array(e.data.dem.data);
 
-			for (let demNode of targetNodes)
+			for (const demNode of targetNodes)
 			{
 				const boxSize = demNode.box.getSize(new Vector3());
 

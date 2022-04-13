@@ -1,4 +1,4 @@
-const Gradients = {
+export const Gradients = {
 	RAINBOW: [
 		[0, new Color(0.278, 0, 0.714)],
 		[1 / 6, new Color(0, 0, 1)],
@@ -79,5 +79,3 @@ const Gradients = {
 		[1, new Color(1, 1, 1)]
 	]
 };
-
-export {Gradients};

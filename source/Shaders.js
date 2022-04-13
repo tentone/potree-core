@@ -1,6 +1,6 @@
 import {ShaderChunk} from 'three';
 
-var Shaders = {};
+const Shaders = {};
 
 // pointcloud.vs
 Shaders.vertex = `

@@ -3,15 +3,15 @@ const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
 	mode: 'development',
-	entry: "./source/Main.js",
-	target: "web",
-	devtool: "inline-source-map",
+	entry: './source/Main.js',
+	target: 'web',
+	devtool: 'inline-source-map',
 	externals: [nodeExternals()],
 	module: {
 		rules: [
 			{
 				test: /\.glsl$/i,
-				use: "raw-loader"
+				use: 'raw-loader'
 			}
 		]
 	},

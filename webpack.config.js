@@ -1,12 +1,13 @@
 const path = require('path');
-const nodeExternals = require('webpack-node-externals');
+const NodeExternals = require('webpack-node-externals');
+const Merge = require('webpack-merge');
 
-module.exports = {
+const config = {
 	mode: 'development',
 	entry: './source/Main.js',
 	target: 'web',
 	devtool: 'inline-source-map',
-	externals: [nodeExternals()],
+	externals: [NodeExternals()],
 	module: {
 		rules: [
 			{
@@ -15,11 +16,25 @@ module.exports = {
 			}
 		]
 	},
-	resolve: {extensions: ['.js']},
-	output: {
-		filename: 'bundle.js',
-		path: path.resolve(__dirname, 'dist'),
-		sourceMapFilename: '[name].map',
-		libraryTarget: 'commonjs'
-	}
+	resolve: {extensions: ['.js']}
 };
+
+
+module.exports = [
+	Object.assign({
+		output: {
+			filename: 'potree.module.js',
+			path: path.resolve(__dirname, 'dist'),
+			sourceMapFilename: '[name].map',
+			libraryTarget: 'module'
+		}
+	}, config),
+	Object.assign({
+		output: {
+			filename: 'potree.js',
+			path: path.resolve(__dirname, 'dist'),
+			sourceMapFilename: '[name].map',
+			libraryTarget: 'umd'
+		}
+	}, config)
+];

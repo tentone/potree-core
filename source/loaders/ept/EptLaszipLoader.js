@@ -58,7 +58,7 @@ export class EptLaszipLoader
 			})
 			.then((header) =>
 			{
-				const i = 0;
+				let i = 0;
 				const np = header.pointsCount;
 
 				const toArray = (v) =>

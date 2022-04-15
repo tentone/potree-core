@@ -1,5 +1,3 @@
-
-
 import {Version} from '../Version.js';
 import {PointAttribute, PointAttributeTypes} from '../loaders/PointAttributes.js';
 
@@ -16,11 +14,8 @@ const typedArrayMapping = {
 	'double': Float64Array
 };
 
-const Potree = {};
-
 onmessage = function(event) 
 {
-
 	performance.mark('binary-decoder-start');
 	
 	const buffer = event.data.buffer;
@@ -30,9 +25,6 @@ onmessage = function(event)
 	const version = new Version(event.data.version);
 	const nodeOffset = event.data.offset;
 	const scale = event.data.scale;
-	const spacing = event.data.spacing;
-	const hasChildren = event.data.hasChildren;
-	const name = event.data.name;
 	
 	const tightBoxMin = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
 	const tightBoxMax = [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY];

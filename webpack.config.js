@@ -26,7 +26,7 @@ module.exports = [
 			filename: 'potree.module.js',
 			path: path.resolve(__dirname, 'dist'),
 			sourceMapFilename: '[name].map',
-			libraryTarget: 'module'
+			libraryTarget: 'commonjs'
 		}
 	}, config),
 	Object.assign({

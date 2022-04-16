@@ -3,10 +3,10 @@
 document.body.onload = function()
 {
 	// three.js
-	var scene = new THREE.Scene();
-	var camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
+	const scene = new THREE.Scene();
+	const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
 
-	var canvas = document.createElement('canvas');
+	const canvas = document.createElement('canvas');
 	canvas.style.position = 'absolute';
 	canvas.style.top = '0px';
 	canvas.style.left = '0px';
@@ -14,7 +14,7 @@ document.body.onload = function()
 	canvas.style.height = '100%';
 	document.body.appendChild(canvas);
 
-	var renderer = new THREE.WebGLRenderer(
+	const renderer = new THREE.WebGLRenderer(
 		{
 			canvas: canvas,
 			alpha: true,
@@ -27,20 +27,20 @@ document.body.onload = function()
 			powerPreference: 'high-performance'
 		});
 
-	var geometry = new THREE.BoxBufferGeometry(25, 1, 25);
-	var material = new THREE.MeshBasicMaterial({color: 0x44AA44});
-	var cube = new THREE.Mesh(geometry, material);
+	const geometry = new THREE.BoxBufferGeometry(25, 1, 25);
+	const material = new THREE.MeshBasicMaterial({color: 0x44AA44});
+	const cube = new THREE.Mesh(geometry, material);
 	cube.position.y = -2;
 	scene.add(cube);
 
 	scene.add(new THREE.AmbientLight(0xffffff));
 
-	var controls = new THREE.OrbitControls(camera, canvas);
+	const controls = new THREE.OrbitControls(camera, canvas);
 	camera.position.z = 10;
 
-	var raycaster = new THREE.Raycaster();
+	const raycaster = new THREE.Raycaster();
 	raycaster.params.Points.threshold = 1e-2;
-	var normalized = new THREE.Vector2();
+	const normalized = new THREE.Vector2();
 
 	canvas.onmousemove = function(event)
 	{
@@ -50,14 +50,14 @@ document.body.onload = function()
 
 	canvas.ondblclick = function(event)
 	{
-		var intesects = raycaster.intersectObject(scene, true);
-		
-		
+		const intesects = raycaster.intersectObject(scene, true);
+
+
 		if (intesects.length > 0)
 		{
-			var geometry = new THREE.SphereBufferGeometry(0.1, 32, 32);
-			var material = new THREE.MeshBasicMaterial({color: 0xAA4444});
-			var sphere = new THREE.Mesh(geometry, material);
+			const geometry = new THREE.SphereBufferGeometry(0.1, 32, 32);
+			const material = new THREE.MeshBasicMaterial({color: 0xAA4444});
+			const sphere = new THREE.Mesh(geometry, material);
 			sphere.position.copy(intesects[0].point);
 			scene.add(sphere);
 		}
@@ -79,19 +79,19 @@ document.body.onload = function()
 
 		Potree.loadPointCloud(url, 'pointcloud', function(e)
 		{
-			var points = new Potree.Group();
+			const points = new Potree.Group();
 			points.material.opacity = 1.0;
 			points.material.wireframe = true;
 			scene.add(points);
 
-			var pointcloud = e.pointcloud;
+			const pointcloud = e.pointcloud;
 
 			if (position !== undefined)
 			{
 				pointcloud.position.copy(position);
 			}
 
-			var material = pointcloud.material;
+			const material = pointcloud.material;
 			material.size = 2;
 			material.pointColorType = Potree.PointColorType.RGB; // RGB | DEPTH | HEIGHT | POINT_INDEX | LOD | CLASSIFICATION
 			material.pointSizeType = Potree.PointSizeType.ADAPTIVE; // ADAPTIVE | FIXED
@@ -115,9 +115,9 @@ document.body.onload = function()
 
 	document.body.onresize = function()
 	{
-		var width = window.innerWidth;
-		var height = window.innerHeight;
-		
+		const width = window.innerWidth;
+		const height = window.innerHeight;
+
 		renderer.setSize(width, height);
 		camera.aspect = width / height;
 		camera.updateProjectionMatrix();

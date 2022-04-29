@@ -143,7 +143,10 @@ bool isClipped(vec3 point) {
   uniform sampler2D hiddenPointSourceIDs;
 #endif
 
-uniform float selectedPointSourceID;
+#if defined num_selectedpointsourceids && num_selectedpointsourceids > 0
+  uniform sampler2D selectedPointSourceIDs;
+#endif
+
 uniform vec3 selectedPointSourceIDColor;
 
 varying vec3 vColor;
@@ -155,6 +158,20 @@ varying float vPointSize;
 float round(float number)
 {
 	return floor(number + 0.5);
+}
+
+bool isSelectedPointSourceID()
+{
+	#if defined num_selectedpointsourceids && num_selectedpointsourceids > 0
+		float x = mod(pointSourceID, 256.0);
+		float y = floor(pointSourceID / 256.0);
+		vec2 xy = vec2(x / 255.0, y / 255.0);
+		float r = texture2D(selectedPointSourceIDs, xy).r;
+
+		return r == 1.0;
+	#endif
+
+	return false;
 }
 
 //---------------------
@@ -528,7 +545,7 @@ vec3 getColor()
 	vec3 color;
 
 	#ifdef selection_type_color
-	if (pointSourceID == selectedPointSourceID)
+	if (isSelectedPointSourceID())
 	{
 		return selectedPointSourceIDColor;
 	}
@@ -575,7 +592,7 @@ vec3 getColor()
 	#endif
 
 	#ifndef color_type_point_index
-		if (pointSourceID == selectedPointSourceID)
+		if (isSelectedPointSourceID())
 		{
 			color[0] = min(color[0] + 0.2, 1.0);
 			color[1] = min(color[1] + 0.2, 1.0);
@@ -743,13 +760,13 @@ void doClipping()
 bool isHiddenClassification()
 {
 	#if defined num_hiddenclassifications && num_hiddenclassifications > 0
-	for (int i = 0; i < num_hiddenclassifications; i++)
-	{
-		if (classification == hiddenClassifications[i])
+		for (int i = 0; i < num_hiddenclassifications; i++)
 		{
-			return true;
+			if (classification == hiddenClassifications[i])
+			{
+				return true;
+			}
 		}
-	}
 	#endif
 
 	return false;
@@ -758,12 +775,12 @@ bool isHiddenClassification()
 bool isHiddenPointSourceID()
 {
 	#if defined num_hiddenpointsourceids && num_hiddenpointsourceids > 0
-	float x = mod(pointSourceID, 256.0);
-	float y = floor(pointSourceID / 256.0);
-	vec2 xy = vec2(x / 255.0, y / 255.0);
-	float r = texture2D(hiddenPointSourceIDs, xy).r;
+		float x = mod(pointSourceID, 256.0);
+		float y = floor(pointSourceID / 256.0);
+		vec2 xy = vec2(x / 255.0, y / 255.0);
+		float r = texture2D(hiddenPointSourceIDs, xy).r;
 
-	return r == 1.0;
+		return r == 1.0;
 	#endif
 
 	return false;

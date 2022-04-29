@@ -304,9 +304,9 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
             type: string;
             value: number[];
         };
-        selectedPointSourceID: {
+        selectedPointSourceIDs: {
             type: string;
-            value: number;
+            value: number[];
         };
         selectedPointSourceIDColor: {
             type: string;
@@ -418,8 +418,8 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
     set hiddenClassifications(values: number[]);
     get hiddenPointSourceIDs(): number[];
     set hiddenPointSourceIDs(values: number[]);
-    get selectedPointSourceID(): number;
-    set selectedPointSourceID(value: number);
+    get selectedPointSourceIDs(): number[];
+    set selectedPointSourceIDs(value: number[]);
     get selectedPointSourceIDColor(): THREE.Color;
     set selectedPointSourceIDColor(values: THREE.Color);
     disableEvents(): void;
@@ -427,4 +427,9 @@ export class PointCloudMaterial extends THREE.RawShaderMaterial {
     _listeners: any;
     enableEvents(): void;
     copyFrom(from: any): void;
+
+    /** @deprecated Use selectedPointSourceIDs */
+    get selectedPointSourceID(): number;
+    /** @deprecated Use selectedPointSourceIDs */
+    set selectedPointSourceID(value: number);
 }

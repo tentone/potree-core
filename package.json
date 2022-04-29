@@ -1,11 +1,11 @@
 {
   "name": "potree-core",
-  "version": "1.4.5",
+  "version": "1.4.6",
   "description": "Potree wrapper for Three.js applications",
   "main": "dist/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cognitedata/potree-core.git"
+    "url": "https://github.com/contilio/potree-core.git"
   },
   "scripts": {
     "build": "webpack",

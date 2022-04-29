@@ -160,11 +160,13 @@ class PointCloudMaterial extends THREE.RawShaderMaterial {
 
 			hiddenClassifications: { type: "fv", value: [] },
 			hiddenPointSourceIDs: { type: "t", value: null },
-			selectedPointSourceID: { type: "f", value: -1 },
+
+			selectedPointSourceIDs: { type: "t", value: null },
 			selectedPointSourceIDColor: { type: "3fv", value: new THREE.Color(0.10, 0.61, 0.78) },
 		};
 
 		this.hiddenPointSourceIDs = [];
+		this.selectedPointSourceIDs = [];
 
 		this.classification = Classification.DEFAULT;
 		this.defaultAttributeValues.normal = [0, 0, 0];
@@ -326,6 +328,10 @@ class PointCloudMaterial extends THREE.RawShaderMaterial {
 			defines.push(`#define num_hiddenpointsourceids ${this.hiddenPointSourceIDs.length}`);
 		}
 
+		if (this.selectedPointSourceIDs.length) {
+			defines.push(`#define num_selectedpointsourceids ${this.selectedPointSourceIDs.length}`);
+		}
+
 		if (this.pointSelectionType === PointSelectionType.COLOR) {
 			defines.push("#define selection_type_color");
 		}
@@ -456,7 +462,7 @@ class PointCloudMaterial extends THREE.RawShaderMaterial {
 	}
 
 	get hiddenPointSourceIDs() {
-		return this._hiddenPointSourceIDs;
+		return this._hiddenPointSourceIDs || [];
 	}
 
 	set hiddenPointSourceIDs(value) {
@@ -465,6 +471,31 @@ class PointCloudMaterial extends THREE.RawShaderMaterial {
 			this._hiddenPointSourceIDs = value;
 			this.recomputeHiddenPointSourceIDs();
 		}
+	}
+
+	get selectedPointSourceIDsTexture() {
+		return this.uniforms.selectedPointSourceIDs.value;
+	}
+
+	get selectedPointSourceIDs() {
+		return this._selectedPointSourceIDs || [];
+	}
+
+	set selectedPointSourceIDs(value) {
+		value = this.getDistinctFV(value);
+		if (JSON.stringify(value) !== JSON.stringify(this._selectedPointSourceIDs)) {
+			this._selectedPointSourceIDs = value;
+			this.recomputeSelectedPointSourceIDs();
+		}
+	}
+
+	/** @deprecated Use selectedPointSourceIDs */
+	get selectedPointSourceID() {
+		return this._selectedPointSourceIDs[0] || -1;
+	}
+	/** @deprecated Use selectedPointSourceIDs */
+	set selectedPointSourceID(value) {
+		this.selectedPointSourceIDs = value === -1 ? [] : [value];
 	}
 
 	getDistinctFV(value) {
@@ -502,19 +533,30 @@ class PointCloudMaterial extends THREE.RawShaderMaterial {
 		});
 	}
 
-	get selectedPointSourceID() {
-		return this.uniforms.selectedPointSourceID.value;
-	}
+	recomputeSelectedPointSourceIDs() {
 
-	set selectedPointSourceID(value) {
-		if (value !== this.uniforms.selectedPointSourceID.value) {
-			this.uniforms.selectedPointSourceID.value = value || -1;
-			this.updateShaderSource();
-			this.dispatchEvent({
-				type: "material_property_changed",
-				target: this
-			});
-		}
+		const selectedPointSourceIDs = this.selectedPointSourceIDs;
+		const width = 256;
+		const height = 256;
+		const size = width * height;
+		const data = new Uint8Array(3 * size);
+
+		selectedPointSourceIDs.forEach(id => {
+			const n = id * 3;
+			data[n] = 255; // 255 here => texture2d(...).r == 1.0 in GLSL
+		});
+
+		const texture = new THREE.DataTexture(data, width, height, THREE.RGBFormat);
+		texture.magFilter = THREE.NearestFilter;
+		texture.needsUpdate = true;
+
+		this.uniforms.selectedPointSourceIDs.value = texture;
+
+		this.updateShaderSource();
+		this.dispatchEvent({
+			type: "material_property_changed",
+			target: this
+		});
 	}
 
 	get selectedPointSourceIDColor() {

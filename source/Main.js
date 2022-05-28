@@ -14,7 +14,7 @@ export {
 	updateVisibilityStructures
 } from './Potree.js';
 
-export {BinaryHeap} from './lib/BinaryHeap.js';
+export {BinaryHeap} from './utils/BinaryHeap.js';
 
 export {LRU} from './utils/LRU.js';
 export {HelperUtils} from './utils/HelperUtils.js';

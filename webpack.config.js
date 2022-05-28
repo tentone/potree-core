@@ -23,18 +23,29 @@ const config = {
 module.exports = [
 	Object.assign({
 		output: {
-			filename: 'potree.module.js',
+			library: 'Potree',
+			filename: 'potree.js',
+			path: path.resolve(__dirname, 'dist'),
+			sourceMapFilename: '[name].map',
+			libraryTarget: 'umd'
+		}
+	}, config),
+	Object.assign({
+		output: {
+			library: 'Potree',
+			filename: 'potree.cjs',
 			path: path.resolve(__dirname, 'dist'),
 			sourceMapFilename: '[name].map',
 			libraryTarget: 'commonjs'
 		}
 	}, config),
 	Object.assign({
+		experiments: {outputModule: true},
 		output: {
-			filename: 'potree.js',
+			filename: 'potree.module.js',
 			path: path.resolve(__dirname, 'dist'),
 			sourceMapFilename: '[name].map',
-			libraryTarget: 'umd'
+			libraryTarget: 'module'
 		}
 	}, config)
 ];

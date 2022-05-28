@@ -1,6 +1,3 @@
-import * as THREE from 'three';
-import * as Potree from '../source/Potree';
-
 document.body.onload = function()
 {
 	// three.js

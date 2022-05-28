@@ -3,3 +3,9 @@ dist
 package-lock.json
 *.jar
 .idea/
+
+build/
+
+example/OrbitControls.js
+
+example/three.min.js

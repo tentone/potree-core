@@ -1,4 +1,5 @@
-
+import * as THREE from 'three';
+import * as Potree from '../source/Potree';
 
 document.body.onload = function()
 {
@@ -110,7 +111,8 @@ document.body.onload = function()
 		renderer.render(scene, camera);
 
 		requestAnimationFrame(loop);
-	};
+	}
+
 	loop();
 
 	document.body.onresize = function()

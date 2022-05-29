@@ -34,9 +34,6 @@
 	],
 	"author": "Tentone",
 	"license": "MIT",
-	"dependencies": {
-		"@rollup/plugin-strip": "^2.1.0"
-	},
 	"peerDependencies": {
 		"three": "^0.120.0"
 	},
@@ -51,6 +48,7 @@
 		"rollup-plugin-web-worker-loader": "~1.6.1",
 		"rollup-plugin-livereload": "~2.0.5",
 		"rollup-plugin-serve": "~1.1.0",
+		"@rollup/plugin-strip": "^2.1.0",
 		"three": "~0.141.0",
 		"webpack": "~5.71.0",
 		"webpack-cli": "~4.9.2",

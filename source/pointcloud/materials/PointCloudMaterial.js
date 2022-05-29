@@ -1,8 +1,23 @@
-import {Matrix4, DataTexture, CanvasTexture, AlwaysDepth, NoBlending, AdditiveBlending, LessEqualDepth, VertexColors, Color, NearestFilter, ShaderMaterial} from 'three';
+import {
+	AdditiveBlending,
+	AlwaysDepth,
+	CanvasTexture,
+	ClampToEdgeWrapping,
+	Color,
+	DataTexture,
+	LessEqualDepth,
+	LinearFilter,
+	Matrix4,
+	NearestFilter,
+	NoBlending,
+	RGBAFormat,
+	ShaderMaterial,
+	VertexColors
+} from 'three';
 import {HelperUtils} from '../../utils/HelperUtils.js';
 import {Gradients} from '../../Gradients.js';
 import {Shaders} from '../../Shaders.js';
-import {TreeType, PointColorType, PointSizeType, PointShape, Classification} from '../../Potree.js';
+import {Classification, PointColorType, PointShape, PointSizeType, TreeType} from '../../Potree.js';
 
 class PointCloudMaterial extends ShaderMaterial
 {
@@ -202,14 +217,13 @@ class PointCloudMaterial extends ShaderMaterial
 		treeTypes[TreeType.OCTREE] = {tree_type_octree: true};
 		treeTypes[TreeType.KDTREE] = {tree_type_kdtree: true};
 
-		const defines = {
-			...pointSizeTypes[this.pointSizeType], 
+		return {
+			...pointSizeTypes[this.pointSizeType],
 			...pointShapes[this.shape],
 			...pointColorTypes[this._pointColorType],
 			...treeTypes[this.treeType],
 			...this.weighted ? {weighted_splats: true} : {}
 		};
-		return defines;
 	}
 
 	get gradient()
@@ -872,7 +886,7 @@ class PointCloudMaterial extends ShaderMaterial
 			for (let y = 0; y < height; y++)
 			{
 				const i = x + width * y;
-				var color;
+				let color;
 				if (classification[x])
 				{
 					color = classification[x];

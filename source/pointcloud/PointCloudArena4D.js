@@ -5,7 +5,6 @@ import {TreeType, PointSizeType, PointColorType} from '../Potree.js';
 import {PointCloudMaterial} from './materials/PointCloudMaterial.js';
 import {PointCloudTree, PointCloudTreeNode} from './PointCloudTree.js';
 
-
 class PointCloudArena4DNode extends PointCloudTreeNode
 {
 	constructor()

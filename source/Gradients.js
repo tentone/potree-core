@@ -1,3 +1,5 @@
+import {Color} from 'three';
+
 export const Gradients = {
 	RAINBOW: [
 		[0, new Color(0.278, 0, 0.714)],

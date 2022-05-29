@@ -14,6 +14,7 @@ const config = {
 			}
 		]
 	},
+	optimization: {minimize: true},
 	resolve: {extensions: ['.js']}
 };
 
@@ -21,21 +22,24 @@ const config = {
 module.exports = [
 	Object.assign({
 		output: {
-			library: {
-				name: 'Potree',
-				type: 'umd'
-			},
+			library: 'Potree',
+			libraryTarget: 'umd',
 			filename: 'potree.js',
 			path: path.resolve(__dirname, 'dist')
+		},
+		externals: {
+			three: {
+				commonjs: 'THREE',
+				umd: 'THREE',
+				amd: 'THREE',
+				root: 'THREE'
+			}
 		}
 	}, config),
 	Object.assign({
 		experiments: {outputModule: true},
 		output: {
-			library: {
-				name: 'Potree',
-				type: 'module'
-			},
+			libraryTarget: 'module',
 			filename: 'potree.module.js',
 			path: path.resolve(__dirname, 'dist')
 		}
@@ -43,10 +47,7 @@ module.exports = [
 	Object.assign({
 		experiments: {outputModule: true},
 		output: {
-			library: {
-				name: 'Potree',
-				type: 'commonjs'
-			},
+			libraryTarget: 'commonjs',
 			filename: 'potree.cjs',
 			path: path.resolve(__dirname, 'dist')
 		}

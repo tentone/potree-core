@@ -34,7 +34,8 @@ export class LRU
 
 	contains(node)
 	{
-		return this.items[node.id] === null;
+		// eslint-disable-next-line eqeqeq
+		return this.items[node.id] == null;
 	}
 
 	touch(node)
@@ -46,7 +47,8 @@ export class LRU
 
 		let item;
 
-		if (this.items[node.id] === null)
+		// eslint-disable-next-line eqeqeq
+		if (this.items[node.id] == null)
 		{
 			// add to list
 			item = new LRUItem(node);

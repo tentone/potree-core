@@ -582,9 +582,9 @@ void main()
 // "pointcloud.fs"
 Shaders.fragment = `
 
-// #if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
-// 	#extension GL_EXT_frag_depth : enable
-// #endif
+#if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
+	#extension GL_EXT_frag_depth : enable
+#endif
 
 precision highp float;
 precision highp int;

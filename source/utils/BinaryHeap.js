@@ -17,12 +17,13 @@ export class BinaryHeap
 
 	pop() 
 	{
-		// Store the first element so we can return it later.
+		// Store the first element, so we can return it later.
 		const result = this.content[0];
+
 		// Get the element at the end of the array.
 		const end = this.content.pop();
-		// If there are any elements left, put the end element at the
-		// start, and let it sink down.
+
+		// If there are any elements left, put the end element at the start, and let it sink down.
 		if (this.content.length > 0)
 		{
 			this.content[0] = end;

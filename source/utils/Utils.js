@@ -3,7 +3,7 @@ import {Vector3, Box3, DataTexture, NearestFilter, RGBAFormat} from 'three';
 export class Utils
 {
 	/**
-	 * Craete a new data texture with a solid color.
+	 * Create a new data texture with a solid color.
 	 */
 	static generateDataTexture(width, height, color)
 	{
@@ -29,7 +29,7 @@ export class Utils
 	};
 
 	/**
-	 * Compute a transformed bouding box from an original box and a transform matrix.
+	 * Compute a transformed bounding box from an original box and a transform matrix.
 	 */
 	static computeTransformedBoundingBox(box, transform)
 	{

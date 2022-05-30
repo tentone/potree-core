@@ -2,20 +2,17 @@ import {
 	AdditiveBlending,
 	AlwaysDepth,
 	CanvasTexture,
-	ClampToEdgeWrapping,
 	Color,
-	DataTexture,
 	LessEqualDepth,
 	LinearFilter,
 	Matrix4,
 	NearestFilter,
 	NoBlending,
-	RGBAFormat,
 	ShaderMaterial
 } from 'three';
 import {Utils} from '../utils/Utils';
 import {Gradients} from '../Gradients';
-import {Classification, PointColorType, PointShape, PointSizeType, TreeType} from '../Enums';
+import {PointColorType, PointShape, PointSizeType, TreeType} from '../Enums';
 import {Shaders} from './Shaders';
 
 class PointCloudMaterial extends ShaderMaterial
@@ -60,7 +57,6 @@ class PointCloudMaterial extends ShaderMaterial
 			color: {type: 'fv', value: []},
 			normal: {type: 'fv', value: []},
 			intensity: {type: 'f', value: []},
-			classification: {type: 'f', value: []},
 			returnNumber: {type: 'f', value: []},
 			numberOfReturns: {type: 'f', value: []},
 			pointSourceID: {type: 'f', value: []},
@@ -71,7 +67,6 @@ class PointCloudMaterial extends ShaderMaterial
 		{
 			projectionMatrix: {value: new Matrix4()},
 			uViewInv: {value: new Matrix4()},
-			clipPlanes: {value: []},
 			level: {type: 'f', value: 0.0},
 			vnStart: {type: 'f', value: 0.0},
 			spacing: {type: 'f', value: 1.0},
@@ -91,7 +86,6 @@ class PointCloudMaterial extends ShaderMaterial
 			elevationRange: {type: '2fv', value: [0, 0]},
 			visibleNodes: {type: 't', value: this.visibleNodesTexture},
 			gradient: {type: 't', value: this.gradientTexture},
-			classificationLUT: {type: 't', value: null},
 			diffuse: {type: 'fv', value: [1, 1, 1]},
 			transition: {type: 'f', value: 0.5},
 			intensityRange: {type: 'fv', value: [0, 65000]},
@@ -104,16 +98,13 @@ class PointCloudMaterial extends ShaderMaterial
 			wRGB: {type: 'f', value: 1},
 			wIntensity: {type: 'f', value: 0},
 			wElevation: {type: 'f', value: 0},
-			wClassification: {type: 'f', value: 0},
 			wReturnNumber: {type: 'f', value: 0},
 			wSourceID: {type: 'f', value: 0},
 			logDepthBufFC: {type: 'f', value: 0},
 			uPCIndex: {value: 0.0}
 		};
 
-		this.classification = Classification.DEFAULT;
 		this.defaultAttributeValues.normal = [0, 0, 0];
-		this.defaultAttributeValues.classification = [0, 0, 0];
 		this.defaultAttributeValues.indices = [0, 0, 0, 0];
 
 		this.defines = this.getDefines();
@@ -205,7 +196,6 @@ class PointCloudMaterial extends ShaderMaterial
 		pointColorTypes[PointColorType.INTENSITY] = {color_type_intensity: true};
 		pointColorTypes[PointColorType.INTENSITY_GRADIENT] = {color_type_intensity_gradient: true};
 		pointColorTypes[PointColorType.POINT_INDEX] = {color_type_point_index: true};
-		pointColorTypes[PointColorType.CLASSIFICATION] = {color_type_classification: true};
 		pointColorTypes[PointColorType.RETURN_NUMBER] = {color_type_return_number: true};
 		pointColorTypes[PointColorType.SOURCE] = {color_type_source: true};
 		pointColorTypes[PointColorType.NORMAL] = {color_type_normal: true};
@@ -240,52 +230,6 @@ class PointCloudMaterial extends ShaderMaterial
 			this.gradientTexture = PointCloudMaterial.generateGradientTexture(this._gradient);
 			this.uniforms.gradient.value = this.gradientTexture;
 		}
-	}
-
-	get classification()
-	{
-		return this._classification;
-	}
-
-	set classification(value)
-	{
-		const copy = {};
-		for (var key of Object.keys(value))
-		{
-			copy[key] = value[key].clone();
-		}
-
-		let isEqual = false;
-		if (this._classification === undefined)
-		{
-			isEqual = false;
-		}
-		else
-		{
-			isEqual = Object.keys(copy).length === Object.keys(this._classification).length;
-			for (var key of Object.keys(copy))
-			{
-				isEqual = isEqual && this._classification[key] !== undefined;
-				isEqual = isEqual && copy[key].equals(this._classification[key]);
-			}
-		}
-
-		if (!isEqual)
-		{
-			this._classification = copy;
-			this.recomputeClassification();
-		}
-	}
-
-	recomputeClassification()
-	{
-		this.classificationTexture = PointCloudMaterial.generateClassificationTexture(this._classification);
-		this.uniforms.classificationLUT.value = this.classificationTexture;
-		this.dispatchEvent(
-			{
-				type: 'material_property_changed',
-				target: this
-			});
 	}
 
 	get spacing()
@@ -792,24 +736,6 @@ class PointCloudMaterial extends ShaderMaterial
 		}
 	}
 
-	get weightClassification()
-	{
-		return this.uniforms.wClassification.value;
-	}
-
-	set weightClassification(value)
-	{
-		if (this.uniforms.wClassification.value !== value)
-		{
-			this.uniforms.wClassification.value = value;
-			this.dispatchEvent(
-				{
-					type: 'material_property_changed',
-					target: this
-				});
-		}
-	}
-
 	get weightReturnNumber()
 	{
 		return this.uniforms.wReturnNumber.value;
@@ -873,43 +799,6 @@ class PointCloudMaterial extends ShaderMaterial
 		texture.needsUpdate = true;
 		texture.minFilter = LinearFilter;
 
-		return texture;
-	}
-
-	static generateClassificationTexture(classification)
-	{
-		const width = 256;
-		const height = 256;
-		const size = width * height;
-		const data = new Uint8Array(4 * size);
-		for (let x = 0; x < width; x++)
-		{
-			for (let y = 0; y < height; y++)
-			{
-				const i = x + width * y;
-				let color;
-				if (classification[x])
-				{
-					color = classification[x];
-				}
-				else if (classification[x % 32])
-				{
-					color = classification[x % 32];
-				}
-				else
-				{
-					color = classification.DEFAULT;
-				}
-				data[4 * i] = 255 * color.x;
-				data[4 * i + 1] = 255 * color.y;
-				data[4 * i + 2] = 255 * color.z;
-				data[4 * i + 3] = 255 * color.w;
-			}
-		}
-		const texture = new DataTexture(data, width, height, RGBAFormat);
-		texture.magFilter = NearestFilter;
-		texture.wrapS = texture.wrapT = ClampToEdgeWrapping;
-		texture.needsUpdate = true;
 		return texture;
 	}
 

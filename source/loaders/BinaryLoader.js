@@ -116,10 +116,6 @@ class BinaryLoader
 				{
 					geometry.setAttribute('intensity', new BufferAttribute(new Float32Array(buffer), 1));
 				}
-				else if (parseInt(property) === PointAttributeNames.CLASSIFICATION)
-				{
-					geometry.setAttribute('classification', new BufferAttribute(new Uint8Array(buffer), 1));
-				}
 				else if (parseInt(property) === PointAttributeNames.NORMAL_SPHEREMAPPED)
 				{
 					geometry.setAttribute('normal', new BufferAttribute(new Float32Array(buffer), 3));

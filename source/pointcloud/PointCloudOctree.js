@@ -386,8 +386,7 @@ class PointCloudOctree extends PointCloudTree
 				}
 			}
 
-			// TODO performance optimization
-			// for some reason, this part can be extremely slow in chrome during a debugging session, but not during profiling
+			// For some reason, this part can be extremely slow in chrome during a debugging session, but not during profiling
 			const bBox = node.getBoundingBox().clone();
 			// bBox.applyMatrix4(node.sceneNode.matrixWorld);
 			// bBox.applyMatrix4(camera.matrixWorldInverse);
@@ -782,9 +781,6 @@ class PointCloudOctree extends PointCloudTree
 		pickMaterial.size = pointSize;
 		pickMaterial.uniforms.minSize.value = this.material.uniforms.minSize.value;
 		pickMaterial.uniforms.maxSize.value = this.material.uniforms.maxSize.value;
-		pickMaterial.classification = this.material.classification;
-		pickMaterial.clippingPlanes = this.material.clippingPlanes;
-		pickMaterial.clipping = this.material.clipping;
 
 		this.updateMaterial(pickMaterial, camera, renderer);
 

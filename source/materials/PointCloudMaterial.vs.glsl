@@ -1,7 +1,6 @@
 // attribute vec3 position;
 attribute vec3 color;
 attribute float intensity;
-attribute float classification;
 attribute float returnNumber;
 attribute float numberOfReturns;
 attribute float pointSourceID;
@@ -51,34 +50,11 @@ uniform float uTransition;
 uniform float wRGB;
 uniform float wIntensity;
 uniform float wElevation;
-uniform float wClassification;
 uniform float wReturnNumber;
 uniform float wSourceID;
 
 uniform sampler2D visibleNodes;
 uniform sampler2D gradient;
-uniform sampler2D classificationLUT;
-
-#if defined(num_clipplanes) && num_clipplanes > 0
-
-uniform vec4 clipPlanes[num_clipplanes];
-
-bool isClipped(vec3 point) {
-    bool clipped = false;
-    for (int i = 0; i < num_clipplanes; ++i) {
-        vec4 p = clipPlanes[i];
-        clipped = clipped || dot(-point, p.xyz) > p.w;
-    }
-    return clipped;
-}
-
-    #else
-
-bool isClipped(vec3 point) {
-    return false;
-}
-
-    #endif
 
 varying vec4 vColor;
 varying float vLogDepth;
@@ -384,12 +360,6 @@ vec3 getElevation()
     return texture2D(gradient, vec2(w,1.0-w)).rgb;
 }
 
-vec4 getClassification()
-{
-    vec2 uv = vec2(classification / 255.0, 0.5);
-    return texture2D(classificationLUT, uv);
-}
-
 vec3 getReturnNumber()
 {
     if(numberOfReturns == 1.0)
@@ -439,10 +409,6 @@ vec3 getCompositeColor()
     c += wSourceID * getSourceID();
     w += wSourceID;
 
-    vec4 cl = wClassification * getClassification();
-    c += cl.a * cl.rgb;
-    w += wClassification * cl.a;
-
     c = c / w;
 
     if(w == 0.0)
@@ -483,10 +449,6 @@ vec4 getColor()
     color = texture2D(gradient, vec2(w,1.0-w)).rgb;
     #elif defined color_type_point_index
     color = indices.rgb;
-    #elif defined color_type_classification
-    vec4 cl = getClassification();
-    color = cl.rgb;
-    alpha = cl.a;
     #elif defined color_type_return_number
     color = getReturnNumber();
     #elif defined color_type_source

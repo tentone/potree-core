@@ -72,11 +72,11 @@ onmessage = function(event)
 	const pointSize = schema.reduce((p, c) => {return p + c.size;}, 0);
 	const numPoints = buffer.byteLength / pointSize;
 
-	let xyzBuffer, rgbBuffer, intensityBuffer, classificationBuffer,
+	let xyzBuffer, rgbBuffer, intensityBuffer,
 		returnNumberBuffer, numberOfReturnsBuffer, pointSourceIdBuffer;
-	let xyz, rgb, intensity, classification, returnNumber, numberOfReturns,
+	let xyz, rgb, intensity, returnNumber, numberOfReturns,
 		pointSourceId;
-	let xyzExtractor, rgbExtractor, intensityExtractor, classificationExtractor,
+	let xyzExtractor, rgbExtractor, intensityExtractor,
 		returnNumberExtractor, numberOfReturnsExtractor, pointSourceIdExtractor;
 	let twoByteColor = false;
 
@@ -117,13 +117,6 @@ onmessage = function(event)
 		intensityBuffer = new ArrayBuffer(numPoints * 4);
 		intensity = new Float32Array(intensityBuffer);
 		intensityExtractor = getExtractor('Intensity');
-	}
-
-	if (dimensions['Classification']) 
-	{
-		classificationBuffer = new ArrayBuffer(numPoints);
-		classification = new Uint8Array(classificationBuffer);
-		classificationExtractor = getExtractor('Classification');
 	}
 
 	if (dimensions['ReturnNumber']) 
@@ -199,7 +192,6 @@ onmessage = function(event)
 		}
 
 		if (intensity) {intensity[i] = intensityExtractor(pos);}
-		if (classification) {classification[i] = classificationExtractor(pos);}
 		if (returnNumber) {returnNumber[i] = returnNumberExtractor(pos);}
 		if (numberOfReturns) {numberOfReturns[i] = numberOfReturnsExtractor(pos);}
 		if (pointSourceId) {pointSourceId[i] = pointSourceIdExtractor(pos);}
@@ -216,11 +208,9 @@ onmessage = function(event)
 		numPoints: numPoints,
 		tightBoundingBox: bounds,
 		mean: mean,
-
 		position: xyzBuffer,
 		color: rgbBuffer,
 		intensity: intensityBuffer,
-		classification: classificationBuffer,
 		returnNumber: returnNumberBuffer,
 		numberOfReturns: numberOfReturnsBuffer,
 		pointSourceId: pointSourceIdBuffer,
@@ -231,7 +221,6 @@ onmessage = function(event)
 		message.position,
 		message.color,
 		message.intensity,
-		message.classification,
 		message.returnNumber,
 		message.numberOfReturns,
 		message.pointSourceId,

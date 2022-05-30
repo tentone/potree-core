@@ -4,7 +4,6 @@ export {Global} from './Global';
 
 export {
 	AttributeLocations,
-	Classification,
 	PointSizeType,
 	PointShape,
 	PointColorType,

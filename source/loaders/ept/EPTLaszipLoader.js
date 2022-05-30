@@ -142,7 +142,6 @@ export class EptLazBatcher
 			const colors = new Uint8Array(e.data.color);
 
 			const intensities = new Float32Array(e.data.intensity);
-			const classifications = new Uint8Array(e.data.classification);
 			const returnNumbers = new Uint8Array(e.data.returnNumber);
 			const numberOfReturns = new Uint8Array(e.data.numberOfReturns);
 			const pointSourceIDs = new Uint16Array(e.data.pointSourceID);
@@ -151,7 +150,6 @@ export class EptLazBatcher
 			g.setAttribute('position', new BufferAttribute(positions, 3));
 			g.setAttribute('color', new BufferAttribute(colors, 4, true));
 			g.setAttribute('intensity', new BufferAttribute(intensities, 1));
-			g.setAttribute('classification', new BufferAttribute(classifications, 1));
 			g.setAttribute('returnNumber', new BufferAttribute(returnNumbers, 1));
 			g.setAttribute('numberOfReturns', new BufferAttribute(numberOfReturns, 1));
 			g.setAttribute('pointSourceID', new BufferAttribute(pointSourceIDs, 1));

@@ -66,11 +66,6 @@ class EPTBinaryLoader
 				const intensity = new Float32Array(e.data.intensity);
 				g.setAttribute('intensity', new BufferAttribute(intensity, 1));
 			}
-			if (e.data.classification)
-			{
-				const classification = new Uint8Array(e.data.classification);
-				g.setAttribute('classification', new BufferAttribute(classification, 1));
-			}
 			if (e.data.returnNumber)
 			{
 				const returnNumber = new Uint8Array(e.data.returnNumber);

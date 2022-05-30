@@ -35,7 +35,6 @@ function readUsingDataView(event)
 	const pBuff = new ArrayBuffer(numPoints * 3 * 4);
 	const cBuff = new ArrayBuffer(numPoints * 4);
 	const iBuff = new ArrayBuffer(numPoints * 4);
-	const clBuff = new ArrayBuffer(numPoints);
 	const rnBuff = new ArrayBuffer(numPoints);
 	const nrBuff = new ArrayBuffer(numPoints);
 	const psBuff = new ArrayBuffer(numPoints * 2);
@@ -43,7 +42,6 @@ function readUsingDataView(event)
 	const positions = new Float32Array(pBuff);
 	const colors = new Uint8Array(cBuff);
 	const intensities = new Float32Array(iBuff);
-	const classifications = new Uint8Array(clBuff);
 	const returnNumbers = new Uint8Array(rnBuff);
 	const numberOfReturns = new Uint8Array(nrBuff);
 	const pointSourceIDs = new Uint16Array(psBuff);
@@ -106,9 +104,6 @@ function readUsingDataView(event)
 		returnNumbers[i] = returnNumber;
 		numberOfReturns[i] = numberOfReturn;
 
-		// CLASSIFICATION
-		classifications[i] = sourceView.getUint8(i * pointSize + 15, true);
-
 		// POINT SOURCE ID
 		pointSourceIDs[i] = sourceView.getUint16(i * pointSize + 18, true);
 
@@ -157,7 +152,6 @@ function readUsingDataView(event)
 		position: pBuff,
 		color: cBuff,
 		intensity: iBuff,
-		classification: clBuff,
 		returnNumber: rnBuff,
 		numberOfReturns: nrBuff,
 		pointSourceID: psBuff,
@@ -169,7 +163,6 @@ function readUsingDataView(event)
 		message.position,
 		message.color,
 		message.intensity,
-		message.classification,
 		message.returnNumber,
 		message.numberOfReturns,
 		message.pointSourceID,

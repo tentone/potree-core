@@ -192,7 +192,6 @@ class LASLAZBatcher
 			const positions = new Float32Array(e.data.position);
 			const colors = new Uint8Array(e.data.color);
 			const intensities = new Float32Array(e.data.intensity);
-			const classifications = new Uint8Array(e.data.classification);
 			const returnNumbers = new Uint8Array(e.data.returnNumber);
 			const numberOfReturns = new Uint8Array(e.data.numberOfReturns);
 			const pointSourceIDs = new Uint16Array(e.data.pointSourceID);
@@ -201,7 +200,6 @@ class LASLAZBatcher
 			geometry.setAttribute('position', new BufferAttribute(positions, 3));
 			geometry.setAttribute('color', new BufferAttribute(colors, 4, true));
 			geometry.setAttribute('intensity', new BufferAttribute(intensities, 1));
-			geometry.setAttribute('classification', new BufferAttribute(classifications, 1));
 			geometry.setAttribute('returnNumber', new BufferAttribute(returnNumbers, 1));
 			geometry.setAttribute('numberOfReturns', new BufferAttribute(numberOfReturns, 1));
 			geometry.setAttribute('pointSourceID', new BufferAttribute(pointSourceIDs, 1));

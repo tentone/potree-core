@@ -38,7 +38,6 @@ onmessage = function(event)
 	const positions = new Float32Array(pBuff);
 	const colors = new Uint8Array(cBuff);
 	const intensities = new Float32Array(iBuff);
-	const classifications = new Uint8Array(clBuff);
 	const returnNumbers = new Uint8Array(rnBuff);
 	const numberOfReturns = new Uint8Array(nrBuff);
 	const pointSourceIDs = new Uint16Array(psBuff);
@@ -82,10 +81,6 @@ onmessage = function(event)
 		returnNumbers[i] = returnNumber;
 		numberOfReturns[i] = numberOfReturn;
 
-		// CLASSIFICATION
-		const classification = sourceView.getUint8(i * sourcePointSize + 15, true);
-		classifications[i] = classification;
-
 		// POINT SOURCE ID
 		const pointSourceID = sourceView.getUint16(i * sourcePointSize + 18, true);
 		pointSourceIDs[i] = pointSourceID;
@@ -117,7 +112,6 @@ onmessage = function(event)
 		position: pBuff,
 		color: cBuff,
 		intensity: iBuff,
-		classification: clBuff,
 		returnNumber: rnBuff,
 		numberOfReturns: nrBuff,
 		pointSourceID: psBuff,
@@ -130,7 +124,6 @@ onmessage = function(event)
 		message.position,
 		message.color,
 		message.intensity,
-		message.classification,
 		message.returnNumber,
 		message.numberOfReturns,
 		message.pointSourceID,

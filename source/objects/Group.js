@@ -75,36 +75,8 @@ class Group extends BasicGroup
 			vnt.needsUpdate = true;
 		}
 
-		// Clip planes
-		const numClippingPlanes = material.clipping && material.clippingPlanes && material.clippingPlanes.length ? material.clippingPlanes.length : 0;
-		const clipPlanesChanged = material.defines['num_clipplanes'] !== numClippingPlanes;
-		let clippingPlanes = [];
-		if (clipPlanesChanged) 
-		{
-			material.defines = {
-				...material.defines,
-				num_clipplanes: numClippingPlanes
-			};
-			material.needsUpdate = true;
-		}
-		if (numClippingPlanes > 0) 
-		{
-			const planes = material.clippingPlanes;
-			const flattenedPlanes = new Array(4 * material.clippingPlanes.length);
-			for (let i = 0; i < planes.length; i++) 
-			{
-				flattenedPlanes[4 * i] = planes[i].normal.x;
-				flattenedPlanes[4*i + 1] = planes[i].normal.y;
-				flattenedPlanes[4*i + 2] = planes[i].normal.z;
-				flattenedPlanes[4*i + 3] = planes[i].constant;
-			}
-			clippingPlanes = flattenedPlanes;
-		}
-
-		const clippingPlanesAsVec4Array = material.clippingPlanes ? material.clippingPlanes.map((x) => {return new Vector4(x.normal.x, x.normal.y, x.normal.z, x.constant);}) : [];
 		material.uniforms.projectionMatrix.value.copy(proj);
 		material.uniforms.uViewInv.value.copy(viewInv);
-		material.uniforms.clipPlanes.value = clippingPlanesAsVec4Array;
 		material.uniforms.fov.value = Math.PI * camera.fov / 180;
 		material.uniforms.near.value = camera.near;
 		material.uniforms.far.value = camera.far;
@@ -123,7 +95,6 @@ class Group extends BasicGroup
 		material.uniforms.wRGB.value = material.weightRGB;
 		material.uniforms.wIntensity.value = material.weightIntensity;
 		material.uniforms.wElevation.value = material.weightElevation;
-		material.uniforms.wClassification.value = material.weightClassification;
 		material.uniforms.wReturnNumber.value = material.weightReturnNumber;
 		material.uniforms.wSourceID.value = material.weightSourceID;
 		material.uniforms.logDepthBufFC.value = renderer.capabilities.logarithmicDepthBuffer ? 2.0 / (Math.log(camera.far + 1.0) / Math.LN2) : undefined;

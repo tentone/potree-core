@@ -1,5 +1,9 @@
 /**
  * The worker manager is responsible for creating and managing worker instances.
+ * 
+ * Workers are created and managed by the worker manager. Workers can be requested to perform tasks.
+ * 
+ * After a worker has finished performing a task, it is returned to the worker manager for reuse.
  */
 class WorkerManager 
 {

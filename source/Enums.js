@@ -1,4 +1,3 @@
-import {Vector4} from 'three';
 
 export const AttributeLocations =
 	{
@@ -39,7 +38,6 @@ export const PointColorType =
 		LOD: 6,
 		LEVEL_OF_DETAIL: 6,
 		POINT_INDEX: 7,
-		CLASSIFICATION: 8,
 		RETURN_NUMBER: 9,
 		SOURCE: 10,
 		NORMAL: 11,

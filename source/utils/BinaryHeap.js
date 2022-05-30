@@ -1,12 +1,26 @@
-
+/**
+ * Binary heap class used to store the priority queue.
+ * 
+ * Elements with higher priority are served before elements with lower priority.
+ */
 export class BinaryHeap 
 {
+	/**
+	 * Constructor for the BinaryHeap class.
+	 * 
+	 * @param {*} scoreFunction Method to compute the score of an element.
+	 */
 	constructor(scoreFunction) 
 	{
 		this.content = [];
 		this.scoreFunction = scoreFunction;
 	}
 
+	/**
+	 * Push a new element onto the heap.
+	 * 
+	 * @param {*} element - Element to be pushed onto the heap.
+	 */
 	push(element) 
 	{
 		// Add the new element to the end of the array.
@@ -15,6 +29,11 @@ export class BinaryHeap
 		this.bubbleUp(this.content.length - 1);
 	}
 
+	/**
+	 * Pop an element off the heap.
+	 * 
+	 * @returns Element with the highest priority.
+	 */
 	pop() 
 	{
 		// Store the first element, so we can return it later.
@@ -32,6 +51,11 @@ export class BinaryHeap
 		return result;
 	}
 
+	/**
+	 * Remove a specific element from the heap.
+	 * 
+	 * @param {*} node 
+	 */
 	remove(node) 
 	{
 		const length = this.content.length;
@@ -55,11 +79,21 @@ export class BinaryHeap
 		}
 	}
 
+	/**
+	 * Get the size of the heap.
+	 * 
+	 * @returns Size of the heap.
+	 */
 	size() 
 	{
 		return this.content.length;
 	}
 
+	/**
+	 * Bubble up the element at the given index.
+	 * 
+	 * @param {*} n Index of the element to be bubbled up.
+	 */
 	bubbleUp(n) 
 	{
 		// Fetch the element that has to be moved.
@@ -73,19 +107,24 @@ export class BinaryHeap
 			const parentN = Math.floor((n + 1) / 2) - 1;
 
 			const parent = this.content[parentN];
-			// If the parent has a lesser score, things are in order and we
-			// are done.
+			// If the parent has a lesser score, things are in order and we are done.
 			if (score >= this.scoreFunction(parent))
-			{break;}
+			{
+				break;
+			}
 
-			// Otherwise, swap the parent with the current element and
-			// continue.
+			// Otherwise, swap the parent with the current element and continue.
 			this.content[parentN] = element;
 			this.content[n] = parent;
 			n = parentN;
 		}
 	}
 
+	/**
+	 * Sink down the element at the given index.
+	 * 
+	 * @param {*} n Index of the element to be sunk down.
+	 */
 	sinkDown(n) 
 	{
 		// Look up the target element and its score.
@@ -100,9 +139,9 @@ export class BinaryHeap
 			const child2N = (n + 1) * 2;
 
 			const child1N = child2N - 1;
-			// This is used to store the new position of the element,
-			// if any.
+			// This is used to store the new position of the element, if any.
 			let swap = null;
+
 			// If the first child exists (is inside the array)...
 			if (child1N < length)
 			{

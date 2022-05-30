@@ -1,5 +1,8 @@
 import {Global} from '../Global';
 
+/**
+ * An element in the double linked list.
+ */
 export class LRUItem
 {
 	constructor(node)
@@ -11,7 +14,9 @@ export class LRUItem
 }
 
 /**
- * @class A doubly-linked-list of the least recently used elements.
+ * A doubly-linked-list of the least recently used (LRU) elements.
+ * 
+ * Elements are stored based on their access time. Last element is the most recently used. First element is the least recently used.
  */
 export class LRU
 {
@@ -26,12 +31,20 @@ export class LRU
 		this.elements = 0;
 		this.numPoints = 0;
 	}
-
+	
+	/**
+	 * Get the number of elements in the LRU.
+	 * 
+	 * @returns {number} The number of elements in the LRU.
+	 */
 	size()
 	{
 		return this.elements;
 	}
 
+	/**
+	 * Check if the LRU contains the given node.
+	 */
 	contains(node)
 	{
 		// eslint-disable-next-line eqeqeq

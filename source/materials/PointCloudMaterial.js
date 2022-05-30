@@ -25,7 +25,7 @@ class PointCloudMaterial extends ShaderMaterial
 	{
 		super();
 
-		//this.extensions.derivatives = true;
+		this.extensions.derivatives = true;
 
 		this.visibleNodesTexture = HelperUtils.generateDataTexture(2048, 1, new Color(0xffffff));
 		this.visibleNodesTexture.minFilter = NearestFilter;

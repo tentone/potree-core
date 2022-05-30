@@ -391,6 +391,7 @@ class PointCloudOctree extends PointCloudTree
 			const bBox = node.getBoundingBox().clone();
 			// bBox.applyMatrix4(node.sceneNode.matrixWorld);
 			// bBox.applyMatrix4(camera.matrixWorldInverse);
+
 			const bSphere = bBox.getBoundingSphere(new Sphere());
 			bSphere.applyMatrix4(node.sceneNode.matrixWorld);
 			bSphere.applyMatrix4(camera.matrixWorldInverse);

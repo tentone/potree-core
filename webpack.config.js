@@ -9,7 +9,7 @@ const config = {
 	module: {
 		rules: [
 			{
-				test: /\.glsl$/i,
+				test: /\.(glsl|fs|vs)$/i,
 				use: 'raw-loader'
 			}
 		]

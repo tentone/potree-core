@@ -6,6 +6,9 @@ import {PointCloudArena4D} from './pointcloud/PointCloudArena4D.js';
 import {PointCloudArena4DGeometry} from './geometry/PointCloudArena4DGeometry.js';
 import {BinaryHeap} from './utils/BinaryHeap.js';
 import {Global} from './Global.js';
+import Derp from './materials/shaders/blur.vs';
+
+console.log(Derp);
 
 const AttributeLocations =
 	{
@@ -140,10 +143,12 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 {
 	let numVisibleNodes = 0;
 	let numVisiblePoints = 0;
+
 	const numVisiblePointsInPointclouds = new Map(pointclouds.map((pc) =>
 	{
 		return [pc, 0];
 	}));
+
 	const visibleNodes = [];
 	const visibleGeometry = [];
 	const unloadedGeometry = [];

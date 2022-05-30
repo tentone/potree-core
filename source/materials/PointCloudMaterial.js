@@ -16,8 +16,8 @@ import {
 } from 'three';
 import {HelperUtils} from '../utils/HelperUtils.js';
 import {Gradients} from '../Gradients.js';
-import {Shaders} from './Shaders.js';
 import {Classification, PointColorType, PointShape, PointSizeType, TreeType} from '../Potree.js';
+import {Shaders} from './Shaders.js';
 
 class PointCloudMaterial extends ShaderMaterial
 {
@@ -25,6 +25,7 @@ class PointCloudMaterial extends ShaderMaterial
 	{
 		super();
 
+		this.extensions.derivatives = true;
 		this.visibleNodesTexture = HelperUtils.generateDataTexture(2048, 1, new Color(0xffffff));
 		this.visibleNodesTexture.minFilter = NearestFilter;
 		this.visibleNodesTexture.magFilter = NearestFilter;

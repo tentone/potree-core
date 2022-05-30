@@ -11,7 +11,7 @@ precision highp int;
 ` + ShaderChunk.logdepthbuf_pars_vertex + `
 
 // attribute vec3 position;
-// attribute vec3 color;
+attribute vec3 color;
 attribute float intensity;
 attribute float classification;
 attribute float returnNumber;
@@ -103,10 +103,6 @@ float myRound(float number)
 {
 	return floor(number + 0.5);
 }
-
-//---------------------
-//OCTREE
-//---------------------
 
 #if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_octree)
 	/**
@@ -286,9 +282,7 @@ float myRound(float number)
 	}
 #endif
 
-//---------------------
-//KD-TREE
-//---------------------
+
 #if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_kdtree)
 	float getLOD()
 	{
@@ -588,9 +582,9 @@ void main()
 // "pointcloud.fs"
 Shaders.fragment = `
 
-#if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
-	#extension GL_EXT_frag_depth : enable
-#endif
+// #if defined USE_LOGDEPTHBUF_EXT || defined paraboloid_point_shape
+// 	#extension GL_EXT_frag_depth : enable
+// #endif
 
 precision highp float;
 precision highp int;

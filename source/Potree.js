@@ -6,9 +6,6 @@ import {PointCloudArena4D} from './pointcloud/PointCloudArena4D.js';
 import {PointCloudArena4DGeometry} from './geometry/PointCloudArena4DGeometry.js';
 import {BinaryHeap} from './utils/BinaryHeap.js';
 import {Global} from './Global.js';
-import Derp from './materials/shaders/blur.vs';
-
-console.log(Derp);
 
 const AttributeLocations =
 	{

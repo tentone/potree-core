@@ -25,31 +25,26 @@ module.exports = [
 			library: 'Potree',
 			libraryTarget: 'umd',
 			filename: 'potree.js',
-			path: path.resolve(__dirname, 'dist')
-		},
-		externals: {
-			three: {
-				commonjs: 'THREE',
-				umd: 'THREE',
-				amd: 'THREE',
-				root: 'THREE'
-			}
-		}
-	}, config),
-	Object.assign({
-		experiments: {outputModule: true},
-		output: {
-			libraryTarget: 'module',
-			filename: 'potree.module.js',
-			path: path.resolve(__dirname, 'dist')
-		}
-	}, config),
-	Object.assign({
-		experiments: {outputModule: true},
-		output: {
-			libraryTarget: 'commonjs',
-			filename: 'potree.cjs',
-			path: path.resolve(__dirname, 'dist')
+			path: path.resolve(__dirname, 'dist'),
+			clean: true
 		}
 	}, config)
+	// Object.assign({
+	// 	experiments: {outputModule: true},
+	// 	output: {
+	// 		libraryTarget: 'module',
+	// 		filename: 'potree.module.js',
+	// 		path: path.resolve(__dirname, 'dist'),
+	// 		clean: false
+	// 	}
+	// }, config),
+	// Object.assign({
+	// 	experiments: {outputModule: true},
+	// 	output: {
+	// 		libraryTarget: 'commonjs',
+	// 		filename: 'potree.cjs',
+	// 		path: path.resolve(__dirname, 'dist'),
+	// 		clean: false
+	// 	}
+	// }, config)
 ];

@@ -1,5 +1,5 @@
 import {Vector3, Box3, Sphere} from 'three';
-import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from '../pointcloud/geometries/PointCloudOctreeGeometry.js';
+import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from '../geometry/PointCloudOctreeGeometry.js';
 import {Global} from '../Global.js';
 import {XHRFactory} from '../XHRFactory.js';
 import {Version} from '../Version.js';

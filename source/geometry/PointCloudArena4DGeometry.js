@@ -1,7 +1,7 @@
 import {Vector3, Box3, BufferAttribute, BufferGeometry, EventDispatcher, Sphere} from 'three';
-import {Global} from '../../Global.js';
-import {XHRFactory} from '../../XHRFactory.js';
-import {PointAttributes} from '../../loaders/PointAttributes';
+import {Global} from '../Global.js';
+import {XHRFactory} from '../XHRFactory.js';
+import {PointAttributes} from '../loaders/PointAttributes';
 
 class PointCloudArena4DGeometryNode
 {

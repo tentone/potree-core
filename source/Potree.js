@@ -3,7 +3,7 @@ import {POCLoader} from './loaders/POCLoader.js';
 import {EPTLoader} from './loaders/EPTLoader.js';
 import {PointCloudOctree} from './pointcloud/PointCloudOctree.js';
 import {PointCloudArena4D} from './pointcloud/PointCloudArena4D.js';
-import {PointCloudArena4DGeometry} from './pointcloud/geometries/PointCloudArena4DGeometry.js';
+import {PointCloudArena4DGeometry} from './geometry/PointCloudArena4DGeometry.js';
 import {BinaryHeap} from './utils/BinaryHeap.js';
 import {Global} from './Global.js';
 

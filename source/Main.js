@@ -25,7 +25,7 @@ export {PointAttribute, PointAttributeNames, PointAttributeTypes} from './loader
 
 export {Gradients} from './Gradients.js';
 export {Points} from './Points.js';
-export {Shaders} from './Shaders.js';
+export {Shaders} from './materials/Shaders.js';
 
 export {DEM} from './pointcloud/DEM.js';
 export {DEMNode} from './pointcloud/DEMNode.js';
@@ -33,11 +33,11 @@ export {PointCloudTree} from './pointcloud/PointCloudTree.js';
 export {PointCloudArena4D} from './pointcloud/PointCloudArena4D.js';
 export {PointCloudOctree} from './pointcloud/PointCloudOctree.js';
 
-export {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from './pointcloud/geometries/PointCloudOctreeGeometry.js';
-export {PointCloudArena4DGeometry} from './pointcloud/geometries/PointCloudArena4DGeometry.js';
-export {PointCloudEptGeometry, PointCloudEptGeometryNode} from './pointcloud/geometries/PointCloudEptGeometry.js';
+export {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from './geometry/PointCloudOctreeGeometry.js';
+export {PointCloudArena4DGeometry} from './geometry/PointCloudArena4DGeometry.js';
+export {PointCloudEptGeometry, PointCloudEptGeometryNode} from './geometry/PointCloudEptGeometry.js';
 
-export {PointCloudMaterial} from './pointcloud/materials/PointCloudMaterial.js';
+export {PointCloudMaterial} from './materials/PointCloudMaterial.js';
 
 export {LASLoader} from './loaders/LASLoader.js';
 export {BinaryLoader} from './loaders/BinaryLoader.js';

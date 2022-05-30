@@ -1,10 +1,10 @@
 import {Vector3, Box3, Sphere} from 'three';
-import {EptBinaryLoader} from '../../loaders/ept/EptBinaryLoader';
-import {EptLaszipLoader} from '../../loaders/ept/EptLaszipLoader';
-import {PointCloudTreeNode} from '../PointCloudTree.js';
-import {Global} from '../../Global.js';
-import {XHRFactory} from '../../XHRFactory.js';
-import {Version} from '../../Version';
+import {EptBinaryLoader} from '../loaders/ept/EptBinaryLoader';
+import {EptLaszipLoader} from '../loaders/ept/EptLaszipLoader';
+import {PointCloudTreeNode} from '../pointcloud/PointCloudTree.js';
+import {Global} from '../Global.js';
+import {XHRFactory} from '../XHRFactory.js';
+import {Version} from '../Version';
 
 class Utils
 {

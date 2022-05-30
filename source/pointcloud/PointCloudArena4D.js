@@ -2,7 +2,7 @@ import {Vector3, Vector2, Sphere, Points, NoBlending, NearestFilter, Scene, WebG
 import {HelperUtils} from '../utils/HelperUtils.js';
 import {Global} from '../Global.js';
 import {TreeType, PointSizeType, PointColorType} from '../Potree.js';
-import {PointCloudMaterial} from './materials/PointCloudMaterial.js';
+import {PointCloudMaterial} from '../materials/PointCloudMaterial.js';
 import {PointCloudTree, PointCloudTreeNode} from './PointCloudTree.js';
 
 class PointCloudArena4DNode extends PointCloudTreeNode

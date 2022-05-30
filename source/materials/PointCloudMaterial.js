@@ -14,10 +14,10 @@ import {
 	ShaderMaterial,
 	VertexColors
 } from 'three';
-import {HelperUtils} from '../../utils/HelperUtils.js';
-import {Gradients} from '../../Gradients.js';
-import {Shaders} from '../../Shaders.js';
-import {Classification, PointColorType, PointShape, PointSizeType, TreeType} from '../../Potree.js';
+import {HelperUtils} from '../utils/HelperUtils.js';
+import {Gradients} from '../Gradients.js';
+import {Shaders} from './Shaders.js';
+import {Classification, PointColorType, PointShape, PointSizeType, TreeType} from '../Potree.js';
 
 class PointCloudMaterial extends ShaderMaterial
 {

@@ -1,8 +1,8 @@
 import {Sphere, EventDispatcher} from 'three';
-import {POCLoader} from '../../loaders/POCLoader.js';
-import {Global} from '../../Global.js';
-import {PointCloudTreeNode} from '../PointCloudTree.js';
-import {XHRFactory} from '../../XHRFactory.js';
+import {POCLoader} from '../loaders/POCLoader.js';
+import {Global} from '../Global.js';
+import {PointCloudTreeNode} from '../pointcloud/PointCloudTree.js';
+import {XHRFactory} from '../XHRFactory.js';
 
 class PointCloudOctreeGeometry
 {

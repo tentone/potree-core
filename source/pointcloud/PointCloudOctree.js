@@ -2,9 +2,9 @@ import {Vector3, Box3, Line3, Points, Box2, Sphere, Object3D, Matrix4, NoBlendin
 import {HelperUtils} from '../utils/HelperUtils.js';
 import {PointColorType} from '../Potree.js';
 import {Global} from '../Global.js';
-import {PointCloudOctreeGeometryNode} from './geometries/PointCloudOctreeGeometry.js';
+import {PointCloudOctreeGeometryNode} from '../geometry/PointCloudOctreeGeometry.js';
 import {PointCloudTree, PointCloudTreeNode} from './PointCloudTree.js';
-import {PointCloudMaterial} from './materials/PointCloudMaterial.js';
+import {PointCloudMaterial} from '../materials/PointCloudMaterial.js';
 
 class PointCloudOctreeNode extends PointCloudTreeNode
 {

@@ -16,7 +16,7 @@ document.body.onload = function()
 		{
 			canvas: canvas,
 			alpha: true,
-			logarithmicDepthBuffer: true,
+			logarithmicDepthBuffer: false,
 			context: null,
 			precision: 'highp',
 			premultipliedAlpha: true,

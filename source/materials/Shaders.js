@@ -11,7 +11,7 @@ precision highp int;
 ` + ShaderChunk.logdepthbuf_pars_vertex + `
 
 // attribute vec3 position;
-attribute vec3 color;
+// attribute vec3 color;
 attribute float intensity;
 attribute float classification;
 attribute float returnNumber;

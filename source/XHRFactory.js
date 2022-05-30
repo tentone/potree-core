@@ -10,9 +10,7 @@ export const XHRFactory = {
 	{
 		const xhr = new XMLHttpRequest();
 
-		if (this.config.customHeaders &&
-			Array.isArray(this.config.customHeaders) &&
-			this.config.customHeaders.length > 0) 
+		if (this.config.customHeaders && Array.isArray(this.config.customHeaders) && this.config.customHeaders.length > 0)
 		{
 			const baseOpen = xhr.open;
 			const customHeaders = this.config.customHeaders;

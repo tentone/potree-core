@@ -27,7 +27,8 @@ module.exports = [
 			filename: 'potree.js',
 			path: path.resolve(__dirname, 'dist'),
 			clean: true
-		}
+		},
+		externals: {three: {root: 'THREE', umd: 'THREE'}}
 	}, config)
 	// Object.assign({
 	// 	experiments: {outputModule: true},
@@ -40,6 +41,7 @@ module.exports = [
 	// }, config),
 	// Object.assign({
 	// 	experiments: {outputModule: true},
+	// 	externalsType: 'module',
 	// 	output: {
 	// 		libraryTarget: 'commonjs',
 	// 		filename: 'potree.cjs',

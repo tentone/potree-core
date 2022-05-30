@@ -73,7 +73,7 @@ document.body.onload = function()
 	function loadPointCloud(url, position)
 	{
 
-		Potree.loadPointCloud(url, 'pointcloud', function(e)
+		Potree.loadPointCloud(url, 'pointcloud').then(function(e)
 		{
 			const points = new Potree.Group();
 			points.material.opacity = 1.0;

@@ -1,6 +1,6 @@
 
-import {WorkerManager} from '../utils/WorkerManager.js';
-import {Global} from '../Global.js';
+import {WorkerManager} from '../utils/WorkerManager';
+import {Global} from '../Global';
 
 const pointFormatReaders =
 [

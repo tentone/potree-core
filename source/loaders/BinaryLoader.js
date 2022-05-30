@@ -1,9 +1,9 @@
 import {Vector3, Box3, BufferAttribute, BufferGeometry} from 'three';
-import {WorkerManager} from '../utils/WorkerManager.js';
-import {Global} from '../Global.js';
-import {XHRFactory} from '../XHRFactory.js';
-import {Version} from '../Version.js';
-import {PointAttributeNames} from './PointAttributes.js';
+import {WorkerManager} from '../utils/WorkerManager';
+import {Global} from '../Global';
+import {XHRFactory} from '../XHRFactory';
+import {Version} from '../Version';
+import {PointAttributeNames} from './PointAttributes';
 
 class BinaryLoader
 {

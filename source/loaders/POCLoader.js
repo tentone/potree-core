@@ -1,11 +1,11 @@
 import {Vector3, Box3, Sphere} from 'three';
-import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from '../geometry/PointCloudOctreeGeometry.js';
-import {Global} from '../Global.js';
-import {XHRFactory} from '../XHRFactory.js';
-import {Version} from '../Version.js';
-import {PointAttributes, PointAttribute} from './PointAttributes.js';
-import {LASLAZLoader} from './LASLAZLoader.js';
-import {BinaryLoader} from './BinaryLoader.js';
+import {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from '../geometry/PointCloudOctreeGeometry';
+import {Global} from '../Global';
+import {XHRFactory} from '../XHRFactory';
+import {Version} from '../Version';
+import {PointAttributes, PointAttribute} from './PointAttributes';
+import {LASLAZLoader} from './LASLAZLoader';
+import {BinaryLoader} from './BinaryLoader';
 
 /**
  * @class Loads mno files and returns a PointcloudOctree

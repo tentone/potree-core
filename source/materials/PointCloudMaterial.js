@@ -13,10 +13,10 @@ import {
 	RGBAFormat,
 	ShaderMaterial
 } from 'three';
-import {Utils} from '../utils/Utils.js';
-import {Gradients} from '../Gradients.js';
-import {Classification, PointColorType, PointShape, PointSizeType, TreeType} from '../Potree.js';
-import {Shaders} from './Shaders.js';
+import {Utils} from '../utils/Utils';
+import {Gradients} from '../Gradients';
+import {Classification, PointColorType, PointShape, PointSizeType, TreeType} from '../Enums';
+import {Shaders} from './Shaders';
 
 class PointCloudMaterial extends ShaderMaterial
 {

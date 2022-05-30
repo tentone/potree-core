@@ -1,5 +1,6 @@
 
-export {Global} from './Global.js';
+export {Global} from './Global';
+
 
 export {
 	AttributeLocations,
@@ -7,44 +8,48 @@ export {
 	PointSizeType,
 	PointShape,
 	PointColorType,
-	TreeType,
+	TreeType
+} from './Enums';
+
+export {
+
 	loadPointCloud,
 	updateVisibility,
 	updatePointClouds,
 	updateVisibilityStructures
-} from './Potree.js';
+} from './Potree';
 
-export {BinaryHeap} from './utils/BinaryHeap.js';
+export {BinaryHeap} from './utils/BinaryHeap';
 
-export {LRU} from './utils/LRU.js';
-export {Utils} from './utils/Utils.js';
-export {Version} from './Version.js';
-export {WorkerManager} from './utils/WorkerManager.js';
+export {LRU} from './utils/LRU';
+export {Utils} from './utils/Utils';
+export {Version} from './Version';
+export {WorkerManager} from './utils/WorkerManager';
 
-export {PointAttribute, PointAttributeNames, PointAttributeTypes} from './loaders/PointAttributes.js';
+export {PointAttribute, PointAttributeNames, PointAttributeTypes} from './loaders/PointAttributes';
 
-export {Gradients} from './Gradients.js';
-export {Points} from './Points.js';
-export {Shaders} from './materials/Shaders.js';
+export {Gradients} from './Gradients';
+export {Points} from './Points';
+export {Shaders} from './materials/Shaders';
 
-export {DEM} from './pointcloud/DEM.js';
-export {DEMNode} from './pointcloud/DEMNode.js';
-export {PointCloudTree} from './pointcloud/PointCloudTree.js';
-export {PointCloudOctree} from './pointcloud/PointCloudOctree.js';
+export {DEM} from './pointcloud/DEM';
+export {DEMNode} from './pointcloud/DEMNode';
+export {PointCloudTree} from './pointcloud/PointCloudTree';
+export {PointCloudOctree} from './pointcloud/PointCloudOctree';
 
-export {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from './geometry/PointCloudOctreeGeometry.js';
-export {PointCloudEptGeometry, PointCloudEptGeometryNode} from './geometry/PointCloudEptGeometry.js';
+export {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from './geometry/PointCloudOctreeGeometry';
+export {PointCloudEptGeometry, PointCloudEptGeometryNode} from './geometry/PointCloudEptGeometry';
 
-export {PointCloudMaterial} from './materials/PointCloudMaterial.js';
+export {PointCloudMaterial} from './materials/PointCloudMaterial';
 
-export {LASLoader} from './loaders/LASLoader.js';
-export {BinaryLoader} from './loaders/BinaryLoader.js';
-export {POCLoader} from './loaders/POCLoader.js';
-export {LASLAZLoader} from './loaders/LASLAZLoader.js';
-export {EPTLoader} from './loaders/EPTLoader.js';
-export {EPTLaszipLoader} from './loaders/ept/EPTLaszipLoader.js';
-export {EPTBinaryLoader} from './loaders/ept/EPTBinaryLoader.js';
+export {LASLoader} from './loaders/LASLoader';
+export {BinaryLoader} from './loaders/BinaryLoader';
+export {POCLoader} from './loaders/POCLoader';
+export {LASLAZLoader} from './loaders/LASLAZLoader';
+export {EPTLoader} from './loaders/EPTLoader';
+export {EPTLaszipLoader} from './loaders/ept/EPTLaszipLoader';
+export {EPTBinaryLoader} from './loaders/ept/EPTBinaryLoader';
 
-export {BasicGroup} from './objects/BasicGroup.js';
-export {Group} from './objects/Group.js';
-export {XHRFactory} from './XHRFactory.js';
+export {BasicGroup} from './objects/BasicGroup';
+export {Group} from './objects/Group';
+export {XHRFactory} from './XHRFactory';

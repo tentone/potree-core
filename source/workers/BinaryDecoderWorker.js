@@ -1,5 +1,5 @@
-import {Version} from '../Version.js';
-import {PointAttribute, PointAttributeTypes} from '../loaders/PointAttributes.js';
+import {Version} from '../Version';
+import {PointAttribute, PointAttributeTypes} from '../loaders/PointAttributes';
 
 const typedArrayMapping = {
 	'int8': Int8Array,

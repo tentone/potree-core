@@ -1,7 +1,7 @@
 import {Vector4} from 'three';
-import {PointCloudTree} from '../pointcloud/PointCloudTree.js';
-import {PointSizeType, PointColorType} from '../Potree.js';
-import {BasicGroup} from './BasicGroup.js';
+import {PointCloudTree} from '../pointcloud/PointCloudTree';
+import {PointSizeType, PointColorType} from '../Enums';
+import {BasicGroup} from './BasicGroup';
 
 class Group extends BasicGroup 
 {

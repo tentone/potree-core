@@ -1,7 +1,7 @@
 import {Vector3, Box3, BufferAttribute, BufferGeometry} from 'three';
-import {Global} from '../../Global.js';
-import {WorkerManager} from '../../utils/WorkerManager.js';
-import {XHRFactory} from '../../XHRFactory.js';
+import {Global} from '../../Global';
+import {WorkerManager} from '../../utils/WorkerManager';
+import {XHRFactory} from '../../XHRFactory';
 
 class EPTBinaryLoader
 {

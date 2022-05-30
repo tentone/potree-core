@@ -1,10 +1,10 @@
 import {Vector3, Box3, Line3, Points, Box2, Sphere, Object3D, Matrix4, NoBlending, NearestFilter, Ray, Vector4, Scene, Vector2, WebGLRenderTarget} from 'three';
-import {Utils} from '../utils/Utils.js';
-import {PointColorType} from '../Potree.js';
-import {Global} from '../Global.js';
-import {PointCloudOctreeGeometryNode} from '../geometry/PointCloudOctreeGeometry.js';
-import {PointCloudTree, PointCloudTreeNode} from './PointCloudTree.js';
-import {PointCloudMaterial} from '../materials/PointCloudMaterial.js';
+import {Utils} from '../utils/Utils';
+import {PointColorType} from '../Enums';
+import {Global} from '../Global';
+import {PointCloudOctreeGeometryNode} from '../geometry/PointCloudOctreeGeometry';
+import {PointCloudMaterial} from '../materials/PointCloudMaterial';
+import {PointCloudTree, PointCloudTreeNode} from './PointCloudTree';
 
 class PointCloudOctreeNode extends PointCloudTreeNode
 {

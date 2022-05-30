@@ -1,10 +1,10 @@
 import {Vector3, Box3, BufferGeometry, Object3D, Mesh, Matrix4, BoxBufferGeometry, Ray, MeshBasicMaterial} from 'three';
-import {Utils} from '../utils/Utils.js';
-import {updatePointClouds} from '../Potree.js';
-import {PointCloudTree} from '../pointcloud/PointCloudTree.js';
+import {Utils} from '../utils/Utils';
+import {updatePointClouds} from '../Potree';
+import {PointCloudTree} from '../pointcloud/PointCloudTree';
 
 /**
- * Potree object is a wrapper to use Potree alongside other THREE based frameworks.
+ * Group object is a wrapper to use the library alongside other THREE based frameworks.
  * 
  * The object can be used a normal Object3D.
  * 
@@ -34,7 +34,7 @@ class BasicGroup extends Mesh
 	raycast(raycaster, intersects) { }
 
 	/**
-	 * Changes the point budget to be used by potree.
+	 * Changes the point budget to be used.
 	 */
 	setPointBudget(budget) 
 	{

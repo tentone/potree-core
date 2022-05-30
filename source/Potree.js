@@ -1,83 +1,10 @@
-import {Vector3, Sphere, Matrix4, Vector4, Box3Helper, Frustum} from 'three';
-import {POCLoader} from './loaders/POCLoader.js';
-import {EPTLoader} from './loaders/EPTLoader.js';
-import {PointCloudOctree} from './pointcloud/PointCloudOctree.js';
-import {BinaryHeap} from './utils/BinaryHeap.js';
-import {Global} from './Global.js';
-
-const AttributeLocations =
-	{
-		position: 0,
-		color: 1,
-		intensity: 2,
-		classification: 3,
-		returnNumber: 4,
-		numberOfReturns: 5,
-		pointSourceID: 6,
-		indices: 7,
-		normal: 8,
-		spacing: 9
-	};
-
-const Classification =
-	{
-		DEFAULT:
-			{
-				0: new Vector4(0.5, 0.5, 0.5, 1.0),
-				1: new Vector4(0.5, 0.5, 0.5, 1.0),
-				2: new Vector4(0.63, 0.32, 0.18, 1.0),
-				3: new Vector4(0.0, 1.0, 0.0, 1.0),
-				4: new Vector4(0.0, 0.8, 0.0, 1.0),
-				5: new Vector4(0.0, 0.6, 0.0, 1.0),
-				6: new Vector4(1.0, 0.66, 0.0, 1.0),
-				7: new Vector4(1.0, 0, 1.0, 1.0),
-				8: new Vector4(1.0, 0, 0.0, 1.0),
-				9: new Vector4(0.0, 0.0, 1.0, 1.0),
-				12: new Vector4(1.0, 1.0, 0.0, 1.0),
-				DEFAULT: new Vector4(0.3, 0.6, 0.6, 0.5)
-			}
-	};
-
-const PointSizeType =
-	{
-		FIXED: 0,
-		ATTENUATED: 1,
-		ADAPTIVE: 2
-	};
-
-const PointShape =
-	{
-		SQUARE: 0,
-		CIRCLE: 1,
-		PARABOLOID: 2
-	};
-
-const PointColorType =
-	{
-		RGB: 0,
-		COLOR: 1,
-		DEPTH: 2,
-		HEIGHT: 3,
-		ELEVATION: 3,
-		INTENSITY: 4,
-		INTENSITY_GRADIENT: 5,
-		LOD: 6,
-		LEVEL_OF_DETAIL: 6,
-		POINT_INDEX: 7,
-		CLASSIFICATION: 8,
-		RETURN_NUMBER: 9,
-		SOURCE: 10,
-		NORMAL: 11,
-		PHONG: 12,
-		RGB_HEIGHT: 13,
-		COMPOSITE: 50
-	};
-
-const TreeType =
-	{
-		OCTREE: 0,
-		KDTREE: 1
-	};
+import {Vector3, Sphere, Matrix4, Box3Helper, Frustum} from 'three';
+import {POCLoader} from './loaders/POCLoader';
+import {EPTLoader} from './loaders/EPTLoader';
+import {PointCloudOctree} from './pointcloud/PointCloudOctree';
+import {BinaryHeap} from './utils/BinaryHeap';
+import {Global} from './Global';
+import {DEM} from './pointcloud/DEM';
 
 /**
  * Load a point cloud from path. Returns a promise with the object created to access the point cloud data.
@@ -85,7 +12,7 @@ const TreeType =
  * @param path
  * @param name
  */
-function loadPointCloud(path, name)
+export function loadPointCloud(path, name)
 {
 	return new Promise(function(resolve, reject) 
 	{
@@ -132,8 +59,11 @@ function loadPointCloud(path, name)
 
 }
 
-function updateVisibility(pointclouds, camera, renderer, totalPointBudget) 
+export function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 {
+	let distance;
+	let i;
+	let pointcloud;
 	let numVisibleNodes = 0;
 	let numVisiblePoints = 0;
 
@@ -165,9 +95,9 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 
 	const pointcloudTransformVersion = Global.pointcloudTransformVersion;
 
-	for (var i = 0; i < pointclouds.length; i++) 
+	for (i = 0; i < pointclouds.length; i++)
 	{
-		var pointcloud = pointclouds[i];
+		pointcloud = pointclouds[i];
 
 		if (!pointcloud.visible) 
 		{
@@ -207,7 +137,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 		const element = priorityQueue.pop();
 		let node = element.node;
 		const parent = element.parent;
-		var pointcloud = pointclouds[element.pointcloud];
+		pointcloud = pointclouds[element.pointcloud];
 		const box = node.getBoundingBox();
 		const frustum = frustums[element.pointcloud];
 		const camObjPos = camObjPositions[element.pointcloud];
@@ -304,7 +234,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 
 		// Add child nodes to priorityQueue
 		const children = node.getChildren();
-		for (var i = 0; i < children.length; i++) 
+		for (i = 0; i < children.length; i++)
 		{
 			const child = children[i];
 			let weight = 0;
@@ -314,7 +244,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 			{
 				const sphere = child.getBoundingSphere(new Sphere());
 				const center = sphere.center;
-				var distance = sphere.center.distanceTo(camObjPos);
+				distance = sphere.center.distanceTo(camObjPos);
 
 				const radius = sphere.radius;
 				const fov = camera.fov * Math.PI / 180;
@@ -341,7 +271,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 			{
 				// TODO <IMPROVE VISIBILITY>
 				const bb = child.getBoundingBox();
-				var distance = child.getBoundingSphere(new Sphere()).center.distanceTo(camObjPos);
+				distance = child.getBoundingSphere(new Sphere()).center.distanceTo(camObjPos);
 				const diagonal = bb.max.clone().sub(bb.min).length();
 				weight = diagonal / distance;
 			}
@@ -362,7 +292,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 		return p.generateDEM && p.dem instanceof DEM;
 	});
 
-	for (var pointcloud of candidates) 
+	for (pointcloud of candidates)
 	{
 		const updatingNodes = pointcloud.visibleNodes.filter((n) =>
 		{
@@ -371,7 +301,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 		pointcloud.dem.update(updatingNodes);
 	}
 
-	for (var i = 0; i < Math.min(Global.maxNodesLoading, unloadedGeometry.length); i++) 
+	for (i = 0; i < Math.min(Global.maxNodesLoading, unloadedGeometry.length); i++)
 	{
 		unloadedGeometry[i].load();
 	}
@@ -383,7 +313,7 @@ function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 	};
 }
 
-function updatePointClouds(pointclouds, camera, renderer, totalPointBudget) 
+export function updatePointClouds(pointclouds, camera, renderer, totalPointBudget)
 {
 	const result = updateVisibility(pointclouds, camera, renderer, totalPointBudget);
 
@@ -398,7 +328,7 @@ function updatePointClouds(pointclouds, camera, renderer, totalPointBudget)
 	return result;
 }
 
-function updateVisibilityStructures(pointclouds, camera, renderer) 
+export function updateVisibilityStructures(pointclouds, camera, renderer)
 {
 	const frustums = [];
 	const camObjPositions = [];
@@ -474,16 +404,3 @@ function updateVisibilityStructures(pointclouds, camera, renderer)
 		priorityQueue: priorityQueue
 	};
 }
-
-export {
-	AttributeLocations,
-	Classification,
-	PointSizeType,
-	PointShape,
-	PointColorType,
-	TreeType,
-	loadPointCloud,
-	updateVisibility,
-	updatePointClouds,
-	updateVisibilityStructures
-};

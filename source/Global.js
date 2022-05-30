@@ -1,6 +1,6 @@
 
-import {LRU} from './utils/LRU.js';
-import {WorkerManager} from './utils/WorkerManager.js';
+import {LRU} from './utils/LRU';
+import {WorkerManager} from './utils/WorkerManager';
 
 function getCurrentScript() 
 {

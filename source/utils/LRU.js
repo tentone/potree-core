@@ -1,4 +1,4 @@
-import {Global} from '../Global.js';
+import {Global} from '../Global';
 
 export class LRUItem
 {

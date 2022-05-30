@@ -1,7 +1,7 @@
 import {Vector3} from 'three';
-import {WorkerManager} from '../utils/WorkerManager.js';
-import {Global} from '../Global.js';
-import {DEMNode} from './DEMNode.js';
+import {WorkerManager} from '../utils/WorkerManager';
+import {Global} from '../Global';
+import {DEMNode} from './DEMNode';
 
 export class DEM
 {

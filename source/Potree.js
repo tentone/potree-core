@@ -2,8 +2,6 @@ import {Vector3, Sphere, Matrix4, Vector4, Box3Helper, Frustum} from 'three';
 import {POCLoader} from './loaders/POCLoader.js';
 import {EPTLoader} from './loaders/EPTLoader.js';
 import {PointCloudOctree} from './pointcloud/PointCloudOctree.js';
-import {PointCloudArena4D} from './pointcloud/PointCloudArena4D.js';
-import {PointCloudArena4DGeometry} from './geometry/PointCloudArena4DGeometry.js';
 import {BinaryHeap} from './utils/BinaryHeap.js';
 import {Global} from './Global.js';
 
@@ -81,59 +79,57 @@ const TreeType =
 		KDTREE: 1
 	};
 
-function loadPointCloud(path, name, callback) 
+/**
+ * Load a point cloud from path. Returns a promise with the object created to access the point cloud data.
+ *
+ * @param path
+ * @param name
+ */
+function loadPointCloud(path, name)
 {
-	const loaded = function(pointcloud)
+	return new Promise(function(resolve, reject) 
 	{
-		if (name !== undefined)
+		const loaded = function(pointcloud)
 		{
-			pointcloud.name = name;
-		}
-
-		callback(
+			if (name)
 			{
+				pointcloud.name = name;
+			}
+
+			resolve({
 				type: 'pointcloud_loaded',
 				pointcloud: pointcloud
 			});
-	};
+		};
 
 
-	// Potree point cloud
-	if (path.indexOf('cloud.js') > 0) 
-	{
-		POCLoader.load(path, function(geometry) 
+		// Potree point cloud
+		if (path.indexOf('cloud.js') > 0)
 		{
-			if (geometry !== undefined) 
+			POCLoader.load(path, function(geometry)
 			{
-				loaded(new PointCloudOctree(geometry));
-			}
-		});
-	}
-	else if (path.indexOf('ept.json') > 0) 
-	{
-		EPTLoader.load(path, function(geometry) 
+				if (geometry !== undefined)
+				{
+					loaded(new PointCloudOctree(geometry));
+				}
+			});
+		}
+		else if (path.indexOf('ept.json') > 0)
 		{
-			if (geometry !== undefined) 
+			EPTLoader.load(path, function(geometry)
 			{
-				loaded(new PointCloudOctree(geometry));
-			}
-		});
-	}
-	// Arena 4D point cloud
-	else if (path.indexOf('.vpc') > 0) 
-	{
-		PointCloudArena4DGeometry.load(path, function(geometry) 
+				if (geometry !== undefined)
+				{
+					loaded(new PointCloudOctree(geometry));
+				}
+			});
+		}
+		else
 		{
-			if (geometry !== undefined) 
-			{
-				loaded(new PointCloudArena4D(geometry));
-			}
-		});
-	}
-	else 
-	{
-		throw new Error('Potree: Failed to load point cloud from URL ' + path);
-	}
+			reject(new Error('Potree: Failed to load point cloud from URL ' + path));
+		}
+	});
+
 }
 
 function updateVisibility(pointclouds, camera, renderer, totalPointBudget) 

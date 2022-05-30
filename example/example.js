@@ -64,8 +64,8 @@ document.body.onload = function()
 	Potree.Global.workerPath = './source';
 
 	loadPointCloud('data/lion_takanawa_ept_bin/ept.json', new THREE.Vector3(-11, -4, 3.0));
-	// loadPointCloud('data/lion_takanawa_ept_laz/ept.json', new THREE.Vector3(-4, -4, 3.0));
-	// loadPointCloud('data/lion_takanawa/cloud.js', new THREE.Vector3(-2, -3, 0.0));
+	loadPointCloud('data/lion_takanawa_ept_laz/ept.json', new THREE.Vector3(-4, -4, 3.0));
+	loadPointCloud('data/lion_takanawa/cloud.js', new THREE.Vector3(-2, -3, 0.0));
 	loadPointCloud('data/lion_takanawa_las/cloud.js', new THREE.Vector3(3, -3, 0.0));
 	loadPointCloud('data/lion_takanawa_laz/cloud.js', new THREE.Vector3(8, -3, 0.0));
 

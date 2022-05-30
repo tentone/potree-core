@@ -11,7 +11,7 @@ import {XHRFactory} from '../../XHRFactory.js';
  *
  * Thanks to Uday Verma and Howard Butler
  */
-export class EptLaszipLoader
+export class EPTLaszipLoader
 {
 	load(node)
 	{

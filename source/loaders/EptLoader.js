@@ -10,8 +10,7 @@ export class EPTLoader
 		const url = file.substr(0, file.lastIndexOf('ept.json'));
 
 		const geometry = new PointCloudEptGeometry(url, json);
-		const root = new PointCloudEptGeometryNode(geometry);
-		geometry.root = root;
+		geometry.root = new PointCloudEptGeometryNode(geometry);
 		geometry.root.load();
 
 		callback(geometry);

@@ -1,6 +1,6 @@
 import {Vector3, Box3, Sphere} from 'three';
-import {EptBinaryLoader} from '../loaders/ept/EptBinaryLoader';
-import {EptLaszipLoader} from '../loaders/ept/EptLaszipLoader';
+import {EPTBinaryLoader} from '../loaders/ept/EPTBinaryLoader';
+import {EPTLaszipLoader} from '../loaders/ept/EPTLaszipLoader';
 import {PointCloudTreeNode} from '../pointcloud/PointCloudTree.js';
 import {Global} from '../Global.js';
 import {XHRFactory} from '../XHRFactory.js';
@@ -85,7 +85,7 @@ class PointCloudEptGeometry
 		const hierarchyType = info.hierarchyType || 'json';
 
 		const dataType = info.dataType || 'laszip';
-		this.loader = dataType === 'binary' ? new EptBinaryLoader() : new EptLaszipLoader();
+		this.loader = dataType === 'binary' ? new EPTBinaryLoader() : new EPTLaszipLoader();
 	}
 }
 

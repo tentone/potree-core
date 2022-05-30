@@ -3,7 +3,7 @@ import {Global} from '../../Global.js';
 import {WorkerManager} from '../../utils/WorkerManager.js';
 import {XHRFactory} from '../../XHRFactory.js';
 
-class EptBinaryLoader
+class EPTBinaryLoader
 {
 	load(node)
 	{
@@ -115,4 +115,4 @@ class EptBinaryLoader
 	}
 }
 
-export {EptBinaryLoader};
+export {EPTBinaryLoader};

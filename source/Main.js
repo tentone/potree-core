@@ -30,11 +30,9 @@ export {Shaders} from './materials/Shaders.js';
 export {DEM} from './pointcloud/DEM.js';
 export {DEMNode} from './pointcloud/DEMNode.js';
 export {PointCloudTree} from './pointcloud/PointCloudTree.js';
-export {PointCloudArena4D} from './pointcloud/PointCloudArena4D.js';
 export {PointCloudOctree} from './pointcloud/PointCloudOctree.js';
 
 export {PointCloudOctreeGeometry, PointCloudOctreeGeometryNode} from './geometry/PointCloudOctreeGeometry.js';
-export {PointCloudArena4DGeometry} from './geometry/PointCloudArena4DGeometry.js';
 export {PointCloudEptGeometry, PointCloudEptGeometryNode} from './geometry/PointCloudEptGeometry.js';
 
 export {PointCloudMaterial} from './materials/PointCloudMaterial.js';
@@ -44,8 +42,8 @@ export {BinaryLoader} from './loaders/BinaryLoader.js';
 export {POCLoader} from './loaders/POCLoader.js';
 export {LASLAZLoader} from './loaders/LASLAZLoader.js';
 export {EPTLoader} from './loaders/EPTLoader.js';
-export {EptLaszipLoader} from './loaders/ept/EptLaszipLoader.js';
-export {EptBinaryLoader} from './loaders/ept/EptBinaryLoader.js';
+export {EPTLaszipLoader} from './loaders/ept/EPTLaszipLoader.js';
+export {EPTBinaryLoader} from './loaders/ept/EPTBinaryLoader.js';
 
 export {BasicGroup} from './objects/BasicGroup.js';
 export {Group} from './objects/Group.js';

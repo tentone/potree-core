@@ -1,5 +1,5 @@
 import {Vector3, Box3, BufferGeometry, Object3D, Mesh, Matrix4, BoxBufferGeometry, Ray, MeshBasicMaterial} from 'three';
-import {HelperUtils} from '../utils/HelperUtils.js';
+import {Utils} from '../utils/Utils.js';
 import {updatePointClouds} from '../Potree.js';
 import {PointCloudTree} from '../pointcloud/PointCloudTree.js';
 
@@ -129,7 +129,7 @@ class BasicGroup extends Mesh
 			const pointcloud = this.pointclouds[i];
 			pointcloud.updateMatrixWorld(true);
 			const pointcloudBox = pointcloud.pcoGeometry.tightBoundingBox ? pointcloud.pcoGeometry.tightBoundingBox : pointcloud.boundingBox;
-			const boxWorld = HelperUtils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
+			const boxWorld = Utils.computeTransformedBoundingBox(pointcloudBox, pointcloud.matrixWorld);
 			box.union(boxWorld);
 		}
 

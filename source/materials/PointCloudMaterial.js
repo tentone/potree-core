@@ -11,10 +11,9 @@ import {
 	NearestFilter,
 	NoBlending,
 	RGBAFormat,
-	ShaderMaterial,
-	VertexColors
+	ShaderMaterial
 } from 'three';
-import {HelperUtils} from '../utils/HelperUtils.js';
+import {Utils} from '../utils/Utils.js';
 import {Gradients} from '../Gradients.js';
 import {Classification, PointColorType, PointShape, PointSizeType, TreeType} from '../Potree.js';
 import {Shaders} from './Shaders.js';
@@ -27,7 +26,7 @@ class PointCloudMaterial extends ShaderMaterial
 
 		this.extensions.derivatives = true;
 
-		this.visibleNodesTexture = HelperUtils.generateDataTexture(2048, 1, new Color(0xffffff));
+		this.visibleNodesTexture = Utils.generateDataTexture(2048, 1, new Color(0xffffff));
 		this.visibleNodesTexture.minFilter = NearestFilter;
 		this.visibleNodesTexture.magFilter = NearestFilter;
 
@@ -118,7 +117,7 @@ class PointCloudMaterial extends ShaderMaterial
 		this.defaultAttributeValues.indices = [0, 0, 0, 0];
 
 		this.defines = this.getDefines();
-		this.vertexColors = VertexColors;
+		this.vertexColors = false;
 
 		this.vertexShader = Shaders.vertex;
 		this.fragmentShader = Shaders.fragment;

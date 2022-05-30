@@ -1,5 +1,5 @@
 import {Vector3, Box3, Line3, Points, Box2, Sphere, Object3D, Matrix4, NoBlending, NearestFilter, Ray, Vector4, Scene, Vector2, WebGLRenderTarget} from 'three';
-import {HelperUtils} from '../utils/HelperUtils.js';
+import {Utils} from '../utils/Utils.js';
 import {PointColorType} from '../Potree.js';
 import {Global} from '../Global.js';
 import {PointCloudOctreeGeometryNode} from '../geometry/PointCloudOctreeGeometry.js';
@@ -150,7 +150,7 @@ class PointCloudOctree extends PointCloudTree
 		let box = [this.pcoGeometry.tightBoundingBox, this.getBoundingBoxWorld()].find((v) => {return v !== undefined;});
 
 		this.updateMatrixWorld(true);
-		box = HelperUtils.computeTransformedBoundingBox(box, this.matrixWorld);
+		box = Utils.computeTransformedBoundingBox(box, this.matrixWorld);
 
 		const bMin = box.min.z;
 		const bMax = box.max.z;
@@ -553,7 +553,7 @@ class PointCloudOctree extends PointCloudTree
 		this.updateMatrixWorld(true);
 		const box = this.boundingBox;
 		const transform = this.matrixWorld;
-		const tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
+		const tBox = Utils.computeTransformedBoundingBox(box, transform);
 
 		this.position.set(0, 0, 0).sub(tBox.getCenter(new Vector3()));
 	};
@@ -563,7 +563,7 @@ class PointCloudOctree extends PointCloudTree
 		this.updateMatrixWorld(true);
 		const box = this.boundingBox;
 		const transform = this.matrixWorld;
-		const tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
+		const tBox = Utils.computeTransformedBoundingBox(box, transform);
 		this.position.y += -tBox.min.y;
 	};
 
@@ -572,7 +572,7 @@ class PointCloudOctree extends PointCloudTree
 		this.updateMatrixWorld(true);
 		const box = this.boundingBox;
 		const transform = this.matrixWorld;
-		const tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
+		const tBox = Utils.computeTransformedBoundingBox(box, transform);
 
 		return tBox;
 	};

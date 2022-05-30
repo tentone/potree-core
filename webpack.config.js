@@ -5,7 +5,7 @@ const config = {
 	mode: 'development',
 	entry: './source/Main.js',
 	target: 'web',
-	externals: [NodeExternals()],
+	externals: [NodeExternals(), 'three'],
 	module: {
 		rules: [
 			{
@@ -25,10 +25,8 @@ module.exports = [
 			library: 'Potree',
 			libraryTarget: 'umd',
 			filename: 'potree.js',
-			path: path.resolve(__dirname, 'dist'),
-			clean: true
-		},
-		externals: {three: {root: 'THREE', umd: 'THREE'}}
+			path: path.resolve(__dirname, 'dist')
+		}
 	}, config)
 	// Object.assign({
 	// 	experiments: {outputModule: true},

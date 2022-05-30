@@ -1,5 +1,5 @@
 import {Vector3, Vector2, Sphere, Points, NoBlending, NearestFilter, Scene, WebGLRenderTarget} from 'three';
-import {HelperUtils} from '../utils/HelperUtils.js';
+import {Utils} from '../utils/Utils.js';
 import {Global} from '../Global.js';
 import {TreeType, PointSizeType, PointColorType} from '../Potree.js';
 import {PointCloudMaterial} from '../materials/PointCloudMaterial.js';
@@ -152,7 +152,7 @@ class PointCloudArena4D extends PointCloudTree
 		this.updateMatrixWorld(true);
 		const box = this.boundingBox;
 		const transform = this.matrixWorld;
-		const tBox = HelperUtils.computeTransformedBoundingBox(box, transform);
+		const tBox = Utils.computeTransformedBoundingBox(box, transform);
 
 		return tBox;
 	};

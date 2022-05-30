@@ -17,7 +17,7 @@ export {
 export {BinaryHeap} from './utils/BinaryHeap.js';
 
 export {LRU} from './utils/LRU.js';
-export {HelperUtils} from './utils/HelperUtils.js';
+export {Utils} from './utils/Utils.js';
 export {Version} from './Version.js';
 export {WorkerManager} from './utils/WorkerManager.js';
 

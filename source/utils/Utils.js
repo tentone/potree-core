@@ -1,6 +1,6 @@
 import {Vector3, Box3, DataTexture, NearestFilter, RGBAFormat} from 'three';
 
-export class HelperUtils
+export class Utils
 {
 	/**
 	 * Craete a new data texture with a solid color.

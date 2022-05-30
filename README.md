@@ -164,18 +164,19 @@ document.body.onresize();
     - These objects are created by the loader
 
 ### Notes
- - Since potree-core is mean to be used as library and not as a full software as potree some features are not available.
+ - Since potree-core is meant to be used as library and not as a full software as potree some features are not available.
  - EDL shading is not supported by potree core (might be added later).
-
-- GUI elements were removed from the library
-  - PotreeViewer
-  - Controls, Input, GUI, Tools
-  - Anotations, Actions, ProfileRequest
-  - Potree.startQuery, Potree.endQuery and Potree.resolveQueries
-  - Potree.timerQueries
-  - Potree.MOUSE, Potree.CameraMode
-  - PotreeRenderer, RepRenderer, Potree.Renderer
-    - JQuery, TWEEN and Proj4 dependencies
+ - Removed classification and clipping functionality.
+ - Removed Arena 4D point cloud support.
+ - GUI elements were removed from the library
+   - PotreeViewer
+   - Controls, Input, GUI, Tools
+   - Anotations, Actions, ProfileRequest
+   - Potree.startQuery, Potree.endQuery and Potree.resolveQueries
+   - Potree.timerQueries
+   - Potree.MOUSE, Potree.CameraMode
+   - PotreeRenderer, RepRenderer, Potree.Renderer
+     - JQuery, TWEEN and Proj4 dependencies
 
 
 ### Building

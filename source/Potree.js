@@ -147,6 +147,7 @@ export function updateVisibility(pointclouds, camera, renderer, totalPointBudget
 		const level = node.getLevel();
 
 		let visible = insideFrustum;
+
 		// Within 'global' total budget?
 		visible = visible && numVisiblePoints + node.getNumPoints() <= totalPointBudget;
 		// Within budget of the point cloud?

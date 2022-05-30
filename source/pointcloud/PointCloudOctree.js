@@ -241,10 +241,12 @@ class PointCloudOctree extends PointCloudTree
 
 	updateVisibleBounds()
 	{
+		let i;
+		let node;
 		const leafNodes = [];
-		for (var i = 0; i < this.visibleNodes.length; i++)
+		for (i = 0; i < this.visibleNodes.length; i++)
 		{
-			var node = this.visibleNodes[i];
+			node = this.visibleNodes[i];
 			let isLeaf = true;
 
 			for (let j = 0; j < node.children.length; j++)
@@ -269,9 +271,9 @@ class PointCloudOctree extends PointCloudTree
 		this.visibleBounds.min = new Vector3(Infinity, Infinity, Infinity);
 		this.visibleBounds.max = new Vector3(-Infinity, -Infinity, -Infinity);
 
-		for (var i = 0; i < leafNodes.length; i++)
+		for (i = 0; i < leafNodes.length; i++)
 		{
-			var node = leafNodes[i];
+			node = leafNodes[i];
 			this.visibleBounds.expandByPoint(node.getBoundingBox().min);
 			this.visibleBounds.expandByPoint(node.getBoundingBox().max);
 		}
@@ -467,7 +469,9 @@ class PointCloudOctree extends PointCloudTree
 			const start = new Vector3(profile.points[i].x, profile.points[i].y, bsWorld.center.z);
 			const end = new Vector3(profile.points[i + 1].x, profile.points[i + 1].y, bsWorld.center.z);
 
-			const closest = new Line3(start, end).closestPointToPoint(bsWorld.center, true);
+			const closest = new Vector3();
+			new Line3(start, end).closestPointToPoint(bsWorld.center, true, closest);
+
 			const distance = closest.distanceTo(bsWorld.center);
 
 			intersects = intersects || distance < bsWorld.radius + profile.width;

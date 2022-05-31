@@ -9,8 +9,8 @@ import {DEM} from './pointcloud/DEM';
 /**
  * Load a point cloud from path. Returns a promise with the object created to access the point cloud data.
  *
- * @param path
- * @param name
+ * @param path Path to the point cloud file.
+ * @param name Name of the point cloud.
  */
 export function loadPointCloud(path, name)
 {
@@ -59,6 +59,11 @@ export function loadPointCloud(path, name)
 
 }
 
+/**
+ * Update the visibility of the point cloud.
+ * 
+ * Based on the current camera frustum and the bounding box of the point cloud, the visibility of the point cloud is updated.
+ */
 export function updateVisibility(pointclouds, camera, renderer, totalPointBudget)
 {
 	let distance;
@@ -314,6 +319,15 @@ export function updateVisibility(pointclouds, camera, renderer, totalPointBudget
 	};
 }
 
+/**
+ * Updates the visibility of the given pointclouds.
+ * 
+ * @param {*} pointclouds 
+ * @param {*} camera 
+ * @param {*} renderer 
+ * @param {*} totalPointBudget 
+ * @returns 
+ */
 export function updatePointClouds(pointclouds, camera, renderer, totalPointBudget)
 {
 	const result = updateVisibility(pointclouds, camera, renderer, totalPointBudget);
@@ -329,6 +343,13 @@ export function updatePointClouds(pointclouds, camera, renderer, totalPointBudge
 	return result;
 }
 
+/**
+ * 
+ * @param {*} pointclouds 
+ * @param {*} camera 
+ * @param {*} renderer 
+ * @returns 
+ */
 export function updateVisibilityStructures(pointclouds, camera, renderer)
 {
 	const frustums = [];

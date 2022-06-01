@@ -1,8 +1,8 @@
 import {Vector3, Box3, BufferAttribute, BufferGeometry} from 'three';
-import {Global} from '../../Global';
-import {LASFile, LASDecoder} from '../LASLoader';
-import {WorkerManager} from '../../utils/WorkerManager';
-import {XHRFactory} from '../../XHRFactory';
+import {Global} from '../Global';
+import {LASFile, LASDecoder} from './LASLoader';
+import {WorkerManager} from '../utils/WorkerManager';
+import {XHRFactory} from '../XHRFactory';
 
 /**
  * laslaz code taken and adapted from plas.io js-laslaz

@@ -2,7 +2,6 @@ import {Box3} from 'three';
 
 export class Points 
 {
-	
 	constructor() 
 	{
 		this.boundingBox = new Box3();

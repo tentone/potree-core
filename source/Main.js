@@ -46,8 +46,8 @@ export {BinaryLoader} from './loaders/BinaryLoader';
 export {POCLoader} from './loaders/POCLoader';
 export {LASLAZLoader} from './loaders/LASLAZLoader';
 export {EPTLoader} from './loaders/EPTLoader';
-export {EPTLaszipLoader} from './loaders/ept/EPTLaszipLoader';
-export {EPTBinaryLoader} from './loaders/ept/EPTBinaryLoader';
+export {EPTLaszipLoader} from './loaders/EPTLaszipLoader';
+export {EPTBinaryLoader} from './loaders/EPTBinaryLoader';
 
 export {BasicGroup} from './objects/BasicGroup';
 export {Group} from './objects/Group';

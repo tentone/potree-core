@@ -1,6 +1,6 @@
 import {Vector3, Box3, Sphere} from 'three';
-import {EPTBinaryLoader} from '../loaders/ept/EPTBinaryLoader';
-import {EPTLaszipLoader} from '../loaders/ept/EPTLaszipLoader';
+import {EPTBinaryLoader} from '../loaders/EPTBinaryLoader';
+import {EPTLaszipLoader} from '../loaders/EPTLaszipLoader';
 import {PointCloudTreeNode} from '../pointcloud/PointCloudTree';
 import {Global} from '../Global';
 import {XHRFactory} from '../XHRFactory';

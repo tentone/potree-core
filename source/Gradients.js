@@ -1,5 +1,8 @@
 import {Color} from 'three';
 
+/**
+ * Gradients are used to interpolate between colors.
+ */
 export const Gradients = {
 	RAINBOW: [
 		[0, new Color(0.278, 0, 0.714)],

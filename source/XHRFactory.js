@@ -1,4 +1,10 @@
+/**
+ * XHR factory used to create XMLHttpRequest objects.
+ */
 export const XHRFactory = {
+	/**
+	 * Configuration used to create XMLHttpRequest objects.
+	 */
 	config: {
 		withCredentials: false,
 		customHeaders: [
@@ -6,6 +12,11 @@ export const XHRFactory = {
 		]
 	},
 
+	/**
+	 * Create a new XHR object.
+	 * 
+	 * @returns XHR object.
+	 */
 	createXMLHttpRequest: function() 
 	{
 		const xhr = new XMLHttpRequest();
@@ -30,6 +41,12 @@ export const XHRFactory = {
 		return xhr;
 	},
 
+	/**
+	 * Fetches a resource using the XMLHttpRequest object.
+	 * 
+	 * @param {*} resource Resource to fetch.
+	 * @returns Fetched resource.
+	 */
 	fetch: async function(resource) 
 	{
 		const headers = new Headers();

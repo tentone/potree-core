@@ -5,7 +5,7 @@ import {XHRFactory} from '../XHRFactory';
 import {Version} from '../Version';
 import {PointAttributeNames} from './PointAttributes';
 
-class BinaryLoader
+export class BinaryLoader
 {
 	constructor(version, boundingBox, scale)
 	{
@@ -157,5 +157,3 @@ class BinaryLoader
 		}, message, [message.buffer]);
 	};
 }
-
-export {BinaryLoader};

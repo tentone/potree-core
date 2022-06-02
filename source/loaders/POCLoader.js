@@ -8,10 +8,7 @@ import {LASLAZLoader} from './LASLAZLoader';
 import {BinaryLoader} from './BinaryLoader';
 
 /**
- * @class Loads mno files and returns a PointcloudOctree
- * for a description of the mno binary file format, read mnoFileFormat.txt
- *
- * @author Markus Schuetz
+ * Loads mno files and returns a PointcloudOctree for a description of the mno binary file format, read mnoFileFormat.txt
  */
 class POCLoader
 {

@@ -281,16 +281,13 @@ class PointCloudOctree extends PointCloudTree
 
 	updateMaterial(material, camera, renderer)
 	{
-		const octtreeSpacing = this.pcoGeometry.spacing * Math.max(this.scale.x, this.scale.y, this.scale.z);
-		const octreeSize = this.pcoGeometry.boundingBox.getSize(new Vector3()).x;
-
-		material.uniforms.fov.value = camera.fov * (Math.PI / 180);
-		material.uniforms.uScreenWidth.value = renderer.domElement.clientWidth;
-		material.uniforms.uScreenHeight.value = renderer.domElement.clientHeight;
-		material.uniforms.uOctreeSpacing.value = octtreeSpacing;
-		material.uniforms.near.value = camera.near;
-		material.uniforms.far.value = camera.far;
-		material.uniforms.octreeSize.value = octreeSize;
+		material.fov = camera.fov * (Math.PI / 180);
+		material.screenWidth = renderer.domElement.clientWidth;
+		material.screenHeight = renderer.domElement.clientHeight;
+		material.spacing = this.pcoGeometry.spacing * Math.max(this.scale.x, this.scale.y, this.scale.z);
+		material.near = camera.near;
+		material.far = camera.far;
+		material.uniforms.octreeSize.value = this.pcoGeometry.boundingBox.getSize(new Vector3()).x;
 
 		material.uniformsNeedUpdate = true;
 	}

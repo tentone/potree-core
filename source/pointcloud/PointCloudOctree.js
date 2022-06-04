@@ -184,27 +184,41 @@ class PointCloudOctree extends PointCloudTree
 
 	toTreeNode(geometryNode, parent)
 	{
-		const node = new PointCloudOctreeNode();
-		const sceneNode = new Points(geometryNode.geometry, this.material);
+		var node = new PointCloudOctreeNode();
+
+		var sceneNode = new THREE.Points(geometryNode.geometry, this.material);
 		sceneNode.name = geometryNode.name;
 		sceneNode.position.copy(geometryNode.boundingBox.min);
 		sceneNode.frustumCulled = true;
-		sceneNode.onBeforeRender = (renderer, scene, camera, geometry, material, group) =>
+		sceneNode.onBeforeRender = (_this, scene, camera, geometry, material, group) =>
 		{
-			let vnStart = null;
-			if (this.visibleNodeTextureOffsets)
+			if (material.program)
 			{
-				vnStart = this.visibleNodeTextureOffsets.get(node);
-			}
+				_this.getContext().useProgram(material.program.program);
 
-			const pcIndex = node.pcIndex ? node.pcIndex : this.visibleNodes.indexOf(node);
-			const level = geometryNode.getLevel();
-	
-			material.uniforms.level.value = level;
-			material.uniforms.vnStart.value = vnStart;
-			material.uniforms.uPCIndex.value = pcIndex;
-			this.updateMaterial(material, camera, renderer);
+				if (material.program.getUniforms().map.level)
+				{
+					var level = geometryNode.getLevel();
+					material.uniforms.level.value = level;
+					material.program.getUniforms().map.level.setValue(_this.getContext(), level);
+				}
+
+				if (this.visibleNodeTextureOffsets && material.program.getUniforms().map.vnStart)
+				{
+					var vnStart = this.visibleNodeTextureOffsets.get(node);
+					material.uniforms.vnStart.value = vnStart;
+					material.program.getUniforms().map.vnStart.setValue(_this.getContext(), vnStart);
+				}
+
+				if (material.program.getUniforms().map.pcIndex)
+				{
+					var i = node.pcIndex ? node.pcIndex : this.visibleNodes.indexOf(node);
+					material.uniforms.pcIndex.value = i;
+					material.program.getUniforms().map.pcIndex.setValue(_this.getContext(), i);
+				}
+			}
 		};
+
 
 		node.geometryNode = geometryNode;
 		node.sceneNode = sceneNode;

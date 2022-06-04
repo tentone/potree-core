@@ -1,7 +1,10 @@
 import {Matrix4, OrthographicCamera} from 'three';
 import {PointCloudTree} from '../pointcloud/PointCloudTree';
-import {PointSizeType, PointColorType} from '../Enums';
+import {PointSizeType, PointColorType, AttributeLocations} from '../Enums';
 import {Shader} from '../Shader';
+import {WebGLTexture} from '../WebGLTexture';
+import {WebGLBuffer} from '../WebGLBuffer';
+import {PointCloudOctreeNode} from '../pointcloud/PointCloudOctree';
 import {BasicGroup} from './BasicGroup';
 
 export class Group extends BasicGroup 
@@ -80,6 +83,150 @@ export class Group extends BasicGroup
         {octrees: octrees};
 
 		return result;
+	}
+
+	createBuffer(gl, geometry)
+	{
+		var webglBuffer = new WebGLBuffer();
+		webglBuffer.vao = gl.createVertexArray();
+		webglBuffer.numElements = geometry.attributes.position.count;
+
+		gl.bindVertexArray(webglBuffer.vao);
+
+		for (var attributeName in geometry.attributes)
+		{
+			var bufferAttribute = geometry.attributes[attributeName];
+
+			var vbo = gl.createBuffer();
+			gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+			gl.bufferData(gl.ARRAY_BUFFER, bufferAttribute.array, gl.STATIC_DRAW);
+
+			var attributeLocation = AttributeLocations[attributeName];
+			var normalized = bufferAttribute.normalized;
+			var type = this.types.get(bufferAttribute.array.constructor);
+
+			if (type !== undefined)
+			{
+				gl.vertexAttribPointer(attributeLocation, bufferAttribute.itemSize, type, normalized, 0, 0);
+				gl.enableVertexAttribArray(attributeLocation);
+			}
+
+			webglBuffer.vbos.set(attributeName,
+				{
+					handle: vbo,
+					name: attributeName,
+					count: bufferAttribute.count,
+					itemSize: bufferAttribute.itemSize,
+					type: geometry.attributes.position.array.constructor,
+					version: 0
+				});
+		}
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, null);
+		gl.bindVertexArray(null);
+
+		return webglBuffer;
+	}
+
+	renderNodes(renderer, octree, nodes, visibilityTextureData, camera, shader)
+	{
+		var gl = renderer.getContext();
+		var view = camera.matrixWorldInverse;
+
+		var worldView = new Matrix4();
+		var mat4holder = new Float32Array(16);
+
+		for (var node of nodes)
+		{
+			var world = node.sceneNode.matrixWorld;
+			worldView.multiplyMatrices(view, world);
+
+			if (visibilityTextureData)
+			{
+				var vnStart = visibilityTextureData.offsets.get(node);
+				shader.setUniform1f('uVNStart', vnStart);
+			}
+
+			var level = node.getLevel();
+			shader.setUniform('uDebug', node.debug === true);
+
+			var isLeaf = Object.keys(node.children).length === 0;
+			shader.setUniform('uIsLeafNode', isLeaf);
+
+			// TODO <consider passing matrices in an array to avoid uniformMatrix4fv overhead>
+			var lModel = shader.uniformLocations['modelMatrix'];
+			if (lModel)
+			{
+				mat4holder.set(world.elements);
+				gl.uniformMatrix4fv(lModel, false, mat4holder);
+			}
+
+			var lModelView = shader.uniformLocations['modelViewMatrix'];
+			mat4holder.set(worldView.elements);
+			gl.uniformMatrix4fv(lModelView, false, mat4holder);
+
+			shader.setUniform1f('uLevel', level);
+			shader.setUniform1f('uNodeSpacing', node.geometryNode.estimatedSpacing);
+			shader.setUniform1f('uPCIndex', 0);
+
+			/*
+			if(shadowMaps.length > 0)
+			{
+				var lShadowMap = shader.uniformLocations["uShadowMap[0]"];
+
+				shader.setUniform3f("uShadowColor", material.uniforms.uShadowColor.value);
+
+				var bindingStart = 5;
+				var bindingPoints = new Array(shadowMaps.length).fill(bindingStart).map((a, i) => (a + i));
+				gl.uniform1iv(lShadowMap, bindingPoints);
+
+				for(var i = 0; i < shadowMaps.length; i++)
+				{
+					var shadowMap = shadowMaps[i];
+					var bindingPoint = bindingPoints[i];
+					var glTexture = renderer.properties.get(shadowMap.target.texture).__webglTexture;
+
+					gl.activeTexture(gl[`TEXTURE${bindingPoint}`]);
+					gl.bindTexture(gl.TEXTURE_2D, glTexture);
+				}
+
+				var worldViewMatrices = shadowMaps.map(sm => sm.camera.matrixWorldInverse).map(view => new THREE.Matrix4().multiplyMatrices(view, world))
+
+				var flattenedMatrices = [].concat(...worldViewMatrices.map(c => c.elements));
+				var lWorldView = shader.uniformLocations["uShadowWorldView[0]"];
+				gl.uniformMatrix4fv(lWorldView, false, flattenedMatrices);
+
+				flattenedMatrices = [].concat(...shadowMaps.map(sm => sm.camera.projectionMatrix.elements));
+				var lProj = shader.uniformLocations["uShadowProj[0]"];
+				gl.uniformMatrix4fv(lProj, false, flattenedMatrices);
+			}
+			*/
+
+			var geometry = node.geometryNode.geometry;
+			var webglBuffer = null;
+			if (!this.buffers.has(geometry))
+			{
+				webglBuffer = this.createBuffer(gl, geometry);
+				this.buffers.set(geometry, webglBuffer);
+			}
+			else
+			{
+				webglBuffer = this.buffers.get(geometry);
+				for (var attributeName in geometry.attributes)
+				{
+					var attribute = geometry.attributes[attributeName];
+					if (attribute.version > webglBuffer.vbos.get(attributeName).version)
+					{
+						this.updateBuffer(gl, geometry);
+					}
+				}
+			}
+
+			gl.bindVertexArray(webglBuffer.vao);
+			gl.drawArrays(gl.POINTS, 0, webglBuffer.numElements);
+		}
+
+		gl.bindVertexArray(null);
 	}
 
 	renderOctree(renderer, octree, nodes, camera) 
@@ -245,12 +392,6 @@ export class Group extends BasicGroup
 		shader.setUniform1i('gradient', currentTextureBindingPoint);
 		gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
 		gl.bindTexture(gradientTexture.target, gradientTexture.id);
-		currentTextureBindingPoint++;
-
-		var classificationTexture = this.textures.get(material.classificationTexture);
-		shader.setUniform1i('classificationLUT', currentTextureBindingPoint);
-		gl.activeTexture(gl.TEXTURE0 + currentTextureBindingPoint);
-		gl.bindTexture(classificationTexture.target, classificationTexture.id);
 		currentTextureBindingPoint++;
 
 		if (material.snapEnabled === true)

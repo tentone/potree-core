@@ -140,7 +140,7 @@ export class Shader
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if (!locationl)
+		if (!location)
 		{
 			return;
 		}
@@ -154,7 +154,7 @@ export class Shader
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if (!locationl)
+		if (!location)
 		{
 			return;
 		}
@@ -167,7 +167,7 @@ export class Shader
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if (!locationl)
+		if (!location)
 		{
 			return;
 		}
@@ -180,7 +180,7 @@ export class Shader
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if (!locationl)
+		if (!location)
 		{
 			return;
 		}
@@ -193,7 +193,7 @@ export class Shader
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if (!locationl)
+		if (!location)
 		{
 			return;
 		}
@@ -206,7 +206,7 @@ export class Shader
 		const gl = this.gl;
 		const location = this.uniformLocations[name];
 
-		if (!locationl)
+		if (!location)
 		{
 			return;
 		}

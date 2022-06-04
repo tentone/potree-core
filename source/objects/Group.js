@@ -1,9 +1,10 @@
 import {Matrix4, OrthographicCamera} from 'three';
 import {PointCloudTree} from '../pointcloud/PointCloudTree';
 import {PointSizeType, PointColorType} from '../Enums';
+import {Shader} from '../Shader';
 import {BasicGroup} from './BasicGroup';
 
-class Group extends BasicGroup 
+export class Group extends BasicGroup 
 {
 	constructor() 
 	{
@@ -312,5 +313,3 @@ class Group extends BasicGroup
 		gl.activeTexture(gl.TEXTURE0);
 	}
 }
-
-export {Group};

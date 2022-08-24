@@ -21,7 +21,7 @@ class BasicGroup extends THREE.Mesh {
 
     this.rotation.set(-Math.PI / 2, 0, 0);
 
-    this.frustumCulled = true;
+    this.frustumCulled = false;
     this.pointclouds = [];
 
     this.nodeSize = 30;

@@ -154,6 +154,7 @@ varying float vLogDepth;
 varying vec3 vViewPosition;
 varying float vRadius;
 varying float vPointSize;
+varying float vHidden;
 
 float round(float number)
 {
@@ -790,8 +791,9 @@ void main()
 {
 	if (isHiddenClassification() || isHiddenPointSourceID())
 	{
-		gl_Position = vec4(100.0, 100.0, 100.0, 1.0); // Outside clip space
-		return; // Note: 'discard' only supported in fragment shaders
+ 		// Will be discard-ed by fragment shader
+ 		vHidden = 1.0;
+		return;
 	}
 
 	vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
@@ -943,9 +945,14 @@ varying vec3 vViewPosition;
 varying float vRadius;
 varying float vPointSize;
 varying vec3 vPosition;
+varying float vHidden;
 
 void main()
 {
+	if (vHidden > 0.5) {
+		discard;
+	}
+
 	vec3 color = vColor;
 	float depth = gl_FragCoord.z;
 

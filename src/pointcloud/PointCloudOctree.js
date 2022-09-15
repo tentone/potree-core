@@ -654,7 +654,7 @@ class PointCloudOctree extends PointCloudTree {
 		let height = Math.ceil(getVal(params.height, size.height));
 
 		let pointSizeType = getVal(params.pointSizeType, this.material.pointSizeType);
-		let pointSize = getVal(params.pointSize, this.material.size);
+		let pointSize = Math.max(10, getVal(params.pointSize, this.material.size));
 
 		let nodes = this.nodesOnRay(this.visibleNodes, ray);
 

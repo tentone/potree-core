@@ -21,6 +21,9 @@ module.exports = {
   },
 
   resolve: {
+    alias: {
+      three: path.resolve(__dirname, 'node_modules', 'three')
+    },
     extensions: ['.js']
   },
 
@@ -53,7 +56,10 @@ module.exports = {
   ],
 
   externalsPresets: { node: true },
-  externals: [nodeExternals()],
+  externals: [
+    nodeExternals(),
+    'three',
+  ],
 
   stats: {
     children: true,

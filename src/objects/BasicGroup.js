@@ -75,7 +75,7 @@ class BasicGroup extends THREE.Mesh {
     } else {
       // Frustrum culling with box geometry causes semi-transparent non-Potree objects to be cropped
       // TODO Is there a better solution
-      this.geometry = new THREE.BoxBufferGeometry(0, 0, 0);
+      this.geometry = new THREE.BoxGeometry(0, 0, 0);
     }
   }
 

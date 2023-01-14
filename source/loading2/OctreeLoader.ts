@@ -400,7 +400,7 @@ export class OctreeLoader
 		{
 			let {name, numElements, min, max} = jsonAttribute;
 
-			let type = typenameTypeattributeMap[jsonAttribute.type]; // Fix the typing, currently jsonAttribute has type "never"
+			let type = typenameTypeattributeMap[jsonAttribute.type]; // Fix the typing, currently jsonAttribute has type 'never'
 
 			let potreeAttributeName = replacements[name] ? replacements[name] : name;
 

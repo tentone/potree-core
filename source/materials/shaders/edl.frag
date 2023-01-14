@@ -1,7 +1,5 @@
-// 
 // adapted from the EDL shader code from Christian Boucheny in cloud compare:
 // https://github.com/cloudcompare/trunk/tree/master/plugins/qEDL/shaders/EDL
-//
 
 uniform float screenWidth;
 uniform float screenHeight;

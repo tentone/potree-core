@@ -364,6 +364,7 @@ export class PointCloudMaterial extends RawShaderMaterial
   	this.defaultAttributeValues.indices = [0, 0, 0, 0];
 
   	this.vertexColors = true;
+	
   	// throw new Error('Not implemented');
   	// this.extensions.fragDepth = true;
 
@@ -504,7 +505,7 @@ export class PointCloudMaterial extends RawShaderMaterial
   	}
 
 
-  	// If "#version 300 es" exists as a line in shaderSrc, remove it and add it as the first element in the parts array
+  	// If '#version 300 es' exists as a line in shaderSrc, remove it and add it as the first element in the parts array
   	const versionLine = shaderSrc.match(/^\s*#version\s+300\s+es\s*\n/);
   	if (versionLine) 
   	{

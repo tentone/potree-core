@@ -1,16 +1,16 @@
-import {PointAttribute, PointAttributeTypes} from "./PointAttributes.ts";
+import {PointAttribute, PointAttributeTypes} from './PointAttributes.ts';
 
 const typedArrayMapping = {
-	"int8":   Int8Array,
-	"int16":  Int16Array,
-	"int32":  Int32Array,
-	"int64":  Float64Array,
-	"uint8":  Uint8Array,
-	"uint16": Uint16Array,
-	"uint32": Uint32Array,
-	"uint64": Float64Array,
-	"float":  Float32Array,
-	"double": Float64Array,
+	'int8':   Int8Array,
+	'int16':  Int16Array,
+	'int32':  Int32Array,
+	'int64':  Float64Array,
+	'uint8':  Uint8Array,
+	'uint16': Uint16Array,
+	'uint32': Uint32Array,
+	'uint64': Float64Array,
+	'float':  Float32Array,
+	'double': Float64Array,
 };
 
 // Potree = {};
@@ -55,7 +55,7 @@ onmessage = function (event) {
 	let numOccupiedCells = 0;
 	for (let pointAttribute of pointAttributes.attributes) {
 		
-		if(["POSITION_CARTESIAN", "position"].includes(pointAttribute.name)){
+		if(['POSITION_CARTESIAN', 'position'].includes(pointAttribute.name)){
 			let buff = new ArrayBuffer(numPoints * 4 * 3);
 			let positions = new Float32Array(buff);
 		
@@ -79,7 +79,7 @@ onmessage = function (event) {
 			}
 
 			attributeBuffers[pointAttribute.name] = { buffer: buff, attribute: pointAttribute };
-		}else if(["RGBA", "rgba"].includes(pointAttribute.name)){
+		}else if(['RGBA', 'rgba'].includes(pointAttribute.name)){
 			let buff = new ArrayBuffer(numPoints * 4);
 			let colors = new Uint8Array(buff);
 
@@ -106,16 +106,16 @@ onmessage = function (event) {
 			let [offset, scale] = [0, 1];
 
 			const getterMap = {
-				"int8":   view.getInt8,
-				"int16":  view.getInt16,
-				"int32":  view.getInt32,
-				// "int64":  view.getInt64,
-				"uint8":  view.getUint8,
-				"uint16": view.getUint16,
-				"uint32": view.getUint32,
-				// "uint64": view.getUint64,
-				"float":  view.getFloat32,
-				"double": view.getFloat64,
+				'int8':   view.getInt8,
+				'int16':  view.getInt16,
+				'int32':  view.getInt32,
+				// 'int64':  view.getInt64,
+				'uint8':  view.getUint8,
+				'uint16': view.getUint16,
+				'uint32': view.getUint32,
+				// 'uint64': view.getUint64,
+				'float':  view.getFloat32,
+				'double': view.getFloat64,
 			};
 			const getter = getterMap[pointAttribute.type.name].bind(view);
 
@@ -159,7 +159,7 @@ onmessage = function (event) {
 			indices[i] = i;
 		}
 		
-		attributeBuffers["INDICES"] = { buffer: buff, attribute: PointAttribute.INDICES };
+		attributeBuffers['INDICES'] = { buffer: buff, attribute: PointAttribute.INDICES };
 	}
 
 
@@ -216,7 +216,7 @@ onmessage = function (event) {
 		transferables.push(message.attributeBuffers[property].buffer);
 	}
 	transferables.push(buffer);
-	// console.log("new", message)
+	// console.log('new', message)
 
 	postMessage(message, transferables);
 };

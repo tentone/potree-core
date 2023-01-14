@@ -7,8 +7,8 @@ export enum WorkerType {
 	DECODER_WORKER = 'DECODER_WORKER',
 }
 
-// Worker JS names: "BinaryDecoderWorker.js", "DEMWorker.js", "EptBinaryDecoderWorker.js", "EptLaszipDecoderWorker.js",
-// EptZstandardDecoder_preamble.js", "EptZstandardDecoderWorker.js", "LASDecoderWorker.js", "LASLAZWorker.js", "LazLoaderWorker.js"
+// Worker JS names: 'BinaryDecoderWorker.js', 'DEMWorker.js', 'EptBinaryDecoderWorker.js', 'EptLaszipDecoderWorker.js',
+// EptZstandardDecoder_preamble.js', 'EptZstandardDecoderWorker.js', 'LASDecoderWorker.js', 'LASLAZWorker.js', 'LazLoaderWorker.js'
 
 function createWorker(type: WorkerType): Worker 
 {
@@ -16,7 +16,7 @@ function createWorker(type: WorkerType): Worker
 	switch (type) 
 	{
 	case WorkerType.DECODER_WORKER_BROTLI: {
-		// const worker = require("./brotli-decoder.worker.js");
+		// const worker = require('./brotli-decoder.worker.js');
 		// return new worker();
 		// return new Worker(
 		// 	new URL('./brotli-decoder.worker.js', import.meta.url),
@@ -25,7 +25,7 @@ function createWorker(type: WorkerType): Worker
 		return new BrotliDecoderWorker();
 	}
 	case WorkerType.DECODER_WORKER: {
-		// let ctor = require("./decoder.worker.js");
+		// let ctor = require('./decoder.worker.js');
 		// return new ctor();
 		// return new Worker(
 		// 	new URL('./decoder.worker.js', import.meta.url),

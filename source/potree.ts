@@ -68,7 +68,7 @@ export class Potree implements IPotree
 		}
 		else if (url === 'metadata.json') 
 		{
-			// throw new Error("Not implemented")
+			// throw new Error('Not implemented')
 			return await loadOctree(url, getUrl, xhrRequest).then((geometry: OctreeGeometry) => {return new PointCloudOctree(this, geometry);});
 		}
 		throw new Error('Unsupported file type');

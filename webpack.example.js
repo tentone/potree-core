@@ -29,8 +29,11 @@ module.exports = {
 				exclude: /node_modules/,
 			},
 			{
-				test: /\.(vs|fs|glsl|vert|frag)$/,
+				test: /\.(vert|frag)$/,
 				loader: 'raw-loader',
+				options: {
+				  esModule: true,
+				},
 			},
 			{
 				test: /\.html$/,

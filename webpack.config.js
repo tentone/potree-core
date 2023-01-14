@@ -30,8 +30,11 @@ export default {
         exclude: /node_modules/,
       },
       {
-        test: /\.(vs|fs|glsl|vert|frag)$/,
-        loader: 'raw-loader'
+        test: /\.(vert|frag)$/,
+        loader: 'raw-loader',
+        options: {
+          esModule: true,
+        },
       }
     ],
   },

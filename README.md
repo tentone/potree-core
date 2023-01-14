@@ -3,10 +3,10 @@
 [![npm version](https://badge.fury.io/js/potree-core.svg)](https://badge.fury.io/js/potree-core)
 [![GitHub version](https://badge.fury.io/gh/tentone%2Fpotree-core.svg)](https://badge.fury.io/gh/tentone%2Fpotree-core)
 
- - This project is based on Potree V1.6.
+ - This project was originally based on Potree 1.6 and is now since version 2.0 based on [fork]https://github.com/shiukaheng/potree-loader] of the [Potree-Loader](https://github.com/pnext/three-loader).
  - Potree is a web based pouint cloud visualizer project created by Markus Schütz.
  - This project contains only the main parts of the potree project adapted to be more easily used as a independent library (I have only adapted code from the original repository).
- - Support for pointclouds from LAS, LAZ, Binary files and Grehound server.
+ - Support for pointclouds from LAS, LAZ, Binary files and Greyhound server.
  - Point clouds are automatically updated, frustum culling is used to avoid unnecessary updates (better update performance for multiple point clouds).
  - Supports logarithmic depth buffer (just by enabling it on the threejs renderer), useful for large scale visualization.
 

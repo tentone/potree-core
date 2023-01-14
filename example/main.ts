@@ -1,6 +1,5 @@
 import { Vector3 } from 'three';
-import {MapControls} from 'three/examples/jsm/controls/OrbitControls.js';
-import { PointCloudOctree } from '../src';
+import { PointCloudOctree } from '../source';
 import { Viewer } from './viewer';
 import "./main.css"
 

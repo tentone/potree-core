@@ -1,7 +1,3 @@
-// -------------------------------------------------------------------------------------------------
-// Converted to Typescript and adapted from https://github.com/potree/potree
-// -------------------------------------------------------------------------------------------------
-
 import {Box3, Vector3} from 'three';
 import {PointAttributes, PointAttributeStringName} from '../point-attributes';
 import {PointCloudOctreeGeometry} from '../point-cloud-octree-geometry';

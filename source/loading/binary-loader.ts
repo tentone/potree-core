@@ -1,6 +1,3 @@
-// -------------------------------------------------------------------------------------------------
-// Converted to Typescript and adapted from https://github.com/potree/potree
-// -------------------------------------------------------------------------------------------------
 
 import {Box3, BufferAttribute, BufferGeometry, Uint8BufferAttribute, Vector3} from 'three';
 import {PointAttributeName, PointAttributeType} from '../point-attributes';
@@ -8,7 +5,7 @@ import {PointCloudOctreeGeometryNode} from '../point-cloud-octree-geometry-node'
 import {Version} from '../version';
 import {GetUrlFn, XhrRequest} from './types';
 
-import ClassicWorker from '../workers/binary-decoder.worker.js?worker&inline';
+const ClassicWorker = require('../workers/binary-decoder.worker.js').default;
 
 interface AttributeData {
   attribute: {

@@ -1,9 +1,3 @@
-/* global onmessage:true postMessage:false Module */
-/* exported onmessage */
-// laz-loader-worker.js
-//
-
-// importScripts('laz-perf.js');
 
 let instance = null; // laz-perf instance
 

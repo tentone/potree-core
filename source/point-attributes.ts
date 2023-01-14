@@ -1,6 +1,3 @@
-// -------------------------------------------------------------------------------------------------
-// Converted to Typescript and adapted from https://github.com/potree/potree
-// -------------------------------------------------------------------------------------------------
 
 export enum PointAttributeName {
   POSITION_CARTESIAN = 0, // float x, y, z;

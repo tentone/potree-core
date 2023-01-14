@@ -1,4 +1,3 @@
-import { handleMessage } from './binary-decoder-worker-internal';
+import { handleMessage } from './binary-decoder-worker-internal.ts';
 
-/*eslint-disable */
 onmessage = handleMessage;

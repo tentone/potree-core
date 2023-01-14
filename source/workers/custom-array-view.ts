@@ -1,10 +1,3 @@
-/**
- * Adapted from Potree.js http://potree.org
- * Potree License: https://github.com/potree/potree/blob/1.5/LICENSE
- */
-
-// http://jsperf.com/uint8array-vs-dataview3/3
-// tslint:disable:no-bitwise
 export class CustomArrayView 
 {
 	private u8: Uint8Array;
@@ -49,4 +42,3 @@ export class CustomArrayView
 		return this.u8[i];
 	}
 }
-// tslint:enable:no-bitwise

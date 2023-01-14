@@ -14,14 +14,14 @@ module.exports = {
 		port: 5000,
 	},
 	resolve: {
-		extensions: ['.ts', '.tsx', '.js'],
+		extensions: ['.ts', '.tsx', '.js', '.frag', '.vert'],
 	},
 	module: {
 		rules: [
 			{
 				test: /\.worker\.js$/,
 				loader: 'worker-loader',
-				options: { inline: 'no-fallback' },
+				options: {inline: 'no-fallback'},
 			},
 			{
 				test: /\.tsx?$/,

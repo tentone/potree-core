@@ -182,6 +182,7 @@ export class Potree implements IPotree
 			{
 				if (node.loaded && loadedToGPUThisFrame < MAX_LOADS_TO_GPU) 
 				{
+					// @ts-ignore
 					node = pointCloud.toTreeNode(node, parentNode);
 					loadedToGPUThisFrame++;
 				}
@@ -203,7 +204,9 @@ export class Potree implements IPotree
 
 			if (isTreeNode(node)) 
 			{
+				// @ts-ignore
 				this.updateTreeNodeVisibility(pointCloud, node, visibleNodes);
+				// @ts-ignore
 				pointCloud.visibleGeometry.push(node.geometryNode);
 			}
 
@@ -425,6 +428,7 @@ export class Potree implements IPotree
 				// Hide any previously visible nodes. We will later show only the needed ones.
 				if (isTreeNode(pointCloud.root)) 
 				{
+					// @ts-ignore
 					pointCloud.hideDescendants(pointCloud?.root?.sceneNode);
 				}
 

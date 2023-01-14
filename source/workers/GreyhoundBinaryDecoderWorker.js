@@ -1,6 +1,3 @@
-/* global onmessage:true postMessage:false Module */
-/* exported onmessage */
-// http://jsperf.com/uint8array-vs-dataview3/3
 function CustomView(buffer) {
   this.buffer = buffer;
   this.u8 = new Uint8Array(buffer);
@@ -71,7 +68,6 @@ let decompress = function(schema, input, numPoints) {
   return ret.buffer;
 };
 
-// Potree = {};
 
 onmessage = function(event) {
   let NUM_POINTS_BYTES = 4;

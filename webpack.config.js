@@ -12,9 +12,9 @@ export default {
       type: 'module',
     },
   },
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js'],
-  },
+	resolve: {
+		extensions: ['.ts', '.tsx', '.js', '.frag', '.vert'],
+	},
   plugins: [],
   externals: ['three'],
   module: {
@@ -29,7 +29,10 @@ export default {
         loader: 'ts-loader',
         exclude: /node_modules/,
       },
-      {test: /\.(vs|fs|glsl|vert|frag)$/, loader: 'raw-loader'},
+      {
+        test: /\.(vs|fs|glsl|vert|frag)$/,
+        loader: 'raw-loader'
+      }
     ],
   },
 };

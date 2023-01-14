@@ -454,6 +454,8 @@ export class PointCloudOctreePicker
 	private static getPickState() 
 	{
 		const scene = new Scene();
+
+    // @ts-ignore
 		scene.autoUpdate = false;
 
 		const material = new PointCloudMaterial();

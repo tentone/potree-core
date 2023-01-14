@@ -1,12 +1,12 @@
-const path = require('path');
+import path from 'path';
 
-module.exports = {
+export default {
   entry: './source/index.ts',
   experiments: {
     outputModule: true,
   },
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve('dist'),
     filename: 'index.js',
     library: {
       type: 'module',

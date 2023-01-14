@@ -1,6 +1,6 @@
-const baseConfig = require('./webpack.config');
+import baseConfig from './webpack.config.js';
 
-module.exports = Object.assign(baseConfig, {
+export default Object.assign(baseConfig, {
   devtool: false,
   stats: 'normal',
   mode: 'production',

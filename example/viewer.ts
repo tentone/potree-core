@@ -1,5 +1,5 @@
 import { PerspectiveCamera, Scene, WebGLRenderer } from 'three';
-import { PointCloudOctree, Potree } from '../source';
+import { PointCloudOctree, Potree } from '../source/index';
 
 export class Viewer {
   /**

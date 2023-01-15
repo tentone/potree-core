@@ -2,7 +2,7 @@ import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import config from './webpack.config.js';
 
-module.exports = {
+export default {
 	context: path.resolve('./example'),
 	entry: './main.ts',
 	output: {

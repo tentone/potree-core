@@ -41,8 +41,8 @@ import {
 import {IClassification, IGradient, IUniform} from './types';
 import {ColorEncoding} from './color-encoding';
 
-const VertShader = require('./shaders/pointcloud.vs');
-const FragShader = require('./shaders/pointcloud.fs');
+const VertShader = require('./shaders/pointcloud.vs').default;
+const FragShader = require('./shaders/pointcloud.fs').default;
 
 export interface IPointCloudMaterialParameters {
   size: number;
@@ -466,8 +466,8 @@ export class PointCloudMaterial extends RawShaderMaterial
   	// We only perform gamma and brightness/contrast calculations per point if values are specified.
   	if (
   		this.rgbGamma !== DEFAULT_RGB_GAMMA ||
-      this.rgbBrightness !== DEFAULT_RGB_BRIGHTNESS ||
-      this.rgbContrast !== DEFAULT_RGB_CONTRAST
+	  this.rgbBrightness !== DEFAULT_RGB_BRIGHTNESS ||
+	  this.rgbContrast !== DEFAULT_RGB_CONTRAST
   	) 
   	{
   		define('use_rgb_gamma_contrast_brightness');
@@ -528,7 +528,7 @@ export class PointCloudMaterial extends RawShaderMaterial
   	this.clipBoxes = clipBoxes;
 
   	const doUpdate =
-      this.numClipBoxes !== clipBoxes.length && (clipBoxes.length === 0 || this.numClipBoxes === 0);
+	  this.numClipBoxes !== clipBoxes.length && (clipBoxes.length === 0 || this.numClipBoxes === 0);
 
   	this.numClipBoxes = clipBoxes.length;
   	this.setUniform('clipBoxCount', this.numClipBoxes);
@@ -689,7 +689,7 @@ export class PointCloudMaterial extends RawShaderMaterial
 
   	if (
   		this.pointSizeType === PointSizeType.ADAPTIVE ||
-      this.pointColorType === PointColorType.LOD
+	  this.pointColorType === PointColorType.LOD
   	) 
   	{
   		this.updateVisibilityTextureData(visibleNodes);
@@ -765,14 +765,10 @@ export class PointCloudMaterial extends RawShaderMaterial
   		}
 
   		materialUniforms.pcIndex.value =
-        pcIndex !== undefined ? pcIndex : octree.visibleNodes.indexOf(node);
-
-  		// Note: when changing uniforms in onBeforeRender, the flag uniformsNeedUpdate has to be
-  		// set to true to instruct ThreeJS to upload them. See also
-  		// https://github.com/mrdoob/three.js/issues/9870#issuecomment-368750182.
+		pcIndex !== undefined ? pcIndex : octree.visibleNodes.indexOf(node);
 
   		// Remove the cast to any after updating to Three.JS >= r113
-  		(material as any) /* ShaderMaterial*/.uniformsNeedUpdate = true;
+  		(material as RawShaderMaterial).uniformsNeedUpdate = true;
   	};
   }
 }

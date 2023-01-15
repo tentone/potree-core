@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-undef
-module.exports = {
+export default {
 	root: true,
 	parserOptions: {
 		sourceType: 'module',
@@ -11,7 +11,7 @@ module.exports = {
 		'arrow-body-style': ['error', 'always'],
 		'arrow-parens': 'error',
 		'brace-style': ['error', 'allman', {allowSingleLine: true}],
-		camelcase: 'off', // ["error", {"ignoreGlobals": true}],
+		camelcase: 'off',
 		indent: ['error', 'tab'],
 		complexity: 'off',
 		semi: ['error', 'always'],

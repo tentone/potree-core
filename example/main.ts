@@ -18,8 +18,6 @@ camera.lookAt(new Vector3());
 let pointCloud: PointCloudOctree | undefined;
 let loaded: boolean = false;
 
-
-
 const unloadBtn = document.createElement('button');
 unloadBtn.textContent = 'Unload';
 unloadBtn.addEventListener('click', () => {

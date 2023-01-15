@@ -9,9 +9,9 @@
 	"files": ["dist"],
 	"type": "module",
 	"scripts": {
-		"start": "webpack --mode development --watch --progress --stats-children",
+		"dev": "webpack --mode development --watch --progress --stats-children",
 		"build": "webpack --mode production --config webpack.prod.js",
-		"example": "npm run build --stats-children && webpack-dev-server --config webpack.example.js --mode development --progress --port 5200",
+		"start": "npm run build && webpack-dev-server --config webpack.example.js --mode development --progress --port 5200",
 		"docs": "jsdoc -d docs source",
 		"pub": "npm run build && npm publish --access public .",
 		"lint": "eslint --ext .js source",

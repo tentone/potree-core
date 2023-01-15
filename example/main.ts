@@ -30,12 +30,7 @@ unloadBtn.addEventListener('click', () => {
   pointCloud = undefined;
 });
 
-viewer
-.load(
-  'metadata.json',
-  'https://static.thelostmetropolis.org/BigShotCleanV2/',
-)
-.then(pco => {
+viewer.load('metadata.json', 'https://static.thelostmetropolis.org/BigShotCleanV2/').then(pco => {
   pointCloud = pco;
   pointCloud.material.size = 1.0;
   pointCloud.material.shape = 2;
@@ -44,6 +39,5 @@ viewer
   pointCloud.position.set(0, -2, 1)
   pointCloud.scale.set(.1, .1, .1);
   viewer.add(pco);
-})
-.catch(err => console.error(err));
+});
 

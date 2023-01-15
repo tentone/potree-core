@@ -1,10 +1,7 @@
-import baseConfig from './webpack.config.js';
+import config from './webpack.config.js';
 
-export default Object.assign(baseConfig, {
+export default Object.assign(config, {
   devtool: false,
-  stats: 'normal',
-  mode: 'production',
-  plugins: [
-    ...baseConfig.plugins,
-  ],
+  // stats: 'normal',
+  mode: 'production'
 });

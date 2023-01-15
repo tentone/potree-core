@@ -16,8 +16,7 @@ import {
 	WebGLRenderer,
 	WebGLRenderTarget
 } from 'three';
-import VertShader from './shaders/pointcloud.vert';
-import FragShader from './shaders/pointcloud.frag';
+
 import {
 	DEFAULT_HIGHLIGHT_COLOR,
 	DEFAULT_MAX_POINT_SIZE,
@@ -41,6 +40,9 @@ import {
 } from './texture-generation';
 import {IClassification, IGradient, IUniform} from './types';
 import {ColorEncoding} from './color-encoding';
+
+const VertShader = require('./shaders/pointcloud.vs');
+const FragShader = require('./shaders/pointcloud.fs');
 
 export interface IPointCloudMaterialParameters {
   size: number;

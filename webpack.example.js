@@ -1,5 +1,6 @@
 import path from 'path';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
+import config from './webpack.config.js';
 
 module.exports = {
 	context: path.resolve('./example'),
@@ -14,27 +15,10 @@ module.exports = {
 		port: 5000,
 	},
 	resolve: {
-		extensions: ['.ts', '.tsx', '.js', '.frag', '.vert'],
+		extensions: ['.ts', '.tsx', '.js'],
 	},
 	module: {
-		rules: [
-			{
-				test: /\.worker\.js$/,
-				loader: 'worker-loader',
-				options: {inline: 'no-fallback'},
-			},
-			{
-				test: /\.tsx?$/,
-				loader: 'ts-loader',
-				exclude: /node_modules/,
-			},
-			{
-				test: /\.(vert|frag)$/,
-				loader: 'raw-loader',
-				options: {
-				  esModule: true,
-				},
-			},
+		rules: config.module.rules.concat([
 			{
 				test: /\.html$/,
 				use: [
@@ -48,7 +32,7 @@ module.exports = {
 				test: /\.css$/,
 				use: ['style-loader', 'css-loader'],
 			},
-		],
+		]),
 	},
 	plugins: [new HtmlWebpackPlugin()],
 };

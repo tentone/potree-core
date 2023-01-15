@@ -1,6 +1,6 @@
 {
 	"name": "potree-core",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "Potree wrapper for three.js applications",
 	"repository": {
 		"type": "git",
@@ -26,7 +26,7 @@
 	"author": "Tentone",
 	"license": "MIT",
 	"peerDependencies": {
-		"three": "^0.120.0"
+		"three": ">0.120.0"
 	},
 	"devDependencies": {
 		"@typescript-eslint/eslint-plugin": "5.48.1",

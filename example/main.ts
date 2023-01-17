@@ -1,53 +1,11 @@
 import { AmbientLight, BoxGeometry,  Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import { PointCloudOctree, Potree } from '../source';
-// import { Viewer } from './viewer';
-// import "./main.css"
-
-// const targetEl = document.createElement('div');
-// targetEl.className = 'container';
-// document.body.appendChild(targetEl);
-
-// const viewer = new Viewer();
-// viewer.initialize(targetEl);
-// const camera = viewer.camera;
-// camera.far = 1000;
-// camera.updateProjectionMatrix();
-// camera.position.set(0, 0, 10);
-// camera.lookAt(new Vector3());
-
-// let pointCloud: PointCloudOctree | undefined;
-// let loaded: boolean = false;
-
-// const unloadBtn = document.createElement('button');
-// unloadBtn.textContent = 'Unload';
-// unloadBtn.addEventListener('click', () => {
-// 	if (!loaded) {
-// 		return;
-// 	}
-
-// 	viewer.unload();
-// 	loaded = false;
-// 	pointCloud = undefined;
-// });
-
-// viewer.load('metadata.json', 'https://static.thelostmetropolis.org/BigShotCleanV2/').then(pco => {
-// 	pointCloud = pco;
-// 	pointCloud.material.size = 1.0;
-// 	pointCloud.material.shape = 2;
-// 	pointCloud.material.inputColorEncoding = 1;
-// 	pointCloud.material.outputColorEncoding = 1;
-// 	pointCloud.position.set(0, -2, 1)
-// 	pointCloud.scale.set(.1, .1, .1);
-// 	viewer.add(pco);
-// });
-
-
 
 document.body.onload = function()
 {
 	const potree = new Potree();
-
+	let pointClouds: PointCloudOctree[] = [];
 
 	// three.js
 	const scene = new Scene();
@@ -65,7 +23,7 @@ document.body.onload = function()
 		{
 			canvas: canvas,
 			alpha: true,
-			logarithmicDepthBuffer: true,
+			logarithmicDepthBuffer: false,
 			precision: 'highp',
 			premultipliedAlpha: true,
 			antialias: true,
@@ -95,7 +53,7 @@ document.body.onload = function()
 		raycaster.setFromCamera(normalized, camera);
 	};
 
-	canvas.ondblclick = function(event)
+	canvas.ondblclick = function()
 	{
 		const intesects = raycaster.intersectObject(scene, true);
 
@@ -116,32 +74,47 @@ document.body.onload = function()
 	loadPointCloud('data/lion_takanawa/', 'cloud.js', new Vector3(-2, -3, 0.0));
 	loadPointCloud('data/lion_takanawa_las/', 'cloud.js', new Vector3(3, -3, 0.0));
 	loadPointCloud('data/lion_takanawa_laz/', 'cloud.js', new Vector3(8, -3, 0.0));
-
+	loadPointCloud('https://static.thelostmetropolis.org/BigShotCleanV2/', 'metadata.json', new Vector3(8, -3, 0.0));
 
 	function loadPointCloud(baseUrl: string, url: string, position: Vector3)
 	{
-		potree.loadPointCloud(url, url => `${baseUrl}${url}`,).then(function(pointcloud: PointCloudOctree)
-		{
-			pointcloud.material.size = 1.0;
-			pointcloud.material.shape = Potree.;
-			pointcloud.material.inputColorEncoding = 1;
-			pointcloud.material.outputColorEncoding = 1;
-			pointcloud.position.set(0, -2, 1)
-			pointcloud.scale.set(.1, .1, .1);
-
-			if (position)
+			potree.loadPointCloud(url, url => `${baseUrl}${url}`,).then(function(pointcloud: PointCloudOctree)
 			{
-				pointcloud.position.copy(position);
-			}
+				pointcloud.material.size = 1.0;
+				pointcloud.material.shape = 2;
+				pointcloud.material.inputColorEncoding = 1;
+				pointcloud.material.outputColorEncoding = 1;
+				// pointcloud.position.set(0, -2, 1)
+				// pointcloud.scale.set(0.1, 0.1, 0.1);
 
-			scene.add(pointcloud);
+				if (position)
+				{
+					pointcloud.position.copy(position);
+				}
+
+				add(pointcloud);
+			});
+	}
+
+	function add(pco: PointCloudOctree): void {
+		scene.add(pco);
+		pointClouds.push(pco);
+	}
+
+	function unload(): void {
+		pointClouds.forEach(pco => {
+			scene.remove(pco);
+			pco.dispose();
 		});
-}
 
-	
+		pointClouds = [];
+	}
+
 	function loop()
 	{
 		cube.rotation.y += 0.01;
+
+		potree.updatePointClouds(pointClouds, camera, renderer);
 
 		controls.update();
 		renderer.render(scene, camera);

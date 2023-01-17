@@ -5,29 +5,29 @@ import {PointCloudOctreeGeometryNode} from './point-cloud-octree-geometry-node';
 
 export class PointCloudOctreeGeometry 
 {
-	disposed: boolean = false;
+	public disposed: boolean = false;
 
-	needsUpdate: boolean = true;
+	public needsUpdate: boolean = true;
 
-	root!: PointCloudOctreeGeometryNode;
+	public root!: PointCloudOctreeGeometryNode;
 
-	octreeDir: string = '';
+	public octreeDir: string = '';
 
-	hierarchyStepSize: number = -1;
+	public hierarchyStepSize: number = -1;
 
-	nodes: Record<string, PointCloudOctreeGeometryNode> = {};
+	public nodes: Record<string, PointCloudOctreeGeometryNode> = {};
 
-	numNodesLoading: number = 0;
+	public numNodesLoading: number = 0;
 
-	maxNumNodesLoading: number = 3;
+	public maxNumNodesLoading: number = 3;
 
-	spacing: number = 0;
+	public spacing: number = 0;
 
-	pointAttributes: PointAttributes = new PointAttributes([]);
+	public pointAttributes: PointAttributes = new PointAttributes([]);
 
-	projection: any = null;
+	public projection: any = null;
 
-	url: string | null = null;
+	public url: string | null = null;
 
 	constructor(
     public loader: BinaryLoader,

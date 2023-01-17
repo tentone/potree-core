@@ -19,19 +19,19 @@ const NODE_STRIDE = 5;
 
 export class PointCloudOctreeGeometryNode extends EventDispatcher implements IPointCloudTreeNode 
 {
-	id: number = PointCloudOctreeGeometryNode.idCount++;
+	public id: number = PointCloudOctreeGeometryNode.idCount++;
 
-	name: string;
+	public name: string;
 
-	pcoGeometry: PointCloudOctreeGeometry;
+	public pcoGeometry: PointCloudOctreeGeometry;
 
-	index: number;
+	public index: number;
 
-	level: number = 0;
+	public level: number = 0;
 
-	spacing: number = 0;
+	public spacing: number = 0;
 
-	hasChildren: boolean = false;
+	public hasChildren: boolean = false;
 
 	readonly children: ReadonlyArray<PointCloudOctreeGeometryNode | null> = [
 		null,
@@ -44,29 +44,29 @@ export class PointCloudOctreeGeometryNode extends EventDispatcher implements IPo
 		null
 	];
 
-	boundingBox: Box3;
+	public boundingBox: Box3;
 
-	tightBoundingBox: Box3;
+	public tightBoundingBox: Box3;
 
-	boundingSphere: Sphere;
+	public boundingSphere: Sphere;
 
-	mean: Vector3 = new Vector3();
+	public mean: Vector3 = new Vector3();
 
-	numPoints: number = 0;
+	public numPoints: number = 0;
 
-	geometry: BufferGeometry | undefined;
+	public geometry: BufferGeometry | undefined;
 
-	loaded: boolean = false;
+	public loaded: boolean = false;
 
-	loading: boolean = false;
+	public loading: boolean = false;
 
-	failed: boolean = false;
+	public failed: boolean = false;
 
-	parent: PointCloudOctreeGeometryNode | null = null;
+	public parent: PointCloudOctreeGeometryNode | null = null;
 
-	oneTimeDisposeHandlers: (()=> void)[] = [];
+	public oneTimeDisposeHandlers: (()=> void)[] = [];
 
-	isLeafNode: boolean = true;
+	public isLeafNode: boolean = true;
 
 	readonly isTreeNode: boolean = false;
 
@@ -102,8 +102,8 @@ export class PointCloudOctreeGeometryNode extends EventDispatcher implements IPo
 	}
 
 	/**
-   * Gets the url of the binary file for this node.
-   */
+	 * Gets the url of the binary file for this node.
+	 */
 	getUrl(): string 
 	{
 		const geometry = this.pcoGeometry;
@@ -128,20 +128,19 @@ export class PointCloudOctreeGeometryNode extends EventDispatcher implements IPo
 	}
 
 	/**
-   * Gets the url of the hierarchy file for this node.
-   */
-	getHierarchyUrl(): string 
+	 * Gets the url of the hierarchy file for this node.
+	 */
+	public getHierarchyUrl(): string 
 	{
 		return `${this.pcoGeometry.octreeDir}/${this.getHierarchyBaseUrl()}/${this.name}.hrc`;
 	}
 
 	/**
-   * Adds the specified node as a child of the current node.
-   *
-   * @param child
-   *    The node which is to be added as a child.
-   */
-	addChild(child: PointCloudOctreeGeometryNode): void 
+	 * Adds the specified node as a child of the current node.
+	 *
+	 * @param child - The node which is to be added as a child.
+	 */
+	public addChild(child: PointCloudOctreeGeometryNode): void 
 	{
 		(this.children as any)[child.index] = child;
 		this.isLeafNode = false;
@@ -149,13 +148,11 @@ export class PointCloudOctreeGeometryNode extends EventDispatcher implements IPo
 	}
 
 	/**
-   * Calls the specified callback for the current node (if includeSelf is set to true) and all its
-   * children.
-   *
-   * @param cb
-   *    The function which is to be called for each node.
-   */
-	traverse(cb: (node: PointCloudOctreeGeometryNode)=> void, includeSelf = true): void 
+	 * Calls the specified callback for the current node (if includeSelf is set to true) and all its children.
+	 *
+	 * @param cb - The function which is to be called for each node.
+	 */
+	public traverse(cb: (node: PointCloudOctreeGeometryNode)=> void, includeSelf = true): void 
 	{
 		const stack: PointCloudOctreeGeometryNode[] = includeSelf ? [this] : [];
 
@@ -175,7 +172,7 @@ export class PointCloudOctreeGeometryNode extends EventDispatcher implements IPo
 		}
 	}
 
-	load(): Promise<void> 
+	public load(): Promise<void> 
 	{
 		if (!this.canLoad()) 
 		{

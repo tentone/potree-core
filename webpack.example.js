@@ -1,5 +1,6 @@
 import path from 'path';
-import HtmlWebpackPlugin from 'html-webpack-plugin';
+import HtmlPlugin from 'html-webpack-plugin';
+import CopyPlugin from 'copy-webpack-plugin';
 import config from './webpack.config.js';
 
 export default {
@@ -34,5 +35,13 @@ export default {
 			},
 		]),
 	},
-	plugins: [new HtmlWebpackPlugin()],
+	plugins: [
+		new CopyPlugin({
+			patterns: [{
+				from: "data/**/*",
+				to: "data"
+			}]
+		}),
+		new HtmlPlugin()
+	],
 };

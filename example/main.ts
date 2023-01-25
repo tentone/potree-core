@@ -1,5 +1,5 @@
 import { AmbientLight, BoxGeometry,  Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three';
-import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { PointCloudOctree, Potree } from '../source';
 
 document.body.onload = function()

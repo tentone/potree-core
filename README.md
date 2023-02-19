@@ -1,4 +1,4 @@
-# Potree Core
+# Potree Core 2.0
 
 [![npm version](https://badge.fury.io/js/potree-core.svg)](https://badge.fury.io/js/potree-core)
 [![GitHub version](https://badge.fury.io/gh/tentone%2Fpotree-core.svg)](https://badge.fury.io/gh/tentone%2Fpotree-core)
@@ -8,7 +8,7 @@
  - This project contains only the main parts of the potree project adapted to be more easily used as a independent library, the code was adapted from the original repositorys.
  - Support for pointclouds from LAS, LAZ, Binary files and Greyhound server.
 
- ### TODO
+ ### TO DO
  - Supports logarithmic depth buffer (just by enabling it on the threejs renderer), useful for large scale visualization.
  - Point clouds are automatically updated, frustum culling is used to avoid unnecessary updates (better update performance for multiple point clouds).
 
@@ -19,7 +19,7 @@
  - Include it alonside the worker folder in your project (can be found on the source folder).
  - Download threejs from github repository.
     - https://github.com/mrdoob/three.js/tree/dev/build
- - The build is a ES module, that can be imported to other projects, it assumes the existence of THREE namespace for threejs dependencies.
+ - The build is a ES module, that can be imported to other projects, threejs should be available as a peer dependency.
 
 
 ## Testing
@@ -27,7 +27,6 @@
 
 ## Demo
  - Live demo at https://tentone.github.io/potree-core/
- - Contains the same model multiple times stored in different formats.
  - Double click the models to raycast the scene and create marker points.
 
 <img src="https://raw.githubusercontent.com/tentone/potree-core/master/screenshot.png" width="700">
@@ -37,54 +36,40 @@
  - Bellow its a fully functional example of how to use this wrapper to load potree point clouds to a THREE.js project
 
 ```javascript
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(60, 1, 0.1, 10000);
+const scene = new Scene();
+const camera = new PerspectiveCamera(60, 1, 0.1, 10000);
 
-var canvas = document.createElement("canvas");
-canvas.style.position = "absolute";
-canvas.style.top = "0px";
-canvas.style.left = "0px";
-canvas.style.width = "100%";
-canvas.style.height = "100%";
-document.body.appendChild(canvas);
+const canvas = document.getElementById("canvas");
 
-var renderer = new THREE.WebGLRenderer({canvas:canvas});
+const renderer = new WebGLRenderer({canvas:canvas});
 
-var geometry = new THREE.BoxGeometry(1, 1, 1);
-var material = new THREE.MeshBasicMaterial({color: 0x00ff00});
-var cube = new THREE.Mesh(geometry, material);
+const geometry = new BoxGeometry(1, 1, 1);
+const material = new MeshBasicMaterial({color: 0x00ff00});
+const cube = new Mesh(geometry, material);
 scene.add(cube);
 
-var controls = new THREE.OrbitControls(camera, canvas);
+const controls = new OrbitControls(camera, canvas);
 camera.position.z = 10;
 
-var points = new Potree.Group();
-points.setPointBudget(10000000)
-scene.add(points);
+const pointClouds = [];
 
-Potree.loadPointCloud("data/test/cloud.js", name, function(data)
-{
-	var pointcloud = data.pointcloud;
-	points.add(pointcloud);
+const baseUrl = "data/test/";
+const potree = new Potree();
+potree.loadPointCloud("cloud.js", url => `${baseUrl}${url}`,).then(function(pco) {
+   scene.add(pco);
+	pointClouds.push(pco);
 });
 
 function loop()
 {
+   potree.updatePointClouds(pointClouds, camera, renderer);
+
 	controls.update();
 	renderer.render(scene, camera);
+
 	requestAnimationFrame(loop);
 };
 loop();
-
-document.body.onresize = function()
-{
-	var width = window.innerWidth;
-	var height = window.innerHeight;
-	renderer.setSize(width, height);
-	camera.aspect = width / height;
-	camera.updateProjectionMatrix();
-}
-document.body.onresize();
 ```
 
 

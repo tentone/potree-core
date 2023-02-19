@@ -68,13 +68,13 @@ document.body.onload = function()
 		}
 	};
 
-	const baseUrl = 'http://localhost:8000/';
+	const baseUrl = 'http://localhost:5200/';
 
 	// loadPointCloud(baseUrl + 'data/lion_takanawa_ept_bin/', 'ept.json', new Vector3(-11, -4, 3.0));
 	// // loadPointCloud(baseUrl + 'data/lion_takanawa_ept_laz/', 'ept.json', new Vector3(-4, -4, 3.0));
-	// loadPointCloud(baseUrl + 'data/lion_takanawa/', 'cloud.js', new Vector3(-2, -3, 0.0));
-	// loadPointCloud(baseUrl + 'data/lion_takanawa_las/', 'cloud.js', new Vector3(3, -3, 0.0));
-	// loadPointCloud(baseUrl + 'data/lion_takanawa_laz/', 'cloud.js', new Vector3(8, -3, 0.0));
+	loadPointCloud(baseUrl + 'data/lion_takanawa/', 'cloud.js', new Vector3(-2, -3, 0.0));
+	loadPointCloud(baseUrl + 'data/lion_takanawa_las/', 'cloud.js', new Vector3(3, -3, 0.0));
+	loadPointCloud(baseUrl + 'data/lion_takanawa_laz/', 'cloud.js', new Vector3(8, -3, 0.0));
 
 	// loadPointCloud('https://potree.org/pointclouds/lion/', 'metadata.json', new Vector3(-2, -3, 0.0));
 	loadPointCloud('https://static.thelostmetropolis.org/BigShotCleanV2/', 'metadata.json', new Vector3(8, -3, 0.0));

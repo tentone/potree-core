@@ -38,7 +38,7 @@ export default {
 	plugins: [
 		new CopyPlugin({
 			patterns: [{
-				from: "data/**/*",
+				from: "data",
 				to: "data"
 			}]
 		}),

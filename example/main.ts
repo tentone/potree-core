@@ -60,33 +60,50 @@ document.body.onload = function()
 
 		if (intesects.length > 0)
 		{
-			const geometry = new SphereGeometry(0.1, 32, 32);
-			const material = new MeshBasicMaterial({color: 0xAA4444});
+			const geometry = new SphereGeometry(0.2, 32, 32);
+			const material = new MeshBasicMaterial({color: Math.random() * 0xAA4444});
 			const sphere = new Mesh(geometry, material);
 			sphere.position.copy(intesects[0].point);
 			scene.add(sphere);
 		}
 	};
 	
-	loadPointCloud('/' + 'data/lion_takanawa/', 'cloud.js', new Vector3(-2, -2, 0.0), new Euler(-Math.PI / 2, 0, 0));
-	loadPointCloud('https://potree.org/pointclouds/lion/', 'metadata.json', new Vector3(-4, -2, 0.0), new Euler(-Math.PI / 2, 0, 0));
-	loadPointCloud('https://static.thelostmetropolis.org/BigShotCleanV2/', 'metadata.json', new Vector3(8, -3, 0.0));
-
+	loadPointCloud('/data/lion_takanawa/', 'cloud.js', new Vector3(-4, -2, 5), new Euler(-Math.PI / 2, 0, 0));
+	loadPointCloud('/data/pump/', 'metadata.json', new Vector3(0, -1.5, 3), new Euler(-Math.PI / 2, 0, 0), new Vector3(2, 2, 2));
 	
 	function loadPointCloud(baseUrl: string, url: string, position?: Vector3, rotation?: Euler, scale?: Vector3)
 	{
-			potree.loadPointCloud(url, url => `${baseUrl}${url}`,).then(function(pointcloud: PointCloudOctree)
+			potree.loadPointCloud(url, url => `${baseUrl}${url}`,).then(function(pco: PointCloudOctree)
 			{
-				pointcloud.material.size = 1.0;
-				pointcloud.material.shape = 2;
-				pointcloud.material.inputColorEncoding = 1;
-				pointcloud.material.outputColorEncoding = 1;
+				pco.material.size = 1.0;
+				pco.material.shape = 2;
+				pco.material.inputColorEncoding = 1;
+				pco.material.outputColorEncoding = 1;
 
-				if (position){pointcloud.position.copy(position);}
-				if (rotation){pointcloud.rotation.copy(rotation);}		
-				if (scale){pointcloud.scale.copy(scale);}
+				if (position){pco.position.copy(position);}
+				if (rotation){pco.rotation.copy(rotation);}		
+				if (scale){pco.scale.copy(scale);}
+				
+				console.log('Pointcloud file loaded', pco);
+				pco.showBoundingBox = false;
+				
+				const box = pco.pcoGeometry.boundingBox;
+				const size = box.getSize(new Vector3());
 
-				add(pointcloud);
+				const geometry = new BoxGeometry(size.x, size.y, size.z);
+				const material = new MeshBasicMaterial({color:0xFF0000, wireframe: true});
+				const mesh = new Mesh(geometry, material);
+				mesh.position.copy(pco.position);
+				mesh.scale.copy(pco.scale);
+				mesh.rotation.copy(pco.rotation);
+				mesh.raycast = () => false;
+
+				size.multiplyScalar(0.5);
+				mesh.position.add(new Vector3(size.x, size.y, -size.z));
+
+				scene.add(mesh);
+
+				add(pco);
 			});
 	}
 

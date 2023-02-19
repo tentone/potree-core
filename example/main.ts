@@ -1,4 +1,4 @@
-import { AmbientLight, BoxGeometry,  Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three';
+import { AmbientLight, BoxGeometry,  Euler,  Mesh, MeshBasicMaterial, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { PointCloudOctree, Potree } from '../source';
 
@@ -67,20 +67,13 @@ document.body.onload = function()
 			scene.add(sphere);
 		}
 	};
-
-	const baseUrl = 'http://localhost:5200/';
-
-	// loadPointCloud(baseUrl + 'data/lion_takanawa_ept_bin/', 'ept.json', new Vector3(-11, -4, 3.0));
-	// // loadPointCloud(baseUrl + 'data/lion_takanawa_ept_laz/', 'ept.json', new Vector3(-4, -4, 3.0));
-	loadPointCloud(baseUrl + 'data/lion_takanawa/', 'cloud.js', new Vector3(-2, -3, 0.0));
-	loadPointCloud(baseUrl + 'data/lion_takanawa_las/', 'cloud.js', new Vector3(3, -3, 0.0));
-	loadPointCloud(baseUrl + 'data/lion_takanawa_laz/', 'cloud.js', new Vector3(8, -3, 0.0));
-
-	// loadPointCloud('https://potree.org/pointclouds/lion/', 'metadata.json', new Vector3(-2, -3, 0.0));
+	
+	loadPointCloud('/' + 'data/lion_takanawa/', 'cloud.js', new Vector3(-2, -2, 0.0), new Euler(-Math.PI / 2, 0, 0));
+	loadPointCloud('https://potree.org/pointclouds/lion/', 'metadata.json', new Vector3(-4, -2, 0.0), new Euler(-Math.PI / 2, 0, 0));
 	loadPointCloud('https://static.thelostmetropolis.org/BigShotCleanV2/', 'metadata.json', new Vector3(8, -3, 0.0));
 
-
-	function loadPointCloud(baseUrl: string, url: string, position: Vector3)
+	
+	function loadPointCloud(baseUrl: string, url: string, position?: Vector3, rotation?: Euler, scale?: Vector3)
 	{
 			potree.loadPointCloud(url, url => `${baseUrl}${url}`,).then(function(pointcloud: PointCloudOctree)
 			{
@@ -88,13 +81,10 @@ document.body.onload = function()
 				pointcloud.material.shape = 2;
 				pointcloud.material.inputColorEncoding = 1;
 				pointcloud.material.outputColorEncoding = 1;
-				// pointcloud.position.set(0, -2, 1)
-				// pointcloud.scale.set(0.1, 0.1, 0.1);
 
-				if (position)
-				{
-					pointcloud.position.copy(position);
-				}
+				if (position){pointcloud.position.copy(position);}
+				if (rotation){pointcloud.rotation.copy(rotation);}		
+				if (scale){pointcloud.scale.copy(scale);}
 
 				add(pointcloud);
 			});

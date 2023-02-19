@@ -126,9 +126,14 @@ export class PointAttributes implements IPointAttributes
 		{
 			const pointAttributeName = pointAttributeNames[i];
 			const pointAttribute = POINT_ATTRIBUTES[pointAttributeName];
-			this.attributes.push(pointAttribute);
-			this.byteSize += pointAttribute.byteSize;
-			this.size++;
+			try {
+				this.attributes.push(pointAttribute);
+				this.byteSize += pointAttribute.byteSize;
+				this.size++;
+			} catch(e) {
+				console.log(pointAttribute);
+			}
+
 		}
 	}
 

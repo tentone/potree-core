@@ -6,7 +6,9 @@
  - This project was originally based on [Potree Viewer 1.6](https://github.com/potree/potree) and is now since version 2.0 based on the [shiukaheng fork](https://github.com/shiukaheng/potree-loader) of the [Potree-Loader](https://github.com/pnext/three-loader).
  - Potree is a web based pouint cloud visualizer project created by Markus Schütz.
  - This project contains only the main parts of the potree project adapted to be more easily used as a independent library, the code was adapted from the original repositorys.
- - Support for pointclouds from LAS, LAZ, Binary files and Greyhound server.
+ - Support for pointclouds from LAS, LAZ, Binary files.
+ - Some features require support for the following GL extensions
+   - EXT_frag_depth, WEBGL_depth_texture, OES_vertex_array_object
 
  ### TO DO
  - Supports logarithmic depth buffer (just by enabling it on the threejs renderer), useful for large scale visualization.
@@ -78,6 +80,7 @@ loop();
  - EDL shading is not supported by potree core.
  - Removed classification and clipping functionality.
  - Removed Arena 4D point cloud support.
+ - Removed Entwine Point Tile file support.
  - GUI elements were removed from the library
    - PotreeViewer
    - Controls, Input, GUI, Tools
@@ -110,33 +113,12 @@ loop();
  - A example can be found in the repository `index.html` file.
 
 
-
-### Potree.BasicGroup
-
-- Container that stores point cloud objects and updates them on render.
-- The container supports frustum culling using the point cloud bouding box.
-- Automatically stops updating the point cloud if out of view.
-- This container only support pointColorType set as RGB, pointSizeType set as FIXED and shape set as SQUARE.
-
-
-
-### Potree.Group
-
-- Complete container with support for all potree features.
-- Some features require support for the following GL extensions
-
-   - EXT_frag_depth, WEBGL_depth_texture, OES_vertex_array_object
-
-   
-
-### Potree.loadPointCloud
+### loadPointCloud
 
 - Method to load a point cloud database file
 - `Potree.loadPointCloud(url, name, onLoad)`
 
-
-
-### Potree.PointCloudMaterial
+### PointCloudMaterial
 
 - Material used by threejs to draw the point clouds, based on RawShaderMaterial
 - shape
@@ -177,7 +159,7 @@ loop();
       - Potree.TreeType.OCTREE
       - Potree.TreeType.KDTREE
 
- - Potree.PointCloudTree
+ - PointCloudTree
     - Base Object3D used to store and represent point cloud data.
     - These objects are created by the loader
 

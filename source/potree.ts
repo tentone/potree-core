@@ -56,20 +56,18 @@ export class Potree implements IPotree
 
 	lru = new LRU(this._pointBudget);
 
-	async loadPointCloud(
-		url: string,
-		getUrl: GetUrlFn,
-		xhrRequest = (input: RequestInfo, init?: RequestInit) => {return fetch(input, init);},
-	): Promise<PointCloudOctree> 
+	async loadPointCloud(url: string, getUrl: GetUrlFn, xhrRequest = (input: RequestInfo, init?: RequestInit) => {return fetch(input, init);}): Promise<PointCloudOctree> 
 	{
 		if (url === 'cloud.js') 
 		{
-			return await loadPOC(url, getUrl, xhrRequest).then((geometry) => {return new PointCloudOctree(this, geometry);});
+			return await loadPOC(url, getUrl, xhrRequest).then((geometry) => {
+				return new PointCloudOctree(this, geometry);
+			});
 		}
 		else if (url === 'metadata.json') 
 		{
-			// throw new Error('Not implemented')
-			return await loadOctree(url, getUrl, xhrRequest).then((geometry: OctreeGeometry) => {return new PointCloudOctree(this, geometry);});
+			return await loadOctree(url, getUrl, xhrRequest).then((geometry: OctreeGeometry) => {
+				return new PointCloudOctree(this, geometry);});
 		}
 		throw new Error('Unsupported file type');
 	}
@@ -210,8 +208,7 @@ export class Potree implements IPotree
 				pointCloud.visibleGeometry.push(node.geometryNode);
 			}
 
-			const halfHeight =
-        0.5 * renderer.getSize(this._rendererSize).height * renderer.getPixelRatio();
+			const halfHeight = 0.5 * renderer.getSize(this._rendererSize).height * renderer.getPixelRatio();
 
 			this.updateChildVisibility(
 				queueItem,

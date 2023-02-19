@@ -10,23 +10,6 @@
  - Some features require support for the following GL extensions
    - EXT_frag_depth, WEBGL_depth_texture, OES_vertex_array_object
 
- ### TO DO
- - Supports logarithmic depth buffer (just by enabling it on the threejs renderer), useful for large scale visualization.
- - Point clouds are automatically updated, frustum culling is used to avoid unnecessary updates (better update performance for multiple point clouds).
-
-
-## How to use
- - Download the custom potree build from the build folder or add it to your project using NPM.
-    - https://www.npmjs.com/package/potree-core
- - Include it alonside the worker folder in your project (can be found on the source folder).
- - Download threejs from github repository.
-    - https://github.com/mrdoob/three.js/tree/dev/build
- - The build is a ES module, that can be imported to other projects, threejs should be available as a peer dependency.
-
-
-## Testing
- - The project can be build running the commands `npm install` and `npm run build`.
-
 ## Demo
  - Live demo at https://tentone.github.io/potree-core/
  - Double click the models to raycast the scene and create marker points.
@@ -35,7 +18,11 @@
 
 
 ## Example
- - Bellow its a fully functional example of how to use this wrapper to load potree point clouds to a THREE.js project
+ - The project can be build running the commands `npm install` and `npm run build`.
+ - Download the potree build from the build folder or add it to your project using NPM.
+ - Include it alonside the worker folder in your project (can be found on the source folder).
+ - The build is a ES module, that can be imported to other projects, threejs should be available as a peer dependency.
+ - Bellow its a fully functional example of how to use this wrapper to load potree point clouds to a three.js project
 
 ```javascript
 const scene = new Scene();
@@ -74,7 +61,6 @@ function loop()
 loop();
 ```
 
-
 ## Notes
  - Since potree-core is meant to be used as library and not as a full software as potree some features are not available.
  - EDL shading is not supported by potree core.
@@ -100,66 +86,13 @@ loop();
  - There are two main versions 2.1 witch generates 4 contained files with point data, hierarchy, 
  - To generate a folder output from a input file run the command `.\PotreeConverter '..\input.laz' -o ../output`
 
+
 ### TXT2LAS
  - The potree converter tool only supports las and laz files, so textural file formats such as .pts, .xyz, have to be first converted into a supported format.
  - The TXT2LAS tool from the (LASTools)[https://github.com/LAStools/LAStools] repository can be used for this effect.
  - To run the tool use the command `.\txt2las64 -i input.pts -ipts -parse xyziRGB  -set_scale 0.001 0.001 0.001 -set_version 1.4 -o output.laz`
 
 
-
-## API Reference
-
- - The project has no generated documentation but bellow are some of the main configuration elements.
- - A example can be found in the repository `index.html` file.
-
-
-### loadPointCloud
-
-- Method to load a point cloud database file
-- `Potree.loadPointCloud(url, name, onLoad)`
-
-### PointCloudMaterial
-
-- Material used by threejs to draw the point clouds, based on RawShaderMaterial
-- shape
-   - Defines the shape used to draw points
-      - Potree.PointShape.SQUARE
-      - Potree.PointShape.CIRCLE
-      - Potree.PointShape.PARABOLOID
-- pointSizeType
-   - Defines how the point cloud points are sized, fixed mode keeps the same size, adaptive resizes points accordingly to their distance to the camera 
-   - Possible values are
-      - Potree.PointSizeType.FIXED
-      - Potree.PointSizeType.ATTENUATED
-      - Potree.PointSizeType.ADAPTIVE
-- pointColorType
-   - Defines how to color the drawn points
-   - Possible values are
-      - Potree.PointColorType.RGB
-      - Potree.PointColorType.COLOR
-      - Potree.PointColorType.DEPTH
-      - Potree.PointColorType.HEIGHT
-      - Potree.PointColorType.INTENSITY
-      - Potree.PointColorType.INTENSITY_GRADIENT
-      - Potree.PointColorType.LOD
-      - Potree.PointColorType.POINT_INDEX
-      - Potree.PointColorType.CLASSIFICATION
-      - Potree.PointColorType.RETURN_NUMBER
-      - Potree.PointColorType.SOURCE
-      - Potree.PointColorType.NORMAL
-      - Potree.PointColorType.PHONG
-      - Potree.PointColorType.RGB_HEIGHT
-- logarithmicDepthBuffer
-   - Set true to enable logarithmic depth buffer
-- weighted
-   - If true points are drawn as weighted splats
-- treeType
-   - Defines the type of point cloud tree being drawn by this material
-   - This should be automatically defined by the loader
-      - Potree.TreeType.OCTREE
-      - Potree.TreeType.KDTREE
-
- - PointCloudTree
-    - Base Object3D used to store and represent point cloud data.
-    - These objects are created by the loader
-
+ ### To Do
+ - Supports logarithmic depth buffer (just by enabling it on the threejs renderer), useful for large scale visualization.
+ - Point clouds are automatically updated, frustum culling is used to avoid unnecessary updates (better update performance for multiple point clouds).

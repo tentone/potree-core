@@ -3,6 +3,7 @@ import {
 	BufferGeometry,
 	Camera,
 	Color,
+	GLSL3,
 	LessEqualDepth,
 	Material,
 	NearestFilter,
@@ -411,6 +412,8 @@ export class PointCloudMaterial extends RawShaderMaterial
 
   updateShaderSource(): void 
   {
+  	this.glslVersion = GLSL3;
+
   	this.vertexShader = this.applyDefines(VertShader);
   	this.fragmentShader = this.applyDefines(FragShader);
 

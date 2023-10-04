@@ -86,8 +86,6 @@ function parse(url: string, getUrl: GetUrlFn, xhrRequest: XhrRequest)
 		pco.projection = data.projection;
 		pco.offset = offset;
 		pco.pointAttributes = new PointAttributes(data.pointAttributes);
-		console.log(pco.pointAttributes);
-    
 
 		const nodes: Record<string, PointCloudOctreeGeometryNode> = {}; // HMM! Juicy! 6. Create a map of nodes
 

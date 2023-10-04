@@ -130,10 +130,7 @@ export class PointAttributes implements IPointAttributes
 				this.attributes.push(pointAttribute);
 				this.byteSize += pointAttribute.byteSize;
 				this.size++;
-			} catch(e) {
-				console.log(pointAttribute);
-			}
-
+			} catch(e) {}
 		}
 	}
 

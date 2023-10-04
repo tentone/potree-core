@@ -269,7 +269,7 @@ export class PointCloudOctreePicker
 			const nodeIndex = nodeIndexOffset + i + 1;
 			if (nodeIndex > 255) 
 			{
-				console.error('More than 255 nodes for pick are not supported.');
+				throw Error('More than 255 nodes for pick are not supported.');
 			}
 			tempNode.onBeforeRender = PointCloudMaterial.makeOnBeforeRender(octree, node, nodeIndex);
 

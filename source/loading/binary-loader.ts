@@ -62,7 +62,6 @@ export class BinaryLoader
 		xhrRequest
 	}: BinaryLoaderOptions) 
 	{
-		console.log([getUrl, version, boundingBox, scale, xhrRequest]);
 		if (typeof version === 'string') 
 		{
 			this.version = new Version(version);

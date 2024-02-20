@@ -281,6 +281,8 @@ export class Potree implements IPotree
 			const radius = sphere.radius;
 
 			let projectionFactor = 0.0;
+			let weight: number;
+			let screenPixelRadius: number;
 
 			if (camera.type === PERSPECTIVE_CAMERA) 
 			{
@@ -288,14 +290,16 @@ export class Potree implements IPotree
 				const fov = perspective.fov * Math.PI / 180.0;
 				const slope = Math.tan(fov / 2.0);
 				projectionFactor = halfHeight / (slope * distance);
+				screenPixelRadius = radius * projectionFactor;
+				weight = distance < radius ? Number.MAX_VALUE : screenPixelRadius + 1 / distance;
 			}
 			else 
 			{
 				const orthographic = camera as OrthographicCamera;
-				projectionFactor = 2 * halfHeight / (orthographic.top - orthographic.bottom);
+				projectionFactor = 2 * halfHeight / (orthographic.top - orthographic.bottom) * orthographic.zoom;
+				screenPixelRadius = radius * projectionFactor;
+				weight = screenPixelRadius;
 			}
-
-			const screenPixelRadius = radius * projectionFactor;
 
 			// Don't add the node if it'll be too small on the screen.
 			if (screenPixelRadius < pointCloud.minNodePixelSize) 
@@ -304,8 +308,6 @@ export class Potree implements IPotree
 			}
 
 			// Nodes which are larger will have priority in loading/displaying.
-			const weight = distance < radius ? Number.MAX_VALUE : screenPixelRadius + 1 / distance;
-
 			priorityQueue.push(new QueueItem(queueItem.pointCloudIndex, weight, child, node));
 		}
 	}

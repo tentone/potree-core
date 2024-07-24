@@ -8,6 +8,7 @@ import {
 	Material,
 	NearestFilter,
 	NoBlending,
+	OrthographicCamera,
 	PerspectiveCamera,
 	RawShaderMaterial,
 	Scene,
@@ -81,6 +82,9 @@ export interface IPointCloudMaterialUniforms {
   rgbGamma: IUniform<number>;
   screenHeight: IUniform<number>;
   screenWidth: IUniform<number>;
+  orthoHeight: IUniform<number>;
+  orthoWidth: IUniform<number>;
+  useOrthographicCamera: IUniform<boolean>;
   size: IUniform<number>;
   spacing: IUniform<number>;
   toModel: IUniform<number[]>;
@@ -213,6 +217,9 @@ export class PointCloudMaterial extends RawShaderMaterial
 		rgbGamma: makeUniform('f', DEFAULT_RGB_GAMMA),
 		screenHeight: makeUniform('f', 1.0),
 		screenWidth: makeUniform('f', 1.0),
+		useOrthographicCamera: makeUniform('b', false),
+		orthoHeight: makeUniform('f', 1.0),
+		orthoWidth: makeUniform('f', 1.0),
 		size: makeUniform('f', 1),
 		spacing: makeUniform('f', 1.0),
 		toModel: makeUniform('Matrix4f', []),
@@ -270,6 +277,12 @@ export class PointCloudMaterial extends RawShaderMaterial
   @uniform('screenHeight') screenHeight!: number;
 
   @uniform('screenWidth') screenWidth!: number;
+
+  @uniform('orthoWidth') orthoWidth!: number;
+
+  @uniform('orthoHeight') orthoHeight!: number;
+
+  @uniform('useOrthographicCamera') useOrthographicCamera!: boolean;
 
   @uniform('size') size!: number;
 
@@ -668,10 +681,15 @@ export class PointCloudMaterial extends RawShaderMaterial
 
   	if (camera.type === PERSPECTIVE_CAMERA) 
   	{
+  		this.useOrthographicCamera = false;
   		this.fov = (camera as PerspectiveCamera).fov * (Math.PI / 180);
   	}
-  	else 
+  	else // ORTHOGRAPHIC
   	{
+   		const orthoCamera = (camera as OrthographicCamera);
+  		this.useOrthographicCamera = true;
+  		this.orthoWidth = (orthoCamera.right - orthoCamera.left) / orthoCamera.zoom;
+  		this.orthoHeight = (orthoCamera.top - orthoCamera.bottom) / orthoCamera.zoom;
   		this.fov = Math.PI / 2; // will result in slope = 1 in the shader
   	}
   	const renderTarget = renderer.getRenderTarget();

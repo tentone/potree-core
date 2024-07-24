@@ -25,6 +25,10 @@ uniform float screenHeight;
 uniform float fov;
 uniform float spacing;
 
+uniform bool useOrthographicCamera;
+uniform float orthoWidth;
+uniform float orthoHeight;
+
 #if defined use_clip_box
 	uniform mat4 clipBoxes[max_clip_boxes];
 #endif
@@ -440,14 +444,27 @@ void main() {
 	float pointSize = 1.0;
 	float slope = tan(fov / 2.0);
 	float projFactor =  -0.5 * screenHeight / (slope * mvPosition.z);
+	float scale = length(
+		modelViewMatrix * vec4(0, 0, 0, 1) -
+		modelViewMatrix * vec4(spacing, 0, 0, 1)
+	) / spacing;
+	projFactor = projFactor * scale;
 
 	#if defined fixed_point_size
 		pointSize = size;
 	#elif defined attenuated_point_size
-		pointSize = size * spacing * projFactor;
+		if (useOrthographicCamera){
+			pointSize = size;
+		} else {
+			pointSize = size * spacing * projFactor;
+		}
 	#elif defined adaptive_point_size
 		float worldSpaceSize = 2.0 * size * spacing / getPointSizeAttenuation();
-		pointSize = worldSpaceSize * projFactor;
+		if(useOrthographicCamera) {
+			pointSize = (worldSpaceSize / orthoWidth) * screenWidth;
+		} else {
+			pointSize = worldSpaceSize * projFactor;
+		}
 	#endif
 
 	pointSize = max(minSize, pointSize);

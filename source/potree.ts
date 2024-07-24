@@ -18,7 +18,7 @@ import {
 	MAX_NUM_NODES_LOADING,
 	PERSPECTIVE_CAMERA
 } from './constants';
-import {FEATURES} from './features';
+import {getFeatures} from './features';
 import {GetUrlFn, loadPOC} from './loading';
 import {ClipMode} from './materials';
 import {PointCloudOctree} from './point-cloud-octree';
@@ -52,7 +52,10 @@ export class Potree implements IPotree
 
 	maxNumNodesLoading: number = MAX_NUM_NODES_LOADING;
 
-	features = FEATURES;
+	get features() 
+	{
+		return getFeatures();
+	}
 
 	lru = new LRU(this._pointBudget);
 

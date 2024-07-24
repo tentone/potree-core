@@ -1,4 +1,4 @@
-let gl: WebGLRenderingContext | null = null;
+let context: WebGLRenderingContext | null = null;
 
 export const getFeatures = () => ({
 	SHADER_INTERPOLATION: hasExtension('EXT_frag_depth') && hasMinVaryingVectors(8),
@@ -9,27 +9,30 @@ export const getFeatures = () => ({
 });
 
 function renderer() {
-	if (gl) return gl; // cache
-	if (typeof document === 'undefined') return false; // server side
+	if (context) return context; // cache
+	if (typeof document === 'undefined') return null; // server side
 	// create a new context
 	const canvas = document.createElement('canvas');
-	gl = canvas.getContext('webgl');
-	return gl;
+	context = canvas.getContext('webgl');
+	return context;
 }
 
 function hasExtension(ext: string)
 {
-	return renderer() !== null && Boolean(gl.getExtension(ext));
+	const gl = renderer();
+	return gl !== null && Boolean(gl.getExtension(ext));
 }
 
 function hasMinVaryingVectors(value: number)
 {
-	return renderer() !== null && gl.getParameter(gl.MAX_VARYING_VECTORS) >= value;
+	const gl = renderer();
+	return gl !== null && gl.getParameter(gl.MAX_VARYING_VECTORS) >= value;
 }
 
 function getPrecision()
 {
-	if (renderer() === null)
+	const gl = renderer();
+	if (gl === null)
 	{
 		return '';
 	}

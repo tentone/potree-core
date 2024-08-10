@@ -34,6 +34,8 @@ export function generateDataTexture(width: number, height: number, color: Color)
 
 export function generateGradientTexture(gradient: IGradient): Texture 
 {
+	if ("undefined" == typeof document) return new Texture();
+
 	const size = 64;
 
 	const canvas = document.createElement('canvas');

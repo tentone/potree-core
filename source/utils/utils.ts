@@ -6,7 +6,7 @@ import {IPointCloudTreeNode} from '../types';
  * @returns True if running on browser.
  */
 export function isBrowser() {
-	return typeof window !== 'undefined';
+	return typeof window !== 'undefined' && typeof document !== "undefined";
 }
 
 /**

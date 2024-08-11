@@ -8,7 +8,16 @@ import {
 	Texture
 } from 'three';
 import {IClassification, IGradient} from '../materials/types';
+import { isBrowser } from 'utils/utils';
 
+/**
+ * Generates a texture from a color.
+ * 
+ * @param width - The width of the texture.
+ * @param height - The height of the texture.
+ * @param color - The color of the texture.
+ * @returns The generated texture.
+ */
 export function generateDataTexture(width: number, height: number, color: Color): Texture 
 {
 	const size = width * height;
@@ -32,10 +41,18 @@ export function generateDataTexture(width: number, height: number, color: Color)
 	return texture;
 }
 
+/**
+ * Generates a texture from a gradient.
+ * 
+ * @param gradient - The gradient to generate the texture from.
+ * @returns The generated texture.
+ */
 export function generateGradientTexture(gradient: IGradient): Texture 
 {
-	if ("undefined" == typeof document) return new Texture();
-
+	if (!isBrowser()) {
+		return new Texture();
+	}
+	
 	const size = 64;
 
 	const canvas = document.createElement('canvas');

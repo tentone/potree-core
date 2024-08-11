@@ -1,5 +1,19 @@
 import {IPointCloudTreeNode} from '../types';
 
+/**
+ * Check if running on browser or node.js.
+ * 
+ * @returns True if running on browser.
+ */
+export function isBrowser() {
+	return typeof window !== 'undefined';
+}
+
+/**
+ * Returns the index of the node in the hierarchy from its name.
+ * 
+ * @param name The name of the node.
+ */
 export function getIndexFromName(name: string) 
 {
 	return parseInt(name.charAt(name.length - 1), 10);
@@ -7,6 +21,9 @@ export function getIndexFromName(name: string)
 
 /**
  * When passed to `[].sort`, sorts the array by level and index: r, r0, r3, r4, r01, r07, r30, ...
+ * 
+ * @param a The first node.
+ * @param b The second node.
  */
 export function byLevelAndIndex(a: IPointCloudTreeNode, b: IPointCloudTreeNode) 
 {

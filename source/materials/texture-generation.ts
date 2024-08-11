@@ -8,7 +8,7 @@ import {
 	Texture
 } from 'three';
 import {IClassification, IGradient} from '../materials/types';
-import { isBrowser } from 'utils/utils';
+import {isBrowser} from '../utils/utils';
 
 /**
  * Generates a texture from a color.

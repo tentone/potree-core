@@ -1,12 +1,10 @@
 // eslint-disable-next-line no-undef
 export default {
-	root: true,
-	parserOptions: {
-		sourceType: 'module',
+	languageOptions: {
 		ecmaVersion: 2020,
-		ecmaFeatures: {impliedStrict: true}
+		sourceType: "module"
 	},
-	plugins: ['import', 'jsdoc'],
+	ignores: ['LASLAZWorker.js'],
 	rules: {
 		'arrow-body-style': ['error', 'always'],
 		'arrow-parens': 'error',
@@ -21,19 +19,19 @@ export default {
 		'guard-for-in': 'off',
 		'id-blacklist': 'off',
 		'id-match': 'off',
-		'sort-imports': ['off', {
-			ignoreCase: false,
-			ignoreDeclarationSort: false,
-			ignoreMemberSort: false,
-			memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single']
-		}],
-		'import/no-deprecated': 'off',
-		'import/no-unassigned-import': 'off',
-		'import/order': 'error',
-		'jsdoc/check-alignment': 'error',
-		'jsdoc/check-indentation': 'off',
-		'jsdoc/newline-after-description': 'error',
-		'jsdoc/no-types': 'off',
+		// 'sort-imports': ['off', {
+		// 	ignoreCase: false,
+		// 	ignoreDeclarationSort: false,
+		// 	ignoreMemberSort: false,
+		// 	memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single']
+		// }],
+		// 'import/no-deprecated': 'off',
+		// 'import/no-unassigned-import': 'off',
+		// 'import/order': 'error',
+		// 'jsdoc/check-alignment': 'error',
+		// 'jsdoc/check-indentation': 'off',
+		// 'jsdoc/newline-after-description': 'error',
+		// 'jsdoc/no-types': 'off',
 		'max-classes-per-file': 'off',
 		'max-len': 'off',
 		'lines-between-class-members': 'error',

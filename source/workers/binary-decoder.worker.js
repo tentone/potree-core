@@ -1,3 +1,3 @@
-import { handleMessage } from './binary-decoder-worker-internal.ts';
+import {handleMessage} from './binary-decoder-worker-internal.ts';
 
 onmessage = handleMessage;

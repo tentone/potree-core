@@ -4,7 +4,7 @@ export default {
 		ecmaVersion: 2020,
 		sourceType: "module"
 	},
-	ignores: ['LASLAZWorker.js'],
+	ignores: ['source/loading2/**'],
 	rules: {
 		'arrow-body-style': ['error', 'always'],
 		'arrow-parens': 'error',
@@ -15,7 +15,7 @@ export default {
 		semi: ['error', 'always'],
 		'constructor-super': 'error',
 		curly: 'error',
-		eqeqeq: 'error',
+		eqeqeq: ['error', 'smart'],
 		'guard-for-in': 'off',
 		'id-blacklist': 'off',
 		'id-match': 'off',

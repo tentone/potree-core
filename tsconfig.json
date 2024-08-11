@@ -18,8 +18,7 @@
 		"experimentalDecorators": true,
 		"typeRoots": ["node_modules/@types"],
 		"lib": ["es2017", "dom"],
-		"plugins": [],
-		"esModuleInterop": true
+		"plugins": []
 	},
 	"include": ["source/**/*.ts"],
 	"exclude": ["node_modules"]

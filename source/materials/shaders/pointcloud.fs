@@ -14,6 +14,7 @@ uniform float spacing;
 uniform float pcIndex;
 uniform float screenWidth;
 uniform float screenHeight;
+uniform float far;
 
 uniform sampler2D depthMap;
 
@@ -243,9 +244,13 @@ void main() {
 		pos = projectionMatrix * pos;
 		pos = pos / pos.w;
 		float expDepth = pos.z;
-		depth = (pos.z + 1.0) / 2.0;
-		gl_FragDepth = depth;
-		
+
+		#if defined(use_log_depth)
+			gl_FragDepth = log(linearDepth) / log(far + 1.0);
+		#else
+			gl_FragDepth = (pos.z + 1.0) / 2.0;
+		#endif
+
 		#if defined(color_type_depth)
 			gl_FragColor.r = linearDepth;
 			gl_FragColor.g = expDepth;

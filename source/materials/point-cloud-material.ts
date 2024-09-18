@@ -333,8 +333,6 @@ export class PointCloudMaterial extends RawShaderMaterial
 
   @requiresShaderUpdate() useEDL: boolean = false;
 
-  @requiresShaderUpdate() useLogDepth: boolean = false;
-
   @requiresShaderUpdate() shape: PointShape = PointShape.SQUARE;
 
   @requiresShaderUpdate() treeType: TreeType = TreeType.OCTREE;
@@ -348,6 +346,8 @@ export class PointCloudMaterial extends RawShaderMaterial
   @requiresShaderUpdate() inputColorEncoding: ColorEncoding = ColorEncoding.SRGB;
 
   @requiresShaderUpdate() outputColorEncoding: ColorEncoding = ColorEncoding.LINEAR;
+
+  @requiresShaderUpdate() private useLogDepth: boolean = false;
 
   attributes = {
   	position: {type: 'fv', value: []},
@@ -716,6 +716,8 @@ export class PointCloudMaterial extends RawShaderMaterial
   		this.screenWidth = renderer.domElement.clientWidth * pixelRatio;
   		this.screenHeight = renderer.domElement.clientHeight * pixelRatio;
   	}
+
+	this.useLogDepth = renderer.capabilities.logarithmicDepthBuffer
 
   	const maxScale = Math.max(octree.scale.x, octree.scale.y, octree.scale.z);
   	this.spacing = octree.pcoGeometry.spacing * maxScale;

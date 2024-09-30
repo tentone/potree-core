@@ -695,6 +695,7 @@ export class PointCloudMaterial extends RawShaderMaterial
   		this.useOrthographicCamera = false;
   		this.fov = (camera as PerspectiveCamera).fov * (Math.PI / 180);
 		this.far = (camera as PerspectiveCamera).far;
+		this.useLogDepth = renderer.capabilities.logarithmicDepthBuffer
   	}
   	else // ORTHOGRAPHIC
   	{
@@ -704,6 +705,7 @@ export class PointCloudMaterial extends RawShaderMaterial
   		this.orthoHeight = (orthoCamera.top - orthoCamera.bottom) / orthoCamera.zoom;
   		this.fov = Math.PI / 2; // will result in slope = 1 in the shader
 		this.far = (camera as OrthographicCamera).far;
+		this.useLogDepth = false;
   	}
   	const renderTarget = renderer.getRenderTarget();
   	if (renderTarget !== null && renderTarget instanceof WebGLRenderTarget) 
@@ -717,7 +719,6 @@ export class PointCloudMaterial extends RawShaderMaterial
   		this.screenHeight = renderer.domElement.clientHeight * pixelRatio;
   	}
 
-	this.useLogDepth = renderer.capabilities.logarithmicDepthBuffer
 
   	const maxScale = Math.max(octree.scale.x, octree.scale.y, octree.scale.z);
   	this.spacing = octree.pcoGeometry.spacing * maxScale;

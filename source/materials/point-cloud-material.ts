@@ -85,6 +85,7 @@ export interface IPointCloudMaterialUniforms {
   orthoHeight: IUniform<number>;
   orthoWidth: IUniform<number>;
   useOrthographicCamera: IUniform<boolean>;
+  far: IUniform<number>;
   size: IUniform<number>;
   spacing: IUniform<number>;
   toModel: IUniform<number[]>;
@@ -220,6 +221,7 @@ export class PointCloudMaterial extends RawShaderMaterial
 		useOrthographicCamera: makeUniform('b', false),
 		orthoHeight: makeUniform('f', 1.0),
 		orthoWidth: makeUniform('f', 1.0),
+		far: makeUniform('f', 1000.0),
 		size: makeUniform('f', 1),
 		spacing: makeUniform('f', 1.0),
 		toModel: makeUniform('Matrix4f', []),
@@ -283,6 +285,8 @@ export class PointCloudMaterial extends RawShaderMaterial
   @uniform('orthoHeight') orthoHeight!: number;
 
   @uniform('useOrthographicCamera') useOrthographicCamera!: boolean;
+  
+  @uniform('far') far!: number;
 
   @uniform('size') size!: number;
 
@@ -342,6 +346,8 @@ export class PointCloudMaterial extends RawShaderMaterial
   @requiresShaderUpdate() inputColorEncoding: ColorEncoding = ColorEncoding.SRGB;
 
   @requiresShaderUpdate() outputColorEncoding: ColorEncoding = ColorEncoding.LINEAR;
+
+  @requiresShaderUpdate() private useLogDepth: boolean = false;
 
   attributes = {
   	position: {type: 'fv', value: []},
@@ -498,6 +504,11 @@ export class PointCloudMaterial extends RawShaderMaterial
   	{
   		define('use_edl');
   	}
+
+	if (this.useLogDepth) 
+	{
+		define('use_log_depth');
+	}
 
   	if (this.weighted) 
   	{
@@ -683,6 +694,8 @@ export class PointCloudMaterial extends RawShaderMaterial
   	{
   		this.useOrthographicCamera = false;
   		this.fov = (camera as PerspectiveCamera).fov * (Math.PI / 180);
+		this.far = (camera as PerspectiveCamera).far;
+		this.useLogDepth = renderer.capabilities.logarithmicDepthBuffer
   	}
   	else // ORTHOGRAPHIC
   	{
@@ -691,6 +704,8 @@ export class PointCloudMaterial extends RawShaderMaterial
   		this.orthoWidth = (orthoCamera.right - orthoCamera.left) / orthoCamera.zoom;
   		this.orthoHeight = (orthoCamera.top - orthoCamera.bottom) / orthoCamera.zoom;
   		this.fov = Math.PI / 2; // will result in slope = 1 in the shader
+		this.far = (camera as OrthographicCamera).far;
+		this.useLogDepth = false;
   	}
   	const renderTarget = renderer.getRenderTarget();
   	if (renderTarget !== null && renderTarget instanceof WebGLRenderTarget) 
@@ -703,6 +718,7 @@ export class PointCloudMaterial extends RawShaderMaterial
   		this.screenWidth = renderer.domElement.clientWidth * pixelRatio;
   		this.screenHeight = renderer.domElement.clientHeight * pixelRatio;
   	}
+
 
   	const maxScale = Math.max(octree.scale.x, octree.scale.y, octree.scale.z);
   	this.spacing = octree.pcoGeometry.spacing * maxScale;

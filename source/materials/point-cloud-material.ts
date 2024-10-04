@@ -149,6 +149,7 @@ const COLOR_DEFS = {
 const CLIP_MODE_DEFS = {
 	[ClipMode.DISABLED]: 'clip_disabled',
 	[ClipMode.CLIP_OUTSIDE]: 'clip_outside',
+	[ClipMode.CLIP_INSIDE]: 'clip_inside',
 	[ClipMode.HIGHLIGHT_INSIDE]: 'clip_highlight_inside'
 };
 

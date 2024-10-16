@@ -7,6 +7,7 @@ uniform vec3 cameraPosition;
 uniform mat4 projectionMatrix;
 uniform float opacity;
 
+uniform bool useOrthographicCamera;
 uniform float blendHardness;
 uniform float blendDepthSupplement;
 uniform float fov;
@@ -232,8 +233,10 @@ void main() {
 	vec4 pos = vec4(vViewPosition, 1.0);
 
 	#if defined(paraboloid_point_shape)
-		float wi = 0.0 - ( u*u + v*v);
-		pos.z += wi * vRadius;
+		if(!useOrthographicCamera){
+			float wi = 0.0 - ( u*u + v*v);
+			pos.z += wi * vRadius;
+		}
 	#endif
 
 	float linearDepth = -pos.z;

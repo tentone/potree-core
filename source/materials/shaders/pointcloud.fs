@@ -38,13 +38,11 @@ out vec4 fragColor;
 	in float vLinearDepth;
 #endif
 
-#if !defined(paraboloid_point_shape) && defined(use_edl)
+#ifdef use_edl
 	in float vLogDepth;
 #endif
 
-#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) || defined(paraboloid_point_shape)
 	in vec3 vViewPosition;
-#endif
 
 #if defined(weighted_splats) || defined(paraboloid_point_shape)
 	in float vRadius;
@@ -91,12 +89,6 @@ void main() {
 		if(vLinearDepth > sDepth + vRadius + blendDepthSupplement){
 			discard;
 		}
-	#endif
-		
-	#if defined color_type_point_index
-		fragColor = vec4(color, pcIndex / 255.0);
-	#else
-		fragColor = vec4(color, vOpacity);
 	#endif
 
 	#if defined(color_type_phong)
@@ -219,56 +211,57 @@ void main() {
 
 		#endif
 		
-		gl_FragColor.xyz = gl_FragColor.xyz * ( emissive + totalDiffuse + ambientLightColor * ambient ) + totalSpecular;
+		fragColor.xyz = fragColor.xyz * ( emissive + totalDiffuse + ambientLightColor * ambient ) + totalSpecular;
 
 	#endif
 	
 	#if defined weighted_splats
-	    //float w = pow(1.0 - (u*u + v*v), blendHardness);
-		
 		float wx = 2.0 * length(2.0 * gl_PointCoord - 1.0);
 		float w = exp(-wx * wx * 0.5);
-		
-		//float distance = length(2.0 * gl_PointCoord - 1.0);
-		//float w = exp( -(distance * distance) / blendHardness);
-		
-		gl_FragColor.rgb = gl_FragColor.rgb * w;
-		gl_FragColor.a = w;
-	#endif
-	
-	#if defined paraboloid_point_shape
-		float wi = 0.0 - ( u*u + v*v);
-		vec4 pos = vec4(vViewPosition, 1.0);
-		pos.z += wi * vRadius;
-		float linearDepth = -pos.z;
-		pos = projectionMatrix * pos;
-		pos = pos / pos.w;
-		float expDepth = pos.z;
-
-		#if defined(use_log_depth)
-			gl_FragDepth = log(linearDepth) / log(far + 1.0);
-		#else
-			gl_FragDepth = (pos.z + 1.0) / 2.0;
-		#endif
-
-		#if defined(color_type_depth)
-			gl_FragColor.r = linearDepth;
-			gl_FragColor.g = expDepth;
-		#endif
-		
-		#if defined(use_edl)
-			gl_FragColor.a = log2(linearDepth);
-		#endif
-		
+		fragColor.rgb = fragColor.rgb * w;
+		fragColor.a = w;
 	#else
-		#if defined(use_edl)
-			gl_FragColor.a = vLogDepth;
+		#if defined(color_type_point_index)
+			fragColor = vec4(color, pcIndex / 255.0);
+		#else
+			fragColor = vec4(color, vOpacity);
 		#endif
 	#endif
 
-	#ifdef highlight_point
+	// Adjust position and compute depth
+	vec4 pos = vec4(vViewPosition, 1.0);
+
+	#if defined(paraboloid_point_shape)
+		float wi = 0.0 - ( u*u + v*v);
+		pos.z += wi * vRadius;
+	#endif
+
+	float linearDepth = -pos.z;
+	vec4 clipPos = projectionMatrix * pos;
+	clipPos = clipPos / clipPos.w;
+	float expDepth = clipPos.z;
+
+	// Set gl_FragDepth
+	#if defined(use_log_depth)
+		gl_FragDepth = log(linearDepth) / log(far + 1.0);
+	#else
+		gl_FragDepth = (clipPos.z + 1.0) / 2.0;
+	#endif
+
+	#if defined(color_type_depth)
+		fragColor.r = linearDepth;
+		fragColor.g = expDepth;
+	#endif
+
+	#if defined(use_edl)
+		fragColor.a = vLogDepth;
+	#endif
+
+
+
+	#if defined(highlight_point)
 		if (vHighlight > 0.0) {
-			gl_FragColor = highlightedPointColor;
+			fragColor = highlightedPointColor;
 		}
 	#endif
 }

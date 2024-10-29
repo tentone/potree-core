@@ -579,17 +579,25 @@ void main() {
 			insideAny = insideAny || inside;
 		}
 
-		if (!insideAny) {
-			#if defined clip_outside
+		#if defined clip_outside
+			if (!insideAny) {
 				gl_Position = vec4(1000.0, 1000.0, 1000.0, 1.0);
-			#elif defined clip_highlight_inside && !defined(color_type_depth)
+			}
+		#elif defined clip_inside
+			if (insideAny) {
+				gl_Position = vec4(1000.0, 1000.0, 1000.0, 1.0);
+			}
+		#elif defined clip_highlight_inside && !defined(color_type_depth)
+			if (!insideAny) {
 				float c = (vColor.r + vColor.g + vColor.b) / 6.0;
-			#endif
-		} else {
-			#if defined clip_highlight_inside
+			}
+		#endif
+
+		#if defined clip_highlight_inside
+			if (insideAny) {
 				vColor.r += 0.5;
-			#endif
-		}
+			}
+		#endif
 	#endif
 
 	// #ifdef color_encoding_sRGB

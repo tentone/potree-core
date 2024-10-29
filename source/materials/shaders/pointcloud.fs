@@ -244,9 +244,8 @@ void main() {
 	clipPos = clipPos / clipPos.w;
 	float expDepth = clipPos.z;
 
-	// Set gl_FragDepth
 	#if defined(use_log_depth)
-		gl_FragDepth = log(linearDepth) / log(far + 1.0);
+		gl_FragDepth = log2( linearDepth + 1.0 ) * log(2.0) / log(far + 1.0 );
 	#else
 		gl_FragDepth = (clipPos.z + 1.0) / 2.0;
 	#endif

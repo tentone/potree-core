@@ -91,13 +91,11 @@ uniform sampler2D depthMap;
 	out float vLinearDepth;
 #endif
 
-#if !defined(paraboloid_point_shape) && defined(use_edl)
+#ifdef use_edl
 	out float vLogDepth;
 #endif
 
-#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) || defined(paraboloid_point_shape)
-	out vec3 vViewPosition;
-#endif
+out vec3 vViewPosition;
 
 #if defined(weighted_splats) || defined(paraboloid_point_shape)
 	out float vRadius;
@@ -415,15 +413,12 @@ vec3 getCompositeColor() {
 	}
 #endif
 
-
 void main() {
 	vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
 
 	gl_Position = projectionMatrix * mvPosition;
 
-	#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0) || defined(paraboloid_point_shape)
-		vViewPosition = mvPosition.xyz;
-	#endif
+	vViewPosition = mvPosition.xyz;
 
 	#if defined weighted_splats
 		vLinearDepth = gl_Position.w;
@@ -433,7 +428,7 @@ void main() {
 		vNormal = normalize(normalMatrix * normal);
 	#endif
 
-	#if !defined(paraboloid_point_shape) && defined(use_edl)
+	#ifdef use_edl
 		vLogDepth = log2(-mvPosition.z);
 	#endif
 

@@ -32,7 +32,6 @@
 		"three": ">0.125.0"
 	},
 	"dependencies": {
-		"three": "^0.154.0",
 		"brotli": "1.3.3"
 	},
 	"devDependencies": {
@@ -48,6 +47,7 @@
 		"html-webpack-plugin": "5.5.0",
 		"raw-loader": "4.0.2",
 		"style-loader": "3.3.1",
+		"three": "^0.154.0",
 		"ts-loader": "9.5.1",
 		"typescript": "5.5.4",
 		"webpack": "5.94.0",

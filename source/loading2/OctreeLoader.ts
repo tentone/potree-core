@@ -1,10 +1,10 @@
-import {XhrRequest} from './../loading/types';
 import {BufferAttribute, BufferGeometry, Vector3} from 'three';
 import {PointAttribute, PointAttributes, PointAttributeTypes} from './PointAttributes';
 import {Box3, Sphere} from 'three';
 import {WorkerPool, WorkerType} from './WorkerPool';
 import {OctreeGeometryNode} from './OctreeGeometryNode';
 import {OctreeGeometry} from './OctreeGeometry';
+import {RequestManager} from './RequestManager';
 
 export class NodeLoader
 {
@@ -16,7 +16,7 @@ export class NodeLoader
 	offset?: [number, number, number];
 	
 
-	constructor(public url: string, public workerPool: WorkerPool, public metadata: Metadata)
+	constructor(public workerPool: WorkerPool, public metadata: Metadata, public requestManager: RequestManager)
 	{
 	}
 
@@ -46,7 +46,7 @@ export class NodeLoader
 				throw new Error('byteOffset and byteSize are required');
 			}
 
-			let urlOctree = this.url.replace('/metadata.json', '/octree.bin');
+			let urlOctree = await this.requestManager.getUrl('/octree.bin');
 
 			let first = byteOffset;
 			let last = byteOffset + byteSize - BigInt(1);
@@ -60,7 +60,7 @@ export class NodeLoader
 			}
 			else 
 			{
-				let response = await fetch(urlOctree, {
+				let response = await this.requestManager.fetch(urlOctree, {
 					headers: {
 						'content-type': 'multipart/byteranges',
 						'Range': `bytes=${first}-${last}`
@@ -276,12 +276,12 @@ export class NodeLoader
 			throw new Error(`hierarchyByteOffset and hierarchyByteSize are undefined for node ${node.name}`);
 		}
 
-		let hierarchyPath = this.url.replace('/metadata.json', '/hierarchy.bin');
+		let hierarchyPath = await this.requestManager.getUrl('/hierarchy.bin');
 		
 		let first = hierarchyByteOffset;
 		let last = first + hierarchyByteSize - BigInt(1);
 
-		let response = await fetch(hierarchyPath, {
+		let response = await this.requestManager.fetch(hierarchyPath, {
 			headers: {
 				'content-type': 'multipart/byteranges',
 				'Range': `bytes=${first}-${last}`
@@ -448,22 +448,22 @@ export class OctreeLoader
 		return attributes;
 	}
 
-	async load(url: string, xhrRequest: XhrRequest)
+	async load(url: string, requestManager: RequestManager)
 	{ // Previously a static method
 
-		let response = await xhrRequest(url);
+		let response = await requestManager.fetch(await requestManager.getUrl(url));
 		let metadata: Metadata = await response.json();
 
 		let attributes = OctreeLoader.parseAttributes(metadata.attributes);
 		// console.log(attributes)
 
-		let loader = new NodeLoader(url, this.workerPool, metadata);
+		let loader = new NodeLoader(this.workerPool, metadata, requestManager);
 		loader.attributes = attributes;
 		loader.scale = metadata.scale;
 		loader.offset = metadata.offset;
 
 		let octree = new OctreeGeometry(loader, new Box3(new Vector3(...metadata.boundingBox.min), new Vector3(...metadata.boundingBox.max)));
-		octree.url = url;
+		octree.url = await requestManager.getUrl(url);
 		octree.spacing = metadata.spacing;
 		octree.scale = metadata.scale;
 

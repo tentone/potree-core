@@ -79,11 +79,11 @@ export class Potree implements IPotree
       // Handle RequestManager case
       const requestManager = arg;
 
-      if (url === 'cloud.js') {
+      if (url.endsWith('cloud.js')) {
         return await loadPOC(url, requestManager.getUrl, requestManager.fetch).then((geometry) => {
           return new PointCloudOctree(this, geometry);
         });
-      } else if (url === 'metadata.json') {
+      } else if (url.endsWith('metadata.json')) {
         return await loadOctree(url, requestManager).then((geometry: OctreeGeometry) => {
           return new PointCloudOctree(this, geometry);
         });

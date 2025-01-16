@@ -46,7 +46,7 @@ export class NodeLoader
 				throw new Error('byteOffset and byteSize are required');
 			}
 
-			let urlOctree = await this.requestManager.getUrl(this.url.replace('/metadata.json', '/octree.bin'));
+			let urlOctree = (await this.requestManager.getUrl(this.url)).replace('/metadata.json', '/octree.bin');
 
 			let first = byteOffset;
 			let last = byteOffset + byteSize - BigInt(1);
@@ -276,8 +276,8 @@ export class NodeLoader
 			throw new Error(`hierarchyByteOffset and hierarchyByteSize are undefined for node ${node.name}`);
 		}
 
-		let hierarchyPath = await this.requestManager.getUrl(this.url.replace('/metadata.json', '/hierarchy.bin'));
-		
+		let hierarchyPath = (await this.requestManager.getUrl(this.url)).replace('/metadata.json', '/hierarchy.bin');
+
 		let first = hierarchyByteOffset;
 		let last = first + hierarchyByteSize - BigInt(1);
 

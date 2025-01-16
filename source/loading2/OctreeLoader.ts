@@ -16,7 +16,7 @@ export class NodeLoader
 	offset?: [number, number, number];
 	
 
-	constructor(public workerPool: WorkerPool, public metadata: Metadata, public requestManager: RequestManager)
+	constructor(public url: string, public workerPool: WorkerPool, public metadata: Metadata, public requestManager: RequestManager)
 	{
 	}
 
@@ -46,7 +46,7 @@ export class NodeLoader
 				throw new Error('byteOffset and byteSize are required');
 			}
 
-			let urlOctree = await this.requestManager.getUrl('/octree.bin');
+			let urlOctree = await this.requestManager.getUrl(this.url.replace('/metadata.json', '/octree.bin'));
 
 			let first = byteOffset;
 			let last = byteOffset + byteSize - BigInt(1);
@@ -276,7 +276,7 @@ export class NodeLoader
 			throw new Error(`hierarchyByteOffset and hierarchyByteSize are undefined for node ${node.name}`);
 		}
 
-		let hierarchyPath = await this.requestManager.getUrl('/hierarchy.bin');
+		let hierarchyPath = await this.requestManager.getUrl(this.url.replace('/metadata.json', '/hierarchy.bin'));
 		
 		let first = hierarchyByteOffset;
 		let last = first + hierarchyByteSize - BigInt(1);
@@ -457,7 +457,7 @@ export class OctreeLoader
 		let attributes = OctreeLoader.parseAttributes(metadata.attributes);
 		// console.log(attributes)
 
-		let loader = new NodeLoader(this.workerPool, metadata, requestManager);
+		let loader = new NodeLoader(url, this.workerPool, metadata, requestManager);
 		loader.attributes = attributes;
 		loader.scale = metadata.scale;
 		loader.offset = metadata.offset;

@@ -606,11 +606,11 @@ void main() {
 	// 	#endif
 	// #endif
 
-	#if defined(output_color_encoding_sRGB) && defined(input_color_encoding_linear)
+	#if defined(output_color_encoding_sRGB) && defined(input_color_encoding_linear) && !defined(color_type_point_index)
 		vColor = toLinear(vColor);
 	#endif
 
-	#if defined(output_color_encoding_linear) && defined(input_color_encoding_sRGB)
+	#if defined(output_color_encoding_linear) && defined(input_color_encoding_sRGB) && !defined(color_type_point_index)
 		vColor = fromLinear(vColor);
 	#endif
 }

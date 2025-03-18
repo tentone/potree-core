@@ -1,3 +1,4 @@
+import { RequestManager } from './loading2/RequestManager';
 import {OctreeGeometry} from './loading2/OctreeGeometry';
 import {loadOctree} from './loading2/load-octree';
 import {
@@ -19,7 +20,7 @@ import {
 	PERSPECTIVE_CAMERA
 } from './constants';
 import {getFeatures} from './features';
-import {GetUrlFn, loadPOC} from './loading';
+import {loadPOC} from './loading';
 import {ClipMode} from './materials';
 import {PointCloudOctree} from './point-cloud-octree';
 import {PointCloudOctreeGeometryNode} from './point-cloud-octree-geometry-node';
@@ -59,21 +60,38 @@ export class Potree implements IPotree
 
 	lru = new LRU(this._pointBudget);
 
-	async loadPointCloud(url: string, getUrl: GetUrlFn, xhrRequest = (input: RequestInfo, init?: RequestInit) => {return fetch(input, init);}): Promise<PointCloudOctree> 
-	{
-		if (url === 'cloud.js') 
-		{
-			return await loadPOC(url, getUrl, xhrRequest).then((geometry) => {
-				return new PointCloudOctree(this, geometry);
-			});
-		}
-		else if (url === 'metadata.json') 
-		{
-			return await loadOctree(url, getUrl, xhrRequest).then((geometry: OctreeGeometry) => {
-				return new PointCloudOctree(this, geometry);});
-		}
-		throw new Error('Unsupported file type');
-	}
+	async loadPointCloud(url: string, baseUrl: string): Promise<PointCloudOctree>;
+  async loadPointCloud(url: string, requestManager: RequestManager): Promise<PointCloudOctree>;
+  async loadPointCloud(
+    url: string,
+    arg: string | RequestManager
+  ): Promise<PointCloudOctree> {
+    if (typeof arg === 'string') {
+      // Handle baseUrl case
+      const baseUrl = arg;
+
+      const requestManager: RequestManager = {
+        getUrl: async (relativeUrl) => `${baseUrl}${relativeUrl}`,
+        fetch: async (input, init) => fetch(input, init),
+      };
+      return this.loadPointCloud(url, requestManager);
+    } else {
+      // Handle RequestManager case
+      const requestManager = arg;
+
+      if (url.endsWith('cloud.js')) {
+        return await loadPOC(url, requestManager.getUrl, requestManager.fetch).then((geometry) => {
+          return new PointCloudOctree(this, geometry);
+        });
+      } else if (url.endsWith('metadata.json')) {
+        return await loadOctree(url, requestManager).then((geometry: OctreeGeometry) => {
+          return new PointCloudOctree(this, geometry);
+        });
+      }
+
+      throw new Error('Unsupported file type');
+    }
+  }
 
 	updatePointClouds(
 		pointClouds: PointCloudOctree[],

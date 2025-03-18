@@ -790,24 +790,25 @@ export class PointCloudMaterial extends RawShaderMaterial
   		material: Material,
   	) => 
   	{
-  		const pointCloudMaterial = material as PointCloudMaterial;
-  		const materialUniforms = pointCloudMaterial.uniforms;
+			if (material instanceof PointCloudMaterial) {
+				const materialUniforms = material.uniforms;
 
-  		materialUniforms.level.value = node.level;
-  		materialUniforms.isLeafNode.value = node.isLeafNode;
+				materialUniforms.level.value = node.level;
+				materialUniforms.isLeafNode.value = node.isLeafNode;
 
-  		const vnStart = pointCloudMaterial.visibleNodeTextureOffsets.get(node.name);
-  		if (vnStart !== undefined) 
-  		{
-  			materialUniforms.vnStart.value = vnStart;
-  		}
+				const vnStart = material.visibleNodeTextureOffsets.get(node.name);
+				if (vnStart !== undefined)
+				{
+					materialUniforms.vnStart.value = vnStart;
+				}
 
-  		materialUniforms.pcIndex.value =
-		pcIndex !== undefined ? pcIndex : octree.visibleNodes.indexOf(node);
+				materialUniforms.pcIndex.value =
+				pcIndex !== undefined ? pcIndex : octree.visibleNodes.indexOf(node);
 
-  		// Remove the cast to any after updating to Three.JS >= r113
-  		(material as RawShaderMaterial).uniformsNeedUpdate = true;
-  	};
+				// Remove the cast to any after updating to Three.JS >= r113
+				(material as RawShaderMaterial).uniformsNeedUpdate = true;
+			}
+		};
   }
 }
 

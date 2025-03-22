@@ -147,14 +147,14 @@ export class PointCloudOctreePicker
 		pickState: IPickState,
 	) 
 	{
+		renderer.setRenderTarget(pickState.renderTarget);
+
 		// Render the intersected nodes onto the pick render target, clipping to a small pick window.
 		renderer.setScissor(x, y, pickWndSize, pickWndSize);
 		renderer.setScissorTest(true);
 		renderer.state.buffers.depth.setTest(pickMaterial.depthTest);
 		renderer.state.buffers.depth.setMask(pickMaterial.depthWrite);
 		renderer.state.setBlending(NoBlending);
-
-		renderer.setRenderTarget(pickState.renderTarget);
 
 		// Save the current clear color and clear the renderer with black color and alpha 0.
 		renderer.getClearColor(this.clearColor);
@@ -262,7 +262,7 @@ export class PointCloudOctreePicker
 			const node = nodes[i];
 			const sceneNode = node.sceneNode;
 			const tempNode = new Points(sceneNode.geometry, pickMaterial);
-			tempNode.matrix = sceneNode.matrix;
+			tempNode.matrix = sceneNode.matrixWorld;
 			tempNode.matrixWorld = sceneNode.matrixWorld;
 			tempNode.matrixAutoUpdate = false;
 			tempNode.frustumCulled = false;

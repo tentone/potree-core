@@ -105,6 +105,7 @@ export interface IPointCloudMaterialUniforms {
   highlightedPointColor: IUniform<Vector4>;
   enablePointHighlighting: IUniform<boolean>;
   highlightedPointScale: IUniform<number>;
+  viewScale: IUniform<number>;
 }
 
 const TREE_TYPE_DEFS = {
@@ -242,7 +243,8 @@ export class PointCloudMaterial extends RawShaderMaterial
 		highlightedPointCoordinate: makeUniform('fv', new Vector3()),
 		highlightedPointColor: makeUniform('fv', DEFAULT_HIGHLIGHT_COLOR.clone()),
 		enablePointHighlighting: makeUniform('b', true),
-		highlightedPointScale: makeUniform('f', 2.0)
+		highlightedPointScale: makeUniform('f', 2.0),
+		viewScale: makeUniform('f', 1.0)
 	};
 
   @uniform('bbSize') bbSize!: [number, number, number];
@@ -320,6 +322,8 @@ export class PointCloudMaterial extends RawShaderMaterial
   @uniform('enablePointHighlighting') enablePointHighlighting!: boolean;
 
   @uniform('highlightedPointScale') highlightedPointScale!: number;
+
+  @uniform('viewScale') viewScale!: number;
 
   // Declare PointCloudMaterial attributes that need shader updates upon change, and set default values.
   @requiresShaderUpdate() useClipBox: boolean = false;
@@ -724,6 +728,12 @@ export class PointCloudMaterial extends RawShaderMaterial
   	const maxScale = Math.max(octree.scale.x, octree.scale.y, octree.scale.z);
   	this.spacing = octree.pcoGeometry.spacing * maxScale;
   	this.octreeSize = octree.pcoGeometry.boundingBox.getSize(PointCloudMaterial.helperVec3).x;
+	const view = (camera as any).view;
+	if (view?.enabled) {
+		this.viewScale = view.fullWidth / view.width;
+	} else {
+		this.viewScale = 1.0;
+	}
 
   	if (
   		this.pointSizeType === PointSizeType.ADAPTIVE ||

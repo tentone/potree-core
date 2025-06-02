@@ -66,7 +66,7 @@ export class PointCloudOctree extends PointCloudTree
 		this.position.copy(pcoGeometry.offset);
 		this.updateMatrix();
 
-		this.material = material || pcoGeometry instanceof OctreeGeometry ? new PointCloudMaterial({newFormat: true}) : new PointCloudMaterial();
+		this.material = material || (pcoGeometry instanceof OctreeGeometry ? new PointCloudMaterial({newFormat: true}) : new PointCloudMaterial());
 		this.initMaterial(this.material);
 	}
 

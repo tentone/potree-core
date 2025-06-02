@@ -21,8 +21,6 @@ export class PointCloudOctree extends PointCloudTree
 
 	boundingSphere: Sphere;
 
-	material: PointCloudMaterial;
-
 	level: number = 0;
 
 	maxLevel: number = Infinity;
@@ -43,6 +41,8 @@ export class PointCloudOctree extends PointCloudTree
 	numVisiblePoints: number = 0;
 
 	showBoundingBox: boolean = false;
+
+	private _material: PointCloudMaterial;
 
 	private visibleBounds: Box3 = new Box3();
 
@@ -67,21 +67,6 @@ export class PointCloudOctree extends PointCloudTree
 		this.updateMatrix();
 
 		this.material = material || pcoGeometry instanceof OctreeGeometry ? new PointCloudMaterial({newFormat: true}) : new PointCloudMaterial();
-		this.initMaterial(this.material);
-	}
-
-	private initMaterial(material: PointCloudMaterial): void 
-	{
-		this.updateMatrixWorld(true);
-
-		const {min, max} = computeTransformedBoundingBox(
-			this.pcoGeometry.tightBoundingBox || this.getBoundingBoxWorld(),
-			this.matrixWorld,
-		);
-
-		const bWidth = max.z - min.z;
-		material.heightMin = min.z - 0.2 * bWidth;
-		material.heightMax = max.z + 0.2 * bWidth;
 	}
 
 	dispose(): void 
@@ -105,6 +90,26 @@ export class PointCloudOctree extends PointCloudTree
 		}
 
 		this.disposed = true;
+	}
+	
+	get material(): PointCloudMaterial
+	{
+		return this._material;
+	}
+
+	set material(material: PointCloudMaterial)
+	{
+		this._material = material;
+		this.updateMatrixWorld(true);
+
+		const {min, max} = computeTransformedBoundingBox(
+			this.pcoGeometry.tightBoundingBox || this.getBoundingBoxWorld(),
+			this.matrixWorld,
+		);
+
+		const bWidth = max.z - min.z;
+		this.material.heightMin = min.z - 0.2 * bWidth;
+		this.material.heightMax = max.z + 0.2 * bWidth;
 	}
 
 	get pointSizeType(): PointSizeType 

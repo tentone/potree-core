@@ -1,9 +1,10 @@
+import {RequestManager} from './loading2/RequestManager';
 import {OctreeGeometry} from './loading2/OctreeGeometry';
 import {PointCloudOctreeGeometry} from './point-cloud-octree-geometry';
 import {Box3, Camera, Sphere, Vector3, WebGLRenderer} from 'three';
-import {GetUrlFn, XhrRequest} from './loading/types';
 import {PointCloudOctree} from './point-cloud-octree';
 import {LRU} from './utils/lru';
+
 
 export interface IPointCloudTreeNode {
   id: number;
@@ -47,7 +48,8 @@ export interface IPotree {
   maxNumNodesLoading: number;
   lru: LRU;
 
-  loadPointCloud(url: string, getUrl: GetUrlFn, xhrRequest?: XhrRequest): Promise<PointCloudOctree>;
+  loadPointCloud(url: string, baseUrl: string): Promise<PointCloudOctree>;
+  loadPointCloud(url: string, requestManager: RequestManager): Promise<PointCloudOctree>;
 
   updatePointClouds(
     pointClouds: PointCloudOctree[],

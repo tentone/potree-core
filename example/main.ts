@@ -73,7 +73,7 @@ document.body.onload = function()
 	
 	function loadPointCloud(baseUrl: string, url: string, position?: Vector3, rotation?: Euler, scale?: Vector3)
 	{
-			potree.loadPointCloud(url, url => `${baseUrl}${url}`,).then(function(pco: PointCloudOctree)
+		potree.loadPointCloud(url, baseUrl).then(function(pco: PointCloudOctree)
 			{
 				pco.material.size = 1.0;
 				pco.material.shape = 2;

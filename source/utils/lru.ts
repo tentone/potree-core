@@ -16,33 +16,55 @@ export class LRUItem
  */
 export class LRU 
 {
-	// the least recently used item
-	first: LRUItem | null = null;
+	/**
+	 * The least recently used item.
+	 */
+	public first: LRUItem | null = null;
 
-	// the most recently used item
-	last: LRUItem | null = null;
+	/**
+	 * The most recently used item
+	 */
+	public last: LRUItem | null = null;
 
-	numPoints: number = 0;
+	/**
+	 * The total number of points in the LRU cache.
+	 */
+	public numPoints: number = 0;
 
+	/**
+	 * Items in the LRU cache, indexed by node ID.
+	 */
 	private items = new Map<number, LRUItem>();
+	
+	/**
+	 * Creates a new LRU cache with a specified point budget.
+	 * 
+	 * @param pointBudget The maximum number of points that can be stored in the LRU cache.
+	 */
+	public constructor(public pointBudget: number = 1_000_000) {}
 
-	constructor(public pointBudget: number = 1_000_000) {}
-
-	get size(): number 
+	public get size(): number 
 	{
 		return this.items.size;
 	}
 
-	has(node: Node): boolean 
+	/**
+	 * Checks if the LRU cache contains the specified node.
+	 * 
+	 * @param node - The node to check for in the LRU cache.
+	 * @returns Returns true if the node is in the cache, false otherwise.
+	 */
+	public has(node: Node): boolean 
 	{
 		return this.items.has(node.id);
 	}
 
 	/**
-   * Makes the specified the most recently used item. if the list does not contain node, it will
-   * be added.
-   */
-	touch(node: Node) 
+	 * Makes the specified the most recently used item. if the list does not contain node, it will be added.
+	 * 
+	 * @param node - The node to touch, making it the most recently used item in the LRU cache.
+	 */
+	public touch(node: Node) 
 	{
 		if (!node.loaded) 
 		{
@@ -60,6 +82,11 @@ export class LRU
 		}
 	}
 
+	/**
+	 * Adds a new node to the LRU cache, making it the most recently used item.
+	 * 
+	 * @param node - The node to add to the LRU cache.
+	 */
 	private addNew(node: Node): void 
 	{
 		const item = new LRUItem(node);
@@ -79,6 +106,11 @@ export class LRU
 		this.numPoints += node.numPoints;
 	}
 
+	/**
+	 * Touches an existing item in the LRU cache, moving it to the end of the list (most recently used).
+	 * 
+	 * @param item - The LRUItem to touch, making it the most recently used item in the cache.
+	 */
 	private touchExisting(item: LRUItem): void 
 	{
 		if (!item.previous) 
@@ -118,7 +150,12 @@ export class LRU
 		}
 	}
 
-	remove(node: Node) 
+	/**
+	 * Removes a node from the LRU cache.
+	 * 
+	 * @param node - The node to remove from the LRU cache.
+	 */
+	public remove(node: Node) 
 	{
 		const item = this.items.get(node.id);
 		if (!item) 
@@ -136,13 +173,13 @@ export class LRU
 			if (!item.previous) 
 			{
 				this.first = item.next;
-        this.first!.previous = null;
+				this.first!.previous = null;
 			}
 
 			if (!item.next) 
 			{
 				this.last = item.previous;
-        this.last!.next = null;
+				this.last!.next = null;
 			}
 
 			if (item.previous && item.next) 
@@ -156,12 +193,22 @@ export class LRU
 		this.numPoints -= node.numPoints;
 	}
 
-	getLRUItem(): Node | undefined 
+	/**
+	 * Gets the least recently used item from the LRU cache.
+	 * 
+	 * @returns Returns the least recently used node, or undefined if the cache is empty. 
+	 */
+	public getLRUItem(): Node | undefined 
 	{
 		return this.first ? this.first.node : undefined;
 	}
 
-	freeMemory(): void 
+	/**
+	 * Frees up memory by removing the least recently used items until the number of points is below the point budget.
+	 * 
+	 * @returns - Returns nothing.
+	 */
+	public freeMemory(): void 
 	{
 		if (this.items.size <= 1) 
 		{
@@ -178,7 +225,12 @@ export class LRU
 		}
 	}
 
-	disposeSubtree(node: Node): void 
+	/**
+	 * Disposes of a subtree starting from the specified node and removes it from the LRU cache.
+	 * 
+	 * @param node - The root node of the subtree to dispose of.
+	 */
+	public disposeSubtree(node: Node): void 
 	{
 		// Collect all the nodes which are to be disposed and removed.
 		const nodesToDispose: Node[] = [node];

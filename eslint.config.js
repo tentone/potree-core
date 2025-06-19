@@ -1,8 +1,8 @@
-// eslint-disable-next-line no-undef
+ 
 export default {
 	languageOptions: {
 		ecmaVersion: 2020,
-		sourceType: "module"
+		sourceType: 'module'
 	},
 	ignores: ['source/loading2/**'],
 	rules: {

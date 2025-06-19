@@ -8,15 +8,10 @@ import {
 } from 'three';
 
 /**
- *
- * code adapted from three.js BoxHelper.js
- * https://github.com/mrdoob/three.js/blob/dev/src/helpers/BoxHelper.js
- *
- * @author mrdoob / http://mrdoob.com/
- * @author Mugen87 / http://github.com/Mugen87
- * @author mschuetz / http://potree.org
+ * Helper class to visualize a Box3 bounding box in 3D space.
+ * 
+ * Code adapted from three.js BoxHelper.js
  */
-
 export class Box3Helper extends LineSegments 
 {
 	constructor(box: Box3, color: Color = new Color(0xffff00)) 

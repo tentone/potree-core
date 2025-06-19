@@ -310,7 +310,7 @@ export class PointCloudOctreeGeometryNode extends EventDispatcher implements IPo
 		return {children: children, numPoints: numPoints, name: name};
 	}
 
-	addNode(
+	public addNode(
 		{name, numPoints, children}: NodeData,
 		pco: PointCloudOctreeGeometry,
 		nodes: Map<string, PointCloudOctreeGeometryNode>,

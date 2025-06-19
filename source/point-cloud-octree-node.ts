@@ -3,24 +3,58 @@ import {PointCloudOctreeGeometryNode} from './point-cloud-octree-geometry-node';
 import {IPointCloudTreeNode} from './types';
 
 export class PointCloudOctreeNode extends EventDispatcher implements IPointCloudTreeNode 
-{
-	geometryNode: PointCloudOctreeGeometryNode;
+{	
+	/**
+	 * Unique identifier for the node, automatically incremented.
+	 */
+	public geometryNode: PointCloudOctreeGeometryNode;
 
-	sceneNode: Points;
+	/**
+	 * The scene node that represents this octree node in the 3D scene.
+	 * 
+	 * It contains the points of the point cloud.
+	 */
+	public sceneNode: Points;
 
-	pcIndex: number | undefined = undefined;
+	/**
+	 * The index of the point cloud in the scene, if applicable.
+	 * 
+	 * This is used to identify which point cloud this node belongs to.
+	 */
+	public pcIndex: number | undefined = undefined;
 
-	boundingBoxNode: Object3D | null = null;
+	/**
+	 * The bounding box node for this octree node, if applicable.
+	 * 
+	 * This is used for visualizing the bounding box in the scene.
+	 */
+	public boundingBoxNode: Object3D | null = null;
 
-	readonly children: (IPointCloudTreeNode | null)[];
+	/**
+	 * An array of child nodes, which can be null if there are no children at that position.
+	 * 
+	 * This is used to traverse the octree structure.
+	 */
+	public readonly children: (IPointCloudTreeNode | null)[];
 
-	readonly loaded = true;
+	/**
+	 * Indicates whether the node's geometry has been loaded.
+	 */
+	public readonly loaded = true;
 
-	readonly isTreeNode: boolean = true;
+	/**
+	 * Indicates whether the node is currently loading.
+	 */
+	public readonly isTreeNode: boolean = true;
 
-	readonly isGeometryNode: boolean = false;
+	/**
+	 * Indicates whether this node is a geometry node.
+	 * 
+	 * This is always false for PointCloudOctreeNode, as it represents a tree node.
+	 */
+	public readonly isGeometryNode: boolean = false;
 
-	constructor(geometryNode: PointCloudOctreeGeometryNode, sceneNode: Points) 
+	public constructor(geometryNode: PointCloudOctreeGeometryNode, sceneNode: Points) 
 	{
 		super();
 
@@ -29,12 +63,22 @@ export class PointCloudOctreeNode extends EventDispatcher implements IPointCloud
 		this.children = geometryNode.children.slice();
 	}
 
-	dispose(): void 
+	/**
+	 * Disposes of the resources used by this node.
+	 * 
+	 * This method should be called when the node is no longer needed to free up memory.
+	 */
+	public dispose(): void 
 	{
 		this.geometryNode.dispose();
 	}
 
-	disposeSceneNode(): void 
+	/**
+	 * Disposes of the scene node associated with this octree node.
+	 * 
+	 * This method removes the geometry and its attributes from the scene node to free up resources.
+	 */
+	public disposeSceneNode(): void 
 	{
 		const node = this.sceneNode;
 
@@ -58,52 +102,58 @@ export class PointCloudOctreeNode extends EventDispatcher implements IPointCloud
 		}
 	}
 
-	traverse(cb: (node: IPointCloudTreeNode)=> void, includeSelf?: boolean): void 
+	/**
+	 * Traverses the octree node and executes a callback function for each node.
+	 * 
+	 * @param cb - The callback function to execute for each node.
+	 * @param includeSelf - If true, the callback will also be executed for this node.
+	 */
+	public traverse(cb: (node: IPointCloudTreeNode)=> void, includeSelf?: boolean): void 
 	{
 		this.geometryNode.traverse(cb, includeSelf);
 	}
 
-	get id() 
+	public get id() 
 	{
 		return this.geometryNode.id;
 	}
 
-	get name() 
+	public get name() 
 	{
 		return this.geometryNode.name;
 	}
 
-	get level(): number 
+	public get level(): number 
 	{
 		return this.geometryNode.level;
 	}
 
-	get isLeafNode(): boolean 
+	public get isLeafNode(): boolean 
 	{
 		return this.geometryNode.isLeafNode;
 	}
 
-	get numPoints(): number 
+	public get numPoints(): number 
 	{
 		return this.geometryNode.numPoints;
 	}
 
-	get index() 
+	public get index() 
 	{
 		return this.geometryNode.index;
 	}
 
-	get boundingSphere(): Sphere 
+	public get boundingSphere(): Sphere 
 	{
 		return this.geometryNode.boundingSphere;
 	}
 
-	get boundingBox(): Box3 
+	public get boundingBox(): Box3 
 	{
 		return this.geometryNode.boundingBox;
 	}
 
-	get spacing() 
+	public get spacing() 
 	{
 		return this.geometryNode.spacing;
 	}

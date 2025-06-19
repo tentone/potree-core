@@ -18,7 +18,6 @@ export interface IPointCloudTreeNode {
   numPoints: number;
   readonly children: ReadonlyArray<IPointCloudTreeNode | null>;
   readonly isLeafNode: boolean;
-  // This probably needs isTreeNode and isGeometryNode as readonly properties too?
 
   dispose(): void;
 
@@ -28,15 +27,19 @@ export interface IPointCloudTreeNode {
 export interface IVisibilityUpdateResult {
   visibleNodes: IPointCloudTreeNode[];
   numVisiblePoints: number;
+  
   /**
    * True when a node has been loaded but was not added to the scene yet.
+   * 
    * Make sure to call updatePointClouds() again on the next frame.
    */
   exceededMaxLoadsToGPU: boolean;
+  
   /**
    * True when at least one node in view has failed to load.
    */
   nodeLoadFailed: boolean;
+  
   /**
    * Promises for loading nodes, will reject when loading fails.
    */

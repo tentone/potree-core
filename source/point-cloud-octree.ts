@@ -10,43 +10,112 @@ import {IPointCloudTreeNode, IPotree, PickPoint, PCOGeometry} from './types';
 import {computeTransformedBoundingBox} from './utils/bounds';
 
 export class PointCloudOctree extends PointCloudTree 
-{
+{	
+	/**
+	 * The name of the point cloud octree.
+	 */
 	public potree: IPotree;
 
+	/**
+	 * Indicates whether the point cloud octree has been disposed.
+	 * 
+	 * This is set to true when the octree is disposed, and can be used to check if the octree is still valid.
+	 */
 	public disposed: boolean = false;
 
+	/**
+	 * The geometry of the point cloud octree.
+	 * 
+	 * This contains the root node and other properties related to the point cloud geometry.
+	 */
 	public pcoGeometry: PCOGeometry;
 
+	/**
+	 * The bounding box of the point cloud octree.
+	 * 
+	 * This is used to define the spatial extent of the point cloud.
+	 */
 	public boundingBox: Box3;
 
+	/**
+	 * The bounding sphere of the point cloud octree.
+	 * 
+	 * This is used for spatial queries and to determine visibility.
+	 */
 	public boundingSphere: Sphere;
 
+	/**
+	 * The position of the point cloud octree in the 3D space.
+	 * 
+	 * This is used to position the octree in the scene.
+	 */
 	public level: number = 0;
 
+	/**
+	 * The maximum level of detail for the point cloud octree.
+	 * 
+	 * This is used to limit the depth of the octree when rendering or processing.
+	 */
 	public maxLevel: number = Infinity;
 
 	/**
-   * The minimum radius of a node's bounding sphere on the screen in order to be displayed.
-   */
+	 * The minimum radius of a node's bounding sphere on the screen in order to be displayed.
+	 */
 	public minNodePixelSize: number = DEFAULT_MIN_NODE_PIXEL_SIZE;
 
+	/**
+	 * The root node of the point cloud octree.
+	 */
 	public root: IPointCloudTreeNode | null = null;
 
+	/**
+	 * Bounding box nodes for visualization.
+	 */
 	public boundingBoxNodes: Object3D[] = [];
 
+	/**
+	 * An array of visible nodes in the point cloud octree.
+	 * 
+	 * These nodes are currently visible in the scene and can be rendered.
+	 */
 	public visibleNodes: PointCloudOctreeNode[] = [];
 
+	/**
+	 * An array of visible geometry nodes in the point cloud octree.
+	 * 
+	 * These nodes contain the geometry data for rendering and are currently visible.
+	 */
 	public visibleGeometry: PointCloudOctreeGeometryNode[] = [];
 
+	/**
+	 * The number of visible points in the point cloud octree.
+	 * 
+	 * This is used to keep track of how many points are currently visible in the scene.
+	 */
 	public numVisiblePoints: number = 0;
 
+	/**
+	 * Indicates whether the bounding box should be shown in the scene.
+	 * 
+	 * This can be toggled to visualize the spatial extent of the point cloud octree.
+	 */
 	public showBoundingBox: boolean = false;
 
 	// @ts-ignore
 	private _material: PointCloudMaterial = null;
 
+	/**
+	 * The bounds of the visible area in the point cloud octree.
+	 * 
+	 * This is used to determine which nodes are currently visible based on the camera's frustum.
+	 */
 	private visibleBounds: Box3 = new Box3();
 
+	/**
+	 * The picker used for picking points in the point cloud octree.
+	 * 
+	 * This is used to interact with the point cloud, such as selecting points or querying information.
+	 */
 	private picker: PointCloudOctreePicker | undefined;
 
 	public constructor(

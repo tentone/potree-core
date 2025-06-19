@@ -26,19 +26,17 @@ export interface PickParams {
   pickWindowSize: number;
   pickOutsideClipRegion: boolean;
   /**
-   * If provided, the picking will use this pixel position instead of the `Ray` passed to the `pick`
-   * method.
+   * If provided, the picking will use this pixel position instead of the `Ray` passed to the `pick` method.
    */
   pixelPosition: Vector3;
+
   /**
-   * Function which gets called after a picking material has been created and setup and before the
-   * point cloud is rendered into the picking render target. This gives applications a chance to
-   * customize the renderTarget and the material.
+   * Function which gets called after a picking material has been created and setup and before the point cloud is rendered into the picking render target.
+   * 
+   * This gives applications a chance to  customize the renderTarget and the material.
    *
-   * @param material
-   *    The pick material.
-   * @param renterTarget
-   *    The render target used for picking.
+   * @param material - The pick material.
+   * @param renterTarget - The render target used for picking.
    */
   onBeforePickRender: (material: PointCloudMaterial, renterTarget: WebGLRenderTarget)=> void;
 }

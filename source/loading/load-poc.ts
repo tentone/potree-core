@@ -32,15 +32,12 @@ interface POCJson {
 }
 
 /**
- *
- * @param url
- *    The url of the point cloud file (usually cloud.js).
- * @param getUrl
- *    Function which receives the relative URL of a point cloud chunk file which is to be loaded
- *    and shoud return a new url (e.g. signed) in the form of a string or a promise.
- * @param xhrRequest An arrow function for a fetch request
- * @returns
- *    An observable which emits once when the first LOD of the point cloud is loaded.
+ * Loads a Point Cloud Octree (POC) from a given URL.
+ * 
+ * @param url - The url of the point cloud file (usually cloud.js).
+ * @param getUrl - Function which receives the relative URL of a point cloud chunk file which is to be loaded and shoud return a new url (e.g. signed) in the form of a string or a promise.
+ * @param xhrRequest - An arrow function for a fetch request
+ * @returns An observable which emits once when the first LOD of the point cloud is loaded.
  */
 export function loadPOC(
 	url: string,

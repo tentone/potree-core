@@ -46,66 +46,149 @@ import {ColorEncoding} from './color-encoding';
 const VertShader = require('./shaders/pointcloud.vs').default;
 const FragShader = require('./shaders/pointcloud.fs').default;
 
+/**
+ * Configuration parameters for point cloud material rendering.
+ * 
+ * @interface IPointCloudMaterialParameters
+ */
 export interface IPointCloudMaterialParameters {
-  size: number;
-  minSize: number;
-  maxSize: number;
-  treeType: TreeType;
-  newFormat: boolean;
+	/**
+	 * The base size of points in the point cloud.
+	 */
+	size: number;
+	
+	/**
+	 * The minimum allowed size for points when scaling.
+	 */
+	minSize: number;
+	
+	/**
+	 * The maximum allowed size for points when scaling.
+	 */
+	maxSize: number;
+	
+	/**
+	 * The type of tree structure used for organizing the point cloud data.
+	 */
+	treeType: TreeType;
+	
+	/**
+	 * Whether to use the new format for point cloud data processing.
+	 */
+	newFormat: boolean;
 }
 
+
+/**
+ * Interface defining uniforms for point cloud material rendering in WebGL shaders.
+ * These uniforms control various aspects of point cloud visualization including
+ * appearance, filtering, transformations, and rendering parameters.
+ * 
+ * @interface IPointCloudMaterialUniforms
+ */
 export interface IPointCloudMaterialUniforms {
-  bbSize: IUniform<[number, number, number]>;
-  blendDepthSupplement: IUniform<number>;
-  blendHardness: IUniform<number>;
-  classificationLUT: IUniform<Texture>;
-  clipBoxCount: IUniform<number>;
-  clipBoxes: IUniform<Float32Array>;
-  depthMap: IUniform<Texture | null>;
-  diffuse: IUniform<[number, number, number]>;
-  fov: IUniform<number>;
-  gradient: IUniform<Texture>;
-  heightMax: IUniform<number>;
-  heightMin: IUniform<number>;
-  intensityBrightness: IUniform<number>;
-  intensityContrast: IUniform<number>;
-  intensityGamma: IUniform<number>;
-  intensityRange: IUniform<[number, number]>;
-  level: IUniform<number>;
-  maxSize: IUniform<number>;
-  minSize: IUniform<number>;
-  octreeSize: IUniform<number>;
-  opacity: IUniform<number>;
-  pcIndex: IUniform<number>;
-  rgbBrightness: IUniform<number>;
-  rgbContrast: IUniform<number>;
-  rgbGamma: IUniform<number>;
-  screenHeight: IUniform<number>;
-  screenWidth: IUniform<number>;
-  orthoHeight: IUniform<number>;
-  orthoWidth: IUniform<number>;
-  useOrthographicCamera: IUniform<boolean>;
-  far: IUniform<number>;
-  size: IUniform<number>;
-  spacing: IUniform<number>;
-  toModel: IUniform<number[]>;
-  transition: IUniform<number>;
-  uColor: IUniform<Color>;
-  visibleNodes: IUniform<Texture>;
-  vnStart: IUniform<number>;
-  wClassification: IUniform<number>;
-  wElevation: IUniform<number>;
-  wIntensity: IUniform<number>;
-  wReturnNumber: IUniform<number>;
-  wRGB: IUniform<number>;
-  wSourceID: IUniform<number>;
-  opacityAttenuation: IUniform<number>;
-  filterByNormalThreshold: IUniform<number>;
-  highlightedPointCoordinate: IUniform<Vector3>;
-  highlightedPointColor: IUniform<Vector4>;
-  enablePointHighlighting: IUniform<boolean>;
-  highlightedPointScale: IUniform<number>;
-  viewScale: IUniform<number>;
+	/** Bounding box size as [width, height, depth] */
+	bbSize: IUniform<[number, number, number]>;
+	/** Supplement value for depth blending calculations */
+	blendDepthSupplement: IUniform<number>;
+	/** Hardness factor for blending operations */
+	blendHardness: IUniform<number>;
+	/** Lookup texture for point classification rendering */
+	classificationLUT: IUniform<Texture>;
+	/** Number of active clipping boxes */
+	clipBoxCount: IUniform<number>;
+	/** Array containing clipping box parameters */
+	clipBoxes: IUniform<Float32Array>;
+	/** Depth map texture for depth-based effects, null if not used */
+	depthMap: IUniform<Texture | null>;
+	/** Diffuse color as RGB values [r, g, b] */
+	diffuse: IUniform<[number, number, number]>;
+	/** Field of view angle in radians */
+	fov: IUniform<number>;
+	/** Gradient texture for color mapping */
+	gradient: IUniform<Texture>;
+	/** Maximum height value for elevation-based coloring */
+	heightMax: IUniform<number>;
+	/** Minimum height value for elevation-based coloring */
+	heightMin: IUniform<number>;
+	/** Brightness adjustment for intensity values */
+	intensityBrightness: IUniform<number>;
+	/** Contrast adjustment for intensity values */
+	intensityContrast: IUniform<number>;
+	/** Gamma correction for intensity values */
+	intensityGamma: IUniform<number>;
+	/** Intensity range as [min, max] values */
+	intensityRange: IUniform<[number, number]>;
+	/** Current level of detail */
+	level: IUniform<number>;
+	/** Maximum point size in pixels */
+	maxSize: IUniform<number>;
+	/** Minimum point size in pixels */
+	minSize: IUniform<number>;
+	/** Size of the octree structure */
+	octreeSize: IUniform<number>;
+	/** Overall opacity of the point cloud (0.0 to 1.0) */
+	opacity: IUniform<number>;
+	/** Point cloud index identifier */
+	pcIndex: IUniform<number>;
+	/** Brightness adjustment for RGB color values */
+	rgbBrightness: IUniform<number>;
+	/** Contrast adjustment for RGB color values */
+	rgbContrast: IUniform<number>;
+	/** Gamma correction for RGB color values */
+	rgbGamma: IUniform<number>;
+	/** Screen height in pixels */
+	screenHeight: IUniform<number>;
+	/** Screen width in pixels */
+	screenWidth: IUniform<number>;
+	/** Orthographic camera height */
+	orthoHeight: IUniform<number>;
+	/** Orthographic camera width */
+	orthoWidth: IUniform<number>;
+	/** Flag indicating whether orthographic camera is being used */
+	useOrthographicCamera: IUniform<boolean>;
+	/** Far clipping plane distance */
+	far: IUniform<number>;
+	/** Base point size */
+	size: IUniform<number>;
+	/** Spacing between points */
+	spacing: IUniform<number>;
+	/** Transformation matrix to model space */
+	toModel: IUniform<number[]>;
+	/** Transition factor for animations or interpolations */
+	transition: IUniform<number>;
+	/** Color uniform for material */
+	uColor: IUniform<Color>;
+	/** Texture containing visible node information */
+	visibleNodes: IUniform<Texture>;
+	/** Starting index for visible nodes */
+	vnStart: IUniform<number>;
+	/** Weight factor for classification-based coloring */
+	wClassification: IUniform<number>;
+	/** Weight factor for elevation-based coloring */
+	wElevation: IUniform<number>;
+	/** Weight factor for intensity-based coloring */
+	wIntensity: IUniform<number>;
+	/** Weight factor for return number-based coloring */
+	wReturnNumber: IUniform<number>;
+	/** Weight factor for RGB color contribution */
+	wRGB: IUniform<number>;
+	/** Weight factor for source ID-based coloring */
+	wSourceID: IUniform<number>;
+	/** Opacity attenuation factor based on distance or other criteria */
+	opacityAttenuation: IUniform<number>;
+	/** Threshold value for normal-based point filtering */
+	filterByNormalThreshold: IUniform<number>;
+	/** 3D coordinate of the highlighted point */
+	highlightedPointCoordinate: IUniform<Vector3>;
+	/** RGBA color for highlighted point rendering */
+	highlightedPointColor: IUniform<Vector4>;
+	/** Flag to enable or disable point highlighting feature */
+	enablePointHighlighting: IUniform<boolean>;
+	/** Scale factor for highlighted point size */
+	highlightedPointScale: IUniform<number>;
+	/** Scale factor for view-dependent sizing */
+	viewScale: IUniform<number>;
 }
 
 const TREE_TYPE_DEFS = {

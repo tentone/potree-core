@@ -11,44 +11,45 @@ import {computeTransformedBoundingBox} from './utils/bounds';
 
 export class PointCloudOctree extends PointCloudTree 
 {
-	potree: IPotree;
+	public potree: IPotree;
 
-	disposed: boolean = false;
+	public disposed: boolean = false;
 
-	pcoGeometry: PCOGeometry;
+	public pcoGeometry: PCOGeometry;
 
-	boundingBox: Box3;
+	public boundingBox: Box3;
 
-	boundingSphere: Sphere;
+	public boundingSphere: Sphere;
 
-	level: number = 0;
+	public level: number = 0;
 
-	maxLevel: number = Infinity;
+	public maxLevel: number = Infinity;
 
 	/**
    * The minimum radius of a node's bounding sphere on the screen in order to be displayed.
    */
-	minNodePixelSize: number = DEFAULT_MIN_NODE_PIXEL_SIZE;
+	public minNodePixelSize: number = DEFAULT_MIN_NODE_PIXEL_SIZE;
 
-	root: IPointCloudTreeNode | null = null;
+	public root: IPointCloudTreeNode | null = null;
 
-	boundingBoxNodes: Object3D[] = [];
+	public boundingBoxNodes: Object3D[] = [];
 
-	visibleNodes: PointCloudOctreeNode[] = [];
+	public visibleNodes: PointCloudOctreeNode[] = [];
 
-	visibleGeometry: PointCloudOctreeGeometryNode[] = [];
+	public visibleGeometry: PointCloudOctreeGeometryNode[] = [];
 
-	numVisiblePoints: number = 0;
+	public numVisiblePoints: number = 0;
 
-	showBoundingBox: boolean = false;
+	public showBoundingBox: boolean = false;
 
-	private _material: PointCloudMaterial;
+	// @ts-ignore
+	private _material: PointCloudMaterial = null;
 
 	private visibleBounds: Box3 = new Box3();
 
 	private picker: PointCloudOctreePicker | undefined;
 
-	constructor(
+	public constructor(
 		potree: IPotree,
 		pcoGeometry: PCOGeometry,
 		material?: PointCloudMaterial,
@@ -69,7 +70,7 @@ export class PointCloudOctree extends PointCloudTree
 		this.material = material || pcoGeometry instanceof OctreeGeometry ? new PointCloudMaterial({newFormat: true}) : new PointCloudMaterial();
 	}
 
-	dispose(): void 
+	public dispose(): void 
 	{
 		if (this.root) 
 		{
@@ -92,12 +93,12 @@ export class PointCloudOctree extends PointCloudTree
 		this.disposed = true;
 	}
 	
-	get material(): PointCloudMaterial
+	public get material(): PointCloudMaterial
 	{
 		return this._material;
 	}
 
-	set material(material: PointCloudMaterial)
+	public set material(material: PointCloudMaterial)
 	{
 		this._material = material;
 		this.updateMatrixWorld(true);
@@ -112,17 +113,17 @@ export class PointCloudOctree extends PointCloudTree
 		this.material.heightMax = max.z + 0.2 * bWidth;
 	}
 
-	get pointSizeType(): PointSizeType 
+	public get pointSizeType(): PointSizeType 
 	{
 		return this.material.pointSizeType;
 	}
 
-	set pointSizeType(value: PointSizeType) 
+	public set pointSizeType(value: PointSizeType) 
 	{
 		this.material.pointSizeType = value;
 	}
 
-	toTreeNode(
+	public toTreeNode(
 		geometryNode: PointCloudOctreeGeometryNode,
 		parent?: PointCloudOctreeNode | null,
 	): PointCloudOctreeNode 
@@ -156,7 +157,7 @@ export class PointCloudOctree extends PointCloudTree
 		return node;
 	}
 
-	updateVisibleBounds() 
+	public updateVisibleBounds() 
 	{
 		const bounds = this.visibleBounds;
 		bounds.min.set(Infinity, Infinity, Infinity);
@@ -172,7 +173,7 @@ export class PointCloudOctree extends PointCloudTree
 		}
 	}
 
-	updateBoundingBoxes(): void 
+	public updateBoundingBoxes(): void 
 	{
 		if (!this.showBoundingBox || !this.parent) 
 		{
@@ -201,7 +202,7 @@ export class PointCloudOctree extends PointCloudTree
 		bbRoot.children = visibleBoxes;
 	}
 
-	updateMatrixWorld(force: boolean): void 
+	public updateMatrixWorld(force: boolean): void 
 	{
 		if (this.matrixAutoUpdate === true) 
 		{
@@ -225,7 +226,7 @@ export class PointCloudOctree extends PointCloudTree
 		}
 	}
 
-	hideDescendants(object: Object3D): void 
+	public hideDescendants(object: Object3D): void 
 	{
 		const toHide: Object3D[] = [];
 		addVisibleChildren(object);
@@ -249,29 +250,29 @@ export class PointCloudOctree extends PointCloudTree
 		}
 	}
 
-	moveToOrigin(): void 
+	public moveToOrigin(): void 
 	{
 		this.position.set(0, 0, 0); // Reset, then the matrix will be updated in getBoundingBoxWorld()
 		this.position.set(0, 0, 0).sub(this.getBoundingBoxWorld().getCenter(new Vector3()));
 	}
 
-	moveToGroundPlane(): void 
+	public moveToGroundPlane(): void 
 	{
 		this.position.y += -this.getBoundingBoxWorld().min.y;
 	}
 
-	getBoundingBoxWorld(): Box3 
+	public getBoundingBoxWorld(): Box3 
 	{
 		this.updateMatrixWorld(true);
 		return computeTransformedBoundingBox(this.boundingBox, this.matrixWorld);
 	}
 
-	getVisibleExtent() 
+	public getVisibleExtent() 
 	{
 		return this.visibleBounds.applyMatrix4(this.matrixWorld);
 	}
 
-	pick(
+	public pick(
 		renderer: WebGLRenderer,
 		camera: Camera,
 		ray: Ray,
@@ -282,7 +283,7 @@ export class PointCloudOctree extends PointCloudTree
 		return this.picker.pick(renderer, camera, ray, [this], params);
 	}
 
-	get progress() 
+	public get progress() 
 	{
 		return this.visibleGeometry.length === 0
 			? 0

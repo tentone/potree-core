@@ -49,7 +49,6 @@ document.body.onload = function()
 
 	canvas.onmousemove = function(event)
 	{
-		console.log("-------------mouse pick-----------");
 		normalized.set(event.clientX / canvas.width * 2 - 1, -(event.clientY / canvas.height) * 2 + 1);
 		raycaster.setFromCamera(normalized, camera);
 

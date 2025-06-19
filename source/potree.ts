@@ -32,68 +32,80 @@ import {BinaryHeap} from './utils/binary-heap';
 import {Box3Helper} from './utils/box3-helper';
 import {LRU} from './utils/lru';
 
-
+/**
+ * Represents an item in a processing queue for point cloud operations.
+ *
+ * This class is typically used to manage nodes within a point cloud structure, associating each node with a specific weight and its parent node if applicable.
+ */
 export class QueueItem 
 {
-	constructor(
-    public pointCloudIndex: number,
-    public weight: number,
-    public node: IPointCloudTreeNode,
-    public parent?: IPointCloudTreeNode | null,
+	/**
+	 * Creates a new QueueItem instance.
+	 *
+	 * @param pointCloudIndex - The index of the point cloud this item belongs to.
+	 * @param weight - The weight or priority associated with this queue item.
+	 * @param node - The point cloud tree node represented by this queue item.
+	 * @param parent - (Optional) The parent node of the current node, or null if it has no parent.
+	 */
+	public constructor(
+		public pointCloudIndex: number,
+		public weight: number,
+		public node: IPointCloudTreeNode,
+		public parent?: IPointCloudTreeNode | null,
 	) {}
 }
 
 export class Potree implements IPotree 
 {
-	private static picker: PointCloudOctreePicker | undefined;
+	public static picker: PointCloudOctreePicker | undefined;
 
-	private _pointBudget: number = DEFAULT_POINT_BUDGET;
+	public _pointBudget: number = DEFAULT_POINT_BUDGET;
 
-	private _rendererSize: Vector2 = new Vector2();
+	public _rendererSize: Vector2 = new Vector2();
 
-	maxNumNodesLoading: number = MAX_NUM_NODES_LOADING;
+	public maxNumNodesLoading: number = MAX_NUM_NODES_LOADING;
 
-	get features() 
+	public get features() 
 	{
 		return getFeatures();
 	}
 
-	lru = new LRU(this._pointBudget);
+	public lru = new LRU(this._pointBudget);
 
-	async loadPointCloud(url: string, baseUrl: string): Promise<PointCloudOctree>;
-  async loadPointCloud(url: string, requestManager: RequestManager): Promise<PointCloudOctree>;
-  async loadPointCloud(
-    url: string,
-    arg: string | RequestManager
-  ): Promise<PointCloudOctree> {
-    if (typeof arg === 'string') {
-      // Handle baseUrl case
-      const baseUrl = arg;
+	public async loadPointCloud(url: string, baseUrl: string): Promise<PointCloudOctree>;
+	public async loadPointCloud(url: string, requestManager: RequestManager): Promise<PointCloudOctree>;
+	public async loadPointCloud(
+		url: string,
+		arg: string | RequestManager
+	): Promise<PointCloudOctree> {
+		if (typeof arg === 'string') {
+			// Handle baseUrl case
+			const baseUrl = arg;
 
-      const requestManager: RequestManager = {
-        getUrl: async (relativeUrl) => `${baseUrl}${relativeUrl}`,
-        fetch: async (input, init) => fetch(input, init),
-      };
-      return this.loadPointCloud(url, requestManager);
-    } else {
-      // Handle RequestManager case
-      const requestManager = arg;
+			const requestManager: RequestManager = {
+				getUrl: async (relativeUrl) => `${baseUrl}${relativeUrl}`,
+				fetch: async (input, init) => fetch(input, init),
+			};
+			return this.loadPointCloud(url, requestManager);
+		} else {
+			// Handle RequestManager case
+			const requestManager = arg;
 
-      if (url.endsWith('cloud.js')) {
-        return await loadPOC(url, requestManager.getUrl, requestManager.fetch).then((geometry) => {
-          return new PointCloudOctree(this, geometry);
-        });
-      } else if (url.endsWith('metadata.json')) {
-        return await loadOctree(url, requestManager).then((geometry: OctreeGeometry) => {
-          return new PointCloudOctree(this, geometry);
-        });
-      }
+			if (url.endsWith('cloud.js')) {
+				return await loadPOC(url, requestManager.getUrl, requestManager.fetch).then((geometry) => {
+					return new PointCloudOctree(this, geometry);
+				});
+			} else if (url.endsWith('metadata.json')) {
+				return await loadOctree(url, requestManager).then((geometry: OctreeGeometry) => {
+					return new PointCloudOctree(this, geometry);
+				});
+			}
 
-      throw new Error('Unsupported file type');
-    }
-  }
+			throw new Error('Unsupported file type');
+		}
+	}
 
-	updatePointClouds(
+	public updatePointClouds(
 		pointClouds: PointCloudOctree[],
 		camera: Camera,
 		renderer: WebGLRenderer,
@@ -119,7 +131,7 @@ export class Potree implements IPotree
 		return result;
 	}
 
-	static pick(
+	public static pick(
 		pointClouds: PointCloudOctree[],
 		renderer: WebGLRenderer,
 		camera: Camera,
@@ -131,12 +143,12 @@ export class Potree implements IPotree
 		return Potree.picker.pick(renderer, camera, ray, pointClouds, params);
 	}
 
-	get pointBudget(): number 
+	public get pointBudget(): number 
 	{
 		return this._pointBudget;
 	}
 
-	set pointBudget(value: number) 
+	public set pointBudget(value: number) 
 	{
 		if (value !== this._pointBudget) 
 		{
@@ -185,8 +197,8 @@ export class Potree implements IPotree
 
 			if (
 				node.level > maxLevel ||
-        !frustums[pointCloudIndex].intersectsBox(node.boundingBox) ||
-        this.shouldClip(pointCloud, node.boundingBox)
+				!frustums[pointCloudIndex].intersectsBox(node.boundingBox) ||
+				this.shouldClip(pointCloud, node.boundingBox)
 			) 
 			{
 				continue;
@@ -387,7 +399,7 @@ export class Potree implements IPotree
 		return true;
 	}
 
-	private updateVisibilityStructures = (() => 
+	public updateVisibilityStructures = (() => 
 	{
 		const frustumMatrix = new Matrix4();
 		const inverseWorldMatrix = new Matrix4();
@@ -397,10 +409,10 @@ export class Potree implements IPotree
 			pointClouds: PointCloudOctree[],
 			camera: Camera,
 		): {
-      frustums: Frustum[];
-      cameraPositions: Vector3[];
-      priorityQueue: BinaryHeap<QueueItem>;
-    } => 
+			frustums: Frustum[];
+			cameraPositions: Vector3[];
+			priorityQueue: BinaryHeap<QueueItem>;
+		} => 
 		{
 			const frustums: Frustum[] = [];
 			const cameraPositions: Vector3[] = [];
@@ -462,3 +474,4 @@ export class Potree implements IPotree
 		};
 	})();
 }
+

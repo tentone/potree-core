@@ -34,12 +34,33 @@ export interface IBlurMaterialUniforms {
 	map: IUniform<Texture | null>;
 }
 
+/**
+ * Represents a custom shader material for applying a blur effect.
+ * 
+ * Extends the base ShaderMaterial class and sets up the required shaders and uniforms.
+ *
+ * This material uses custom vertex and fragment shaders for blurring.
+ */
 export class BlurMaterial extends ShaderMaterial 
 {
-	// vertexShader = require('./shaders/blur.vert');
-	// fragmentShader = require('./shaders/blur.frag');
+	/**
+	 * The GLSL source code for the vertex shader.
+	 */
+	public vertexShader = require('./shaders/blur.vs');
 
-	uniforms: IBlurMaterialUniforms = {
+	/**
+	 * The GLSL source code for the fragment shader.
+	 */
+	public fragmentShader = require('./shaders/blur.fs');
+
+	/**
+	 * The set of uniforms used by the blur shader.
+	 *
+	 * @property screenWidth - The width of the screen, used for blur calculations.
+	 * @property screenHeight - The height of the screen, used for blur calculations.
+	 * @property map - The texture to which the blur effect will be applied.
+	 */
+	public uniforms: IBlurMaterialUniforms = {
 		screenWidth: {type: 'f', value: 0},
 		screenHeight: {type: 'f', value: 0},
 		map: {type: 't', value: null}

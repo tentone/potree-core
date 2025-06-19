@@ -6,20 +6,34 @@ import {OctreeGeometryNode} from './OctreeGeometryNode';
 import {OctreeGeometry} from './OctreeGeometry';
 import {RequestManager} from './RequestManager';
 
+/**
+ * NodeLoader is responsible for loading the geometry of octree nodes.
+ */
 export class NodeLoader
 {
+	/**
+	 * Point attributes to be used when loading the geometry.
+	 */
+	public attributes?: PointAttributes;
 
-	attributes?: PointAttributes;
+	/**
+	 * Scale applied to the geometry when loading.
+	 */
+	public scale?: [number, number, number];
 
-	scale?: [number, number, number];
-
-	offset?: [number, number, number];
+	/**
+	 * Offset applied to the geometry when loading.
+	 */
+	public offset?: [number, number, number];
 	
 
-	constructor(public url: string, public workerPool: WorkerPool, public metadata: Metadata, public requestManager: RequestManager)
-	{
-	}
+	constructor(public url: string, public workerPool: WorkerPool, public metadata: Metadata, public requestManager: RequestManager){}
 
+	/**
+	 * Loads the geometry for a given octree node.
+	 * 
+	 * @param node - The octree node to load. 
+	 */
 	async load(node: OctreeGeometryNode)
 	{
 
@@ -125,8 +139,6 @@ export class NodeLoader
 					}
 
 				}
-				// indices ??
-
 				node.density = data.density;
 				node.geometry = geometry;
 				node.loaded = true;
@@ -165,22 +177,16 @@ export class NodeLoader
 			node.loaded = false;
 			node.loading = false;
 			node.octreeGeometry.numNodesLoading--;
-
-			// console.log(`failed to load ${node.name}`);
-			// console.log(e);
-			// console.log(`trying again!`);
 		}
 	}
 
-	parseHierarchy(node: OctreeGeometryNode, buffer: ArrayBuffer)
+	public parseHierarchy(node: OctreeGeometryNode, buffer: ArrayBuffer)
 	{
-
 		let view = new DataView(buffer);
-
 		let bytesPerNode = 22;
 		let numNodes = buffer.byteLength / bytesPerNode;
-
 		let octree = node.octreeGeometry;
+
 		// let nodes = [node];
 		let nodes: OctreeGeometryNode[] = new Array(numNodes);
 		nodes[0] = node;
@@ -195,10 +201,6 @@ export class NodeLoader
 			let numPoints = view.getUint32(i * bytesPerNode + 2, true);
 			let byteOffset = view.getBigInt64(i * bytesPerNode + 6, true);
 			let byteSize = view.getBigInt64(i * bytesPerNode + 14, true);
-
-			// if(byteSize === 0n){
-			// 	// debugger;
-			// }
 
 
 			if (current.nodeType === 2)
@@ -259,11 +261,6 @@ export class NodeLoader
 			// 	yield;
 			// }
 		}
-
-		// if(duration > 20){
-		// 	let msg = `duration: ${duration}ms, numNodes: ${numNodes}`;
-		// 	console.log(msg);
-		// }
 	}
 
 	async loadHierarchy(node: OctreeGeometryNode)
@@ -296,6 +293,14 @@ export class NodeLoader
 }
 
 let tmpVec3 = new Vector3();
+
+/**
+ * Creates a child AABB from the given parent AABB based on the specified index.
+ * 
+ * @param aabb - The parent AABB from which to create the child AABB.
+ * @param index - The index of the child AABB to create, which determines its position relative to the parent AABB.
+ * @returns The newly created child AABB.
+ */
 function createChildAABB(aabb: Box3, index: number)
 {
 	let min = aabb.min.clone();
@@ -347,6 +352,9 @@ let typenameTypeattributeMap = {
 
 type AttributeType = keyof typeof typenameTypeattributeMap;
 
+/**
+ * Attribute interface defines the structure of an attribute in the octree geometry.
+ */
 export interface Attribute {
 	name: string;
 	description: string;
@@ -357,6 +365,9 @@ export interface Attribute {
 	max: number[];
 }
 
+/**
+ * Metadata interface defines the structure of the metadata for an octree geometry.
+ */
 export interface Metadata {
 	version: string;
 	name: string;
@@ -379,16 +390,24 @@ export interface Metadata {
 	attributes: Attribute[];
 }
 
+/**
+ * OctreeLoader is responsible for loading octree geometries from a given URL.
+ */
 export class OctreeLoader
 {
+	/**
+	 * WorkerPool instance used for managing workers for loading tasks.
+	 */
+	public workerPool: WorkerPool = new WorkerPool();
 
-	workerPool: WorkerPool = new WorkerPool();
 
-	constructor() 
-	{
-	}
-
-	static parseAttributes(jsonAttributes: Attribute[])
+	/**
+	 * Parses the attributes from a JSON array and converts them into PointAttributes.
+	 * 
+	 * @param jsonAttributes Array of attributes in JSON format.
+	 * @returns A PointAttributes instance containing the parsed attributes.
+	 */
+	public static parseAttributes(jsonAttributes: Attribute[]): PointAttributes
 	{
 
 		let attributes = new PointAttributes();
@@ -416,7 +435,8 @@ export class OctreeLoader
 			}
 
 			if (name === 'gps-time') 
-			{ // HACK: Guard against bad gpsTime range in metadata, see potree/potree#909
+			{
+				// HACK: Guard against bad gpsTime range in metadata, see potree/potree#909
 				if (typeof attribute.range[0] === 'number' && attribute.range[0] === attribute.range[1]) 
 				{
 					attribute.range[1] += 1;
@@ -448,14 +468,20 @@ export class OctreeLoader
 		return attributes;
 	}
 
-	async load(url: string, requestManager: RequestManager)
-	{ // Previously a static method
+	/**
+	 * Loads an octree geometry from a given URL using the provided RequestManager.
+	 * 
+	 * @param url - The URL from which to load the octree geometry metadata. 
+	 * @param requestManager - The RequestManager instance used to handle HTTP requests.
+	 * @returns Geometry object containing the loaded octree geometry.
+	 */
+	public async load(url: string, requestManager: RequestManager)
+	{
 
 		let response = await requestManager.fetch(await requestManager.getUrl(url));
 		let metadata: Metadata = await response.json();
 
 		let attributes = OctreeLoader.parseAttributes(metadata.attributes);
-		// console.log(attributes)
 
 		let loader = new NodeLoader(url, this.workerPool, metadata, requestManager);
 		loader.attributes = attributes;

@@ -61,6 +61,23 @@ function loop()
 loop();
 ```
 
+## Custom Request Manager
+   - The potree core library uses a custom request manager to handle the loading of point cloud data.
+   - The request manager can be replaced by a custom implementation, for example to use a custom caching system or to handle requests in a different way.
+
+   ```javascript
+   class CustomRequestManager implements RequestManager 
+   {
+      fetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+         throw new Error("Method not implemented.")
+      }
+
+      async getUrl(url: string): Promise<string> {
+         return url;
+      }
+   }
+   ```   
+
 ## Notes
  - Since potree-core is meant to be used as library and not as a full software as potree some features are not available.
  - EDL shading is not supported by potree core.

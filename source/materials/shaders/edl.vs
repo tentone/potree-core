@@ -1,11 +1,13 @@
-
-
+// Declare a varying vec2 to pass UV coordinates to the fragment shader
 varying vec2 vUv;
 
 void main() {
-    vUv = uv;
+	// Assign the UV coordinates from the vertex data to vUv
+	vUv = uv;
 	
-	vec4 mvPosition = modelViewMatrix * vec4(position,1.0);
+	// Compute the model-view position of the vertex
+	vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
 
-    gl_Position = projectionMatrix * mvPosition;
+	// Project the computed position onto the screen
+	gl_Position = projectionMatrix * mvPosition;
 }

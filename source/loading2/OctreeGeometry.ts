@@ -3,49 +3,45 @@ import {Box3, Sphere, Vector3} from 'three';
 import {PointAttributes} from './PointAttributes';
 import {OctreeGeometryNode} from './OctreeGeometryNode';
 
-export class OctreeGeometry
-{
-	root!: OctreeGeometryNode;
+export class OctreeGeometry {
+	public root!: OctreeGeometryNode;
 
-	url: string | null = null;
+	public url: string | null = null;
 
-	pointAttributes: PointAttributes | null = null;
+	public pointAttributes: PointAttributes | null = null;
 
-	spacing: number = 0;
+	public spacing: number = 0;
 
-	tightBoundingBox: Box3;
+	public tightBoundingBox: Box3;
 
-	numNodesLoading: number = 0;
+	public numNodesLoading: number = 0;
 
-	maxNumNodesLoading: number = 3; // I don't understand why this is also a property of IPotree then. Duplicate functionality?
+	public maxNumNodesLoading: number = 3; // I don't understand why this is also a property of IPotree then. Duplicate functionality?
 
-	boundingSphere: Sphere;
+	public boundingSphere: Sphere;
 
-	tightBoundingSphere: Sphere;
+	public tightBoundingSphere: Sphere;
 
-	offset!: Vector3;
+	public offset!: Vector3;
 
-	scale!: [number, number, number];
+	public scale!: [number, number, number];
 
-	disposed: boolean = false;
+	public disposed: boolean = false;
 
-	projection?: Metadata['projection'];
+	public projection?: Metadata['projection'];
 
 	constructor(
 		public loader: NodeLoader,
 		public boundingBox: Box3, // Need to be get from metadata.json
-	)
-	{
+	) {
 		this.tightBoundingBox = this.boundingBox.clone();
 		this.boundingSphere = this.boundingBox.getBoundingSphere(new Sphere());
 		this.tightBoundingSphere = this.boundingBox.getBoundingSphere(new Sphere());
 	}
 
-	dispose(): void 
-	{
+	public dispose(): void {
 		// this.loader.dispose();
-		this.root.traverse((node) => {return node.dispose();});
+		this.root.traverse((node) => { return node.dispose(); });
 		this.disposed = true;
 	}
-
 }

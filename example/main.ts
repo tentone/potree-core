@@ -51,6 +51,17 @@ document.body.onload = function()
 	{
 		normalized.set(event.clientX / canvas.width * 2 - 1, -(event.clientY / canvas.height) * 2 + 1);
 		raycaster.setFromCamera(normalized, camera);
+
+		let ray = raycaster.ray;
+		const start1 = performance.now();
+		const I = Potree.pick(pointClouds, renderer, camera, ray)
+		console.log('Potree.pick :>> ', I?.position, performance.now() - start1);
+
+		const start2 = performance.now();
+        const intesects = raycaster.intersectObject(scene, true);
+        if (intesects.length > 0) {
+            console.log('iraycaster.intersectObject :>> ', intesects[0].point, performance.now() - start2);
+		}
 	};
 
 	canvas.ondblclick = function()

@@ -24,6 +24,7 @@ uniform float screenWidth;
 uniform float screenHeight;
 uniform float fov;
 uniform float spacing;
+uniform float viewScale;
 
 uniform bool useOrthographicCamera;
 uniform float orthoWidth;
@@ -468,6 +469,8 @@ void main() {
 	#if defined(weighted_splats) || defined(paraboloid_point_shape)
 		vRadius = pointSize / projFactor;
 	#endif
+
+	pointSize *= viewScale;
 
 	gl_PointSize = pointSize;
 

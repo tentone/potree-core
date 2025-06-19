@@ -15,10 +15,10 @@
 		"dev": "webpack --mode development --watch --progress --stats-children",
 		"build": "webpack --mode production --config webpack.prod.js",
 		"start": "npm run build && webpack-dev-server --config webpack.example.js --mode development --progress --port 5200",
-		"docs": "jsdoc -d docs source",
+		"docs": "typedoc source --out docs --tsconfig tsconfig.json --theme default --excludeNotDocumented --excludeExternals --excludePrivate --excludeProtected",
 		"pub": "npm run build && npm publish --access public .",
-		"lint": "eslint source",
-		"lint-fix": "eslint --fix source"
+		"lint": "eslint ./source",
+		"lint-fix": "eslint --fix ./source"
 	},
 	"keywords": [
 		"three",
@@ -49,6 +49,7 @@
 		"style-loader": "3.3.1",
 		"three": "^0.154.0",
 		"ts-loader": "9.5.1",
+		"typedoc": "0.28.5",
 		"typescript": "5.5.4",
 		"webpack": "5.94.0",
 		"webpack-bundle-analyzer": "4.10.2",

@@ -21,7 +21,7 @@ import {
 } from './constants';
 import {getFeatures} from './features';
 import {loadPOC} from './loading';
-import {ClipMode} from './materials';
+import {ClipMode, PointCloudMaterial} from './materials';
 import {PointCloudOctree} from './point-cloud-octree';
 import {PointCloudOctreeGeometryNode} from './point-cloud-octree-geometry-node';
 import {PointCloudOctreeNode} from './point-cloud-octree-node';
@@ -76,11 +76,12 @@ export class Potree implements IPotree
 	public async loadPointCloud(url: string, requestManager: RequestManager): Promise<PointCloudOctree>;
 	public async loadPointCloud(
 		url: string,
-		arg: string | RequestManager
+		reqManager: string | RequestManager,
+		material?: PointCloudMaterial,
 	): Promise<PointCloudOctree> {
-		if (typeof arg === 'string') {
+		if (typeof reqManager === 'string') {
 			// Handle baseUrl case
-			const baseUrl = arg;
+			const baseUrl = reqManager;
 
 			const requestManager: RequestManager = {
 				getUrl: async (relativeUrl) => `${baseUrl}${relativeUrl}`,
@@ -89,15 +90,15 @@ export class Potree implements IPotree
 			return this.loadPointCloud(url, requestManager);
 		} else {
 			// Handle RequestManager case
-			const requestManager = arg;
+			const requestManager = reqManager;
 
 			if (url.endsWith('cloud.js')) {
 				return await loadPOC(url, requestManager.getUrl, requestManager.fetch).then((geometry) => {
-					return new PointCloudOctree(this, geometry);
+					return new PointCloudOctree(this, geometry, material);
 				});
 			} else if (url.endsWith('metadata.json')) {
 				return await loadOctree(url, requestManager).then((geometry: OctreeGeometry) => {
-					return new PointCloudOctree(this, geometry);
+					return new PointCloudOctree(this, geometry, material);
 				});
 			}
 

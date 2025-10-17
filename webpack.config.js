@@ -1,4 +1,5 @@
 import path from 'path';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 
 export default {
 	entry: './source/index.ts',
@@ -18,7 +19,13 @@ export default {
 	resolve: {
 		extensions: ['.tsx', '.ts', '.js'],
 	},
-	plugins: [],
+	plugins: [
+		new CopyWebpackPlugin({
+			patterns: [
+				{ from: 'utils/binary-heap.d.ts', to: 'utils/binary-heap.d.ts', context: 'source' },
+			],
+		}),
+	],
 	externals: ['three'],
 	module: {
 		rules: [

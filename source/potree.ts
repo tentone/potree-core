@@ -459,11 +459,7 @@ export class Potree implements IPotree
 				}
 
 				// Hide any previously visible nodes. We will later show only the needed ones.
-				if (isTreeNode(pointCloud.root)) 
-				{
-					// @ts-ignore
-					pointCloud.hideDescendants(pointCloud?.root?.sceneNode);
-				}
+				pointCloud.hideDescendants(pointCloud);
 
 				for (const boundingBoxNode of pointCloud.boundingBoxNodes) 
 				{

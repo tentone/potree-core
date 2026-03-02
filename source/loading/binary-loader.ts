@@ -93,6 +93,13 @@ export class BinaryLoader
 			return Promise.resolve();
 		}
 
+		if (node.numPoints === 0) {
+			node.loaded = true;
+			node.loading = false;
+			node.pcoGeometry.numNodesLoading--;
+			return Promise.resolve();
+		}
+
 		return Promise.resolve(this.getUrl(this.getNodeUrl(node)))
 			.then((url) => {return this.xhrRequest(url, {mode: 'cors'});})
 			.then((res) => {return res.arrayBuffer();})

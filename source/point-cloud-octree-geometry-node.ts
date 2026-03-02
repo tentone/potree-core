@@ -298,7 +298,13 @@ export class PointCloudOctreeGeometryNode extends EventDispatcher implements IPo
 		nodes.set(node.name, node);
 		decoded.forEach((nodeData) => {return this.addNode(nodeData, node.pcoGeometry, nodes);});
 
-		node.loadPoints();
+		if (node.numPoints > 0) {
+			node.loadPoints();
+		} else {
+			node.loaded = true;
+			node.loading = false;
+			node.pcoGeometry.numNodesLoading--;
+		}
 	}
 
 	// tslint:enable:no-bitwise

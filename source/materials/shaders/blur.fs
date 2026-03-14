@@ -1,8 +1,7 @@
 precision highp float;
 precision highp int;
 
-// Uniforms for projection, screen size, and texture sampler
-uniform mat4 projectionMatrix;
+// Uniforms for screen size and texture sampler
 uniform float screenWidth;
 uniform float screenHeight;
 uniform sampler2D map;

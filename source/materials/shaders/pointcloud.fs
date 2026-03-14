@@ -59,7 +59,7 @@ in vec3 vViewPosition;
 	in float vHighlight;
 #endif
 
-float specularStrength = 1.0;
+const float specularStrength = 1.0;
 
 void main() {
 	// Choose the proper color format
@@ -83,7 +83,7 @@ void main() {
 	// Depth comparison for weighted splats
 	#if defined(weighted_splats)
 		vec2 uv = gl_FragCoord.xy / vec2(screenWidth, screenHeight);
-		if(vLinearDepth > texture2D(depthMap, uv).r + vRadius + blendDepthSupplement) discard;
+		if(vLinearDepth > texture(depthMap, uv).r + vRadius + blendDepthSupplement) discard;
 	#endif
 
 	// Lighting calculations for Phong shading
@@ -96,7 +96,6 @@ void main() {
 
 		#if MAX_POINT_LIGHTS > 0
 			vec3 pointDiffuse = vec3(0.0);
-			vec3 pointSpecular = vec3(0.0);
 			// Loop through each point light
 			for(int i = 0; i < MAX_POINT_LIGHTS; i++) {
 				vec4 lPos = viewMatrix * vec4(pointLightPosition[i], 1.0);
@@ -114,19 +113,13 @@ void main() {
 					float diffuseW = max(dotVal, 0.0);
 				#endif
 				pointDiffuse += diffuse * pointLightColor[i] * diffuseW * lDistance;
-				vec3 halfVec = normalize(lVector + viewDir);
-				float specW = specularStrength * max(pow(max(dot(normal, halfVec), 0.0), shininess), 0.0);
-				float normFactor = (shininess + 2.0) / 8.0;
-				vec3 schlick = specular + (vec3(1.0)-specular)*pow(max(1.0-dot(lVector, halfVec), 0.0), 5.0);
-				pointSpecular += schlick * pointLightColor[i] * specW * diffuseW * lDistance * normFactor;
-				// Disable specular effect if required
-				pointSpecular = vec3(0.0);
 			}
 		#endif
 
 		#if MAX_DIR_LIGHTS > 0
 			vec3 dirDiffuse = vec3(0.0);
 			vec3 dirSpecular = vec3(0.0);
+			float normFactor = (shininess + 2.0) / 8.0;
 			// Loop through each directional light
 			for(int i = 0; i < MAX_DIR_LIGHTS; i++) {
 				vec4 lDir = viewMatrix * vec4(directionalLightDirection[i], 0.0);
@@ -142,7 +135,6 @@ void main() {
 				dirDiffuse += diffuse * directionalLightColor[i] * diffuseW;
 				vec3 halfVec = normalize(dVector + viewDir);
 				float specW = specularStrength * max(pow(max(dot(normal, halfVec), 0.0), shininess), 0.0);
-				float normFactor = (shininess + 2.0) / 8.0;
 				vec3 schlick = specular + (vec3(1.0)-specular)*pow(max(1.0-dot(dVector, halfVec), 0.0), 5.0);
 				dirSpecular += schlick * directionalLightColor[i] * specW * diffuseW * normFactor;
 			}
@@ -153,21 +145,19 @@ void main() {
 		vec3 totalSpecular = vec3(0.0);
 		#if MAX_POINT_LIGHTS > 0
 			totalDiffuse += pointDiffuse;
-			totalSpecular += pointSpecular;
 		#endif
 		#if MAX_DIR_LIGHTS > 0
 			totalDiffuse += dirDiffuse;
 			totalSpecular += dirSpecular;
 		#endif
-		fragColor.xyz = fragColor.xyz * (emissive + totalDiffuse + ambientLightColor * ambient) + totalSpecular;
+		color = color * (emissive + totalDiffuse + ambientLightColor * ambient) + totalSpecular;
 	#endif
 
 	// Handle weighted splats or default opacity and color
 	#if defined(weighted_splats)
 		float wx = 2.0 * length(pc);
 		float w = exp(-wx * wx * 0.5);
-		fragColor.rgb *= w;
-		fragColor.a = w;
+		fragColor = vec4(color * w, w);
 	#else
 		#if defined(color_type_point_index)
 			fragColor = vec4(color, pcIndex / 255.0);
@@ -197,8 +187,8 @@ void main() {
 		gl_FragDepth = gl_FragCoord.z;
 	}else{
 		#if defined(use_log_depth)
-			// Logarithmic depth
-			gl_FragDepth = log2(linearDepth + 1.0) * log(2.0) / log(far + 1.0);
+			// Logarithmic depth: log2(linearDepth + 1.0) / log2(far + 1.0)
+			gl_FragDepth = log2(linearDepth + 1.0) / log2(far + 1.0);
 		#else
 			// Use the GPU-computed default depth.
 			gl_FragDepth = gl_FragCoord.z;

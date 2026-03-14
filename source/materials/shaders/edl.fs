@@ -19,7 +19,7 @@ uniform mat4 uProj;
 // Far plane distance, used to reconstruct logarithmic depth buffer values.
 uniform float far;
 
-// Wether the renderer is using a logarithmic depth buffer.
+// Whether the renderer is using a logarithmic depth buffer.
 uniform bool useLogDepth;
 
 // Orthographic camera flag.
@@ -86,7 +86,7 @@ void main() {
 	// Output the final color by combining the original color with the shading effect, and applying the set opacity.
 	fragColor = vec4(color.rgb * shade, opacity);
 
-	// Reconstruct linear depth from the stored log2(lenearDepth) value.
+	// Reconstruct linear depth from the stored log2(linearDepth) value.
 	float dl = pow(2.0, depth);
 	
 	if(useLogDepth && !useOrthographicCamera) {

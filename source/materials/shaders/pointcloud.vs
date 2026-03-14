@@ -131,14 +131,7 @@ int numberOfOnes(int number, int index) {
 
 // Checks if bit at specific index is set
 bool isBitSet(int number, int index){
-	int powi = (index == 0) ? 1 :
-			   (index == 1) ? 2 :
-			   (index == 2) ? 4 :
-			   (index == 3) ? 8 :
-			   (index == 4) ? 16 :
-			   (index == 5) ? 32 :
-			   (index == 6) ? 64 : 128;
-	return mod(float(number / powi), 2.0) != 0.0;
+	return (number & (1 << index)) != 0;
 }
 
 // Computes level-of-detail based on octree visibility
@@ -148,7 +141,7 @@ float getLOD() {
 	float depth = level;
 
 	for (float i = 0.0; i <= 30.0; i++) {
-		float nodeSizeAtLevel = octreeSize / pow(2.0, i + level);
+		float nodeSizeAtLevel = octreeSize / exp2(i + level);
 		vec3 index3d = floor((position - offset) / nodeSizeAtLevel + 0.5);
 		int index = int(round(4.0 * index3d.x + 2.0 * index3d.y + index3d.z));
 		
@@ -171,7 +164,7 @@ float getLOD() {
 }
 
 float getPointSizeAttenuation() {
-	return 0.5 * pow(2.0, getLOD());
+	return 0.5 * exp2(getLOD());
 }
 
 #endif
@@ -283,7 +276,7 @@ vec3 getSourceID() {
 vec3 getCompositeColor() {
 	vec3 c = wRGB * getRGB();
 	float w = wRGB;
-	c += wIntensity * getIntensity() * vec3(1.0);
+	c += wIntensity * getIntensity();
 	w += wIntensity;
 	c += wElevation * getElevation();
 	w += wElevation;
@@ -346,8 +339,8 @@ void main() {
 	// POINT SIZE COMPUTATION
 	float tanHalfFOV = tan(fov * 0.5);
 	float projFactor = -0.5 * screenHeight / (tanHalfFOV * mvPosition.z);
-	// Scale compensation based on transformation difference 
-	float scale = length(modelViewMatrix * vec4(0, 0, 0, 1) - modelViewMatrix * vec4(spacing, 0, 0, 1)) / spacing;
+	// Scale compensation based on transformation: length of the X-axis column of the model-view matrix
+	float scale = length(modelViewMatrix[0].xyz);
 	projFactor *= scale;
 	
 	float pointSize = 1.0;
@@ -445,7 +438,7 @@ void main() {
 	#endif
 	
 	#if !defined color_type_composite && defined color_type_classification
-		if (getClassification().a == 0.0) {
+		if (cl.a == 0.0) {
 			gl_Position = vec4(100.0, 100.0, 100.0, 0.0); // Cull point if classification alpha is zero
 			return;
 		}

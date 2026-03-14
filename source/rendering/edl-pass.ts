@@ -17,6 +17,7 @@ import {
 import { EyeDomeLightingMaterial } from '../materials/eye-dome-lighting-material';
 import { PointCloudOctree } from '../point-cloud-octree';
 import { ScreenPass } from './screen-pass';
+import { ORTHOGRAPHIC_CAMERA } from '../constants';
 
 export type EDLPassParams = {
     renderer: WebGLRenderer;
@@ -180,7 +181,11 @@ export class EDLPass {
         }
         this.edlMaterial.setProjectionMatrix(camera.projectionMatrix);
 
-        renderer.setRenderTarget(null);
+        // Pass far plane and log depth flag so EDL shader can reconstruct depth in the correct format.
+        this.edlMaterial.uniforms.far.value = camera.far;
+        this.edlMaterial.uniforms.useLogDepth.value = renderer.capabilities.logarithmicDepthBuffer;
+        this.edlMaterial.uniforms.useOrthographicCamera.value = camera.type === ORTHOGRAPHIC_CAMERA
+
         // Keep existing depth buffer from layer0 render.
         this.screenPass.render(renderer, this.edlMaterial, null);
 

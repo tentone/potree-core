@@ -17,6 +17,9 @@ export interface IEyeDomeLightingMaterialUniforms {
 
 	uProj: IUniform<Float32Array>;
 	colorMap: IUniform<Texture | null>;
+	far: IUniform<number>;
+	useLogDepth: IUniform<boolean>;
+	useOrthographicCamera: IUniform<boolean>;
 }
 
 export class EyeDomeLightingMaterial extends RawShaderMaterial {
@@ -38,6 +41,9 @@ export class EyeDomeLightingMaterial extends RawShaderMaterial {
 			neighbours: { type: '2fv', value: this.neighboursArray },
 			uProj: { type: 'Matrix4fv', value: new Float32Array(16) },
 			colorMap: { type: 't', value: null },
+			far: { type: 'f', value: 1000.0 },
+			useLogDepth: { type: 'b', value: false },
+			useOrthographicCamera: { type: 'b', value: false },
 		};
 
 		this.glslVersion = GLSL3;

@@ -191,13 +191,19 @@ void main() {
 
 	// When using an orthographic camera, paraboloid correction is not applied,
 	// so use the GPU-compluted default depth (gl_FragCoord.z).
-	#if defined(use_log_depth)
-		// Logarithmic depth
-		gl_FragDepth = log2(linearDepth + 1.0) * log(2.0) / log(far + 1.0);
-	#else
-		// Use the GPU-computed default depth.
+	if(useOrthographicCamera){
+		// Orthographic camera: use the GPU-computed default depth.
+		// When using an orthographic camera, Three.js does not use `logarithmicDepthBuffer` either.
 		gl_FragDepth = gl_FragCoord.z;
-	#endif
+	}else{
+		#if defined(use_log_depth)
+			// Logarithmic depth
+			gl_FragDepth = log2(linearDepth + 1.0) * log(2.0) / log(far + 1.0);
+		#else
+			// Use the GPU-computed default depth.
+			gl_FragDepth = gl_FragCoord.z;
+		#endif
+	}
 
 	#if defined(color_type_depth)
 		// Render depth information into color channels

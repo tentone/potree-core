@@ -16,6 +16,15 @@ uniform sampler2D colorMap;        // Texture containing both color data and dep
 // Projection matrix used to reconstruct regular depth from log depth.
 uniform mat4 uProj;
 
+// Far plane distance, used to reconstruct logarithmic depth buffer values.
+uniform float far;
+
+// Wether the renderer is using a logarithmic depth buffer.
+uniform bool useLogDepth;
+
+// Orthographic camera flag.
+uniform bool useOrthographicCamera;
+
 // Varying variable passed from the vertex shader:
 in vec2 vUv;                       // Texture coordinates for the current fragment.
 
@@ -76,10 +85,22 @@ void main() {
 	
 	// Output the final color by combining the original color with the shading effect, and applying the set opacity.
 	fragColor = vec4(color.rgb * shade, opacity);
-	
-	// Write regular hyperbolic depth values to depth buffer, reconstructed from log depth.
+
+	// Reconstruct linear depth from the stored log2(lenearDepth) value.
 	float dl = pow(2.0, depth);
-	vec4 dp = uProj * vec4(0.0, 0.0, -dl, 1.0);
-	float pz = dp.z / dp.w;
-	gl_FragDepth = (pz + 1.0) / 2.0;
+	
+	if(useLogDepth && !useOrthographicCamera) {
+		// Logarithmic depth buffer: write depth in the same format as three.js
+		// logarithmicDepthBuffer, which uses:
+		// vFlagDepth = clipPos.w + 1.0.
+		// logDepthBufFC = 2.0 / log(far + 1.0).
+		// gl_FragDepth = log2(vFlagDepth) * logDepthBufFC * 0.5;
+		// Simplifies to: log2(linearDepth + 1.0) / log2(far + 1.0)
+		gl_FragDepth = log2(dl + 1.0) / log2(far + 1.0);
+	} else {
+		// Standard hyperbolic depth buffer.
+		vec4 dp = uProj * vec4(0.0, 0.0, -dl, 1.0);
+		float pz = dp.z / dp.w;
+		gl_FragDepth = (pz + 1.0) / 2.0;
+	}
 }

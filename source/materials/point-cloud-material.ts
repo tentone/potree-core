@@ -28,20 +28,20 @@ import {
 	DEFAULT_RGB_GAMMA,
 	PERSPECTIVE_CAMERA
 } from '../constants';
-import {PointCloudOctree} from '../point-cloud-octree';
-import {PointCloudOctreeNode} from '../point-cloud-octree-node';
-import {byLevelAndIndex} from '../utils/utils';
-import {DEFAULT_CLASSIFICATION} from './classification';
-import {ClipMode, IClipBox} from './clipping';
-import {PointColorType, PointOpacityType, PointShape, PointSizeType, TreeType} from './enums';
-import {SPECTRAL} from './gradients';
+import { PointCloudOctree } from '../point-cloud-octree';
+import { PointCloudOctreeNode } from '../point-cloud-octree-node';
+import { byLevelAndIndex } from '../utils/utils';
+import { DEFAULT_CLASSIFICATION } from './classification';
+import { ClipMode, IClipBox } from './clipping';
+import { PointColorType, PointOpacityType, PointShape, PointSizeType, TreeType } from './enums';
+import { SPECTRAL } from './gradients';
 import {
 	generateClassificationTexture,
 	generateDataTexture,
 	generateGradientTexture
 } from './texture-generation';
-import {IClassification, IGradient, IUniform} from './types';
-import {ColorEncoding} from './color-encoding';
+import { IClassification, IGradient, IUniform } from './types';
+import { ColorEncoding } from './color-encoding';
 
 const VertShader = require('./shaders/pointcloud.vs').default;
 const FragShader = require('./shaders/pointcloud.fs').default;
@@ -56,22 +56,22 @@ export interface IPointCloudMaterialParameters {
 	 * The base size of points in the point cloud.
 	 */
 	size: number;
-	
+
 	/**
 	 * The minimum allowed size for points when scaling.
 	 */
 	minSize: number;
-	
+
 	/**
 	 * The maximum allowed size for points when scaling.
 	 */
 	maxSize: number;
-	
+
 	/**
 	 * The type of tree structure used for organizing the point cloud data.
 	 */
 	treeType: TreeType;
-	
+
 	/**
 	 * Whether to use the new format for point cloud data processing.
 	 */
@@ -248,8 +248,7 @@ const OUTPUT_COLOR_ENCODING = {
 	[ColorEncoding.SRGB]: 'output_color_encoding_sRGB'
 };
 
-export class PointCloudMaterial extends RawShaderMaterial 
-{
+export class PointCloudMaterial extends RawShaderMaterial {
 	private static helperVec3 = new Vector3();
 
 	lights = false;
@@ -330,559 +329,502 @@ export class PointCloudMaterial extends RawShaderMaterial
 		viewScale: makeUniform('f', 1.0)
 	};
 
-  @uniform('bbSize') bbSize!: [number, number, number];
+	@uniform('bbSize') bbSize!: [number, number, number];
 
-  @uniform('depthMap') depthMap!: Texture | undefined;
+	@uniform('depthMap') depthMap!: Texture | undefined;
 
-  @uniform('fov') fov!: number;
+	@uniform('fov') fov!: number;
 
-  @uniform('heightMax') heightMax!: number;
+	@uniform('heightMax') heightMax!: number;
 
-  @uniform('heightMin') heightMin!: number;
+	@uniform('heightMin') heightMin!: number;
 
-  @uniform('intensityBrightness') intensityBrightness!: number;
+	@uniform('intensityBrightness') intensityBrightness!: number;
 
-  @uniform('intensityContrast') intensityContrast!: number;
+	@uniform('intensityContrast') intensityContrast!: number;
 
-  @uniform('intensityGamma') intensityGamma!: number;
+	@uniform('intensityGamma') intensityGamma!: number;
 
-  @uniform('intensityRange') intensityRange!: [number, number];
+	@uniform('intensityRange') intensityRange!: [number, number];
 
-  @uniform('maxSize') maxSize!: number;
+	@uniform('maxSize') maxSize!: number;
 
-  @uniform('minSize') minSize!: number;
+	@uniform('minSize') minSize!: number;
 
-  @uniform('octreeSize') octreeSize!: number;
+	@uniform('octreeSize') octreeSize!: number;
 
-  @uniform('opacity', true) opacity!: number;
+	@uniform('opacity', true) opacity!: number;
 
-  @uniform('rgbBrightness', true) rgbBrightness!: number;
+	@uniform('rgbBrightness', true) rgbBrightness!: number;
 
-  @uniform('rgbContrast', true) rgbContrast!: number;
+	@uniform('rgbContrast', true) rgbContrast!: number;
 
-  @uniform('rgbGamma', true) rgbGamma!: number;
+	@uniform('rgbGamma', true) rgbGamma!: number;
 
-  @uniform('screenHeight') screenHeight!: number;
+	@uniform('screenHeight') screenHeight!: number;
 
-  @uniform('screenWidth') screenWidth!: number;
+	@uniform('screenWidth') screenWidth!: number;
 
-  @uniform('orthoWidth') orthoWidth!: number;
+	@uniform('orthoWidth') orthoWidth!: number;
 
-  @uniform('orthoHeight') orthoHeight!: number;
+	@uniform('orthoHeight') orthoHeight!: number;
 
-  @uniform('useOrthographicCamera') useOrthographicCamera!: boolean;
-  
-  @uniform('far') far!: number;
+	@uniform('useOrthographicCamera') useOrthographicCamera!: boolean;
 
-  @uniform('size') size!: number;
+	@uniform('far') far!: number;
 
-  @uniform('spacing') spacing!: number;
+	@uniform('size') size!: number;
 
-  @uniform('transition') transition!: number;
+	@uniform('spacing') spacing!: number;
 
-  @uniform('uColor') color!: Color;
+	@uniform('transition') transition!: number;
 
-  @uniform('wClassification') weightClassification!: number;
+	@uniform('uColor') color!: Color;
 
-  @uniform('wElevation') weightElevation!: number;
+	@uniform('wClassification') weightClassification!: number;
 
-  @uniform('wIntensity') weightIntensity!: number;
+	@uniform('wElevation') weightElevation!: number;
 
-  @uniform('wReturnNumber') weightReturnNumber!: number;
+	@uniform('wIntensity') weightIntensity!: number;
 
-  @uniform('wRGB') weightRGB!: number;
+	@uniform('wReturnNumber') weightReturnNumber!: number;
 
-  @uniform('wSourceID') weightSourceID!: number;
+	@uniform('wRGB') weightRGB!: number;
 
-  @uniform('opacityAttenuation') opacityAttenuation!: number;
+	@uniform('wSourceID') weightSourceID!: number;
 
-  @uniform('filterByNormalThreshold') filterByNormalThreshold!: number;
+	@uniform('opacityAttenuation') opacityAttenuation!: number;
 
-  @uniform('highlightedPointCoordinate') highlightedPointCoordinate!: Vector3;
+	@uniform('filterByNormalThreshold') filterByNormalThreshold!: number;
 
-  @uniform('highlightedPointColor') highlightedPointColor!: Vector4;
+	@uniform('highlightedPointCoordinate') highlightedPointCoordinate!: Vector3;
 
-  @uniform('enablePointHighlighting') enablePointHighlighting!: boolean;
+	@uniform('highlightedPointColor') highlightedPointColor!: Vector4;
 
-  @uniform('highlightedPointScale') highlightedPointScale!: number;
+	@uniform('enablePointHighlighting') enablePointHighlighting!: boolean;
 
-  @uniform('viewScale') viewScale!: number;
+	@uniform('highlightedPointScale') highlightedPointScale!: number;
 
-  // Declare PointCloudMaterial attributes that need shader updates upon change, and set default values.
-  @requiresShaderUpdate() useClipBox: boolean = false;
+	@uniform('viewScale') viewScale!: number;
 
-  @requiresShaderUpdate() weighted: boolean = false;
+	// Declare PointCloudMaterial attributes that need shader updates upon change, and set default values.
+	@requiresShaderUpdate() useClipBox: boolean = false;
 
-  @requiresShaderUpdate() pointColorType: PointColorType = PointColorType.RGB;
+	@requiresShaderUpdate() weighted: boolean = false;
 
-  @requiresShaderUpdate() pointSizeType: PointSizeType = PointSizeType.ADAPTIVE;
+	@requiresShaderUpdate() pointColorType: PointColorType = PointColorType.RGB;
 
-  @requiresShaderUpdate() clipMode: ClipMode = ClipMode.DISABLED;
+	@requiresShaderUpdate() pointSizeType: PointSizeType = PointSizeType.ADAPTIVE;
 
-  @requiresShaderUpdate() useEDL: boolean = false;
+	@requiresShaderUpdate() clipMode: ClipMode = ClipMode.DISABLED;
 
-  @requiresShaderUpdate() shape: PointShape = PointShape.SQUARE;
+	@requiresShaderUpdate() useEDL: boolean = false;
 
-  @requiresShaderUpdate() treeType: TreeType = TreeType.OCTREE;
+	@requiresShaderUpdate() shape: PointShape = PointShape.SQUARE;
 
-  @requiresShaderUpdate() pointOpacityType: PointOpacityType = PointOpacityType.FIXED;
+	@requiresShaderUpdate() treeType: TreeType = TreeType.OCTREE;
 
-  @requiresShaderUpdate() useFilterByNormal: boolean = false;
+	@requiresShaderUpdate() pointOpacityType: PointOpacityType = PointOpacityType.FIXED;
 
-  @requiresShaderUpdate() highlightPoint: boolean = false;
+	@requiresShaderUpdate() useFilterByNormal: boolean = false;
 
-  @requiresShaderUpdate() inputColorEncoding: ColorEncoding = ColorEncoding.SRGB;
-
-  @requiresShaderUpdate() outputColorEncoding: ColorEncoding = ColorEncoding.LINEAR;
-
-  @requiresShaderUpdate() private useLogDepth: boolean = false;
-
-  attributes = {
-  	position: {type: 'fv', value: []},
-  	color: {type: 'fv', value: []},
-  	normal: {type: 'fv', value: []},
-  	intensity: {type: 'f', value: []},
-  	classification: {type: 'f', value: []},
-  	returnNumber: {type: 'f', value: []},
-  	numberOfReturns: {type: 'f', value: []},
-  	pointSourceID: {type: 'f', value: []},
-  	indices: {type: 'fv', value: []}
-  };
-
-  newFormat: boolean;
-
-  constructor(parameters: Partial<IPointCloudMaterialParameters> = {}) 
-  {
-  	super();
-
-  	const tex = this.visibleNodesTexture = generateDataTexture(2048, 1, new Color(0xffffff));
-  	tex.minFilter = NearestFilter;
-  	tex.magFilter = NearestFilter;
-  	this.setUniform('visibleNodes', tex);
-
-  	this.treeType = getValid(parameters.treeType, TreeType.OCTREE);
-  	this.size = getValid(parameters.size, 1.0);
-  	this.minSize = getValid(parameters.minSize, 2.0);
-  	this.maxSize = getValid(parameters.maxSize, 50.0);
-
-  	this.newFormat = Boolean(parameters.newFormat);
-
-  	this.classification = DEFAULT_CLASSIFICATION;
-
-  	this.defaultAttributeValues.normal = [0, 0, 0];
-  	this.defaultAttributeValues.classification = [0, 0, 0];
-  	this.defaultAttributeValues.indices = [0, 0, 0, 0];
-
-  	this.vertexColors = true;
-	
-  	// throw new Error('Not implemented');
-  	// this.extensions.fragDepth = true;
-
-  	this.updateShaderSource();
-  }
-
-  dispose(): void 
-  {
-  	super.dispose();
-
-  	if (this.gradientTexture) 
-  	{
-  		this.gradientTexture.dispose();
-  		this.gradientTexture = undefined;
-  	}
-
-  	if (this.visibleNodesTexture) 
-  	{
-  		this.visibleNodesTexture.dispose();
-  		this.visibleNodesTexture = undefined;
-  	}
-
-  	this.clearVisibleNodeTextureOffsets();
-
-  	if (this.classificationTexture) 
-  	{
-  		this.classificationTexture.dispose();
-  		this.classificationTexture = undefined;
-  	}
-
-  	if (this.depthMap) 
-  	{
-  		this.depthMap.dispose();
-  		this.depthMap = undefined;
-  	}
-  }
-
-  clearVisibleNodeTextureOffsets(): void 
-  {
-  	this.visibleNodeTextureOffsets.clear();
-  }
-
-  updateShaderSource(): void 
-  {
-  	this.glslVersion = GLSL3;
-
-  	this.vertexShader = this.applyDefines(VertShader);
-  	this.fragmentShader = this.applyDefines(FragShader);
-
-  	if (this.opacity === 1.0) 
-  	{
-  		this.blending = NoBlending;
-  		this.transparent = false;
-  		this.depthTest = true;
-  		this.depthWrite = true;
-  		this.depthFunc = LessEqualDepth;
-  	}
-  	else if (this.opacity < 1.0 && !this.useEDL) 
-  	{
-  		this.blending = AdditiveBlending;
-  		this.transparent = true;
-  		this.depthTest = false;
-  		this.depthWrite = true;
-  	}
-
-  	if (this.weighted) 
-  	{
-  		this.blending = AdditiveBlending;
-  		this.transparent = true;
-  		this.depthTest = true;
-  		this.depthWrite = false;
-  		this.depthFunc = LessEqualDepth;
-  	}
-
-  	this.needsUpdate = true;
-  }
-
-  applyDefines(shaderSrc: string): string 
-  {
-  	const parts: string[] = [];
-
-  	function define(value: string | undefined) 
-  	{
-  		if (value) 
-  		{
-  			parts.push(`#define ${value}`);
-  		}
-  	}
-
-  	define(TREE_TYPE_DEFS[this.treeType]);
-  	define(SIZE_TYPE_DEFS[this.pointSizeType]);
-  	define(SHAPE_DEFS[this.shape]);
-  	define(COLOR_DEFS[this.pointColorType]);
-  	define(CLIP_MODE_DEFS[this.clipMode]);
-  	define(OPACITY_DEFS[this.pointOpacityType]);
-  	define(OUTPUT_COLOR_ENCODING[this.outputColorEncoding]);
-  	define(INPUT_COLOR_ENCODING[this.inputColorEncoding]);
-
-  	// We only perform gamma and brightness/contrast calculations per point if values are specified.
-  	if (
-  		this.rgbGamma !== DEFAULT_RGB_GAMMA ||
-	  this.rgbBrightness !== DEFAULT_RGB_BRIGHTNESS ||
-	  this.rgbContrast !== DEFAULT_RGB_CONTRAST
-  	) 
-  	{
-  		define('use_rgb_gamma_contrast_brightness');
-  	}
-
-  	if (this.useFilterByNormal) 
-  	{
-  		define('use_filter_by_normal');
-  	}
-
-  	if (this.useEDL) 
-  	{
-  		define('use_edl');
-  	}
-
-	if (this.useLogDepth) 
-	{
-		define('use_log_depth');
+	@requiresShaderUpdate() highlightPoint: boolean = false;
+
+	@requiresShaderUpdate() inputColorEncoding: ColorEncoding = ColorEncoding.SRGB;
+
+	@requiresShaderUpdate() outputColorEncoding: ColorEncoding = ColorEncoding.LINEAR;
+
+	@requiresShaderUpdate() private useLogDepth: boolean = false;
+
+	attributes = {
+		position: { type: 'fv', value: [] },
+		color: { type: 'fv', value: [] },
+		normal: { type: 'fv', value: [] },
+		intensity: { type: 'f', value: [] },
+		classification: { type: 'f', value: [] },
+		returnNumber: { type: 'f', value: [] },
+		numberOfReturns: { type: 'f', value: [] },
+		pointSourceID: { type: 'f', value: [] },
+		indices: { type: 'fv', value: [] }
+	};
+
+	newFormat: boolean;
+
+	constructor(parameters: Partial<IPointCloudMaterialParameters> = {}) {
+		super();
+
+		const tex = this.visibleNodesTexture = generateDataTexture(2048, 1, new Color(0xffffff));
+		tex.minFilter = NearestFilter;
+		tex.magFilter = NearestFilter;
+		this.setUniform('visibleNodes', tex);
+
+		this.treeType = getValid(parameters.treeType, TreeType.OCTREE);
+		this.size = getValid(parameters.size, 1.0);
+		this.minSize = getValid(parameters.minSize, 2.0);
+		this.maxSize = getValid(parameters.maxSize, 50.0);
+
+		this.newFormat = Boolean(parameters.newFormat);
+
+		this.classification = DEFAULT_CLASSIFICATION;
+
+		this.defaultAttributeValues.normal = [0, 0, 0];
+		this.defaultAttributeValues.classification = [0, 0, 0];
+		this.defaultAttributeValues.indices = [0, 0, 0, 0];
+
+		this.vertexColors = true;
+
+		// throw new Error('Not implemented');
+		// this.extensions.fragDepth = true;
+
+		this.updateShaderSource();
 	}
 
-  	if (this.weighted) 
-  	{
-  		define('weighted_splats');
-  	}
+	dispose(): void {
+		super.dispose();
 
-  	if (this.numClipBoxes > 0) 
-  	{
-  		define('use_clip_box');
-  	}
+		if (this.gradientTexture) {
+			this.gradientTexture.dispose();
+			this.gradientTexture = undefined;
+		}
 
-  	if (this.highlightPoint) 
-  	{
-  		define('highlight_point');
-  	}
+		if (this.visibleNodesTexture) {
+			this.visibleNodesTexture.dispose();
+			this.visibleNodesTexture = undefined;
+		}
 
-  	define('MAX_POINT_LIGHTS 0');
-  	define('MAX_DIR_LIGHTS 0');
+		this.clearVisibleNodeTextureOffsets();
 
-  	if (this.newFormat) 
-  	{
-  		define ('new_format');
-  	}
+		if (this.classificationTexture) {
+			this.classificationTexture.dispose();
+			this.classificationTexture = undefined;
+		}
 
-
-  	// If '#version 300 es' exists as a line in shaderSrc, remove it and add it as the first element in the parts array
-  	const versionLine = shaderSrc.match(/^\s*#version\s+300\s+es\s*\n/);
-  	if (versionLine) 
-  	{
-  		parts.unshift(versionLine[0]);
-  		shaderSrc = shaderSrc.replace(versionLine[0], '');
-  	}
-  	parts.push(shaderSrc);
-  	return parts.join('\n');
-  }
-
-  setClipBoxes(clipBoxes: IClipBox[]): void 
-  {
-  	if (!clipBoxes) 
-  	{
-  		return;
-  	}
-
-  	this.clipBoxes = clipBoxes;
-
-  	const doUpdate =
-	  this.numClipBoxes !== clipBoxes.length && (clipBoxes.length === 0 || this.numClipBoxes === 0);
-
-  	this.numClipBoxes = clipBoxes.length;
-  	this.setUniform('clipBoxCount', this.numClipBoxes);
-
-  	if (doUpdate) 
-  	{
-  		this.updateShaderSource();
-  	}
-
-  	const clipBoxesLength = this.numClipBoxes * 16;
-  	const clipBoxesArray = new Float32Array(clipBoxesLength);
-
-  	for (let i = 0; i < this.numClipBoxes; i++) 
-  	{
-  		clipBoxesArray.set(clipBoxes[i].inverse.elements, 16 * i);
-  	}
-
-  	for (let i = 0; i < clipBoxesLength; i++) 
-  	{
-  		if (isNaN(clipBoxesArray[i])) 
-  		{
-  			clipBoxesArray[i] = Infinity;
-  		}
-  	}
-
-  	this.setUniform('clipBoxes', clipBoxesArray);
-  }
-
-  get gradient(): IGradient 
-  {
-  	return this._gradient;
-  }
-
-  set gradient(value: IGradient) 
-  {
-  	if (this._gradient !== value) 
-  	{
-  		this._gradient = value;
-  		this.gradientTexture = generateGradientTexture(this._gradient);
-  		this.setUniform('gradient', this.gradientTexture);
-  	}
-  }
-
-  get classification(): IClassification 
-  {
-  	return this._classification;
-  }
-
-  set classification(value: IClassification) 
-  {
-  	const copy: IClassification = {} as any;
-  	for (const key of Object.keys(value)) 
-  	{
-  		copy[key] = value[key].clone();
-  	}
-
-  	let isEqual = false;
-  	if (this._classification === undefined) 
-  	{
-  		isEqual = false;
-  	}
-  	else 
-  	{
-  		isEqual = Object.keys(copy).length === Object.keys(this._classification).length;
-
-  		for (const key of Object.keys(copy)) 
-  		{
-  			isEqual = isEqual && this._classification[key] !== undefined;
-  			isEqual = isEqual && copy[key].equals(this._classification[key]);
-  		}
-  	}
-
-  	if (!isEqual) 
-  	{
-  		this._classification = copy;
-  		this.recomputeClassification();
-  	}
-  }
-
-  private recomputeClassification(): void 
-  {
-  	this.classificationTexture = generateClassificationTexture(this._classification);
-  	this.setUniform('classificationLUT', this.classificationTexture);
-  }
-
-  get elevationRange(): [number, number] 
-  {
-  	return [this.heightMin, this.heightMax];
-  }
-
-  set elevationRange(value: [number, number]) 
-  {
-  	this.heightMin = value[0];
-  	this.heightMax = value[1];
-  }
-
-  getUniform<K extends keyof IPointCloudMaterialUniforms>(
-  	name: K,
-  ): IPointCloudMaterialUniforms[K]['value'] 
-  {
-  	return this.uniforms === undefined ? (undefined as any) : this.uniforms[name].value;
-  }
-
-  setUniform<K extends keyof IPointCloudMaterialUniforms>(
-  	name: K,
-  	value: IPointCloudMaterialUniforms[K]['value'],
-  ): void 
-  {
-  	if (this.uniforms === undefined) 
-  	{
-  		return;
-  	}
-
-  	const uObj = this.uniforms[name];
-
-  	if (uObj.type === 'c') 
-  	{
-  		(uObj.value as Color).copy(value as Color);
-  	}
-  	else if (value !== uObj.value) 
-  	{
-  		uObj.value = value;
-  	}
-  }
-
-  updateMaterial(
-  	octree: PointCloudOctree,
-  	visibleNodes: PointCloudOctreeNode[],
-  	camera: Camera,
-  	renderer: WebGLRenderer,
-  ): void 
-  {
-  	const pixelRatio = renderer.getPixelRatio();
-
-  	if (camera.type === PERSPECTIVE_CAMERA) 
-  	{
-  		this.useOrthographicCamera = false;
-  		this.fov = (camera as PerspectiveCamera).fov * (Math.PI / 180);
-		this.far = (camera as PerspectiveCamera).far;
-		this.useLogDepth = renderer.capabilities.logarithmicDepthBuffer
-  	}
-  	else // ORTHOGRAPHIC
-  	{
-   		const orthoCamera = (camera as OrthographicCamera);
-  		this.useOrthographicCamera = true;
-  		this.orthoWidth = (orthoCamera.right - orthoCamera.left) / orthoCamera.zoom;
-  		this.orthoHeight = (orthoCamera.top - orthoCamera.bottom) / orthoCamera.zoom;
-  		this.fov = Math.PI / 2; // will result in slope = 1 in the shader
-		this.far = (camera as OrthographicCamera).far;
-		this.useLogDepth = false;
-  	}
-  	const renderTarget = renderer.getRenderTarget();
-  	if (renderTarget !== null && renderTarget instanceof WebGLRenderTarget) 
-  	{
-  		this.screenWidth = renderTarget.width;
-  		this.screenHeight = renderTarget.height;
-  	}
-  	else 
-  	{
-  		this.screenWidth = renderer.domElement.clientWidth * pixelRatio;
-  		this.screenHeight = renderer.domElement.clientHeight * pixelRatio;
-  	}
-
-
-  	const maxScale = Math.max(octree.scale.x, octree.scale.y, octree.scale.z);
-  	this.spacing = octree.pcoGeometry.spacing * maxScale;
-  	this.octreeSize = octree.pcoGeometry.boundingBox.getSize(PointCloudMaterial.helperVec3).x;
-	const view = (camera as any).view;
-	if (view?.enabled) {
-		this.viewScale = view.fullWidth / view.width;
-	} else {
-		this.viewScale = 1.0;
+		if (this.depthMap) {
+			this.depthMap.dispose();
+			this.depthMap = undefined;
+		}
 	}
 
-  	if (
-  		this.pointSizeType === PointSizeType.ADAPTIVE ||
-	  this.pointColorType === PointColorType.LOD
-  	) 
-  	{
-  		this.updateVisibilityTextureData(visibleNodes);
-  	}
-  }
+	clearVisibleNodeTextureOffsets(): void {
+		this.visibleNodeTextureOffsets.clear();
+	}
 
-  private updateVisibilityTextureData(nodes: PointCloudOctreeNode[]) 
-  {
-  	nodes.sort(byLevelAndIndex);
+	updateShaderSource(): void {
+		this.glslVersion = GLSL3;
 
-  	const data = new Uint8Array(nodes.length * 4);
-  	const offsetsToChild = new Array(nodes.length).fill(Infinity);
+		this.vertexShader = this.applyDefines(VertShader);
+		this.fragmentShader = this.applyDefines(FragShader);
 
-  	this.visibleNodeTextureOffsets.clear();
+		if (this.opacity === 1.0) {
+			this.blending = NoBlending;
+			this.transparent = false;
+			this.depthTest = true;
+			this.depthWrite = true;
+			this.depthFunc = LessEqualDepth;
+		}
+		else if (this.opacity < 1.0 && !this.useEDL) {
+			this.blending = AdditiveBlending;
+			this.transparent = true;
+			this.depthTest = false;
+			this.depthWrite = true;
+		}
 
-  	for (let i = 0; i < nodes.length; i++) 
-  	{
-  		const node = nodes[i];
+		if (this.weighted) {
+			this.blending = AdditiveBlending;
+			this.transparent = true;
+			this.depthTest = true;
+			this.depthWrite = false;
+			this.depthFunc = LessEqualDepth;
+		}
 
-  		this.visibleNodeTextureOffsets.set(node.name, i);
+		this.needsUpdate = true;
+	}
 
-  		if (i > 0) 
-  		{
-  			const parentName = node.name.slice(0, -1);
-  			const parentOffset = this.visibleNodeTextureOffsets.get(parentName)!;
-  			const parentOffsetToChild = i - parentOffset;
+	applyDefines(shaderSrc: string): string {
+		const parts: string[] = [];
 
-  			offsetsToChild[parentOffset] = Math.min(offsetsToChild[parentOffset], parentOffsetToChild);
+		function define(value: string | undefined) {
+			if (value) {
+				parts.push(`#define ${value}`);
+			}
+		}
 
-  			// tslint:disable:no-bitwise
-  			const offset = parentOffset * 4;
-  			data[offset] = data[offset] | 1 << node.index;
-  			data[offset + 1] = offsetsToChild[parentOffset] >> 8;
-  			data[offset + 2] = offsetsToChild[parentOffset] % 256;
-  			// tslint:enable:no-bitwise
-  		}
+		define(TREE_TYPE_DEFS[this.treeType]);
+		define(SIZE_TYPE_DEFS[this.pointSizeType]);
+		define(SHAPE_DEFS[this.shape]);
+		define(COLOR_DEFS[this.pointColorType]);
+		define(CLIP_MODE_DEFS[this.clipMode]);
+		define(OPACITY_DEFS[this.pointOpacityType]);
+		define(OUTPUT_COLOR_ENCODING[this.outputColorEncoding]);
+		define(INPUT_COLOR_ENCODING[this.inputColorEncoding]);
 
-  		data[i * 4 + 3] = node.name.length;
-  	}
+		// We only perform gamma and brightness/contrast calculations per point if values are specified.
+		if (
+			this.rgbGamma !== DEFAULT_RGB_GAMMA ||
+			this.rgbBrightness !== DEFAULT_RGB_BRIGHTNESS ||
+			this.rgbContrast !== DEFAULT_RGB_CONTRAST
+		) {
+			define('use_rgb_gamma_contrast_brightness');
+		}
 
-  	const texture = this.visibleNodesTexture;
-  	if (texture) 
-  	{
-  		texture.image.data.set(data);
-  		texture.needsUpdate = true;
-  	}
-  }
+		if (this.useFilterByNormal) {
+			define('use_filter_by_normal');
+		}
 
-  static makeOnBeforeRender(
-  	octree: PointCloudOctree,
-  	node: PointCloudOctreeNode,
-  	pcIndex?: number,
-  ) 
-  {
-  	return (
-  		_renderer: WebGLRenderer,
-  		_scene: Scene,
-  		_camera: Camera,
-  		_geometry: BufferGeometry,
-  		material: Material,
-  	) => 
-  	{
+		if (this.useEDL) {
+			define('use_edl');
+		}
+
+		if (this.useLogDepth) {
+			define('use_log_depth');
+		}
+
+		if (this.weighted) {
+			define('weighted_splats');
+		}
+
+		if (this.numClipBoxes > 0) {
+			define('use_clip_box');
+		}
+
+		if (this.highlightPoint) {
+			define('highlight_point');
+		}
+
+		define('MAX_POINT_LIGHTS 0');
+		define('MAX_DIR_LIGHTS 0');
+
+		if (this.newFormat) {
+			define('new_format');
+		}
+
+
+		// If '#version 300 es' exists as a line in shaderSrc, remove it and add it as the first element in the parts array
+		const versionLine = shaderSrc.match(/^\s*#version\s+300\s+es\s*\n/);
+		if (versionLine) {
+			parts.unshift(versionLine[0]);
+			shaderSrc = shaderSrc.replace(versionLine[0], '');
+		}
+		parts.push(shaderSrc);
+		return parts.join('\n');
+	}
+
+	setClipBoxes(clipBoxes: IClipBox[]): void {
+		if (!clipBoxes) {
+			return;
+		}
+
+		this.clipBoxes = clipBoxes;
+
+		const doUpdate =
+			this.numClipBoxes !== clipBoxes.length && (clipBoxes.length === 0 || this.numClipBoxes === 0);
+
+		this.numClipBoxes = clipBoxes.length;
+		this.setUniform('clipBoxCount', this.numClipBoxes);
+
+		if (doUpdate) {
+			this.updateShaderSource();
+		}
+
+		const clipBoxesLength = this.numClipBoxes * 16;
+		const clipBoxesArray = new Float32Array(clipBoxesLength);
+
+		for (let i = 0; i < this.numClipBoxes; i++) {
+			clipBoxesArray.set(clipBoxes[i].inverse.elements, 16 * i);
+		}
+
+		for (let i = 0; i < clipBoxesLength; i++) {
+			if (isNaN(clipBoxesArray[i])) {
+				clipBoxesArray[i] = Infinity;
+			}
+		}
+
+		this.setUniform('clipBoxes', clipBoxesArray);
+	}
+
+	get gradient(): IGradient {
+		return this._gradient;
+	}
+
+	set gradient(value: IGradient) {
+		if (this._gradient !== value) {
+			this._gradient = value;
+			this.gradientTexture = generateGradientTexture(this._gradient);
+			this.setUniform('gradient', this.gradientTexture);
+		}
+	}
+
+	get classification(): IClassification {
+		return this._classification;
+	}
+
+	set classification(value: IClassification) {
+		const copy: IClassification = {} as any;
+		for (const key of Object.keys(value)) {
+			copy[key] = value[key].clone();
+		}
+
+		let isEqual = false;
+		if (this._classification === undefined) {
+			isEqual = false;
+		}
+		else {
+			isEqual = Object.keys(copy).length === Object.keys(this._classification).length;
+
+			for (const key of Object.keys(copy)) {
+				isEqual = isEqual && this._classification[key] !== undefined;
+				isEqual = isEqual && copy[key].equals(this._classification[key]);
+			}
+		}
+
+		if (!isEqual) {
+			this._classification = copy;
+			this.recomputeClassification();
+		}
+	}
+
+	private recomputeClassification(): void {
+		this.classificationTexture = generateClassificationTexture(this._classification);
+		this.setUniform('classificationLUT', this.classificationTexture);
+	}
+
+	get elevationRange(): [number, number] {
+		return [this.heightMin, this.heightMax];
+	}
+
+	set elevationRange(value: [number, number]) {
+		this.heightMin = value[0];
+		this.heightMax = value[1];
+	}
+
+	getUniform<K extends keyof IPointCloudMaterialUniforms>(
+		name: K,
+	): IPointCloudMaterialUniforms[K]['value'] {
+		return this.uniforms === undefined ? (undefined as any) : this.uniforms[name].value;
+	}
+
+	setUniform<K extends keyof IPointCloudMaterialUniforms>(
+		name: K,
+		value: IPointCloudMaterialUniforms[K]['value'],
+	): void {
+		if (this.uniforms === undefined) {
+			return;
+		}
+
+		const uObj = this.uniforms[name];
+
+		if (uObj.type === 'c') {
+			(uObj.value as Color).copy(value as Color);
+		}
+		else if (value !== uObj.value) {
+			uObj.value = value;
+		}
+	}
+
+	updateMaterial(
+		octree: PointCloudOctree,
+		visibleNodes: PointCloudOctreeNode[],
+		camera: Camera,
+		renderer: WebGLRenderer,
+	): void {
+		const pixelRatio = renderer.getPixelRatio();
+
+		this.useLogDepth = renderer.capabilities.logarithmicDepthBuffer;
+
+		if (camera.type === PERSPECTIVE_CAMERA) {
+			this.useOrthographicCamera = false;
+			this.fov = (camera as PerspectiveCamera).fov * (Math.PI / 180);
+			this.far = (camera as PerspectiveCamera).far;
+		}
+		else // ORTHOGRAPHIC
+		{
+			const orthoCamera = (camera as OrthographicCamera);
+			this.useOrthographicCamera = true;
+			this.orthoWidth = (orthoCamera.right - orthoCamera.left) / orthoCamera.zoom;
+			this.orthoHeight = (orthoCamera.top - orthoCamera.bottom) / orthoCamera.zoom;
+			this.fov = Math.PI / 2; // will result in slope = 1 in the shader
+			this.far = (camera as OrthographicCamera).far;
+			this.useLogDepth = false;
+		}
+		const renderTarget = renderer.getRenderTarget();
+		if (renderTarget !== null && renderTarget instanceof WebGLRenderTarget) {
+			this.screenWidth = renderTarget.width;
+			this.screenHeight = renderTarget.height;
+		}
+		else {
+			this.screenWidth = renderer.domElement.clientWidth * pixelRatio;
+			this.screenHeight = renderer.domElement.clientHeight * pixelRatio;
+		}
+
+
+		const maxScale = Math.max(octree.scale.x, octree.scale.y, octree.scale.z);
+		this.spacing = octree.pcoGeometry.spacing * maxScale;
+		this.octreeSize = octree.pcoGeometry.boundingBox.getSize(PointCloudMaterial.helperVec3).x;
+		const view = (camera as any).view;
+		if (view?.enabled) {
+			this.viewScale = view.fullWidth / view.width;
+		} else {
+			this.viewScale = 1.0;
+		}
+
+		if (
+			this.pointSizeType === PointSizeType.ADAPTIVE ||
+			this.pointColorType === PointColorType.LOD
+		) {
+			this.updateVisibilityTextureData(visibleNodes);
+		}
+	}
+
+	private updateVisibilityTextureData(nodes: PointCloudOctreeNode[]) {
+		nodes.sort(byLevelAndIndex);
+
+		const data = new Uint8Array(nodes.length * 4);
+		const offsetsToChild = new Array(nodes.length).fill(Infinity);
+
+		this.visibleNodeTextureOffsets.clear();
+
+		for (let i = 0; i < nodes.length; i++) {
+			const node = nodes[i];
+
+			this.visibleNodeTextureOffsets.set(node.name, i);
+
+			if (i > 0) {
+				const parentName = node.name.slice(0, -1);
+				const parentOffset = this.visibleNodeTextureOffsets.get(parentName)!;
+				const parentOffsetToChild = i - parentOffset;
+
+				offsetsToChild[parentOffset] = Math.min(offsetsToChild[parentOffset], parentOffsetToChild);
+
+				// tslint:disable:no-bitwise
+				const offset = parentOffset * 4;
+				data[offset] = data[offset] | 1 << node.index;
+				data[offset + 1] = offsetsToChild[parentOffset] >> 8;
+				data[offset + 2] = offsetsToChild[parentOffset] % 256;
+				// tslint:enable:no-bitwise
+			}
+
+			data[i * 4 + 3] = node.name.length;
+		}
+
+		const texture = this.visibleNodesTexture;
+		if (texture) {
+			texture.image.data.set(data);
+			texture.needsUpdate = true;
+		}
+	}
+
+	static makeOnBeforeRender(
+		octree: PointCloudOctree,
+		node: PointCloudOctreeNode,
+		pcIndex?: number,
+	) {
+		return (
+			_renderer: WebGLRenderer,
+			_scene: Scene,
+			_camera: Camera,
+			_geometry: BufferGeometry,
+			material: Material,
+		) => {
 			if (material instanceof PointCloudMaterial) {
 				const materialUniforms = material.uniforms;
 
@@ -890,28 +832,25 @@ export class PointCloudMaterial extends RawShaderMaterial
 				materialUniforms.isLeafNode.value = node.isLeafNode;
 
 				const vnStart = material.visibleNodeTextureOffsets.get(node.name);
-				if (vnStart !== undefined)
-				{
+				if (vnStart !== undefined) {
 					materialUniforms.vnStart.value = vnStart;
 				}
 
 				materialUniforms.pcIndex.value =
-				pcIndex !== undefined ? pcIndex : octree.visibleNodes.indexOf(node);
+					pcIndex !== undefined ? pcIndex : octree.visibleNodes.indexOf(node);
 
 				// Remove the cast to any after updating to Three.JS >= r113
 				(material as RawShaderMaterial).uniformsNeedUpdate = true;
 			}
 		};
-  }
+	}
 }
 
-function makeUniform<T>(type: string, value: T): IUniform<T> 
-{
-	return {type: type, value: value};
+function makeUniform<T>(type: string, value: T): IUniform<T> {
+	return { type: type, value: value };
 }
 
-function getValid<T>(a: T | undefined, b: T): T 
-{
+function getValid<T>(a: T | undefined, b: T): T {
 	return a === undefined ? b : a;
 }
 
@@ -919,22 +858,16 @@ function getValid<T>(a: T | undefined, b: T): T
 function uniform<K extends keyof IPointCloudMaterialUniforms>(
 	uniformName: K,
 	requireSrcUpdate: boolean = false,
-): PropertyDecorator 
-{
-	return (target: Object, propertyKey: string | symbol): void => 
-	{
+): PropertyDecorator {
+	return (target: Object, propertyKey: string | symbol): void => {
 		Object.defineProperty(target, propertyKey, {
-			get: function() 
-			{
+			get: function () {
 				return this.getUniform(uniformName);
 			},
-			set: function(value: any) 
-			{
-				if (value !== this.getUniform(uniformName)) 
-				{
+			set: function (value: any) {
+				if (value !== this.getUniform(uniformName)) {
 					this.setUniform(uniformName, value);
-					if (requireSrcUpdate) 
-					{
+					if (requireSrcUpdate) {
 						this.updateShaderSource();
 					}
 				}
@@ -943,21 +876,16 @@ function uniform<K extends keyof IPointCloudMaterialUniforms>(
 	};
 }
 
-function requiresShaderUpdate() 
-{
-	return (target: Object, propertyKey: string | symbol): void => 
-	{
+function requiresShaderUpdate() {
+	return (target: Object, propertyKey: string | symbol): void => {
 		const fieldName = `_${propertyKey.toString()}`;
 
 		Object.defineProperty(target, propertyKey, {
-			get: function() 
-			{
+			get: function () {
 				return this[fieldName];
 			},
-			set: function(value: any) 
-			{
-				if (value !== this[fieldName]) 
-				{
+			set: function (value: any) {
+				if (value !== this[fieldName]) {
 					this[fieldName] = value;
 					this.updateShaderSource();
 				}

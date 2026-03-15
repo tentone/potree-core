@@ -1,6 +1,7 @@
 import { AmbientLight, BoxGeometry, Euler, Mesh, MeshBasicMaterial, OrthographicCamera, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { ClipMode, PointCloudOctree, Potree, PotreeRenderer, createClipBox, createClipSphere } from '../source';
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
+import { ClipMode, PointCloudOctree, PointSizeType, Potree, PotreeRenderer, createClipBox, createClipSphere } from '../source';
 
 document.body.onload = function () {
 	const potree = new Potree();
@@ -11,6 +12,23 @@ document.body.onload = function () {
 	const clipModes: ClipMode[] = [ClipMode.DISABLED, ClipMode.HIGHLIGHT_INSIDE, ClipMode.CLIP_OUTSIDE, ClipMode.CLIP_INSIDE];
 	const clipModeLabels = ['Disabled', 'Highlight Inside', 'Clip Outside', 'Clip Inside'];
 	let clipModeIndex = 1;
+
+	// Point size and scaling mode
+	let pointSize = 1.0;
+	const pointSizeTypes: PointSizeType[] = [PointSizeType.FIXED, PointSizeType.ATTENUATED, PointSizeType.ADAPTIVE];
+	const pointSizeTypeLabels = ['Fixed', 'Attenuated', 'Adaptive'];
+	let pointSizeTypeIndex = 2;
+
+	// TransformControls modes
+	const transformModes = ['translate', 'rotate', 'scale'] as const;
+	const transformModeLabels = ['Translate', 'Rotate', 'Scale'];
+	let transformModeIndex = 0;
+
+	// Selected point cloud for TransformControls
+	let selectedPco: PointCloudOctree | null = null;
+
+	// Pick method: true = Potree.pick, false = three.js Raycaster
+	let usePotreePick = true;
 
 	// EDL settings
 	let edlEnabled = false;
@@ -70,6 +88,13 @@ document.body.onload = function () {
 
 	let controls = new OrbitControls(camera, canvas);
 
+	// TransformControls for moving selected point clouds
+	let transformControls = new TransformControls(camera, canvas);
+	transformControls.addEventListener('dragging-changed', (event) => {
+		controls.enabled = !event.value;
+	});
+	scene.add(transformControls);
+
 	const raycaster = new Raycaster();
 	// @ts-ignore
 	raycaster.params.Points.threshold = 1e-2;
@@ -78,29 +103,35 @@ document.body.onload = function () {
 	canvas.onmousemove = function (event) {
 		normalized.set(event.clientX / canvas.width * 2 - 1, -(event.clientY / canvas.height) * 2 + 1);
 		raycaster.setFromCamera(normalized, camera);
-
-		let ray = raycaster.ray;
-		const start1 = performance.now();
-		const I = Potree.pick(pointClouds, renderer, camera, ray)
-		console.log('Potree.pick :>> ', I?.position, performance.now() - start1);
-
-		const start2 = performance.now();
-		const intesects = raycaster.intersectObject(scene, true);
-		if (intesects.length > 0) {
-			console.log('iraycaster.intersectObject :>> ', intesects[0].point, performance.now() - start2);
-		}
 	};
 
 	canvas.ondblclick = function () {
-		const intesects = raycaster.intersectObject(scene, true);
+		const ray = raycaster.ray;
+		let pickedPco: PointCloudOctree | null = null;
 
+		if (usePotreePick) {
+			const pick = Potree.pick(pointClouds, renderer, camera, ray);
+			pickedPco = pick?.pointCloud ?? null;
+		} else {
+			const intersects = raycaster.intersectObjects(pointClouds, true);
+			if (intersects.length > 0) {
+				let node = intersects[0].object;
+				while (node != null) {
+					if (pointClouds.includes(node as PointCloudOctree)) {
+						pickedPco = node as PointCloudOctree;
+						break;
+					}
+					node = node.parent as typeof node;
+				}
+			}
+		}
 
-		if (intesects.length > 0) {
-			const geometry = new SphereGeometry(0.2, 32, 32);
-			const material = new MeshBasicMaterial({ color: Math.random() * 0xAA4444 });
-			const sphere = new Mesh(geometry, material);
-			sphere.position.copy(intesects[0].point);
-			scene.add(sphere);
+		if (pickedPco) {
+			selectedPco = pickedPco;
+			transformControls.attach(selectedPco);
+		} else {
+			selectedPco = null;
+			transformControls.detach();
 		}
 	};
 
@@ -109,7 +140,8 @@ document.body.onload = function () {
 
 	function loadPointCloud(baseUrl: string, url: string, position?: Vector3, rotation?: Euler, scale?: Vector3, applyClipBox = false, applyClipSphere = false) {
 		potree.loadPointCloud(url, baseUrl).then(function (pco: PointCloudOctree) {
-			pco.material.size = 1.0;
+			pco.material.size = pointSize;
+			pco.material.pointSizeType = pointSizeTypes[pointSizeTypeIndex];
 			pco.material.shape = 2;
 			pco.material.inputColorEncoding = 1;
 			pco.material.outputColorEncoding = 1;
@@ -221,6 +253,19 @@ document.body.onload = function () {
 		controls.dispose();
 		controls = new OrbitControls(camera, canvas);
 
+		// Rebuild TransformControls for the new camera
+		const wasAttached = transformControls.object;
+		scene.remove(transformControls);
+		transformControls.dispose();
+		transformControls = new TransformControls(camera, canvas);
+		transformControls.addEventListener('dragging-changed', (event) => {
+			controls.enabled = !event.value;
+		});
+		scene.add(transformControls);
+		if (wasAttached) {
+			transformControls.attach(wasAttached);
+		}
+
 		updateSize();
 		cameraLabel.textContent = toOrthographic ? 'Orthographic' : 'Perspective';
 	}
@@ -331,6 +376,91 @@ document.body.onload = function () {
 	clipRow.appendChild(clipButton);
 	clipRow.appendChild(clipLabel);
 	panel.appendChild(clipRow);
+
+	// Point size slider
+	const sizeRow = document.createElement('div');
+	sizeRow.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+	const sizeLabel = document.createElement('label');
+	sizeLabel.textContent = 'Point Size';
+	sizeLabel.style.cssText = 'min-width: 90px;';
+	const sizeInput = document.createElement('input');
+	sizeInput.type = 'range';
+	sizeInput.min = '0.1';
+	sizeInput.max = '5';
+	sizeInput.step = '0.1';
+	sizeInput.value = String(pointSize);
+	const sizeValue = document.createElement('span');
+	sizeValue.textContent = sizeInput.value;
+	sizeValue.style.cssText = 'min-width: 40px; text-align: right;';
+	sizeInput.oninput = () => {
+		pointSize = parseFloat(sizeInput.value);
+		sizeValue.textContent = pointSize.toFixed(1);
+		for (const pco of pointClouds) {
+			pco.material.size = pointSize;
+		}
+	};
+	sizeRow.appendChild(sizeLabel);
+	sizeRow.appendChild(sizeInput);
+	sizeRow.appendChild(sizeValue);
+	panel.appendChild(sizeRow);
+
+	// Point scaling mode button
+	const scalingRow = document.createElement('div');
+	scalingRow.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+	const scalingButton = document.createElement('button');
+	scalingButton.textContent = 'Scaling Mode';
+	scalingButton.style.cssText = 'cursor: pointer; padding: 4px 10px; border: none; border-radius: 4px; background-color: #FD7E14; color: white; font-size: 13px;';
+	const scalingLabel = document.createElement('span');
+	scalingLabel.textContent = `Scale: ${pointSizeTypeLabels[pointSizeTypeIndex]}`;
+	scalingButton.onclick = () => {
+		pointSizeTypeIndex = (pointSizeTypeIndex + 1) % pointSizeTypes.length;
+		for (const pco of pointClouds) {
+			pco.material.pointSizeType = pointSizeTypes[pointSizeTypeIndex];
+		}
+		scalingLabel.textContent = `Scale: ${pointSizeTypeLabels[pointSizeTypeIndex]}`;
+	};
+	scalingRow.appendChild(scalingButton);
+	scalingRow.appendChild(scalingLabel);
+	panel.appendChild(scalingRow);
+
+	// Transform mode button (translate / rotate / scale)
+	const transformRow = document.createElement('div');
+	transformRow.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+	const transformButton = document.createElement('button');
+	transformButton.textContent = 'Transform Mode';
+	transformButton.style.cssText = 'cursor: pointer; padding: 4px 10px; border: none; border-radius: 4px; background-color: #17A2B8; color: white; font-size: 13px;';
+	const transformLabel = document.createElement('span');
+	transformLabel.textContent = `Mode: ${transformModeLabels[transformModeIndex]}`;
+	transformButton.onclick = () => {
+		transformModeIndex = (transformModeIndex + 1) % transformModes.length;
+		transformControls.setMode(transformModes[transformModeIndex]);
+		transformLabel.textContent = `Mode: ${transformModeLabels[transformModeIndex]}`;
+	};
+	transformRow.appendChild(transformButton);
+	transformRow.appendChild(transformLabel);
+	panel.appendChild(transformRow);
+
+	// Hint label for TransformControls
+	const hintLabel = document.createElement('div');
+	hintLabel.textContent = 'Double-click point cloud to select';
+	hintLabel.style.cssText = 'font-size: 11px; color: #555; margin-top: 4px;';
+	panel.appendChild(hintLabel);
+
+	// Pick method toggle button
+	const pickRow = document.createElement('div');
+	pickRow.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+	const pickButton = document.createElement('button');
+	pickButton.textContent = 'Pick Method';
+	pickButton.style.cssText = 'cursor: pointer; padding: 4px 10px; border: none; border-radius: 4px; background-color: #DC3545; color: white; font-size: 13px;';
+	const pickLabel = document.createElement('span');
+	pickLabel.textContent = 'Pick: Potree';
+	pickButton.onclick = () => {
+		usePotreePick = !usePotreePick;
+		pickLabel.textContent = `Pick: ${usePotreePick ? 'Potree' : 'Raycaster'}`;
+	};
+	pickRow.appendChild(pickButton);
+	pickRow.appendChild(pickLabel);
+	panel.appendChild(pickRow);
 
 	function loop() {
 		cube.rotation.y += 0.01;

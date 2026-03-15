@@ -133,6 +133,15 @@ document.body.onload = function () {
 			selectedPco = null;
 			transformControls.detach();
 		}
+
+		const intesects = raycaster.intersectObject(scene, true);
+		if (intesects.length > 0) {
+			const geometry = new SphereGeometry(0.2, 32, 32);
+			const material = new MeshBasicMaterial({ color: Math.random() * 0xAA4444 });
+			const sphere = new Mesh(geometry, material);
+			sphere.position.copy(intesects[0].point);
+			scene.add(sphere);
+		}
 	};
 
 	loadPointCloud('/data/lion_takanawa/', 'cloud.js', new Vector3(-4, -2, 5), new Euler(-Math.PI / 2, 0, 0), undefined, false, true);

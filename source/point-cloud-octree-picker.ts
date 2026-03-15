@@ -52,6 +52,9 @@ interface RenderedNode {
   octree: PointCloudOctree;
 }
 
+/**
+ * Handle picking for points in octree.
+ */
 export class PointCloudOctreePicker 
 {
 	private static readonly helperVec3 = new Vector3();
@@ -71,8 +74,7 @@ export class PointCloudOctreePicker
 		}
 	}
 
-	pick(
-		renderer: WebGLRenderer,
+	pick(renderer: WebGLRenderer,
 		camera: Camera,
 		ray: Ray,
 		octrees: PointCloudOctree[],
@@ -115,9 +117,7 @@ export class PointCloudOctreePicker
 		const x = Math.floor(clamp(pixelPosition.x - halfPickWndSize, 0, width));
 		const y = Math.floor(clamp(pixelPosition.y - halfPickWndSize, 0, height));
 
-		// Save render target so it can be restored after picking; EDL and other
-		// multi-pass renderers may have set a non-null render target that we must
-		// not permanently clobber.
+		// Save render target so it can be restored after picking (for EDL and other multi-pass renderers).
 		const prevRenderTarget = renderer.getRenderTarget();
 
 		PointCloudOctreePicker.prepareRender(renderer, x, y, pickWndSize, pickMaterial, pickState);
@@ -252,6 +252,7 @@ export class PointCloudOctreePicker
       pixels,
 		);
 		renderer.setScissorTest(false);
+		renderer.setRenderTarget(null!);
 		return pixels;
 	}
 
@@ -272,10 +273,10 @@ export class PointCloudOctreePicker
 			tempNode.matrixWorld = sceneNode.matrixWorld;
 			tempNode.matrixAutoUpdate = false;
 			tempNode.frustumCulled = false;
-			// Enable all layers so the picking camera can see this node regardless of
-			// which layers the camera is currently restricted to (e.g. by an EDL pass
-			// that temporarily limits the camera to the point-cloud layer).
+
+			// Enable all layers so the picking camera can see EDL pass that temporarily limits the camera to the point-cloud layer
 			tempNode.layers.enableAll();
+
 			const nodeIndex = nodeIndexOffset + i + 1;
 			if (nodeIndex > 255) 
 			{

@@ -138,17 +138,26 @@ document.body.onload = function () {
 
 			if (applyClipBox) {
 				pumpPco = pco;
+
 				// Compute the world-space bounding box of the point cloud data.
-				// pco.position/rotation/scale are already set, so we update the matrix
-				// before transforming the local bounding box to world space.
 				pco.updateMatrixWorld(true);
 				const worldBBox = pco.pcoGeometry.boundingBox.clone().applyMatrix4(pco.matrixWorld);
 				const center = worldBBox.getCenter(new Vector3());
 				const worldSize = worldBBox.getSize(new Vector3());
+
 				// Use half the world-space size so only the central portion is clipped.
 				const clipBox = createClipBox(worldSize.multiplyScalar(0.5), center);
 				pco.material.clipMode = clipModes[clipModeIndex];
 				pco.material.setClipBoxes([clipBox]);
+
+				// Draw the clip box in the scene for visualization.
+				const clipBoxHelper = new Mesh(
+					new BoxGeometry(worldSize.x, worldSize.y, worldSize.z),
+					new MeshBasicMaterial({ color: 0x0000FF, wireframe: true })
+				);
+				clipBoxHelper.position.copy(center);
+				clipBoxHelper.raycast = () => false;
+				scene.add(clipBoxHelper);
 			}
 
 			add(pco);

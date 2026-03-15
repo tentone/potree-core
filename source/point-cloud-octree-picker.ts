@@ -115,6 +115,11 @@ export class PointCloudOctreePicker
 		const x = Math.floor(clamp(pixelPosition.x - halfPickWndSize, 0, width));
 		const y = Math.floor(clamp(pixelPosition.y - halfPickWndSize, 0, height));
 
+		// Save render target so it can be restored after picking; EDL and other
+		// multi-pass renderers may have set a non-null render target that we must
+		// not permanently clobber.
+		const prevRenderTarget = renderer.getRenderTarget();
+
 		PointCloudOctreePicker.prepareRender(renderer, x, y, pickWndSize, pickMaterial, pickState);
 
 		const renderedNodes = PointCloudOctreePicker.render(
@@ -132,6 +137,10 @@ export class PointCloudOctreePicker
 
 		// Read back image and decode hit point
 		const pixels = PointCloudOctreePicker.readPixels(renderer, x, y, pickWndSize);
+
+		// Restore the render target to whatever it was before pick() was called.
+		renderer.setRenderTarget(prevRenderTarget);
+
 		const hit = PointCloudOctreePicker.findHit(pixels, pickWndSize);
 		return PointCloudOctreePicker.getPickPoint(hit, renderedNodes);
 	}
@@ -243,7 +252,6 @@ export class PointCloudOctreePicker
       pixels,
 		);
 		renderer.setScissorTest(false);
-		renderer.setRenderTarget(null!);
 		return pixels;
 	}
 
@@ -264,6 +272,10 @@ export class PointCloudOctreePicker
 			tempNode.matrixWorld = sceneNode.matrixWorld;
 			tempNode.matrixAutoUpdate = false;
 			tempNode.frustumCulled = false;
+			// Enable all layers so the picking camera can see this node regardless of
+			// which layers the camera is currently restricted to (e.g. by an EDL pass
+			// that temporarily limits the camera to the point-cloud layer).
+			tempNode.layers.enableAll();
 			const nodeIndex = nodeIndexOffset + i + 1;
 			if (nodeIndex > 255) 
 			{

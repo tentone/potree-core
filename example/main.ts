@@ -27,6 +27,9 @@ document.body.onload = function () {
 	// Selected point cloud for TransformControls
 	let selectedPco: PointCloudOctree | null = null;
 
+	// Pick method: true = Potree.pick, false = three.js Raycaster
+	let usePotreePick = true;
+
 	// EDL settings
 	let edlEnabled = false;
 	const potreeRenderer = new PotreeRenderer({
@@ -104,10 +107,27 @@ document.body.onload = function () {
 
 	canvas.ondblclick = function () {
 		const ray = raycaster.ray;
-		const pick = Potree.pick(pointClouds, renderer, camera, ray);
+		let pickedPco: PointCloudOctree | null = null;
 
-		if (pick?.pointCloud) {
-			selectedPco = pick.pointCloud;
+		if (usePotreePick) {
+			const pick = Potree.pick(pointClouds, renderer, camera, ray);
+			pickedPco = pick?.pointCloud ?? null;
+		} else {
+			const intersects = raycaster.intersectObjects(pointClouds, true);
+			if (intersects.length > 0) {
+				let node = intersects[0].object;
+				while (node != null) {
+					if (pointClouds.includes(node as PointCloudOctree)) {
+						pickedPco = node as PointCloudOctree;
+						break;
+					}
+					node = node.parent as typeof node;
+				}
+			}
+		}
+
+		if (pickedPco) {
+			selectedPco = pickedPco;
 			transformControls.attach(selectedPco);
 		} else {
 			selectedPco = null;
@@ -425,6 +445,22 @@ document.body.onload = function () {
 	hintLabel.textContent = 'Double-click point cloud to select';
 	hintLabel.style.cssText = 'font-size: 11px; color: #555; margin-top: 4px;';
 	panel.appendChild(hintLabel);
+
+	// Pick method toggle button
+	const pickRow = document.createElement('div');
+	pickRow.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+	const pickButton = document.createElement('button');
+	pickButton.textContent = 'Pick Method';
+	pickButton.style.cssText = 'cursor: pointer; padding: 4px 10px; border: none; border-radius: 4px; background-color: #DC3545; color: white; font-size: 13px;';
+	const pickLabel = document.createElement('span');
+	pickLabel.textContent = 'Pick: Potree';
+	pickButton.onclick = () => {
+		usePotreePick = !usePotreePick;
+		pickLabel.textContent = `Pick: ${usePotreePick ? 'Potree' : 'Raycaster'}`;
+	};
+	pickRow.appendChild(pickButton);
+	pickRow.appendChild(pickLabel);
+	panel.appendChild(pickRow);
 
 	function loop() {
 		cube.rotation.y += 0.01;

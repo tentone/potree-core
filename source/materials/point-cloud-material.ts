@@ -32,7 +32,7 @@ import {PointCloudOctree} from '../point-cloud-octree';
 import {PointCloudOctreeNode} from '../point-cloud-octree-node';
 import {byLevelAndIndex} from '../utils/utils';
 import {DEFAULT_CLASSIFICATION} from './classification';
-import {ClipMode, IClipBox} from './clipping';
+import {ClipMode, IClipBox, IClipSphere} from './clipping';
 import {PointColorType, PointOpacityType, PointShape, PointSizeType, TreeType} from './enums';
 import {SPECTRAL} from './gradients';
 import {
@@ -99,6 +99,10 @@ export interface IPointCloudMaterialUniforms {
 	clipBoxCount: IUniform<number>;
 	/** Array containing clipping box parameters */
 	clipBoxes: IUniform<Float32Array>;
+	/** Number of active clipping spheres */
+	clipSphereCount: IUniform<number>;
+	/** Array containing clipping sphere parameters (vec4: xyz=center, w=radius) */
+	clipSpheres: IUniform<Float32Array>;
 	/** Depth map texture for depth-based effects, null if not used */
 	depthMap: IUniform<Texture | null>;
 	/** Diffuse color as RGB values [r, g, b] */
@@ -260,6 +264,10 @@ export class PointCloudMaterial extends RawShaderMaterial
 
 	clipBoxes: IClipBox[] = [];
 
+	numClipSpheres: number = 0;
+
+	clipSpheres: IClipSphere[] = [];
+
 	visibleNodesTexture: Texture | undefined;
 
 	private visibleNodeTextureOffsets = new Map<string, number>();
@@ -281,6 +289,8 @@ export class PointCloudMaterial extends RawShaderMaterial
 		classificationLUT: makeUniform('t', this.classificationTexture || new Texture()),
 		clipBoxCount: makeUniform('f', 0),
 		clipBoxes: makeUniform('Matrix4fv', [] as any),
+		clipSphereCount: makeUniform('f', 0),
+		clipSpheres: makeUniform('fv', [] as any),
 		depthMap: makeUniform('t', null),
 		diffuse: makeUniform('fv', [1, 1, 1] as [number, number, number]),
 		fov: makeUniform('f', 1.0),
@@ -410,6 +420,8 @@ export class PointCloudMaterial extends RawShaderMaterial
 
   // Declare PointCloudMaterial attributes that need shader updates upon change, and set default values.
   @requiresShaderUpdate() useClipBox: boolean = false;
+
+  @requiresShaderUpdate() useClipSphere: boolean = false;
 
   @requiresShaderUpdate() weighted: boolean = false;
 
@@ -608,6 +620,11 @@ export class PointCloudMaterial extends RawShaderMaterial
   		define('use_clip_box');
   	}
 
+  	if (this.numClipSpheres > 0)
+  	{
+  		define('use_clip_sphere');
+  	}
+
   	if (this.highlightPoint) 
   	{
   		define('highlight_point');
@@ -670,6 +687,40 @@ export class PointCloudMaterial extends RawShaderMaterial
   	}
 
   	this.setUniform('clipBoxes', clipBoxesArray);
+  }
+
+  setClipSpheres(clipSpheres: IClipSphere[]): void
+  {
+  	if (!clipSpheres)
+  	{
+  		return;
+  	}
+
+  	this.clipSpheres = clipSpheres;
+
+  	const doUpdate =
+	  (this.numClipSpheres === 0) !== (clipSpheres.length === 0);
+
+  	this.numClipSpheres = clipSpheres.length;
+  	this.setUniform('clipSphereCount', this.numClipSpheres);
+
+  	if (doUpdate)
+  	{
+  		this.updateShaderSource();
+  	}
+
+  	const clipSpheresLength = this.numClipSpheres * 4;
+  	const clipSpheresArray = new Float32Array(clipSpheresLength);
+
+  	for (let i = 0; i < this.numClipSpheres; i++)
+  	{
+  		clipSpheresArray[i * 4 + 0] = clipSpheres[i].center.x;
+  		clipSpheresArray[i * 4 + 1] = clipSpheres[i].center.y;
+  		clipSpheresArray[i * 4 + 2] = clipSpheres[i].center.z;
+  		clipSpheresArray[i * 4 + 3] = clipSpheres[i].radius;
+  	}
+
+  	this.setUniform('clipSpheres', clipSpheresArray);
   }
 
   get gradient(): IGradient 

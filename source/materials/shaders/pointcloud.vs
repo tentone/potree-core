@@ -1,7 +1,8 @@
 precision highp float;
 precision highp int;
 
-#define max_clip_boxes 30  // Maximum number of clipping boxes
+#define max_clip_boxes 30   // Maximum number of clipping boxes
+#define max_clip_spheres 30 // Maximum number of clipping spheres
 
 // Input Attributes
 in vec3 position;
@@ -35,6 +36,11 @@ uniform float orthoHeight;
 
 #if defined use_clip_box
 	uniform mat4 clipBoxes[max_clip_boxes]; // Clipping box transforms
+#endif
+
+#if defined use_clip_sphere
+	uniform vec4 clipSpheres[max_clip_spheres]; // Clipping spheres: xyz = center, w = radius
+	uniform float clipSphereCount;
 #endif
 
 uniform float heightMin;
@@ -446,19 +452,31 @@ void main() {
 
 
 	// CLIPPING
-	#if defined use_clip_box
+	#if defined use_clip_box || defined use_clip_sphere
 		bool insideAny = false;
-		for (int i = 0; i < max_clip_boxes; i++) {
-			if (i == int(clipBoxCount)) break;
-			vec4 clipPosition = clipBoxes[i] * modelMatrix * vec4(position, 1.0);
-			bool inside = abs(clipPosition.x) <= 0.5 && abs(clipPosition.y) <= 0.5 && abs(clipPosition.z) <= 0.5;
-			insideAny = insideAny || inside;
-		}
+
+		#if defined use_clip_box
+			for (int i = 0; i < max_clip_boxes; i++) {
+				if (i == int(clipBoxCount)) break;
+				vec4 clipPosition = clipBoxes[i] * modelMatrix * vec4(position, 1.0);
+				bool inside = abs(clipPosition.x) <= 0.5 && abs(clipPosition.y) <= 0.5 && abs(clipPosition.z) <= 0.5;
+				insideAny = insideAny || inside;
+			}
+		#endif
+
+		#if defined use_clip_sphere
+			vec4 modelPos = modelMatrix * vec4(position, 1.0);
+			for (int i = 0; i < max_clip_spheres; i++) {
+				if (i == int(clipSphereCount)) break;
+				float dist = distance(modelPos.xyz, clipSpheres[i].xyz);
+				insideAny = insideAny || (dist <= clipSpheres[i].w);
+			}
+		#endif
 
 		#if defined clip_outside
-			if (!insideAny) { gl_Position = vec4(1000.0); } // Cull if outside any clip box
+			if (!insideAny) { gl_Position = vec4(1000.0); } // Cull if outside any clip volume
 		#elif defined clip_inside
-			if (insideAny) { gl_Position = vec4(1000.0); } // Cull if inside any clip box
+			if (insideAny) { gl_Position = vec4(1000.0); } // Cull if inside any clip volume
 		#elif defined clip_highlight_inside && !defined(color_type_depth)
 			if (!insideAny) { /* additional processing if needed */ }
 		#endif

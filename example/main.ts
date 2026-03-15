@@ -339,10 +339,12 @@ document.body.onload = function () {
 
 		controls.update();
 
-		potreeRenderer.render({ renderer, scene, camera, pointClouds });
-
 		// If you are not using EDL, you can render the scene directly with the standard three.js renderer:
-		// renderer.render(scene, camera);
+		if (!edlEnabled) {
+			renderer.render(scene, camera);
+		} else {
+			potreeRenderer.render({ renderer, scene, camera, pointClouds });
+		}
 
 		requestAnimationFrame(loop);
 	}

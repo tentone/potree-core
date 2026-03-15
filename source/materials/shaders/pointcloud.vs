@@ -162,7 +162,7 @@ float getLOD() {
 			iOffset += advance;
 			depth++;
 		} else {
-			return value.a * 255.0;
+			return depth;
 		}
 		offset += (vec3(1.0) * nodeSizeAtLevel * 0.5) * index3d;
 	}

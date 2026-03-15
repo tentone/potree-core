@@ -59,7 +59,7 @@ in vec3 vViewPosition;
 	in float vHighlight;
 #endif
 
-float specularStrength = 1.0;
+const float specularStrength = 1.0;
 
 void main() {
 	// Choose the proper color format
@@ -83,7 +83,18 @@ void main() {
 	// Depth comparison for weighted splats
 	#if defined(weighted_splats)
 		vec2 uv = gl_FragCoord.xy / vec2(screenWidth, screenHeight);
-		if(vLinearDepth > texture2D(depthMap, uv).r + vRadius + blendDepthSupplement) discard;
+		if(vLinearDepth > texture(depthMap, uv).r + vRadius + blendDepthSupplement) discard;
+	#endif
+
+	// Initialize fragment color and opacity
+	#if defined(weighted_splats)
+		float wx = 2.0 * length(pc);
+		float w = exp(-wx * wx * 0.5);
+		fragColor = vec4(color * w, w);
+	#elif defined(color_type_point_index)
+		fragColor = vec4(color, pcIndex / 255.0);
+	#else
+		fragColor = vec4(color, vOpacity);
 	#endif
 
 	// Lighting calculations for Phong shading
@@ -96,7 +107,6 @@ void main() {
 
 		#if MAX_POINT_LIGHTS > 0
 			vec3 pointDiffuse = vec3(0.0);
-			vec3 pointSpecular = vec3(0.0);
 			// Loop through each point light
 			for(int i = 0; i < MAX_POINT_LIGHTS; i++) {
 				vec4 lPos = viewMatrix * vec4(pointLightPosition[i], 1.0);
@@ -114,13 +124,6 @@ void main() {
 					float diffuseW = max(dotVal, 0.0);
 				#endif
 				pointDiffuse += diffuse * pointLightColor[i] * diffuseW * lDistance;
-				vec3 halfVec = normalize(lVector + viewDir);
-				float specW = specularStrength * max(pow(max(dot(normal, halfVec), 0.0), shininess), 0.0);
-				float normFactor = (shininess + 2.0) / 8.0;
-				vec3 schlick = specular + (vec3(1.0)-specular)*pow(max(1.0-dot(lVector, halfVec), 0.0), 5.0);
-				pointSpecular += schlick * pointLightColor[i] * specW * diffuseW * lDistance * normFactor;
-				// Disable specular effect if required
-				pointSpecular = vec3(0.0);
 			}
 		#endif
 
@@ -153,27 +156,12 @@ void main() {
 		vec3 totalSpecular = vec3(0.0);
 		#if MAX_POINT_LIGHTS > 0
 			totalDiffuse += pointDiffuse;
-			totalSpecular += pointSpecular;
 		#endif
 		#if MAX_DIR_LIGHTS > 0
 			totalDiffuse += dirDiffuse;
 			totalSpecular += dirSpecular;
 		#endif
-		fragColor.xyz = fragColor.xyz * (emissive + totalDiffuse + ambientLightColor * ambient) + totalSpecular;
-	#endif
-
-	// Handle weighted splats or default opacity and color
-	#if defined(weighted_splats)
-		float wx = 2.0 * length(pc);
-		float w = exp(-wx * wx * 0.5);
-		fragColor.rgb *= w;
-		fragColor.a = w;
-	#else
-		#if defined(color_type_point_index)
-			fragColor = vec4(color, pcIndex / 255.0);
-		#else
-			fragColor = vec4(color, vOpacity);
-		#endif
+		fragColor.rgb = fragColor.rgb * (emissive + totalDiffuse + ambientLightColor * ambient) + totalSpecular;
 	#endif
 
 	// Compute depth from view position

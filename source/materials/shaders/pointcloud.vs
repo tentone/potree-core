@@ -131,14 +131,7 @@ int numberOfOnes(int number, int index) {
 
 // Checks if bit at specific index is set
 bool isBitSet(int number, int index){
-	int powi = (index == 0) ? 1 :
-			   (index == 1) ? 2 :
-			   (index == 2) ? 4 :
-			   (index == 3) ? 8 :
-			   (index == 4) ? 16 :
-			   (index == 5) ? 32 :
-			   (index == 6) ? 64 : 128;
-	return mod(float(number / powi), 2.0) != 0.0;
+	return ((number >> index) & 1) != 0;
 }
 
 // Computes level-of-detail based on octree visibility

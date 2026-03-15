@@ -61,6 +61,28 @@ function loop()
 loop();
 ```
 
+## Clip Boxes
+ - Clip boxes restrict the rendered region of a point cloud to a box-shaped volume.
+ - Use the `createClipBox(size, position)` helper to build an `IClipBox` from a size and world-space position.
+ - Set the desired `ClipMode` on the material and pass the clip boxes to `setClipBoxes()`.
+
+```javascript
+import { ClipMode, createClipBox } from 'potree-core';
+import { Vector3 } from 'three';
+
+// Create a 5×5×5 clip box centered at world position (2, 0, 0)
+const clipBox = createClipBox(new Vector3(5, 5, 5), new Vector3(2, 0, 0));
+
+// Highlight points inside the box (other modes: CLIP_OUTSIDE, CLIP_INSIDE, DISABLED)
+pco.material.clipMode = ClipMode.HIGHLIGHT_INSIDE;
+pco.material.setClipBoxes([clipBox]);
+```
+
+ - `ClipMode.DISABLED` – no clipping.
+ - `ClipMode.CLIP_OUTSIDE` – only points inside the box are rendered.
+ - `ClipMode.CLIP_INSIDE` – only points outside the box are rendered.
+ - `ClipMode.HIGHLIGHT_INSIDE` – all points rendered; points inside the box are highlighted.
+
 ## Custom Request Manager
    - The potree core library uses a custom request manager to handle the loading of point cloud data.
    - The request manager can be replaced by a custom implementation, for example to use a custom caching system or to handle requests in a different way.
@@ -81,7 +103,6 @@ loop();
 ## Notes
  - Since potree-core is meant to be used as library and not as a full software as potree some features are not available.
  - EDL shading is not supported by potree core.
- - Removed classification and clipping functionality.
  - Removed Arena 4D point cloud support.
  - Removed Entwine Point Tile file support.
  - GUI elements were removed from the library

@@ -13,3 +13,30 @@ export interface IClipBox {
   matrix: Matrix4;
   position: Vector3;
 }
+
+/**
+ * Creates an IClipBox from a given size and position.
+ *
+ * The base shape is a unit cube centered at the origin (-0.5 to 0.5 on each axis).
+ * The transformation matrix is built by applying scale (size) followed by translation (position).
+ * The inverse matrix is computed from the transformation matrix and is used by the shader for clipping.
+ *
+ * @param size - The dimensions of the clip box.
+ * @param position - The center position of the clip box in world space. Defaults to the origin.
+ * @returns An IClipBox object ready to be passed to PointCloudMaterial.setClipBoxes().
+ */
+export function createClipBox(size: Vector3, position: Vector3 = new Vector3(0, 0, 0)): IClipBox {
+  const box = new Box3(new Vector3(-0.5, -0.5, -0.5), new Vector3(0.5, 0.5, 0.5));
+
+  const scaleMatrix = new Matrix4().makeScale(size.x, size.y, size.z);
+  const translationMatrix = new Matrix4().makeTranslation(position.x, position.y, position.z);
+  const matrix = new Matrix4().multiplyMatrices(translationMatrix, scaleMatrix);
+  const inverse = matrix.clone().invert();
+
+  return {
+    box,
+    matrix,
+    inverse,
+    position: position.clone(),
+  };
+}

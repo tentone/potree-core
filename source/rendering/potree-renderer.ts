@@ -108,12 +108,13 @@ export class PotreeRenderer {
     }
 
     private setLayerMaskRecursive(root: Object3D, desiredMask: number): void {
-        if (root.layers.mask !== desiredMask) {
-            root.layers.mask = desiredMask;
-        }
-
+        // NOTE: We intentionally do NOT change the root object's own layer mask.
+        // The root PointCloudOctree has no renderable geometry, so its layer does not
+        // affect rendering. Keeping it on the default layer (0) ensures that a standard
+        // THREE.js Raycaster can still reach its raycast() method even when EDL is active
+        // and child nodes are moved to a dedicated rendering layer.
         root.traverse((obj: Object3D) => {
-            if (obj.layers.mask !== desiredMask) {
+            if (obj !== root && obj.layers.mask !== desiredMask) {
                 obj.layers.mask = desiredMask;
             }
         });

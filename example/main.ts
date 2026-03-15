@@ -1,11 +1,12 @@
 import { AmbientLight, BoxGeometry, Euler, Mesh, MeshBasicMaterial, OrthographicCamera, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { ClipMode, PointCloudOctree, Potree, PotreeRenderer, createClipBox } from '../source';
+import { ClipMode, PointCloudOctree, Potree, PotreeRenderer, createClipBox, createClipSphere } from '../source';
 
 document.body.onload = function () {
 	const potree = new Potree();
 	let pointClouds: PointCloudOctree[] = [];
 	let pumpPco: PointCloudOctree | null = null;
+	let lionPco: PointCloudOctree | null = null;
 
 	const clipModes: ClipMode[] = [ClipMode.DISABLED, ClipMode.HIGHLIGHT_INSIDE, ClipMode.CLIP_OUTSIDE, ClipMode.CLIP_INSIDE];
 	const clipModeLabels = ['Disabled', 'Highlight Inside', 'Clip Outside', 'Clip Inside'];
@@ -103,10 +104,10 @@ document.body.onload = function () {
 		}
 	};
 
-	loadPointCloud('/data/lion_takanawa/', 'cloud.js', new Vector3(-4, -2, 5), new Euler(-Math.PI / 2, 0, 0));
+	loadPointCloud('/data/lion_takanawa/', 'cloud.js', new Vector3(-4, -2, 5), new Euler(-Math.PI / 2, 0, 0), undefined, false, true);
 	loadPointCloud('/data/pump/', 'metadata.json', new Vector3(0, -1.5, 3), new Euler(-Math.PI / 2, 0, 0), new Vector3(2, 2, 2), true);
 
-	function loadPointCloud(baseUrl: string, url: string, position?: Vector3, rotation?: Euler, scale?: Vector3, applyClipBox = false) {
+	function loadPointCloud(baseUrl: string, url: string, position?: Vector3, rotation?: Euler, scale?: Vector3, applyClipBox = false, applyClipSphere = false) {
 		potree.loadPointCloud(url, baseUrl).then(function (pco: PointCloudOctree) {
 			pco.material.size = 1.0;
 			pco.material.shape = 2;
@@ -158,6 +159,31 @@ document.body.onload = function () {
 				clipBoxHelper.position.copy(center);
 				clipBoxHelper.raycast = () => false;
 				scene.add(clipBoxHelper);
+			}
+
+			if (applyClipSphere) {
+				lionPco = pco;
+
+				// Compute the world-space bounding box and derive a sphere from it.
+				pco.updateMatrixWorld(true);
+				const worldBBox = pco.pcoGeometry.boundingBox.clone().applyMatrix4(pco.matrixWorld);
+				const center = worldBBox.getCenter(new Vector3());
+				const worldSize = worldBBox.getSize(new Vector3());
+
+				// Use half the diagonal as the radius, scaled down to clip only the interior.
+				const radius = worldSize.length() * 0.25;
+				const clipSphere = createClipSphere(center, radius);
+				pco.material.clipMode = clipModes[clipModeIndex];
+				pco.material.setClipSpheres([clipSphere]);
+
+				// Draw the clip sphere in the scene for visualization.
+				const clipSphereHelper = new Mesh(
+					new SphereGeometry(radius, 16, 16),
+					new MeshBasicMaterial({ color: 0xFF6600, wireframe: true })
+				);
+				clipSphereHelper.position.copy(center);
+				clipSphereHelper.raycast = () => false;
+				scene.add(clipSphereHelper);
 			}
 
 			add(pco);
@@ -296,6 +322,9 @@ document.body.onload = function () {
 		clipModeIndex = (clipModeIndex + 1) % clipModes.length;
 		if (pumpPco) {
 			pumpPco.material.clipMode = clipModes[clipModeIndex];
+		}
+		if (lionPco) {
+			lionPco.material.clipMode = clipModes[clipModeIndex];
 		}
 		clipLabel.textContent = `Clip: ${clipModeLabels[clipModeIndex]}`;
 	};

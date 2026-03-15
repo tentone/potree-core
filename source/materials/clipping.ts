@@ -1,5 +1,24 @@
 import {Box3, Matrix4, Vector3} from 'three';
 
+export interface IClipSphere {
+  center: Vector3;
+  radius: number;
+}
+
+/**
+ * Creates an IClipSphere from a center position and radius.
+ *
+ * @param center - The center position of the clip sphere in world space. Defaults to the origin.
+ * @param radius - The radius of the clip sphere.
+ * @returns An IClipSphere object ready to be passed to PointCloudMaterial.setClipSpheres().
+ */
+export function createClipSphere(center: Vector3 = new Vector3(0, 0, 0), radius: number): IClipSphere {
+  return {
+    center: center.clone(),
+    radius,
+  };
+}
+
 export enum ClipMode {
   DISABLED = 0,
   CLIP_OUTSIDE = 1,

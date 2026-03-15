@@ -1,5 +1,5 @@
 import {OctreeGeometry} from './loading2/OctreeGeometry';
-import {Box3, Camera, Object3D, Points, Ray, Sphere, Vector3, WebGLRenderer} from 'three';
+import {Box3, Camera, Intersection, Object3D, Points, Ray, Raycaster, Sphere, Vector3, WebGLRenderer} from 'three';
 import {DEFAULT_MIN_NODE_PIXEL_SIZE} from './constants';
 import {PointCloudMaterial, PointSizeType} from './materials';
 import {PointCloudOctreeGeometryNode} from './point-cloud-octree-geometry-node';
@@ -350,6 +350,36 @@ export class PointCloudOctree extends PointCloudTree
 	{
 		this.picker = this.picker || new PointCloudOctreePicker();
 		return this.picker.pick(renderer, camera, ray, [this], params);
+	}
+
+	/**
+	 * Implements THREE.js raycaster support for point cloud picking.
+	 *
+	 * When EDL is active, point cloud child nodes are moved to a dedicated rendering layer
+	 * (e.g. layer 1) so they are excluded from the normal scene render pass. This means
+	 * the default THREE.js layer test inside `Raycaster.intersectObject()` will fail for
+	 * those nodes, making `raycaster.intersectObject()` return no hits.
+	 *
+	 * This override handles that case by directly calling `raycast()` on each visible node's
+	 * scene node whenever the node's layer is NOT visible to the raycaster (i.e. EDL mode).
+	 * When nodes ARE on a raycaster-visible layer (non-EDL mode), this method does nothing
+	 * and lets the normal recursive traversal call `Points.raycast()` instead, avoiding
+	 * double-counting of intersections.
+	 */
+	public raycast(raycaster: Raycaster, intersects: Intersection[]): void
+	{
+		for (const node of this.visibleNodes)
+		{
+			const sceneNode = node.sceneNode;
+			if (sceneNode && !sceneNode.layers.test(raycaster.layers))
+			{
+				// Node is on a layer the raycaster cannot see (e.g. EDL dedicated layer).
+				// Call raycast() directly, bypassing the layer check, so picks still work.
+				sceneNode.raycast(raycaster, intersects);
+			}
+			// If sceneNode.layers.test(raycaster.layers) is true, the recursive traversal
+			// from intersectObject() will process this node normally — no action needed here.
+		}
 	}
 
 	public get progress() 

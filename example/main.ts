@@ -1,10 +1,15 @@
 import { AmbientLight, BoxGeometry, Euler, Mesh, MeshBasicMaterial, OrthographicCamera, PerspectiveCamera, Raycaster, Scene, SphereGeometry, Vector2, Vector3, WebGLRenderer } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { PointCloudOctree, Potree, PotreeRenderer } from '../source';
+import { ClipMode, PointCloudOctree, Potree, PotreeRenderer, createClipBox } from '../source';
 
 document.body.onload = function () {
 	const potree = new Potree();
 	let pointClouds: PointCloudOctree[] = [];
+	let pumpPco: PointCloudOctree | null = null;
+
+	const clipModes: ClipMode[] = [ClipMode.DISABLED, ClipMode.HIGHLIGHT_INSIDE, ClipMode.CLIP_OUTSIDE, ClipMode.CLIP_INSIDE];
+	const clipModeLabels = ['Disabled', 'Highlight Inside', 'Clip Outside', 'Clip Inside'];
+	let clipModeIndex = 1;
 
 	// EDL settings
 	let edlEnabled = false;
@@ -99,9 +104,9 @@ document.body.onload = function () {
 	};
 
 	loadPointCloud('/data/lion_takanawa/', 'cloud.js', new Vector3(-4, -2, 5), new Euler(-Math.PI / 2, 0, 0));
-	loadPointCloud('/data/pump/', 'metadata.json', new Vector3(0, -1.5, 3), new Euler(-Math.PI / 2, 0, 0), new Vector3(2, 2, 2));
+	loadPointCloud('/data/pump/', 'metadata.json', new Vector3(0, -1.5, 3), new Euler(-Math.PI / 2, 0, 0), new Vector3(2, 2, 2), true);
 
-	function loadPointCloud(baseUrl: string, url: string, position?: Vector3, rotation?: Euler, scale?: Vector3) {
+	function loadPointCloud(baseUrl: string, url: string, position?: Vector3, rotation?: Euler, scale?: Vector3, applyClipBox = false) {
 		potree.loadPointCloud(url, baseUrl).then(function (pco: PointCloudOctree) {
 			pco.material.size = 1.0;
 			pco.material.shape = 2;
@@ -130,6 +135,13 @@ document.body.onload = function () {
 			mesh.position.add(new Vector3(size.x, size.y, -size.z));
 
 			scene.add(mesh);
+
+			if (applyClipBox) {
+				pumpPco = pco;
+				const clipBox = createClipBox(new Vector3(1.5, 1.5, 1.5), pco.position.clone());
+				pco.material.clipMode = clipModes[clipModeIndex];
+				pco.material.setClipBoxes([clipBox]);
+			}
 
 			add(pco);
 		});
@@ -254,6 +266,25 @@ document.body.onload = function () {
 	radiusRow.appendChild(radiusInput);
 	radiusRow.appendChild(radiusValue);
 	panel.appendChild(radiusRow);
+
+	// Clip box mode cycle button (applies to the pump point cloud)
+	const clipRow = document.createElement('div');
+	clipRow.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+	const clipButton = document.createElement('button');
+	clipButton.textContent = 'Clip Mode';
+	clipButton.style.cssText = 'cursor: pointer; padding: 4px 10px; border: none; border-radius: 4px; background-color: #6F42C1; color: white; font-size: 13px;';
+	const clipLabel = document.createElement('span');
+	clipLabel.textContent = `Clip: ${clipModeLabels[clipModeIndex]}`;
+	clipButton.onclick = () => {
+		clipModeIndex = (clipModeIndex + 1) % clipModes.length;
+		if (pumpPco) {
+			pumpPco.material.clipMode = clipModes[clipModeIndex];
+		}
+		clipLabel.textContent = `Clip: ${clipModeLabels[clipModeIndex]}`;
+	};
+	clipRow.appendChild(clipButton);
+	clipRow.appendChild(clipLabel);
+	panel.appendChild(clipRow);
 
 	function loop() {
 		cube.rotation.y += 0.01;

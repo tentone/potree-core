@@ -101,7 +101,7 @@ document.body.onload = function () {
 
 	let useOrthographicCamera = false;
 	const perspectiveCamera = new PerspectiveCamera(60, 1, 0.1, 1000);
-	perspectiveCamera.position.set(0, 0, 10);
+	perspectiveCamera.position.set(-10, 10, 15);
 
 	const orthographicFrustrumSize = 20;
 	const orthographicCamera = new OrthographicCamera(
@@ -364,7 +364,7 @@ document.body.onload = function () {
 	});
 
 	// Clip Plane sub-folder
-	const planeFolder = clipFolder.addFolder('Clip Planes (pump)');
+	const planeFolder = clipFolder.addFolder('Clip Planes');
 	planeFolder.add(clipPlaneState, 'enableX').name('Enable X').onChange(() => updateClipPlanes());
 	planeFolder.add(clipPlaneState, 'offsetX', -1, 1, 0.01).name('X Offset').onChange(() => updatePlaneConstant('X'));
 	planeFolder.add(clipPlaneState, 'enableY').name('Enable Y').onChange(() => updateClipPlanes());

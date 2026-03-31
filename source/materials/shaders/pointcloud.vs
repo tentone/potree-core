@@ -3,6 +3,7 @@ precision highp int;
 
 #define max_clip_boxes 30   // Maximum number of clipping boxes
 #define max_clip_spheres 30 // Maximum number of clipping spheres
+#define max_clip_planes 30  // Maximum number of clipping planes
 
 // Input Attributes
 in vec3 position;
@@ -41,6 +42,11 @@ uniform float orthoHeight;
 #if defined use_clip_sphere
 	uniform vec4 clipSpheres[max_clip_spheres]; // Clipping spheres: xyz = center, w = radius
 	uniform float clipSphereCount;
+#endif
+
+#if defined use_clip_plane
+	uniform vec4 clipPlanes[max_clip_planes]; // Clipping planes: xyz = normal, w = constant
+	uniform float clipPlaneCount;
 #endif
 
 uniform float heightMin;
@@ -452,10 +458,12 @@ void main() {
 
 
 	// CLIPPING
-	#if defined use_clip_box || defined use_clip_sphere
+	#if defined use_clip_box || defined use_clip_sphere || defined use_clip_plane
 		bool insideAny = false;
+		bool hasVolumeClip = false;
 
 		#if defined use_clip_box
+			hasVolumeClip = true;
 			for (int i = 0; i < max_clip_boxes; i++) {
 				if (i == int(clipBoxCount)) break;
 				vec4 clipPosition = clipBoxes[i] * modelMatrix * vec4(position, 1.0);
@@ -465,6 +473,7 @@ void main() {
 		#endif
 
 		#if defined use_clip_sphere
+			hasVolumeClip = true;
 			vec4 modelPos = modelMatrix * vec4(position, 1.0);
 			for (int i = 0; i < max_clip_spheres; i++) {
 				if (i == int(clipSphereCount)) break;
@@ -473,6 +482,21 @@ void main() {
 			}
 		#endif
 
+		// When only clip planes are used, start as inside
+		if (!hasVolumeClip) insideAny = true;
+
+		#if defined use_clip_plane
+			// Point must be on positive side of all planes
+			vec4 clipWorldPos = modelMatrix * vec4(position, 1.0);
+			for (int i = 0; i < max_clip_planes; i++) {
+				if (i == int(clipPlaneCount)) break;
+				float d = dot(clipPlanes[i].xyz, clipWorldPos.xyz) + clipPlanes[i].w;
+				// Even if a point was accepted by a volume clip,
+				// it is rejected when it falls on the negative side of a plane.
+				if (d < 0.0) { insideAny = false; break; }
+			}
+		#endif
+		
 		#if defined clip_outside
 			if (!insideAny) { gl_Position = vec4(1000.0); } // Cull if outside any clip volume
 		#elif defined clip_inside

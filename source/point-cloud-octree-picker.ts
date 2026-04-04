@@ -157,7 +157,10 @@ export class PointCloudOctreePicker
 		renderer.setRenderTarget(pickState.renderTarget);
 
 		// Render the intersected nodes onto the pick render target, clipping to a small pick window.
-		renderer.setScissor(x, y, pickWndSize, pickWndSize);
+		// x, y and pickWndSize are in device pixels. setScissor() multiplies by pixelRatio internally,
+		// so we must divide first to avoid applying the pixel ratio twice on high-DPI displays.
+		const pixelRatio = renderer.getPixelRatio();
+		renderer.setScissor(x / pixelRatio, y / pixelRatio, pickWndSize / pixelRatio, pickWndSize / pixelRatio);
 		renderer.setScissorTest(true);
 		renderer.state.buffers.depth.setTest(pickMaterial.depthTest);
 		renderer.state.buffers.depth.setMask(pickMaterial.depthWrite);

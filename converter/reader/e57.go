@@ -81,6 +81,9 @@ func readPhysical(f io.ReaderAt, offset, length uint64) ([]byte, error) {
 		}
 
 		buf := make([]byte, toRead)
+		if offset > uint64(math.MaxInt64) {
+			return nil, fmt.Errorf("readPhysical: offset %d exceeds int64 range", offset)
+		}
 		if _, err := f.ReadAt(buf, int64(offset)); err != nil {
 			return nil, err
 		}

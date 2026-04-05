@@ -32,12 +32,11 @@ func (r *LAZReader) Read() ([]Point, error) {
 	var cmdErr error
 	for _, tool := range []string{"laszip", "las2las"} {
 		cmd := exec.Command(tool, "-i", r.path, "-o", tmp)
-		if out, err := cmd.CombinedOutput(); err == nil {
+		if _, err := cmd.CombinedOutput(); err == nil {
 			cmdErr = nil
-			_ = out
 			break
 		} else {
-			cmdErr = fmt.Errorf("%s: %w\n%s", tool, err, out)
+			cmdErr = fmt.Errorf("%s failed: %w", tool, err)
 		}
 	}
 	if cmdErr != nil {

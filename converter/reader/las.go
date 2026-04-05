@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"math"
 	"os"
 )
 
@@ -175,8 +174,6 @@ func parseLASPoint(buf []byte, format uint8, hasRGB, hasNIR bool,
 		}
 	}
 
-	_ = hasNIR
-	_ = math.NaN
 	return p, nil
 }
 

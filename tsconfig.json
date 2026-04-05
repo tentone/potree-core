@@ -1,19 +1,18 @@
 {
 	"compileOnSave": false,
 	"compilerOptions": {
-		"baseUrl": "./source/",
 		"sourceMap": true,
 		"declaration": true,
+		"rootDir": "source",
 		"declarationDir": "dist",
 		"module": "es2020",
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		"strict": false,
 		"noImplicitAny": false,
 		"noImplicitReturns": false,
 		"noImplicitThis": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": false,
-		"alwaysStrict": false,
 		"target": "es2020",
 		"experimentalDecorators": true,
 		"typeRoots": ["node_modules/@types"],
@@ -23,4 +22,3 @@
 	"include": ["source/**/*.ts"],
 	"exclude": ["node_modules"]
   }
-  

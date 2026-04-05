@@ -112,6 +112,29 @@ export const POINT_ATTRIBUTES = {
 
 export type PointAttributeStringName = keyof typeof POINT_ATTRIBUTES;
 
+export interface PointAttributeObject {
+	name: string;
+	type: string;
+	size: number;
+	elements: number;
+	elementSize: number;
+	description?: string;
+}
+
+/**
+ * Maps attribute names found in cloud.js files to their canonical POINT_ATTRIBUTES keys.
+ * For example, some exporters write "RGBA" while the internal key is "RGBA_PACKED".
+ */
+export const ATTRIBUTE_NAME_ALIASES: Record<string, string> = {
+	RGBA: 'RGBA_PACKED',
+};
+
+export function resolveAttributeName(name: string): PointAttributeStringName 
+{
+	const upper = name.toUpperCase();
+	return (ATTRIBUTE_NAME_ALIASES[upper] ?? upper) as PointAttributeStringName;
+}
+
 export class PointAttributes implements IPointAttributes 
 {
 	attributes: IPointAttribute[] = [];
@@ -120,17 +143,22 @@ export class PointAttributes implements IPointAttributes
 
 	size: number = 0;
 
-	constructor(pointAttributeNames: PointAttributeStringName[] = []) 
+	constructor(pointAttributeNames: (PointAttributeStringName | PointAttributeObject)[] = []) 
 	{
 		for (let i = 0; i < pointAttributeNames.length; i++) 
 		{
-			const pointAttributeName = pointAttributeNames[i];
-			const pointAttribute = POINT_ATTRIBUTES[pointAttributeName];
-			try {
-				this.attributes.push(pointAttribute);
-				this.byteSize += pointAttribute.byteSize;
-				this.size++;
-			} catch(e) {}
+			const entry = pointAttributeNames[i];
+			const key = typeof entry === 'object'
+				? resolveAttributeName(entry.name)
+				: entry;
+			const pointAttribute = POINT_ATTRIBUTES[key];
+			if (!pointAttribute) 
+			{
+				continue;
+			}
+			this.attributes.push(pointAttribute);
+			this.byteSize += pointAttribute.byteSize;
+			this.size++;
 		}
 	}
 

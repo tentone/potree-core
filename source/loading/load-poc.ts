@@ -1,5 +1,5 @@
 import {Box3, Vector3} from 'three';
-import {PointAttributes, PointAttributeStringName} from '../point-attributes';
+import {PointAttributes, PointAttributeObject, PointAttributeStringName} from '../point-attributes';
 import {PointCloudOctreeGeometry} from '../point-cloud-octree-geometry';
 import {PointCloudOctreeGeometryNode} from '../point-cloud-octree-geometry-node';
 import {createChildAABB} from '../utils/bounds';
@@ -24,7 +24,7 @@ interface POCJson {
   points: number;
   boundingBox: BoundingBoxData;
   tightBoundingBox?: BoundingBoxData;
-  pointAttributes: PointAttributeStringName[];
+  pointAttributes: (PointAttributeStringName | PointAttributeObject)[];
   spacing: number;
   scale: number;
   hierarchyStepSize: number;

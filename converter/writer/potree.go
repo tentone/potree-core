@@ -11,6 +11,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -168,7 +169,7 @@ func Write(outDir string, root *octree.Node, points []reader.Point, totalPoints 
 		hierarchyFile.Close()
 		return fmt.Errorf("write hierarchy.bin: %w", err)
 	}
-	hierarchySize, err := hierarchyFile.Seek(0, os.SEEK_CUR)
+	hierarchySize, err := hierarchyFile.Seek(0, io.SeekCurrent)
 	if err != nil {
 		hierarchyFile.Close()
 		return err

@@ -72,12 +72,13 @@ func (r *LASReader) Read() ([]Point, error) {
 	}
 
 	// For LAS 1.4, the point count is a uint64 stored later in the header.
-	// We handle it by seeking past the standard 1.2 fields when needed.
+	// For LAS 1.4, NumberOfPointRecords in the standard header is set to 0 when
+	// the point count exceeds 2^32.  The actual uint64 count is at byte offset 247
+	// (LAS 1.4 spec §2.7 "Extended Point Count" field).
 	numPoints := uint64(hdr.NumberOfPointRecords)
 	if hdr.VersionMajor == 1 && hdr.VersionMinor >= 4 {
-		// LAS 1.4 extended header starts at byte 247 (after standard block)
 		var extPoints uint64
-		// Seek to position 247 to read uint64 point count
+		// LAS 1.4 spec table 3: "Number of point records" (uint64) is at offset 247.
 		if _, err := f.Seek(247, io.SeekStart); err == nil {
 			if err2 := binary.Read(f, binary.LittleEndian, &extPoints); err2 == nil && extPoints > 0 {
 				numPoints = extPoints

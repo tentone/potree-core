@@ -64,6 +64,10 @@ func e57Page(f io.ReaderAt, pageIdx int64) ([]byte, error) {
 // transparently crossing page boundaries (skipping the 4-byte CRC at the
 // end of each page).
 func readPhysical(f io.ReaderAt, offset, length uint64) ([]byte, error) {
+	// Validate up front: all offsets we will ever need must fit in int64 for ReadAt.
+	if offset > uint64(math.MaxInt64) || length > uint64(math.MaxInt64)-offset {
+		return nil, fmt.Errorf("readPhysical: offset/length would exceed int64 range")
+	}
 	out := make([]byte, 0, length)
 	for length > 0 {
 		pageIdx := int64(offset / e57PageSize)
@@ -81,9 +85,6 @@ func readPhysical(f io.ReaderAt, offset, length uint64) ([]byte, error) {
 		}
 
 		buf := make([]byte, toRead)
-		if offset > uint64(math.MaxInt64) {
-			return nil, fmt.Errorf("readPhysical: offset %d exceeds int64 range", offset)
-		}
 		if _, err := f.ReadAt(buf, int64(offset)); err != nil {
 			return nil, err
 		}

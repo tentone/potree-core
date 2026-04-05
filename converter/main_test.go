@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -97,7 +98,7 @@ func makeTinyLAS(path string, n int) error {
 	writeF64(f, 0.0)
 
 	// Pad to hdrSize if needed
-	cur, _ := f.Seek(0, os.SEEK_CUR)
+	cur, _ := f.Seek(0, io.SeekCurrent)
 	if cur < int64(hdrSize) {
 		f.Write(make([]byte, int64(hdrSize)-cur))
 	}

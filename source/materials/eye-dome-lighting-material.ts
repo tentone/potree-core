@@ -18,7 +18,6 @@ export interface IEyeDomeLightingMaterialUniforms {
 	uProj: IUniform<Float32Array>;
 	colorMap: IUniform<Texture | null>;
 	far: IUniform<number>;
-	useLogDepth: IUniform<boolean>;
 	useOrthographicCamera: IUniform<boolean>;
 }
 
@@ -26,6 +25,8 @@ export class EyeDomeLightingMaterial extends RawShaderMaterial {
 	public uniforms: IEyeDomeLightingMaterialUniforms;
 
 	private _neighbourCount: number = 8;
+	private _useLogDepth = false;
+	private _useReversedDepth = false;
 	private neighboursArray: Float32Array = new Float32Array(16);
 
 	public constructor() {
@@ -42,7 +43,6 @@ export class EyeDomeLightingMaterial extends RawShaderMaterial {
 			uProj: { type: 'Matrix4fv', value: new Float32Array(16) },
 			colorMap: { type: 't', value: null },
 			far: { type: 'f', value: 1000.0 },
-			useLogDepth: { type: 'b', value: false },
 			useOrthographicCamera: { type: 'b', value: false },
 		};
 
@@ -70,6 +70,28 @@ export class EyeDomeLightingMaterial extends RawShaderMaterial {
 		}
 	}
 
+	public set useLogDepth(value: boolean) {
+		if (this._useLogDepth !== value) {
+			this._useLogDepth = value;
+			this.updateShaderSource();
+		}
+	}
+
+	public get useLogDepth(): boolean {
+		return this._useLogDepth;
+	}
+
+	public set useReversedDepth(value: boolean) {
+		if (this._useReversedDepth !== value) {
+			this._useReversedDepth = value;
+			this.updateShaderSource();
+		}
+	}
+
+	public get useReversedDepth(): boolean {
+		return this._useReversedDepth;
+	}
+
 	private initializeNeighboursArray(neighbourCount: number): void {
 		this.neighboursArray = new Float32Array(neighbourCount * 2);
 		for (let c = 0; c < neighbourCount; c++) {
@@ -80,7 +102,14 @@ export class EyeDomeLightingMaterial extends RawShaderMaterial {
 	}
 
 	private getDefines(): string {
-		return `#define NEIGHBOUR_COUNT ${this._neighbourCount}\n`;
+		const parts = [`#define NEIGHBOUR_COUNT ${this._neighbourCount}`];
+		if (this._useLogDepth) {
+			parts.push('#define use_log_depth');
+		}
+		if (this._useReversedDepth) {
+			parts.push('#define use_reversed_depth');
+		}
+		return `${parts.join('\n')}\n`;
 	}
 
 	public updateShaderSource(): void {

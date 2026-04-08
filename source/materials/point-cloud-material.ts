@@ -456,6 +456,8 @@ export class PointCloudMaterial extends RawShaderMaterial {
 
 	@requiresShaderUpdate() private useLogDepth: boolean = false;
 
+	@requiresShaderUpdate() private useReversedDepth: boolean = false;
+
 	attributes = {
 		position: { type: 'fv', value: [] },
 		color: { type: 'fv', value: [] },
@@ -597,6 +599,10 @@ export class PointCloudMaterial extends RawShaderMaterial {
 
 		if (this.useLogDepth) {
 			define('use_log_depth');
+		}
+
+		if (this.useReversedDepth) {
+			define('use_reversed_depth');
 		}
 
 		if (this.weighted) {
@@ -821,7 +827,14 @@ export class PointCloudMaterial extends RawShaderMaterial {
 		// Sync clipping planes to shader uniforms
 		this.syncClippingPlanes();
 
-		this.useLogDepth = renderer.capabilities.logarithmicDepthBuffer;
+		const capabilities = renderer.capabilities as typeof renderer.capabilities & {
+			reversedDepthBuffer?: boolean;
+			reverseDepthBuffer?: boolean;
+		};
+		const useReversedDepth = capabilities.reversedDepthBuffer === true || capabilities.reverseDepthBuffer === true;
+
+		this.useReversedDepth = useReversedDepth;
+		this.useLogDepth = renderer.capabilities.logarithmicDepthBuffer && !useReversedDepth;
 
 		if (camera.type === PERSPECTIVE_CAMERA) {
 			this.useOrthographicCamera = false;

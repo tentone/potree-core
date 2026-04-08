@@ -175,22 +175,26 @@ void main() {
 
 	float linearDepth = -pos.z;
 	vec4 clipPos = projectionMatrix * pos;
-	clipPos /= clipPos.w;
+	float fragmentDepth = gl_FragCoord.z;
 
 	// When using an orthographic camera, paraboloid correction is not applied,
 	// so use the GPU-compluted default depth (gl_FragCoord.z).
 	if(useOrthographicCamera){
 		// Orthographic camera: use the GPU-computed default depth.
 		// When using an orthographic camera, Three.js does not use `logarithmicDepthBuffer` either.
-		gl_FragDepth = gl_FragCoord.z;
+		gl_FragDepth = fragmentDepth;
 	}else{
 		#if defined(use_log_depth)
 			// Logarithmic depth
-			gl_FragDepth = log2(linearDepth + 1.0) * log(2.0) / log(far + 1.0);
+			fragmentDepth = log2(linearDepth + 1.0) * log(2.0) / log(far + 1.0);
+		#elif defined(use_reversed_depth)
+			// Recompute depth from the adjusted fragment position so paraboloid sprites
+			// depth-test using their curved surface instead of the point center.
+			fragmentDepth = clipPos.z / clipPos.w;
 		#else
-			// Use the GPU-computed default depth.
-			gl_FragDepth = gl_FragCoord.z;
+			fragmentDepth = 0.5 * (clipPos.z / clipPos.w) + 0.5;
 		#endif
+		gl_FragDepth = fragmentDepth;
 	}
 
 	#if defined(color_type_depth)

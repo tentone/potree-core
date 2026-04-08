@@ -182,9 +182,16 @@ export class EDLPass {
         this.edlMaterial.setProjectionMatrix(camera.projectionMatrix);
 
         // Pass far plane and log depth flag so EDL shader can reconstruct depth in the correct format.
+        const capabilities = renderer.capabilities as typeof renderer.capabilities & {
+            reversedDepthBuffer?: boolean;
+            reverseDepthBuffer?: boolean;
+        };
+        const useReversedDepth =
+            capabilities.reversedDepthBuffer === true || capabilities.reverseDepthBuffer === true;
         this.edlMaterial.uniforms.far.value = camera.far;
-        this.edlMaterial.uniforms.useLogDepth.value = renderer.capabilities.logarithmicDepthBuffer;
-        this.edlMaterial.uniforms.useOrthographicCamera.value = camera.type === ORTHOGRAPHIC_CAMERA
+        this.edlMaterial.useLogDepth = renderer.capabilities.logarithmicDepthBuffer && !useReversedDepth;
+        this.edlMaterial.useReversedDepth = useReversedDepth;
+        this.edlMaterial.uniforms.useOrthographicCamera.value = camera.type === ORTHOGRAPHIC_CAMERA;
 
         // Keep existing depth buffer from layer0 render.
         this.screenPass.render(renderer, this.edlMaterial, null);

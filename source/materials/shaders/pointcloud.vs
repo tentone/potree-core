@@ -367,7 +367,11 @@ void main() {
 
 	pointSize = clamp(pointSize, minSize, maxSize);
 	#if defined(weighted_splats) || defined(paraboloid_point_shape)
-		vRadius = pointSize / projFactor;
+		if (useOrthographicCamera) {
+			vRadius = pointSize * orthoWidth / screenWidth;
+		} else {
+			vRadius = pointSize / projFactor;
+		}
 	#endif
 	
 	pointSize *= viewScale;

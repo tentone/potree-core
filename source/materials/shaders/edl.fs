@@ -88,22 +88,19 @@ void main() {
 	vec4 dp = uProj * vec4(0.0, 0.0, -dl, 1.0);
 	float pz = dp.z / dp.w;
 
-	#if defined(use_reversed_depth)
+	#if defined(use_log_depth)
+		// Logarithmic depth buffer: write depth in the same format as three.js.
+		// Orthographic cameras do not use logarithmic depth, so they fall back
+		// to the standard non-logarithmic depth mapping.
+		float fragmentDepth = useOrthographicCamera
+			? ((pz + 1.0) / 2.0)
+			: (log2(dl + 1.0) / log2(far + 1.0));
+	#elif defined(use_reversed_depth)
+		// Reversed depth uses the projection-mapped depth directly.
 		float fragmentDepth = pz;
 	#else
+		// Standard hyperbolic depth buffer mapping from NDC [-1, 1] to [0, 1].
 		float fragmentDepth = (pz + 1.0) / 2.0;
-	#endif
-
-	#if defined(use_log_depth)
-		if (!useOrthographicCamera) {
-			// Logarithmic depth buffer: write depth in the same format as three.js
-			// logarithmicDepthBuffer, which uses:
-			// vFlagDepth = clipPos.w + 1.0.
-			// logDepthBufFC = 2.0 / log(far + 1.0).
-			// gl_FragDepth = log2(vFlagDepth) * logDepthBufFC * 0.5;
-			// Simplifies to: log2(linearDepth + 1.0) / log2(far + 1.0)
-			fragmentDepth = log2(dl + 1.0) / log2(far + 1.0);
-		}
 	#endif
 
 	gl_FragDepth = fragmentDepth;

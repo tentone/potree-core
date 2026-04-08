@@ -167,35 +167,30 @@ void main() {
 	// Compute depth from view position
 	vec4 pos = vec4(vViewPosition, 1.0);
 	#if defined(paraboloid_point_shape)
-		if(!useOrthographicCamera){
-			// Adjust depth based on point shape
-			pos.z += -dot(pc, pc) * vRadius;
-		}
+		// Adjust depth based on point shape for both perspective and orthographic cameras.
+		pos.z += -dot(pc, pc) * vRadius;
 	#endif
 
 	float linearDepth = -pos.z;
 	vec4 clipPos = projectionMatrix * pos;
-	float fragmentDepth = gl_FragCoord.z;
+	float fragmentDepth;
 
-	// When using an orthographic camera, paraboloid correction is not applied,
-	// so use the GPU-compluted default depth (gl_FragCoord.z).
-	if(useOrthographicCamera){
-		// Orthographic camera: use the GPU-computed default depth.
-		// When using an orthographic camera, Three.js does not use `logarithmicDepthBuffer` either.
-		gl_FragDepth = fragmentDepth;
-	}else{
-		#if defined(use_log_depth)
-			// Logarithmic depth
-			fragmentDepth = log2(linearDepth + 1.0) * log(2.0) / log(far + 1.0);
-		#elif defined(use_reversed_depth)
-			// Recompute depth from the adjusted fragment position so paraboloid sprites
-			// depth-test using their curved surface instead of the point center.
-			fragmentDepth = clipPos.z / clipPos.w;
-		#else
-			fragmentDepth = 0.5 * (clipPos.z / clipPos.w) + 0.5;
-		#endif
-		gl_FragDepth = fragmentDepth;
-	}
+	#if defined(use_log_depth)
+		// Three.js does not use logarithmic depth for orthographic cameras,
+		// so orthographic rendering falls back to the standard depth mapping.
+		fragmentDepth = useOrthographicCamera
+			? (0.5 * (clipPos.z / clipPos.w) + 0.5)
+			: (log2(linearDepth + 1.0) * log(2.0) / log(far + 1.0));
+	#elif defined(use_reversed_depth)
+		// Recompute depth from the adjusted fragment position so paraboloid sprites
+		// depth-test using their curved surface instead of the point center.
+		fragmentDepth = clipPos.z / clipPos.w;
+	#else
+		// Standard hyperbolic depth buffer mapping from NDC [-1, 1] to [0, 1].
+		fragmentDepth = 0.5 * (clipPos.z / clipPos.w) + 0.5;
+	#endif
+
+	gl_FragDepth = fragmentDepth;
 
 	#if defined(color_type_depth)
 		// Render depth information into color channels

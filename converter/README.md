@@ -33,7 +33,6 @@ Options:
   -o string       Output directory (required)
   -format string  Input format: las, laz, ply, e57  (default: inferred from extension)
   -scale float    Quantisation scale for positions in metres (default 0.001)
-  -max-pts int    Maximum points per octree node (default 65536)
   -name string    Dataset name written to metadata.json (default: input filename)
 ```
 
@@ -44,7 +43,7 @@ Options:
 potree-converter -i scan.las -o ./output
 
 # Convert an E57 file with custom scale
-potree-converter -i building.e57 -o ./output -scale 0.001 -max-pts 65536
+potree-converter -i building.e57 -o ./output -scale 0.001
 
 # Convert a binary PLY file
 potree-converter -i cloud.ply -o ./output
@@ -100,8 +99,9 @@ Pure Go reader.  Handles the common case of E57 files produced by typical
 
 1. **Read** – All points are loaded into memory.
 2. **Build octree** – The point cloud is recursively subdivided into an
-   axis-aligned octree.  Each node retains up to `max-pts` spatially
-   representative samples; excess points are forwarded to child nodes.
+   axis-aligned octree.  The per-node point capacity is computed automatically
+   as `ceil(∛N)` where N is the total number of input points, producing a
+   balanced tree depth that includes every point.
 3. **Write** – Nodes are serialised in BFS order to `octree.bin` and
    `hierarchy.bin`, and `metadata.json` is written with full dataset metadata.
 

@@ -78,16 +78,11 @@ type Options struct {
 	Name string
 	// Scale controls the quantisation precision for positions (default 0.001 m).
 	Scale float64
-	// MaxPointsPerNode mirrors the octree builder setting (used for spacing).
-	MaxPointsPerNode int
 }
 
 func (o Options) withDefaults() Options {
 	if o.Scale <= 0 {
 		o.Scale = 0.001
-	}
-	if o.MaxPointsPerNode <= 0 {
-		o.MaxPointsPerNode = 65536
 	}
 	if o.Name == "" {
 		o.Name = "converted"
@@ -180,7 +175,7 @@ func Write(outDir string, root *octree.Node, points []reader.Point, totalPoints 
 
 	// ---- Write metadata.json -------------------------------------------
 	treeDepth := maxDepth(root)
-	spacing := computeSpacing(root, opts)
+	spacing := computeSpacing(root, totalPoints)
 
 	meta := buildMetadata(root, nodes, totalPoints, treeDepth, spacing, int(hierarchySize), attrs, attrRanges, opts)
 
@@ -447,18 +442,13 @@ func maxDepth(node *octree.Node) int {
 	return max
 }
 
-func computeSpacing(root *octree.Node, opts Options) float64 {
-	// Spacing ~ the average distance between points at the root level
+func computeSpacing(root *octree.Node, totalPoints int64) float64 {
+	// Spacing ~ average distance between points: cube-root of (volume / totalPoints).
 	side := root.Bounds.Max[0] - root.Bounds.Min[0]
-	n := float64(opts.MaxPointsPerNode)
-	if n <= 0 {
-		n = 65536
-	}
-	// Approximate: cube-root of (volume / numPoints) * some factor
 	vol := side * side * side
+	n := float64(totalPoints)
 	if vol <= 0 || n <= 0 {
 		return 0.05
 	}
-	spacing := math.Pow(vol/n, 1.0/3.0)
-	return spacing
+	return math.Pow(vol/n, 1.0/3.0)
 }

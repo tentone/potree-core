@@ -161,7 +161,7 @@ func TestPLYRoundTrip(t *testing.T) {
 		t.Error("expected HasRGB=true")
 	}
 
-	root := octree.Build(pts, octree.Options{MaxPointsPerNode: 1024})
+	root := octree.Build(pts, octree.Options{})
 	if root == nil {
 		t.Fatal("nil root")
 	}
@@ -201,7 +201,7 @@ func TestLASRoundTrip(t *testing.T) {
 		t.Error("expected HasIntensity=true")
 	}
 
-	root := octree.Build(pts, octree.Options{MaxPointsPerNode: 1024})
+	root := octree.Build(pts, octree.Options{})
 
 	if err := writer.Write(outDir, root, pts, int64(n), writer.Options{Scale: 0.001}); err != nil {
 		t.Fatalf("Write: %v", err)

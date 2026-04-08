@@ -73,17 +73,11 @@ func (b Bounds) ChildBounds(index int) Bounds {
 
 // Options controls octree construction.
 type Options struct {
-	// MaxPointsPerNode is the maximum number of points kept in a single node
-	// before the excess is delegated to children. Defaults to 65536.
-	MaxPointsPerNode int
 	// MaxDepth limits the tree depth.  Defaults to 20.
 	MaxDepth int
 }
 
 func (o Options) withDefaults() Options {
-	if o.MaxPointsPerNode <= 0 {
-		o.MaxPointsPerNode = 65536
-	}
 	if o.MaxDepth <= 0 {
 		o.MaxDepth = 20
 	}
@@ -91,8 +85,19 @@ func (o Options) withDefaults() Options {
 }
 
 // Build constructs an octree from the given points.
+// The maximum number of points stored per node is computed automatically as
+// ceil(cbrt(len(points))), which produces a balanced tree depth while ensuring
+// every input point is included in the output.
 func Build(points []reader.Point, opts Options) *Node {
 	opts = opts.withDefaults()
+
+	// Auto-compute per-node limit so all points fit in the tree at a
+	// reasonable depth.  Using the cube-root targets roughly three levels of
+	// meaningful subdivision regardless of dataset size.
+	maxPointsPerNode := int(math.Ceil(math.Cbrt(float64(len(points)))))
+	if maxPointsPerNode < 1 {
+		maxPointsPerNode = 1
+	}
 
 	bounds := computeBounds(points)
 	bounds = makeCubic(bounds)
@@ -103,19 +108,19 @@ func Build(points []reader.Point, opts Options) *Node {
 	}
 
 	root := &Node{Name: "r", Level: 0, Bounds: bounds}
-	buildRecursive(root, points, indices, opts)
+	buildRecursive(root, points, indices, maxPointsPerNode, opts)
 	return root
 }
 
 // buildRecursive partitions `indices` into this node and its children.
-// The first `min(maxPts, len(indices))` indices (after shuffling) are kept
+// The first `min(maxPointsPerNode, len(indices))` indices (after shuffling) are kept
 // at this node; the rest are forwarded to child nodes.
-func buildRecursive(node *Node, points []reader.Point, indices []int32, opts Options) {
+func buildRecursive(node *Node, points []reader.Point, indices []int32, maxPointsPerNode int, opts Options) {
 	if len(indices) == 0 {
 		return
 	}
 
-	if len(indices) <= opts.MaxPointsPerNode || node.Level >= opts.MaxDepth {
+	if len(indices) <= maxPointsPerNode || node.Level >= opts.MaxDepth {
 		node.PointIndices = indices
 		return
 	}
@@ -123,7 +128,7 @@ func buildRecursive(node *Node, points []reader.Point, indices []int32, opts Opt
 	// Shuffle to get a spatially representative random sample.
 	lcgShuffle(indices)
 
-	keep := opts.MaxPointsPerNode
+	keep := maxPointsPerNode
 	node.PointIndices = indices[:keep]
 	rest := indices[keep:]
 
@@ -155,7 +160,7 @@ func buildRecursive(node *Node, points []reader.Point, indices []int32, opts Opt
 			Bounds: node.Bounds.ChildBounds(ci),
 		}
 		node.Children[ci] = child
-		buildRecursive(child, points, childIndices, opts)
+		buildRecursive(child, points, childIndices, maxPointsPerNode, opts)
 	}
 }
 

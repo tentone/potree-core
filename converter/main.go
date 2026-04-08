@@ -3,7 +3,7 @@
 //
 // Usage:
 //
-//	potree-converter -i <input> -o <output-dir> [-format <ext>] [-scale <s>] [-max-pts <n>] [-name <name>]
+//	potree-converter -i <input> -o <output-dir> [-format <ext>] [-scale <s>] [-name <name>]
 package main
 
 import (
@@ -25,7 +25,6 @@ func main() {
 	output := flag.String("o", "", "Output directory (required)")
 	format := flag.String("format", "", "Input format: las, laz, ply, e57 (default: inferred from extension)")
 	scale := flag.Float64("scale", 0.001, "Quantisation scale for positions in metres (default 0.001)")
-	maxPts := flag.Int("max-pts", 65536, "Maximum points per octree node (default 65536)")
 	name := flag.String("name", "", "Dataset name for metadata.json (default: input filename without extension)")
 	flag.Usage = usage
 	flag.Parse()
@@ -77,10 +76,7 @@ func main() {
 	t1 := time.Now()
 	log.Printf("Building octree …")
 
-	root := octree.Build(points, octree.Options{
-		MaxPointsPerNode: *maxPts,
-		MaxDepth:         20,
-	})
+	root := octree.Build(points, octree.Options{})
 	log.Printf("Octree built in %v", time.Since(t1).Round(time.Millisecond))
 
 	// ---- Write output ------------------------------------------------------
@@ -88,9 +84,8 @@ func main() {
 	log.Printf("Writing Potree 2.0 output to %s …", *output)
 
 	if err := writer.Write(*output, root, points, int64(len(points)), writer.Options{
-		Name:             dsName,
-		Scale:            *scale,
-		MaxPointsPerNode: *maxPts,
+		Name:  dsName,
+		Scale: *scale,
 	}); err != nil {
 		log.Fatalf("Write: %v", err)
 	}
@@ -121,6 +116,6 @@ Output:
 
 Example:
   potree-converter -i scan.las -o ./output
-  potree-converter -i cloud.e57 -o ./output -scale 0.001 -max-pts 65536
+  potree-converter -i cloud.e57 -o ./output -scale 0.001
 `)
 }

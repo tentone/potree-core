@@ -93,16 +93,6 @@ export class BinaryLoader
 			return Promise.resolve();
 		}
 
-		if (node.numPoints === 0 && this.version.newerThan('1.5')) {
-			node.geometry = node.geometry || new BufferGeometry();
-			node.loaded = true;
-			node.loading = false;
-			node.pcoGeometry.numNodesLoading--;
-			node.pcoGeometry.needsUpdate = true;
-			this.callbacks.forEach((callback) => {return callback(node);});
-			return Promise.resolve();
-		}
-
 		return Promise.resolve(this.getUrl(this.getNodeUrl(node)))
 			.then((url) => {return this.xhrRequest(url, {mode: 'cors'});})
 			.then((res) => {return res.arrayBuffer();})

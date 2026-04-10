@@ -37,10 +37,12 @@ uniform float orthoHeight;
 
 #if defined use_clip_box
 	uniform mat4 clipBoxes[max_clip_boxes]; // Clipping box transforms
+	uniform float clipBoxModes[max_clip_boxes]; // 0 = include, 1 = exclude
 #endif
 
 #if defined use_clip_sphere
 	uniform vec4 clipSpheres[max_clip_spheres]; // Clipping spheres: xyz = center, w = radius
+	uniform float clipSphereModes[max_clip_spheres]; // 0 = include, 1 = exclude
 	uniform float clipSphereCount;
 #endif
 
@@ -463,54 +465,102 @@ void main() {
 
 	// CLIPPING
 	#if defined use_clip_box || defined use_clip_sphere || defined use_clip_plane
-		bool insideAny = false;
-		bool hasVolumeClip = false;
+		#if defined clip_per_volume_mode
+			#if !defined(clip_disabled)
+				bool hasIncludeVolumes = false;
+				bool insideAnyInclude = false;
+				bool insideAnyExclude = false;
 
-		#if defined use_clip_box
-			hasVolumeClip = true;
-			for (int i = 0; i < max_clip_boxes; i++) {
-				if (i == int(clipBoxCount)) break;
-				vec4 clipPosition = clipBoxes[i] * modelMatrix * vec4(position, 1.0);
-				bool inside = abs(clipPosition.x) <= 0.5 && abs(clipPosition.y) <= 0.5 && abs(clipPosition.z) <= 0.5;
-				insideAny = insideAny || inside;
-			}
-		#endif
+				#if defined use_clip_box
+					for (int i = 0; i < max_clip_boxes; i++) {
+						if (i == int(clipBoxCount)) break;
+						vec4 clipPosition = clipBoxes[i] * modelMatrix * vec4(position, 1.0);
+						bool inside = abs(clipPosition.x) <= 0.5
+							&& abs(clipPosition.y) <= 0.5
+							&& abs(clipPosition.z) <= 0.5;
+						bool isExclude = clipBoxModes[i] > 0.5;
+						if (isExclude) {
+							insideAnyExclude = insideAnyExclude || inside;
+						} else {
+							hasIncludeVolumes = true;
+							insideAnyInclude = insideAnyInclude || inside;
+						}
+					}
+				#endif
 
-		#if defined use_clip_sphere
-			hasVolumeClip = true;
-			vec4 modelPos = modelMatrix * vec4(position, 1.0);
-			for (int i = 0; i < max_clip_spheres; i++) {
-				if (i == int(clipSphereCount)) break;
-				float dist = distance(modelPos.xyz, clipSpheres[i].xyz);
-				insideAny = insideAny || (dist <= clipSpheres[i].w);
-			}
-		#endif
+				#if defined use_clip_sphere
+					vec4 modelPos = modelMatrix * vec4(position, 1.0);
+					for (int i = 0; i < max_clip_spheres; i++) {
+						if (i == int(clipSphereCount)) break;
+						float dist = distance(modelPos.xyz, clipSpheres[i].xyz);
+						bool inside = dist <= clipSpheres[i].w;
+						bool isExclude = clipSphereModes[i] > 0.5;
+						if (isExclude) {
+							insideAnyExclude = insideAnyExclude || inside;
+						} else {
+							hasIncludeVolumes = true;
+							insideAnyInclude = insideAnyInclude || inside;
+						}
+					}
+				#endif
 
-		// When only clip planes are used, start as inside
-		if (!hasVolumeClip) insideAny = true;
+				bool visible = (!hasIncludeVolumes || insideAnyInclude) && !insideAnyExclude;
+				if (!visible) { gl_Position = vec4(1000.0); }
 
-		#if defined use_clip_plane
-			// Point must be on positive side of all planes
-			vec4 clipWorldPos = modelMatrix * vec4(position, 1.0);
-			for (int i = 0; i < max_clip_planes; i++) {
-				if (i == int(clipPlaneCount)) break;
-				float d = dot(clipPlanes[i].xyz, clipWorldPos.xyz) + clipPlanes[i].w;
-				// Even if a point was accepted by a volume clip,
-				// it is rejected when it falls on the negative side of a plane.
-				if (d < 0.0) { insideAny = false; break; }
-			}
-		#endif
-		
-		#if defined clip_outside
-			if (!insideAny) { gl_Position = vec4(1000.0); } // Cull if outside any clip volume
-		#elif defined clip_inside
-			if (insideAny) { gl_Position = vec4(1000.0); } // Cull if inside any clip volume
-		#elif defined clip_highlight_inside && !defined(color_type_depth)
-			if (!insideAny) { /* additional processing if needed */ }
-		#endif
+				#if defined clip_highlight_inside
+					if (insideAnyInclude) { vColor.r += 0.5; }
+				#endif
+			#endif
+		#else
+			bool insideAny = false;
+			bool hasVolumeClip = false;
 
-		#if defined clip_highlight_inside
-			if (insideAny) { vColor.r += 0.5; }
+			#if defined use_clip_box
+				hasVolumeClip = true;
+				for (int i = 0; i < max_clip_boxes; i++) {
+					if (i == int(clipBoxCount)) break;
+					vec4 clipPosition = clipBoxes[i] * modelMatrix * vec4(position, 1.0);
+					bool inside = abs(clipPosition.x) <= 0.5 && abs(clipPosition.y) <= 0.5 && abs(clipPosition.z) <= 0.5;
+					insideAny = insideAny || inside;
+				}
+			#endif
+
+			#if defined use_clip_sphere
+				hasVolumeClip = true;
+				vec4 modelPos = modelMatrix * vec4(position, 1.0);
+				for (int i = 0; i < max_clip_spheres; i++) {
+					if (i == int(clipSphereCount)) break;
+					float dist = distance(modelPos.xyz, clipSpheres[i].xyz);
+					insideAny = insideAny || (dist <= clipSpheres[i].w);
+				}
+			#endif
+
+			// When only clip planes are used, start as inside
+			if (!hasVolumeClip) insideAny = true;
+
+			#if defined use_clip_plane
+				// Point must be on positive side of all planes
+				vec4 clipWorldPos = modelMatrix * vec4(position, 1.0);
+				for (int i = 0; i < max_clip_planes; i++) {
+					if (i == int(clipPlaneCount)) break;
+					float d = dot(clipPlanes[i].xyz, clipWorldPos.xyz) + clipPlanes[i].w;
+					// Even if a point was accepted by a volume clip,
+					// it is rejected when it falls on the negative side of a plane.
+					if (d < 0.0) { insideAny = false; break; }
+				}
+			#endif
+			
+			#if defined clip_outside
+				if (!insideAny) { gl_Position = vec4(1000.0); } // Cull if outside any clip volume
+			#elif defined clip_inside
+				if (insideAny) { gl_Position = vec4(1000.0); } // Cull if inside any clip volume
+			#elif defined clip_highlight_inside && !defined(color_type_depth)
+				if (!insideAny) { /* additional processing if needed */ }
+			#endif
+
+			#if defined clip_highlight_inside
+				if (insideAny) { vColor.r += 0.5; }
+			#endif
 		#endif
 	#endif
 

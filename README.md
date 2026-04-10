@@ -64,7 +64,11 @@ loop();
 ## Clip Boxes
  - Clip boxes restrict the rendered region of a point cloud to a box-shaped volume.
  - Use the `createClipBox(size, position)` helper to build an `IClipBox` from a size and world-space position.
- - Set the desired `ClipMode` on the material and pass the clip boxes to `setClipBoxes()`.
+ - Set clip boxes on the material with `setClipBoxes()`.
+ - Optional per-volume mode: `mode?: "include" | "exclude"`.
+   - `include` keeps points inside the volume.
+   - `exclude` removes points inside the volume.
+ - Legacy behavior remains unchanged when no clip volume has `mode` set.
 
 ```javascript
 import { ClipMode, createClipBox } from 'potree-core';
@@ -86,7 +90,8 @@ pco.material.setClipBoxes([clipBox]);
 ## Clip Spheres
  - Clip spheres restrict the rendered region of a point cloud to a sphere-shaped volume.
  - Use the `createClipSphere(center, radius)` helper to build an `IClipSphere` from a center position and radius.
- - Set the desired `ClipMode` on the material and pass the clip spheres to `setClipSpheres()`.
+ - Set clip spheres with `setClipSpheres()`.
+ - Optional per-volume mode: `mode?: "include" | "exclude"`.
  - Clip boxes and clip spheres can be used together; a point is considered "inside" if it falls inside any box or any sphere.
 
 ```javascript
@@ -101,11 +106,28 @@ pco.material.clipMode = ClipMode.HIGHLIGHT_INSIDE;
 pco.material.setClipSpheres([clipSphere]);
 ```
 
- - `ClipMode.DISABLED` – no clipping.
- - `ClipMode.CLIP_OUTSIDE` – only points inside the sphere are rendered.
- - `ClipMode.CLIP_INSIDE` – only points outside the sphere are rendered.
- - `ClipMode.HIGHLIGHT_INSIDE` – all points rendered; points inside the sphere are highlighted.
+```javascript
+import { createClipBox } from 'potree-core';
+import { Vector3 } from 'three';
 
+// Include outer region A and exclude inner region B (hole in A)
+const includeA = {
+  ...createClipBox(new Vector3(10, 10, 10), new Vector3(0, 0, 0)),
+  mode: 'include',
+};
+
+const excludeB = {
+  ...createClipBox(new Vector3(4, 4, 4), new Vector3(0, 0, 0)),
+  mode: 'exclude',
+};
+
+pco.material.setClipBoxes([includeA, excludeB]);
+```
+
+ - `ClipMode.DISABLED` - no clipping.
+ - `ClipMode.CLIP_OUTSIDE` - only points inside the sphere are rendered.
+ - `ClipMode.CLIP_INSIDE` - only points outside the sphere are rendered.
+ - `ClipMode.HIGHLIGHT_INSIDE` - all points rendered; points inside the sphere are highlighted.
 ## Custom Request Manager
    - The potree core library uses a custom request manager to handle the loading of point cloud data.
    - The request manager can be replaced by a custom implementation, for example to use a custom caching system or to handle requests in a different way.

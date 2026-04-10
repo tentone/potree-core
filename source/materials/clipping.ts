@@ -1,8 +1,11 @@
 import {Box3, Matrix4, Vector3} from 'three';
 
+export type ClipVolumeMode = 'include' | 'exclude';
+
 export interface IClipSphere {
   center: Vector3;
   radius: number;
+  mode?: ClipVolumeMode;
 }
 
 /**
@@ -31,6 +34,7 @@ export interface IClipBox {
   inverse: Matrix4;
   matrix: Matrix4;
   position: Vector3;
+  mode?: ClipVolumeMode;
 }
 
 /**

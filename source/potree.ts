@@ -373,6 +373,16 @@ export class Potree implements IPotree
 	private shouldClip(pointCloud: PointCloudOctree, boundingBox: Box3): boolean 
 	{
 		const material = pointCloud.material;
+		const hasPerClipVolumeModes =
+			material.clipBoxes.some((box) => box.mode !== undefined) ||
+			material.clipSpheres.some((sphere) => sphere.mode !== undefined);
+
+		// Mixed include/exclude semantics are not safely handled by this coarse culling path.
+		// Keep legacy fast culling for CLIP_OUTSIDE only when no per-volume modes are active.
+		if (hasPerClipVolumeModes) 
+		{
+			return false;
+		}
 
 		if (material.numClipBoxes === 0 || material.clipMode !== ClipMode.CLIP_OUTSIDE) 
 		{
@@ -471,4 +481,3 @@ export class Potree implements IPotree
 		};
 	})();
 }
-

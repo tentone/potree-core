@@ -478,7 +478,10 @@ void main() {
 			bool insideAnyInclude = false;
 			bool insideAnyExclude = false;
 			bool insideAnyHighlight = false;
-			bool hasShapeVolumes = clipBoxCount > 0.0 || clipSphereCount > 0.0;
+			bool hasShapeVolumes = clipBoxCount > 0.0;
+			#if defined use_clip_sphere
+				hasShapeVolumes = hasShapeVolumes || clipSphereCount > 0.0;
+			#endif
 
 			float inheritedMode = global_clip_mode_include;
 			#if defined clip_outside

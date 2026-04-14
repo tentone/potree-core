@@ -63,71 +63,58 @@ loop();
 
 ## Clip Boxes
  - Clip boxes restrict the rendered region of a point cloud to a box-shaped volume.
- - Use the `createClipBox(size, position)` helper to build an `IClipBox` from a size and world-space position.
- - Set clip boxes on the material with `setClipBoxes()`.
- - Optional per-volume mode: `mode?: "include" | "exclude"`.
-   - `include` keeps points inside the volume.
-   - `exclude` removes points inside the volume.
- - Legacy behavior remains unchanged when no clip volume has `mode` set.
+ - Use `createClipBox(size, position, mode?)` to build an `IClipBox`.
+ - `mode?: "include" | "exclude"`.
+ - `include`: clip-outside semantics for that volume (inside can stay visible).
+ - `exclude`: clip-inside semantics for that volume (inside is removed).
+ - If `mode` is `undefined`, that volume inherits the global material `clipMode`.
+ - `ClipMode.DISABLED` is a global master off switch and disables all clipping/highlighting.
+ - Clipping uses one unified rule across boxes, spheres, and clip planes:
+   - include volumes are unioned
+   - exclude volumes are unioned
+   - `B = (!hasIncludeVolumes || insideAnyInclude) && !insideAnyExclude`
+   - `P = insideAllPlanes`
+   - `S = hasBoxOrSphere`
+   - For `CLIP_OUTSIDE`: `visible = B && P`
+   - For `CLIP_INSIDE`: `visible = (S && B) || !P`
+ - Global `ClipMode.HIGHLIGHT_INSIDE` is still supported through inheritance (`mode` undefined) and only highlights without changing visibility.
+ - Clip planes are evaluated as `insideAllPlanes` (point is on the positive side of all planes).
+ - Planes are integrated into the same formulas via `P`, so plane-only behavior falls out naturally from the same equations.
 
 ```javascript
 import { ClipMode, createClipBox } from 'potree-core';
 import { Vector3 } from 'three';
 
-// Create a 5×5×5 clip box centered at world position (2, 0, 0)
-const clipBox = createClipBox(new Vector3(5, 5, 5), new Vector3(2, 0, 0));
+pco.material.clipMode = ClipMode.CLIP_OUTSIDE; // global fallback for undefined volume modes
 
-// Highlight points inside the box (other modes: CLIP_OUTSIDE, CLIP_INSIDE, DISABLED)
-pco.material.clipMode = ClipMode.HIGHLIGHT_INSIDE;
-pco.material.setClipBoxes([clipBox]);
+const includeA = createClipBox(new Vector3(10, 10, 10), new Vector3(0, 0, 0), 'include');
+const excludeB = createClipBox(new Vector3(4, 4, 4), new Vector3(0, 0, 0), 'exclude');
+const inheritedD = createClipBox(new Vector3(3, 3, 3), new Vector3(-3, 0, 0)); // inherits CLIP_OUTSIDE
+
+pco.material.setClipBoxes([includeA, excludeB, inheritedD]);
 ```
 
- - `ClipMode.DISABLED` – no clipping.
- - `ClipMode.CLIP_OUTSIDE` – only points inside the box are rendered.
- - `ClipMode.CLIP_INSIDE` – only points outside the box are rendered.
- - `ClipMode.HIGHLIGHT_INSIDE` – all points rendered; points inside the box are highlighted.
-
 ## Clip Spheres
- - Clip spheres restrict the rendered region of a point cloud to a sphere-shaped volume.
- - Use the `createClipSphere(center, radius)` helper to build an `IClipSphere` from a center position and radius.
- - Set clip spheres with `setClipSpheres()`.
- - Optional per-volume mode: `mode?: "include" | "exclude"`.
- - Clip boxes and clip spheres can be used together; a point is considered "inside" if it falls inside any box or any sphere.
+ - Clip spheres work like clip boxes and support the same optional mode.
+ - Use `createClipSphere(center, radius, mode?)` to build an `IClipSphere`.
+ - `mode?: "include" | "exclude"`.
+ - If `mode` is `undefined`, the sphere inherits the global material `clipMode`.
+
+## Clip Planes
+ - Clip planes do not have per-plane mode; they always use inherited global mode behavior.
+ - Planes are represented by `P = insideAllPlanes` in the visibility formulas above.
 
 ```javascript
 import { ClipMode, createClipSphere } from 'potree-core';
 import { Vector3 } from 'three';
 
-// Create a sphere of radius 3 centered at world position (0, 1, 0)
-const clipSphere = createClipSphere(new Vector3(0, 1, 0), 3);
-
-// Highlight points inside the sphere (other modes: CLIP_OUTSIDE, CLIP_INSIDE, DISABLED)
 pco.material.clipMode = ClipMode.HIGHLIGHT_INSIDE;
-pco.material.setClipSpheres([clipSphere]);
+
+const sphereA = createClipSphere(new Vector3(0, 1, 0), 3, 'exclude');
+const sphereB = createClipSphere(new Vector3(5, 1, 0), 2); // inherits HIGHLIGHT_INSIDE
+
+pco.material.setClipSpheres([sphereA, sphereB]);
 ```
-
-```javascript
-import { createClipBox } from 'potree-core';
-import { Vector3 } from 'three';
-
-// Include outer region A and exclude inner region B (hole in A)
-const includeA = {
-  ...createClipBox(new Vector3(10, 10, 10), new Vector3(0, 0, 0)),
-  mode: 'include',
-};
-
-const excludeB = {
-  ...createClipBox(new Vector3(4, 4, 4), new Vector3(0, 0, 0)),
-  mode: 'exclude',
-};
-
-pco.material.setClipBoxes([includeA, excludeB]);
-```
-
- - `ClipMode.DISABLED` - no clipping.
- - `ClipMode.CLIP_OUTSIDE` - only points inside the sphere are rendered.
- - `ClipMode.CLIP_INSIDE` - only points outside the sphere are rendered.
- - `ClipMode.HIGHLIGHT_INSIDE` - all points rendered; points inside the sphere are highlighted.
 ## Custom Request Manager
    - The potree core library uses a custom request manager to handle the loading of point cloud data.
    - The request manager can be replaced by a custom implementation, for example to use a custom caching system or to handle requests in a different way.
@@ -179,3 +166,4 @@ pco.material.setClipBoxes([includeA, excludeB]);
  ### To Do
  - Supports logarithmic depth buffer (just by enabling it on the threejs renderer), useful for large scale visualization.
  - Point clouds are automatically updated, frustum culling is used to avoid unnecessary updates (better update performance for multiple point clouds).
+

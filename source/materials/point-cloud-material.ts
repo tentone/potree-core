@@ -32,7 +32,7 @@ import { PointCloudOctree } from '../point-cloud-octree';
 import { PointCloudOctreeNode } from '../point-cloud-octree-node';
 import { byLevelAndIndex } from '../utils/utils';
 import { DEFAULT_CLASSIFICATION } from './classification';
-import { ClipMode, IClipBox, IClipSphere } from './clipping';
+import { ClipMode, ClipVolumeMode, IClipBox, IClipSphere } from './clipping';
 import { PointColorType, PointOpacityType, PointShape, PointSizeType, TreeType } from './enums';
 import { SPECTRAL } from './gradients';
 import {
@@ -99,13 +99,13 @@ export interface IPointCloudMaterialUniforms {
 	clipBoxCount: IUniform<number>;
 	/** Array containing clipping box parameters */
 	clipBoxes: IUniform<Float32Array>;
-	/** Array containing clipping box modes (0 = include, 1 = exclude) */
+	/** Array containing clipping box modes (0 = include, 1 = exclude, 2 = inherit global mode) */
 	clipBoxModes: IUniform<Float32Array>;
 	/** Number of active clipping spheres */
 	clipSphereCount: IUniform<number>;
 	/** Array containing clipping sphere parameters (vec4: xyz=center, w=radius) */
 	clipSpheres: IUniform<Float32Array>;
-	/** Array containing clipping sphere modes (0 = include, 1 = exclude) */
+	/** Array containing clipping sphere modes (0 = include, 1 = exclude, 2 = inherit global mode) */
 	clipSphereModes: IUniform<Float32Array>;
 	/** Number of active clipping planes */
 	clipPlaneCount: IUniform<number>;
@@ -261,6 +261,10 @@ const OUTPUT_COLOR_ENCODING = {
 };
 
 export class PointCloudMaterial extends RawShaderMaterial {
+	private static readonly CLIP_VOLUME_MODE_INCLUDE = 0;
+	private static readonly CLIP_VOLUME_MODE_EXCLUDE = 1;
+	private static readonly CLIP_VOLUME_MODE_INHERIT = 2;
+
 	private static helperVec3 = new Vector3();
 
 	lights = false;
@@ -274,8 +278,6 @@ export class PointCloudMaterial extends RawShaderMaterial {
 	numClipSpheres: number = 0;
 
 	clipSpheres: IClipSphere[] = [];
-
-	private hasPerClipVolumeModes: boolean = false;
 
 	private numClipPlanes: number = 0;
 
@@ -629,10 +631,6 @@ export class PointCloudMaterial extends RawShaderMaterial {
 			define('use_clip_plane');
 		}
 
-		if (this.hasPerClipVolumeModes) {
-			define('clip_per_volume_mode');
-		}
-
 		if (this.highlightPoint) {
 			define('highlight_point');
 		}
@@ -655,9 +653,30 @@ export class PointCloudMaterial extends RawShaderMaterial {
 		return parts.join('\n');
 	}
 
-	private recomputeHasPerClipVolumeModes(): boolean {
-		return this.clipBoxes.some((box) => box.mode !== undefined) ||
-			this.clipSpheres.some((sphere) => sphere.mode !== undefined);
+	private static encodeClipVolumeMode(mode: ClipVolumeMode | undefined): number {
+		if (mode === undefined) {
+			return PointCloudMaterial.CLIP_VOLUME_MODE_INHERIT;
+		}
+		if (mode === 'exclude') {
+			return PointCloudMaterial.CLIP_VOLUME_MODE_EXCLUDE;
+		}
+		return PointCloudMaterial.CLIP_VOLUME_MODE_INCLUDE;
+	}
+
+	private updateClipBoxModesUniform(): void {
+		const clipBoxModesArray = new Float32Array(this.numClipBoxes);
+		for (let i = 0; i < this.numClipBoxes; i++) {
+			clipBoxModesArray[i] = PointCloudMaterial.encodeClipVolumeMode(this.clipBoxes[i].mode);
+		}
+		this.setUniform('clipBoxModes', clipBoxModesArray);
+	}
+
+	private updateClipSphereModesUniform(): void {
+		const clipSphereModesArray = new Float32Array(this.numClipSpheres);
+		for (let i = 0; i < this.numClipSpheres; i++) {
+			clipSphereModesArray[i] = PointCloudMaterial.encodeClipVolumeMode(this.clipSpheres[i].mode);
+		}
+		this.setUniform('clipSphereModes', clipSphereModesArray);
 	}
 
 	setClipBoxes(clipBoxes: IClipBox[]): void {
@@ -666,8 +685,6 @@ export class PointCloudMaterial extends RawShaderMaterial {
 		}
 
 		const hadClipBoxes = this.numClipBoxes > 0;
-		const hadPerClipVolumeModes = this.hasPerClipVolumeModes;
-
 		this.clipBoxes = clipBoxes;
 
 		this.numClipBoxes = clipBoxes.length;
@@ -688,17 +705,10 @@ export class PointCloudMaterial extends RawShaderMaterial {
 
 		this.setUniform('clipBoxes', clipBoxesArray);
 
-		const clipBoxModesArray = new Float32Array(this.numClipBoxes);
-		for (let i = 0; i < this.numClipBoxes; i++) {
-			clipBoxModesArray[i] = this.clipBoxes[i].mode === 'exclude' ? 1 : 0;
-		}
-		this.setUniform('clipBoxModes', clipBoxModesArray);
-
-		this.hasPerClipVolumeModes = this.recomputeHasPerClipVolumeModes();
+		this.updateClipBoxModesUniform();
 
 		const hasClipBoxes = this.numClipBoxes > 0;
-		const doUpdate = hadClipBoxes !== hasClipBoxes ||
-			hadPerClipVolumeModes !== this.hasPerClipVolumeModes;
+		const doUpdate = hadClipBoxes !== hasClipBoxes;
 		if (doUpdate) {
 			this.updateShaderSource();
 		}
@@ -710,8 +720,6 @@ export class PointCloudMaterial extends RawShaderMaterial {
 		}
 
 		const hadClipSpheres = this.numClipSpheres > 0;
-		const hadPerClipVolumeModes = this.hasPerClipVolumeModes;
-
 		this.clipSpheres = clipSpheres;
 
 		this.numClipSpheres = clipSpheres.length;
@@ -729,20 +737,37 @@ export class PointCloudMaterial extends RawShaderMaterial {
 
 		this.setUniform('clipSpheres', clipSpheresArray);
 
-		const clipSphereModesArray = new Float32Array(this.numClipSpheres);
-		for (let i = 0; i < this.numClipSpheres; i++) {
-			clipSphereModesArray[i] = this.clipSpheres[i].mode === 'exclude' ? 1 : 0;
-		}
-		this.setUniform('clipSphereModes', clipSphereModesArray);
-
-		this.hasPerClipVolumeModes = this.recomputeHasPerClipVolumeModes();
+		this.updateClipSphereModesUniform();
 
 		const hasClipSpheres = this.numClipSpheres > 0;
-		const doUpdate = hadClipSpheres !== hasClipSpheres ||
-			hadPerClipVolumeModes !== this.hasPerClipVolumeModes;
+		const doUpdate = hadClipSpheres !== hasClipSpheres;
 		if (doUpdate) {
 			this.updateShaderSource();
 		}
+	}
+
+	setClipBoxMode(index: number, mode?: ClipVolumeMode): void {
+		if (index < 0 || index >= this.clipBoxes.length) {
+			return;
+		}
+		if (this.clipBoxes[index].mode === mode) {
+			return;
+		}
+
+		this.clipBoxes[index].mode = mode;
+		this.updateClipBoxModesUniform();
+	}
+
+	setClipSphereMode(index: number, mode?: ClipVolumeMode): void {
+		if (index < 0 || index >= this.clipSpheres.length) {
+			return;
+		}
+		if (this.clipSpheres[index].mode === mode) {
+			return;
+		}
+
+		this.clipSpheres[index].mode = mode;
+		this.updateClipSphereModesUniform();
 	}
 
 	/**

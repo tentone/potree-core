@@ -312,26 +312,14 @@ export class PointCloudOctreePicker
 			pickMaterial.clipMode = ClipMode.DISABLED;
 			pickMaterial.setClipBoxes([]);
 			pickMaterial.setClipSpheres([]);
+			pickMaterial.clippingPlanes = [];
 		}
 		else 
 		{
 			pickMaterial.clipMode = nodeMaterial.clipMode;
-			const hasPerClipVolumeModes =
-				nodeMaterial.clipBoxes.some((box) => box.mode !== undefined) ||
-				nodeMaterial.clipSpheres.some((sphere) => sphere.mode !== undefined);
-
-			if (hasPerClipVolumeModes) 
-			{
-				pickMaterial.setClipBoxes(nodeMaterial.clipBoxes);
-				pickMaterial.setClipSpheres(nodeMaterial.clipSpheres);
-			}
-			else 
-			{
-				pickMaterial.setClipBoxes(
-					nodeMaterial.clipMode === ClipMode.CLIP_OUTSIDE ? nodeMaterial.clipBoxes : [],
-				);
-				pickMaterial.setClipSpheres([]);
-			}
+			pickMaterial.setClipBoxes(nodeMaterial.clipBoxes);
+			pickMaterial.setClipSpheres(nodeMaterial.clipSpheres);
+			pickMaterial.clippingPlanes = nodeMaterial.clippingPlanes;
 		}
 	}
 

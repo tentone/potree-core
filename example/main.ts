@@ -3,12 +3,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import { ViewHelper } from 'three/examples/jsm/helpers/ViewHelper';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
-import { ClipMode, PointCloudOctree, PointSizeType, Potree, PotreeRenderer, createClipBox, createClipSphere } from '../source';
+import { ClipMode, ClipVolumeMode, PointCloudOctree, PointSizeType, Potree, PotreeRenderer, createClipBox, createClipSphere } from '../source';
 
 document.body.onload = function () {
 	const potree = new Potree();
 	let pointClouds: PointCloudOctree[] = [];
 	let clipPlanesTarget: PointCloudOctree | null = null;
+	let pumpClipBoxesTarget: PointCloudOctree | null = null;
 
 	// Clip plane state
 	const clipPlaneX = new Plane(new Vector3(1, 0, 0), 0);
@@ -58,12 +59,24 @@ document.body.onload = function () {
 		updateClipPlanes();
 	}
 
+	function updatePumpClipBoxModes() {
+		if (!pumpClipBoxesTarget) return;
+		pumpClipBoxesTarget.material.setClipBoxMode(0, clipVolumeModeMap[params.pumpClipBox1Mode]);
+		pumpClipBoxesTarget.material.setClipBoxMode(1, clipVolumeModeMap[params.pumpClipBox2Mode]);
+	}
+
 	// ClipMode
 	const clipModeMap: Record<string, ClipMode> = {
 		'Disabled': ClipMode.DISABLED,
 		'Highlight Inside': ClipMode.HIGHLIGHT_INSIDE,
 		'Clip Outside': ClipMode.CLIP_OUTSIDE,
 		'Clip Inside': ClipMode.CLIP_INSIDE,
+	};
+
+	const clipVolumeModeMap: Record<string, ClipVolumeMode | undefined> = {
+		'Inherit Global': undefined,
+		'Include': 'include',
+		'Exclude': 'exclude',
 	};
 
 	// State
@@ -76,6 +89,8 @@ document.body.onload = function () {
 		edlRadius: 1.4,
 		// Clipping
 		clipMode: 'Highlight Inside',
+		pumpClipBox1Mode: 'Inherit Global',
+		pumpClipBox2Mode: 'Inherit Global',
 		// Points
 		pointSize: 1.0,
 		sizeType: 'Adaptive',
@@ -259,19 +274,35 @@ document.body.onload = function () {
 			pco.material.clipMode = clipModeMap[params.clipMode];
 
 			if (applyClipBox) {
-				// ClipBox
-				const halfSize = worldSize.clone().multiplyScalar(0.5);
-				const clipBox = createClipBox(halfSize, center);
-				pco.material.setClipBoxes([clipBox]);
+				// ClipBoxes
+				pumpClipBoxesTarget = pco;
 
-				const clipBoxHelper = new Mesh(
-					new BoxGeometry(halfSize.x, halfSize.y, halfSize.z),
-					new MeshBasicMaterial({ color: 0x0066FF, wireframe: true }),
-				);
-				clipBoxHelper.position.copy(center);
-				clipBoxHelper.raycast = () => false;
-				scene.add(clipBoxHelper);
+				const primaryClipBoxSize = worldSize.clone().multiplyScalar(0.35);
+				const secondaryClipBoxSize = worldSize.clone().multiplyScalar(0.25);
+				const secondaryClipBoxCenter = center.clone().add(new Vector3(
+					worldSize.x * 0.18,
+					worldSize.y * 0.08,
+					-worldSize.z * 0.12,
+				));
 
+				pco.material.setClipBoxes([
+					createClipBox(primaryClipBoxSize, center),
+					createClipBox(secondaryClipBoxSize, secondaryClipBoxCenter),
+				]);
+				updatePumpClipBoxModes();
+
+				const addClipBoxHelper = (size: Vector3, position: Vector3, color: number) => {
+					const clipBoxHelper = new Mesh(
+						new BoxGeometry(size.x, size.y, size.z),
+						new MeshBasicMaterial({ color, wireframe: true }),
+					);
+					clipBoxHelper.position.copy(position);
+					clipBoxHelper.raycast = () => false;
+					scene.add(clipBoxHelper);
+				};
+
+				addClipBoxHelper(primaryClipBoxSize, center, 0x0066FF);
+				addClipBoxHelper(secondaryClipBoxSize, secondaryClipBoxCenter, 0x00B894);
 			}
 
 			if (applyClipPlanes) {
@@ -361,6 +392,14 @@ document.body.onload = function () {
 	clipFolder.add(params, 'clipMode', Object.keys(clipModeMap)).name('Clip Mode').onChange((v: string) => {
 		const mode = clipModeMap[v];
 		for (const pco of pointClouds) pco.material.clipMode = mode;
+	});
+
+	const pumpClipBoxesFolder = clipFolder.addFolder('Pump Clip Boxes');
+	pumpClipBoxesFolder.add(params, 'pumpClipBox1Mode', Object.keys(clipVolumeModeMap)).name('Box 1 Mode').onChange(() => {
+		updatePumpClipBoxModes();
+	});
+	pumpClipBoxesFolder.add(params, 'pumpClipBox2Mode', Object.keys(clipVolumeModeMap)).name('Box 2 Mode').onChange(() => {
+		updatePumpClipBoxModes();
 	});
 
 	// Clip Plane sub-folder

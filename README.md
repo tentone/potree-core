@@ -166,4 +166,3 @@ pco.material.setClipSpheres([sphereA, sphereB]);
  ### To Do
  - Supports logarithmic depth buffer (just by enabling it on the threejs renderer), useful for large scale visualization.
  - Point clouds are automatically updated, frustum culling is used to avoid unnecessary updates (better update performance for multiple point clouds).
-

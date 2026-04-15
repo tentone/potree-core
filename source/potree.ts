@@ -370,36 +370,36 @@ export class Potree implements IPotree
 		}
 	}
 
-	private shouldClip(pointCloud: PointCloudOctree, boundingBox: Box3): boolean 
+	private shouldClip(pointCloud: PointCloudOctree, boundingBox: Box3): boolean
 	{
 		const material = pointCloud.material;
-		if (material.clipMode === ClipMode.DISABLED) 
+		if (material.clipMode === ClipMode.DISABLED)
 		{
 			return false;
 		}
 
 		const hasClipPlanes = !!(material.clippingPlanes && material.clippingPlanes.length > 0);
-		if (material.numClipBoxes === 0 || material.numClipSpheres > 0 || hasClipPlanes) 
+		if (material.numClipBoxes === 0 || material.numClipSpheres > 0 || hasClipPlanes)
 		{
 			return false;
 		}
 
-		const isEffectiveInclude = (mode: 'include' | 'exclude' | undefined): boolean => 
+		const isEffectiveInclude = (mode: 'include' | 'exclude' | undefined): boolean =>
 		{
-			if (mode !== undefined) 
+			if (mode !== undefined)
 			{
 				return mode === 'include';
 			}
-			if (material.clipMode === ClipMode.CLIP_INSIDE) 
+			if (material.clipMode === ClipMode.CLIP_INSIDE)
 			{
 				return false;
 			}
 			return material.clipMode === ClipMode.CLIP_OUTSIDE;
 		};
 
-		for (let i = 0; i < material.clipBoxes.length; i++) 
+		for (let i = 0; i < material.clipBoxes.length; i++)
 		{
-			if (!isEffectiveInclude(material.clipBoxes[i].mode)) 
+			if (!isEffectiveInclude(material.clipBoxes[i].mode))
 			{
 				return false;
 			}

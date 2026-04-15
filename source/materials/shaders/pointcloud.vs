@@ -559,9 +559,11 @@ void main() {
 				visible = (hasShapeVolumes && baseVisible) || !insideAllPlanes;
 			#elif defined clip_highlight_inside
 				visible = baseVisible;
-				if (!hasShapeVolumes && clipPlaneCount > 0.0 && insideAllPlanes) {
-					insideAnyHighlight = true;
-				}
+				#if defined use_clip_plane
+					if (!hasShapeVolumes && clipPlaneCount > 0.0 && insideAllPlanes) {
+						insideAnyHighlight = true;
+					}
+				#endif
 			#endif
 
 			if (!visible) { gl_Position = vec4(1000.0); }

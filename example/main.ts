@@ -448,18 +448,10 @@ document.body.onload = function () {
 	});
 
 	const pumpClipBoxesFolder = clipFolder.addFolder('Clipping Boxes with Individual Modes');
-	pumpClipBoxesFolder.add(params, 'pumpClipBox1Enabled').name('Box 1 Enabled').onChange(() => {
-		updatePumpClipBoxes();
-	});
-	pumpClipBoxesFolder.add(params, 'pumpClipBox1Mode', Object.keys(clipVolumeModeMap)).name('Box 1 Mode').onChange(() => {
-		updatePumpClipBoxes();
-	});
-	pumpClipBoxesFolder.add(params, 'pumpClipBox2Enabled').name('Box 2 Enabled').onChange(() => {
-		updatePumpClipBoxes();
-	});
-	pumpClipBoxesFolder.add(params, 'pumpClipBox2Mode', Object.keys(clipVolumeModeMap)).name('Box 2 Mode').onChange(() => {
-		updatePumpClipBoxes();
-	});
+	pumpClipBoxesFolder.add(params, 'pumpClipBox1Enabled').name('Box 1 Enabled').onChange(updatePumpClipBoxes);
+	pumpClipBoxesFolder.add(params, 'pumpClipBox1Mode', Object.keys(clipVolumeModeMap)).name('Box 1 Mode').onChange(updatePumpClipBoxes);
+	pumpClipBoxesFolder.add(params, 'pumpClipBox2Enabled').name('Box 2 Enabled').onChange(updatePumpClipBoxes);
+	pumpClipBoxesFolder.add(params, 'pumpClipBox2Mode', Object.keys(clipVolumeModeMap)).name('Box 2 Mode').onChange(updatePumpClipBoxes);
 
 	// Clip Plane sub-folder
 	const planeFolder = clipFolder.addFolder('Clip Planes');

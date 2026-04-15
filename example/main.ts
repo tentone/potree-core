@@ -116,8 +116,8 @@ document.body.onload = function () {
 		edlRadius: 1.4,
 		// Clipping
 		clipMode: 'Highlight Inside',
-		pumpClipBox1Enabled: true,
-		pumpClipBox2Enabled: true,
+		pumpClipBox1Enabled: false,
+		pumpClipBox2Enabled: false,
 		pumpClipBox1Mode: 'Include',
 		pumpClipBox2Mode: 'Exclude',
 		// Points

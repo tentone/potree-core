@@ -717,12 +717,13 @@ export class PointCloudMaterial extends RawShaderMaterial {
 		//Only update shader source if we transition between having clipping planes and not having clipping planes.
 		//The shader only needs to know whether clipping planes are in use.
 		const doUpdate = (this.numClipPlanes === 0) !== (count === 0);
-		if (doUpdate) {
-			this.updateShaderSource();
-		}
 
 		this.numClipPlanes = count;
 		this.setUniform('clipPlaneCount', count);
+
+		if (doUpdate) {
+			this.updateShaderSource();
+		}
 
 		// If there are clipping planes, update shader uniforms each frame with their positions.
 		if (count > 0 && planes) {

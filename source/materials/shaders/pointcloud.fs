@@ -173,24 +173,27 @@ void main() {
 
 	float linearDepth = -pos.z;
 	vec4 clipPos = projectionMatrix * pos;
-	float fragmentDepth;
 
-	#if defined(use_log_depth)
-		// Three.js does not use logarithmic depth for orthographic cameras,
-		// so orthographic rendering falls back to the standard depth mapping.
-		fragmentDepth = useOrthographicCamera
-			? (0.5 * (clipPos.z / clipPos.w) + 0.5)
-			: (log2(linearDepth + 1.0) * log(2.0) / log(far + 1.0));
-	#elif defined(use_reversed_depth)
-		// Recompute depth from the adjusted fragment position so paraboloid sprites
-		// depth-test using their curved surface instead of the point center.
-		fragmentDepth = clipPos.z / clipPos.w;
-	#else
-		// Standard hyperbolic depth buffer mapping from NDC [-1, 1] to [0, 1].
-		fragmentDepth = 0.5 * (clipPos.z / clipPos.w) + 0.5;
+	#if defined(paraboloid_point_shape) || defined(use_log_depth) || defined(use_reversed_depth)
+		float fragmentDepth;
+
+		#if defined(use_log_depth)
+			// Three.js does not use logarithmic depth for orthographic cameras,
+			// so orthographic rendering falls back to the standard depth mapping.
+			fragmentDepth = useOrthographicCamera
+				? (0.5 * (clipPos.z / clipPos.w) + 0.5)
+				: (log2(linearDepth + 1.0) * log(2.0) / log(far + 1.0));
+		#elif defined(use_reversed_depth)
+			// Recompute depth from the adjusted fragment position so paraboloid sprites
+			// depth-test using their curved surface instead of the point center.
+			fragmentDepth = clipPos.z / clipPos.w;
+		#else
+			// Standard hyperbolic depth buffer mapping from NDC [-1, 1] to [0, 1].
+			fragmentDepth = 0.5 * (clipPos.z / clipPos.w) + 0.5;
+		#endif
+
+		gl_FragDepth = fragmentDepth;
 	#endif
-
-	gl_FragDepth = fragmentDepth;
 
 	#if defined(color_type_depth)
 		// Render depth information into color channels

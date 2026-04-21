@@ -3,12 +3,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import { ViewHelper } from 'three/examples/jsm/helpers/ViewHelper';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
-import { ClipMode, PointCloudOctree, PointSizeType, Potree, PotreeRenderer, createClipBox, createClipSphere } from '../source';
+import { ClipMode, ClipVolumeMode, PointCloudOctree, PointSizeType, Potree, PotreeRenderer, createClipBox, createClipSphere } from '../source';
 
 document.body.onload = function () {
 	const potree = new Potree();
 	let pointClouds: PointCloudOctree[] = [];
 	let clipPlanesTarget: PointCloudOctree | null = null;
+	let pumpClipBoxesTarget: PointCloudOctree | null = null;
 
 	// Clip plane state
 	const clipPlaneX = new Plane(new Vector3(1, 0, 0), 0);
@@ -36,6 +37,13 @@ document.body.onload = function () {
 	clipHelperY.raycast = () => false;
 	clipHelperZ.raycast = () => false;
 
+	let pumpClipBox1Size: Vector3 | null = null;
+	let pumpClipBox1Center: Vector3 | null = null;
+	let pumpClipBox2Size: Vector3 | null = null;
+	let pumpClipBox2Center: Vector3 | null = null;
+	let pumpClipBox1Helper: Mesh | null = null;
+	let pumpClipBox2Helper: Mesh | null = null;
+
 	function updateClipPlanes() {
 		if (!clipPlanesTarget) return;
 		const planes: Plane[] = [];
@@ -58,12 +66,44 @@ document.body.onload = function () {
 		updateClipPlanes();
 	}
 
+	function updatePumpClipBoxes() {
+		if (!pumpClipBoxesTarget) return;
+		if (!pumpClipBox1Size || !pumpClipBox1Center || !pumpClipBox2Size || !pumpClipBox2Center) return;
+
+		const clipBoxes = [];
+		if (params.pumpClipBox1Enabled) {
+			clipBoxes.push(createClipBox(
+				pumpClipBox1Size,
+				pumpClipBox1Center,
+				clipVolumeModeMap[params.pumpClipBox1Mode],
+			));
+		}
+		if (params.pumpClipBox2Enabled) {
+			clipBoxes.push(createClipBox(
+				pumpClipBox2Size,
+				pumpClipBox2Center,
+				clipVolumeModeMap[params.pumpClipBox2Mode],
+			));
+		}
+
+		pumpClipBoxesTarget.material.setClipBoxes(clipBoxes);
+
+		if (pumpClipBox1Helper) pumpClipBox1Helper.visible = params.pumpClipBox1Enabled;
+		if (pumpClipBox2Helper) pumpClipBox2Helper.visible = params.pumpClipBox2Enabled;
+	}
+
 	// ClipMode
 	const clipModeMap: Record<string, ClipMode> = {
 		'Disabled': ClipMode.DISABLED,
 		'Highlight Inside': ClipMode.HIGHLIGHT_INSIDE,
 		'Clip Outside': ClipMode.CLIP_OUTSIDE,
 		'Clip Inside': ClipMode.CLIP_INSIDE,
+	};
+
+	const clipVolumeModeMap: Record<string, ClipVolumeMode | undefined> = {
+		'Inherit Global': undefined,
+		'Include': 'include',
+		'Exclude': 'exclude',
 	};
 
 	// State
@@ -76,6 +116,10 @@ document.body.onload = function () {
 		edlRadius: 1.4,
 		// Clipping
 		clipMode: 'Highlight Inside',
+		pumpClipBox1Enabled: false,
+		pumpClipBox2Enabled: false,
+		pumpClipBox1Mode: 'Include',
+		pumpClipBox2Mode: 'Exclude',
 		// Points
 		pointSize: 1.0,
 		sizeType: 'Adaptive',
@@ -208,11 +252,21 @@ document.body.onload = function () {
 	};
 
 	// Load point clouds: lion and pump
-	loadPointCloud('/data/lion_takanawa/', 'cloud.js', new Vector3(-10, -2, 5), new Euler(-Math.PI / 2, 0, 0), undefined, false, true, false);
-	loadPointCloud('/data/lion_takanawa/', 'cloud.js', new Vector3(0, -2, 10), new Euler(-Math.PI / 2, 0, 0), undefined, true, false, false);
-	loadPointCloud('/data/pump/', 'metadata.json', new Vector3(0, -1.5, 3), new Euler(-Math.PI / 2, 0, 0), new Vector3(2, 2, 2), true, false, true);
+	loadPointCloud('/data/lion_takanawa/', 'cloud.js', new Vector3(-10, -2, 5), new Euler(-Math.PI / 2, 0, 0), undefined, false, true, false, false);
+	loadPointCloud('/data/lion_takanawa/', 'cloud.js', new Vector3(0, -2, 10), new Euler(-Math.PI / 2, 0, 0), undefined, true, false, false, false);
+	loadPointCloud('/data/pump/', 'metadata.json', new Vector3(0, -1.5, 3), new Euler(-Math.PI / 2, 0, 0), new Vector3(2, 2, 2), true, false, true, true);
 
-	function loadPointCloud(baseUrl: string, url: string, position?: Vector3, rotation?: Euler, scale?: Vector3, applyClipBox = false, applyClipSphere = false, applyClipPlanes = false) {
+	function loadPointCloud(
+		baseUrl: string,
+		url: string,
+		position?: Vector3,
+		rotation?: Euler,
+		scale?: Vector3,
+		applyClipBox = false,
+		applyClipSphere = false,
+		applyClipPlanes = false,
+		usePumpClipBoxes = false,
+	) {
 		potree.loadPointCloud(url, baseUrl).then(function (pco: PointCloudOctree) {
 			const sizeTypeMap: Record<string, PointSizeType> = {
 				'Fixed': PointSizeType.FIXED,
@@ -259,19 +313,49 @@ document.body.onload = function () {
 			pco.material.clipMode = clipModeMap[params.clipMode];
 
 			if (applyClipBox) {
-				// ClipBox
-				const halfSize = worldSize.clone().multiplyScalar(0.5);
-				const clipBox = createClipBox(halfSize, center);
-				pco.material.setClipBoxes([clipBox]);
+				if (usePumpClipBoxes) {
+					// Pump clip boxes with per-volume mode controls.
+					pumpClipBoxesTarget = pco;
 
-				const clipBoxHelper = new Mesh(
-					new BoxGeometry(halfSize.x, halfSize.y, halfSize.z),
-					new MeshBasicMaterial({ color: 0x0066FF, wireframe: true }),
-				);
-				clipBoxHelper.position.copy(center);
-				clipBoxHelper.raycast = () => false;
-				scene.add(clipBoxHelper);
+					pumpClipBox1Size = worldSize.clone().multiplyScalar(0.35);
+					pumpClipBox1Center = center.clone();
+					pumpClipBox2Size = worldSize.clone().multiplyScalar(0.25);
+					pumpClipBox2Center = center.clone().add(new Vector3(
+						worldSize.x * 0.18,
+						worldSize.y * 0.08,
+						-worldSize.z * 0.12,
+					));
 
+					updatePumpClipBoxes();
+
+					const addClipBoxHelper = (size: Vector3, position: Vector3, color: number) => {
+						const clipBoxHelper = new Mesh(
+							new BoxGeometry(size.x, size.y, size.z),
+							new MeshBasicMaterial({ color, wireframe: true }),
+						);
+						clipBoxHelper.position.copy(position);
+						clipBoxHelper.raycast = () => false;
+						scene.add(clipBoxHelper);
+						return clipBoxHelper;
+					};
+
+					pumpClipBox1Helper = addClipBoxHelper(pumpClipBox1Size, pumpClipBox1Center, 0x0066FF);
+					pumpClipBox2Helper = addClipBoxHelper(pumpClipBox2Size, pumpClipBox2Center, 0x00B894);
+					updatePumpClipBoxes();
+				} else {
+					// Default single clip box used by the lion example.
+					const halfSize = worldSize.clone().multiplyScalar(0.5);
+					const clipBox = createClipBox(halfSize, center);
+					pco.material.setClipBoxes([clipBox]);
+
+					const clipBoxHelper = new Mesh(
+						new BoxGeometry(halfSize.x, halfSize.y, halfSize.z),
+						new MeshBasicMaterial({ color: 0x0066FF, wireframe: true }),
+					);
+					clipBoxHelper.position.copy(center);
+					clipBoxHelper.raycast = () => false;
+					scene.add(clipBoxHelper);
+				}
 			}
 
 			if (applyClipPlanes) {
@@ -362,6 +446,12 @@ document.body.onload = function () {
 		const mode = clipModeMap[v];
 		for (const pco of pointClouds) pco.material.clipMode = mode;
 	});
+
+	const pumpClipBoxesFolder = clipFolder.addFolder('Clipping Boxes with Individual Modes');
+	pumpClipBoxesFolder.add(params, 'pumpClipBox1Enabled').name('Box 1 Enabled').onChange(updatePumpClipBoxes);
+	pumpClipBoxesFolder.add(params, 'pumpClipBox1Mode', Object.keys(clipVolumeModeMap)).name('Box 1 Mode').onChange(updatePumpClipBoxes);
+	pumpClipBoxesFolder.add(params, 'pumpClipBox2Enabled').name('Box 2 Enabled').onChange(updatePumpClipBoxes);
+	pumpClipBoxesFolder.add(params, 'pumpClipBox2Mode', Object.keys(clipVolumeModeMap)).name('Box 2 Mode').onChange(updatePumpClipBoxes);
 
 	// Clip Plane sub-folder
 	const planeFolder = clipFolder.addFolder('Clip Planes');

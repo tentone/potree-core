@@ -93,9 +93,12 @@ export class Potree implements IPotree
 			const requestManager = reqManager;
 
 			if (url.endsWith('cloud.js')) {
-				return await loadPOC(url, requestManager.getUrl, requestManager.fetch).then((geometry) => {
-					return new PointCloudOctree(this, geometry, material);
-				});
+				return await loadPOC(
+					url,
+					requestManager.getUrl.bind(requestManager),
+					requestManager.fetch.bind(requestManager)).then((geometry) => {
+						return new PointCloudOctree(this, geometry, material);
+					});
 			} else if (url.endsWith('metadata.json')) {
 				return await loadOctree(url, requestManager).then((geometry: OctreeGeometry) => {
 					return new PointCloudOctree(this, geometry, material);

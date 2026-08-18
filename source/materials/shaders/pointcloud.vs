@@ -309,26 +309,26 @@ vec3 getCompositeColor() {
 }
 #endif
 
-#ifdef new_format
-// sRGB conversion functions
-vec4 fromLinear(vec4 linearRGB) {
-	bvec4 cutoff = lessThan(linearRGB, vec4(0.0031308));
-	return mix(linearRGB * vec4(12.92), vec4(1.055) * pow(linearRGB, vec4(1.0/2.4)) - vec4(0.055), cutoff);
-} 
-vec4 toLinear(vec4 sRGB) {
-	bvec4 cutoff = lessThan(sRGB, vec4(0.04045));
-	return mix(sRGB/vec4(12.92), pow((sRGB + vec4(0.055))/vec4(1.055), vec4(2.4)), cutoff);
-}
-#else
-vec3 fromLinear(vec3 linearRGB) {
-	bvec3 cutoff = lessThan(linearRGB, vec3(0.0031308));
-	return mix(linearRGB * vec3(12.92), vec3(1.055) * pow(linearRGB, vec3(1.0/2.4)) - vec3(0.055), cutoff);
-}
-vec3 toLinear(vec3 sRGB) {
-	bvec3 cutoff = lessThan(sRGB, vec3(0.04045));
-	return mix(sRGB/vec3(12.92), pow((sRGB + vec3(0.055))/vec3(1.055), vec3(2.4)), cutoff);
-}
-#endif
+  #ifdef new_format
+  // sRGB conversion functions
+  vec4 fromLinear(vec4 linearRGB) {
+        bvec4 cutoff = lessThan(linearRGB, vec4(0.0031308));
+        return mix(vec4(1.055) * pow(linearRGB, vec4(1.0/2.4)) - vec4(0.055), linearRGB * vec4(12.92), cutoff);
+  }
+  vec4 toLinear(vec4 sRGB) {
+        bvec4 cutoff = lessThan(sRGB, vec4(0.04045));
+        return mix(pow((sRGB + vec4(0.055))/vec4(1.055), vec4(2.4)), sRGB/vec4(12.92), cutoff);
+  }
+  #else
+  vec3 fromLinear(vec3 linearRGB) {
+        bvec3 cutoff = lessThan(linearRGB, vec3(0.0031308));
+        return mix(vec3(1.055) * pow(linearRGB, vec3(1.0/2.4)) - vec3(0.055), linearRGB * vec3(12.92), cutoff);
+  }
+  vec3 toLinear(vec3 sRGB) {
+        bvec3 cutoff = lessThan(sRGB, vec3(0.04045));
+        return mix(pow((sRGB + vec3(0.055))/vec3(1.055), vec3(2.4)), sRGB/vec3(12.92), cutoff);
+  }
+  #endif
 
 void main() {
 	// Compute model-view position and projected position

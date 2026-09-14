@@ -1,8 +1,11 @@
 import {Box3, Matrix4, Vector3} from 'three';
 
+export type ClipVolumeMode = 'include' | 'exclude';
+
 export interface IClipSphere {
   center: Vector3;
   radius: number;
+  mode?: ClipVolumeMode;
 }
 
 /**
@@ -10,12 +13,18 @@ export interface IClipSphere {
  *
  * @param center - The center position of the clip sphere in world space. Defaults to the origin.
  * @param radius - The radius of the clip sphere.
+ * @param mode - Optional per-volume mode (`include` or `exclude`). Defaults to undefined (inherit global mode).
  * @returns An IClipSphere object ready to be passed to PointCloudMaterial.setClipSpheres().
  */
-export function createClipSphere(center: Vector3 = new Vector3(0, 0, 0), radius: number): IClipSphere {
+export function createClipSphere(
+  center: Vector3 = new Vector3(0, 0, 0),
+  radius: number,
+  mode?: ClipVolumeMode,
+): IClipSphere {
   return {
     center: center.clone(),
     radius,
+    mode,
   };
 }
 
@@ -31,6 +40,7 @@ export interface IClipBox {
   inverse: Matrix4;
   matrix: Matrix4;
   position: Vector3;
+  mode?: ClipVolumeMode;
 }
 
 /**
@@ -42,9 +52,14 @@ export interface IClipBox {
  *
  * @param size - The dimensions of the clip box.
  * @param position - The center position of the clip box in world space. Defaults to the origin.
+ * @param mode - Optional per-volume mode (`include` or `exclude`). Defaults to undefined (inherit global mode).
  * @returns An IClipBox object ready to be passed to PointCloudMaterial.setClipBoxes().
  */
-export function createClipBox(size: Vector3, position: Vector3 = new Vector3(0, 0, 0)): IClipBox {
+export function createClipBox(
+  size: Vector3,
+  position: Vector3 = new Vector3(0, 0, 0),
+  mode?: ClipVolumeMode,
+): IClipBox {
   const box = new Box3(new Vector3(-0.5, -0.5, -0.5), new Vector3(0.5, 0.5, 0.5));
 
   const scaleMatrix = new Matrix4().makeScale(size.x, size.y, size.z);
@@ -57,5 +72,6 @@ export function createClipBox(size: Vector3, position: Vector3 = new Vector3(0, 
     matrix,
     inverse,
     position: position.clone(),
+    mode,
   };
 }

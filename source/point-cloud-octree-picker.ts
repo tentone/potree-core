@@ -310,13 +310,16 @@ export class PointCloudOctreePicker
 		if (params.pickOutsideClipRegion) 
 		{
 			pickMaterial.clipMode = ClipMode.DISABLED;
+			pickMaterial.setClipBoxes([]);
+			pickMaterial.setClipSpheres([]);
+			pickMaterial.clippingPlanes = [];
 		}
 		else 
 		{
 			pickMaterial.clipMode = nodeMaterial.clipMode;
-			pickMaterial.setClipBoxes(
-				nodeMaterial.clipMode === ClipMode.CLIP_OUTSIDE ? nodeMaterial.clipBoxes : [],
-			);
+			pickMaterial.setClipBoxes(nodeMaterial.clipBoxes);
+			pickMaterial.setClipSpheres(nodeMaterial.clipSpheres);
+			pickMaterial.clippingPlanes = nodeMaterial.clippingPlanes;
 		}
 	}
 

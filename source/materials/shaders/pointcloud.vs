@@ -566,7 +566,7 @@ void main() {
 				#endif
 			#endif
 
-			if (!visible) { gl_Position = vec4(1000.0); }
+			if (!visible) { gl_Position = vec4(100.0, 100.0, 100.0, 1.0); }
 
 			if (insideAnyHighlight) { vColor.r += 0.5; }
 		#endif

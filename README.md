@@ -44,7 +44,7 @@ const pointClouds = [];
 
 const baseUrl = "data/test/";
 const potree = new Potree();
-potree.loadPointCloud("cloud.js", url => `${baseUrl}${url}`,).then(function(pco) {
+potree.loadPointCloud("cloud.js", baseUrl).then(function(pco) {
    scene.add(pco);
 	pointClouds.push(pco);
 });
@@ -134,7 +134,7 @@ pco.material.setClipSpheres([sphereA, sphereB]);
 
 ## Notes
  - Since potree-core is meant to be used as library and not as a full software as potree some features are not available.
- - EDL shading is not supported by potree core.
+ - EDL shading is available through `PotreeRenderer` with `edl: {enabled: true}`, see `example/main.ts`.
  - Removed Arena 4D point cloud support.
  - Removed Entwine Point Tile file support.
  - GUI elements were removed from the library
@@ -144,7 +144,7 @@ pco.material.setClipSpheres([sphereA, sphereB]);
    - Potree.startQuery, Potree.endQuery and Potree.resolveQueries
    - Potree.timerQueries
    - Potree.MOUSE, Potree.CameraMode
-   - PotreeRenderer, RepRenderer, Potree.Renderer
+   - RepRenderer, Potree.Renderer
      - JQuery, TWEEN and Proj4 dependencies
 
 

@@ -25,11 +25,7 @@ out vec4 fragColor;
 	uniform vec4 highlightedPointColor;
 #endif
 
-#ifdef new_format
-	in vec4 vColor;
-#else
-	in vec3 vColor;
-#endif
+in vec3 vColor;
 
 #if !defined(color_type_point_index)
 	// Opacity attribute when not using point index color type
@@ -62,13 +58,7 @@ in vec3 vViewPosition;
 const float specularStrength = 1.0;
 
 void main() {
-	// Choose the proper color format
-	#ifdef new_format
-		vec3 actualColor = vColor.xyz;
-	#else
-		vec3 actualColor = vColor;
-	#endif
-	vec3 color = actualColor;
+	vec3 color = vColor;
 
 	// Precompute normalized point coordinate if needed
 	#if defined(circle_point_shape) || defined(paraboloid_point_shape) || defined(weighted_splats)

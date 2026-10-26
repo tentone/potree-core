@@ -14,6 +14,7 @@
 	"scripts": {
 		"dev": "webpack --mode development --watch --progress --stats-children",
 		"build": "webpack --mode production --config webpack.prod.js",
+		"build:example": "webpack --mode production --config webpack.example.js",
 		"start": "npm run build && webpack-dev-server --config webpack.example.js --mode development --progress --port 5200",
 		"docs": "typedoc source/** --out docs --tsconfig tsconfig.json --theme default --excludeExternals --excludeNotDocumented",
 		"pub": "npm run build && npm run docs && npm publish --access public .",

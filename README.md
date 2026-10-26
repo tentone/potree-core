@@ -13,6 +13,10 @@
 ## Demo
  - Live demo at https://tentone.github.io/potree-core/
  - Double click the models to raycast the scene and create marker points.
+ - See the [interactive example source](example/main.ts) and [build configuration](webpack.example.js).
+ - Run `npm install`, then `npm start` to open the development demo at http://localhost:5200.
+ - Run `npm run build:example` from the repository root to build the example into `build/`, including `index.html`, the bundled code, and point-cloud data. Serve that directory over HTTP at the server root with support for byte-range requests.
+ - The Points panel controls point size, shape (`PointShape`), opacity type (`PointOpacityType`), and color type (`PointColorType`).
 
 <img src="https://raw.githubusercontent.com/tentone/potree-core/master/screenshot.png" width="700">
 

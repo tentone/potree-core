@@ -31,6 +31,7 @@ Run commands from the repository root. Use `npm install` when dependencies are m
 | --- | --- |
 | `npx tsc --noEmit` | Check library TypeScript. |
 | `npm run build` | Build ESM, declarations, workers, and shaders into `dist/`. |
+| `npm run build:example` | Build the demo and point-cloud data into `build/`. |
 | `npm run dev` | Watch the library build. |
 | `npm start` | Build and serve the demo at `http://localhost:5200`. |
 | `npm run lint` | Run ESLint with its current coverage limits. |

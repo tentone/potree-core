@@ -39,7 +39,9 @@ export default {
 		new CopyPlugin({
 			patterns: [{
 				from: "data",
-				to: "data"
+				to: "data",
+				// Potree cloud.js files contain JSON metadata and must not be minified as JavaScript.
+				info: { minimized: true }
 			}]
 		}),
 		new HtmlPlugin()

@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls';
 import { ViewHelper } from 'three/examples/jsm/helpers/ViewHelper';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
-import { ClipMode, ClipVolumeMode, PointCloudOctree, PointSizeType, Potree, PotreeRenderer, createClipBox, createClipSphere } from '../source';
+import { ClipMode, ClipVolumeMode, PointCloudOctree, PointColorType, PointOpacityType, PointShape, PointSizeType, Potree, PotreeRenderer, createClipBox, createClipSphere } from '../source';
 
 document.body.onload = function () {
 	const potree = new Potree();
@@ -123,6 +123,9 @@ document.body.onload = function () {
 		// Points
 		pointSize: 1.0,
 		sizeType: 'Adaptive',
+		pointShape: PointShape.PARABOLOID,
+		pointOpacityType: PointOpacityType.FIXED,
+		pointColorType: PointColorType.RGB,
 		// Transform
 		transformMode: 'translate',
 		// Pick
@@ -275,7 +278,9 @@ document.body.onload = function () {
 			};
 			pco.material.size = params.pointSize;
 			pco.material.pointSizeType = sizeTypeMap[params.sizeType] ?? PointSizeType.ADAPTIVE;
-			pco.material.shape = 2;
+			pco.material.shape = params.pointShape;
+			pco.material.pointOpacityType = params.pointOpacityType;
+			pco.material.pointColorType = params.pointColorType;
 			pco.material.inputColorEncoding = 1;
 			pco.material.outputColorEncoding = 1;
 
@@ -475,6 +480,51 @@ document.body.onload = function () {
 			'Adaptive': PointSizeType.ADAPTIVE,
 		};
 		for (const pco of pointClouds) pco.material.pointSizeType = map[v];
+	});
+
+	pointsFolder.add(params, 'pointShape', {
+		'Square': PointShape.SQUARE,
+		'Circle': PointShape.CIRCLE,
+		'Paraboloid': PointShape.PARABOLOID
+	}).name('Shape').onChange((shape: PointShape) =>
+	{
+		for (const pco of pointClouds)
+		{
+			pco.material.shape = shape;
+		}
+	});
+	pointsFolder.add(params, 'pointOpacityType', {
+		'Fixed': PointOpacityType.FIXED,
+		'Attenuated': PointOpacityType.ATTENUATED
+	}).name('Opacity Type').onChange((opacityType: PointOpacityType) =>
+	{
+		for (const pco of pointClouds)
+		{
+			pco.material.pointOpacityType = opacityType;
+		}
+	});
+	pointsFolder.add(params, 'pointColorType', {
+		'RGB': PointColorType.RGB,
+		'Color': PointColorType.COLOR,
+		'Depth': PointColorType.DEPTH,
+		'Height': PointColorType.HEIGHT,
+		'Intensity': PointColorType.INTENSITY,
+		'Intensity Gradient': PointColorType.INTENSITY_GRADIENT,
+		'Level of Detail': PointColorType.LOD,
+		'Point Index': PointColorType.POINT_INDEX,
+		'Classification': PointColorType.CLASSIFICATION,
+		'Return Number': PointColorType.RETURN_NUMBER,
+		'Source': PointColorType.SOURCE,
+		'Normal': PointColorType.NORMAL,
+		'Phong': PointColorType.PHONG,
+		'RGB Height': PointColorType.RGB_HEIGHT,
+		'Composite': PointColorType.COMPOSITE
+	}).name('Color Type').onChange((colorType: PointColorType) =>
+	{
+		for (const pco of pointClouds)
+		{
+			pco.material.pointColorType = colorType;
+		}
 	});
 
 	// Interaction folder

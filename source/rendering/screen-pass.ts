@@ -6,6 +6,7 @@ import {
 	RawShaderMaterial,
 	Scene,
 	WebGLRenderer,
+	WebGLMultipleRenderTargets,
 	WebGLRenderTarget,
 } from 'three';
 
@@ -54,15 +55,23 @@ export class ScreenPass {
 	public render(
 		renderer: WebGLRenderer,
 		material: RawShaderMaterial,
-		target: WebGLRenderTarget | null = null,
+		target: WebGLRenderTarget | WebGLMultipleRenderTargets | null = null,
 	): void {
 		const oldTarget = renderer.getRenderTarget();
+		const oldCubeFace = renderer.getActiveCubeFace();
+		const oldMipLevel = renderer.getActiveMipmapLevel();
 
 		this.quad.material = material;
 
-		renderer.setRenderTarget(target);
-		renderer.render(this.scene, this.camera);
-
-		renderer.setRenderTarget(oldTarget);
+		try
+		{
+			if (target !== oldTarget) renderer.setRenderTarget(target);
+			renderer.render(this.scene, this.camera);
+		}
+		finally
+		{
+			if (target !== oldTarget) renderer.setRenderTarget(oldTarget, oldCubeFace, oldMipLevel);
+			this.quad.material = this.placeholderMaterial;
+		}
 	}
 }

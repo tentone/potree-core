@@ -1,6 +1,5 @@
 import {
     Camera,
-    Color,
     FloatType,
     HalfFloatType,
     NearestFilter,
@@ -8,8 +7,8 @@ import {
     OrthographicCamera,
     PerspectiveCamera,
     RGBAFormat,
+    Scene,
     UnsignedByteType,
-    Vector2,
     WebGLRenderer,
     WebGLRenderTarget,
 } from 'three';
@@ -17,6 +16,7 @@ import {
 import { EyeDomeLightingMaterial } from '../materials/eye-dome-lighting-material';
 import { PointCloudOctree } from '../point-cloud-octree';
 import { ScreenPass } from './screen-pass';
+import { RendererState } from './renderer-state';
 import { ORTHOGRAPHIC_CAMERA } from '../constants';
 
 export type EDLPassParams = {
@@ -41,7 +41,7 @@ export class EDLPass {
     private rtTypeChecked = false;
     private edlMaterial: EyeDomeLightingMaterial;
     private screenPass: ScreenPass;
-    private size = new Vector2();
+	private state = new RendererState();
 
     public constructor() {
         this.edlMaterial = new EyeDomeLightingMaterial();
@@ -110,95 +110,65 @@ export class EDLPass {
         this.screenPass.dispose();
     }
 
-    private resizeToRenderer(renderer: WebGLRenderer): void {
-        renderer.getSize(this.size);
-        const dpr = renderer.getPixelRatio();
-        const width = Math.max(1, Math.floor(this.size.x * dpr));
-        const height = Math.max(1, Math.floor(this.size.y * dpr));
+	public render(params: EDLPassParams): void
+	{
+		const { renderer, scene, camera } = params;
+		if (!isPerspectiveOrOrthographicCamera(camera))
+		{
+			throw new Error('EDLPass.render: camera must be PerspectiveCamera or OrthographicCamera');
+		}
+		const pointCloudLayer = params.pointCloudLayer ?? 1;
+		this.ensureRenderTargetType(renderer);
+		this.state.capture(renderer);
+		this.rtEDL.setSize(Math.max(1, this.state.viewport.z), Math.max(1, this.state.viewport.w));
+		if (this.edlMaterial.neighbourCount !== this.neighbourCount)
+		{
+			this.edlMaterial.neighbourCount = this.neighbourCount;
+		}
 
-        if (this.rtEDL.width !== width || this.rtEDL.height !== height) {
-            this.rtEDL.setSize(width, height);
-        }
-    }
+		const oldLayerMask = camera.layers.mask;
+		const background = scene instanceof Scene ? scene.background : null;
+		try
+		{
+			renderer.autoClear = false;
+			// Render to the caller's current target and viewport, including its depth.
+			renderer.clear(true, true, true);
+			camera.layers.mask = oldLayerMask & ~(1 << pointCloudLayer);
+			renderer.render(scene, camera);
 
-    public render(params: EDLPassParams): void {
-        const { renderer, scene, camera } = params;
-        const pointCloudLayer = params.pointCloudLayer ?? 1;
+			// The scene background must not overwrite the offscreen occupancy marker.
+			if (scene instanceof Scene) scene.background = null;
+			renderer.setClearColor(0x000000, 1);
+			renderer.setRenderTarget(this.rtEDL);
+			renderer.clear(true, true, true);
+			camera.layers.mask = 1 << pointCloudLayer;
+			renderer.render(scene, camera);
 
-        this.ensureRenderTargetType(renderer);
+			this.edlMaterial.uniforms.screenWidth.value = this.rtEDL.width;
+			this.edlMaterial.uniforms.screenHeight.value = this.rtEDL.height;
+			this.edlMaterial.uniforms.edlStrength.value = this.edlStrength;
+			this.edlMaterial.uniforms.radius.value = this.radius;
+			this.edlMaterial.uniforms.opacity.value = this.opacity;
+			this.edlMaterial.uniforms.colorMap.value = this.rtEDL.texture;
+			this.edlMaterial.setProjectionMatrix(camera.projectionMatrix);
+			const capabilities = renderer.capabilities as typeof renderer.capabilities & {
+				reversedDepthBuffer?: boolean;
+				reverseDepthBuffer?: boolean;
+			};
+			const useReversedDepth = capabilities.reversedDepthBuffer === true || capabilities.reverseDepthBuffer === true;
+			this.edlMaterial.uniforms.far.value = camera.far;
+			this.edlMaterial.useLogDepth = renderer.capabilities.logarithmicDepthBuffer && !useReversedDepth;
+			this.edlMaterial.useReversedDepth = useReversedDepth;
+			this.edlMaterial.uniforms.useOrthographicCamera.value = camera.type === ORTHOGRAPHIC_CAMERA;
 
-        this.resizeToRenderer(renderer);
-
-        // Ensure shader define counts are correct.
-        if (this.edlMaterial.neighbourCount !== this.neighbourCount) {
-            this.edlMaterial.neighbourCount = this.neighbourCount;
-        }
-
-        const oldAutoClear = renderer.autoClear;
-        renderer.autoClear = false;
-
-        const oldTarget = renderer.getRenderTarget();
-        const oldLayerMask = camera.layers.mask;
-
-        // Clear default framebuffer
-        renderer.setRenderTarget(null);
-        renderer.clear(true, true, true);
-
-        // 1) Render everything the camera would normally render, except the point-cloud layer.
-        // This respects user-defined layer masks.
-        camera.layers.mask = oldLayerMask & ~(1 << pointCloudLayer);
-        renderer.render(scene, camera);
-
-        // 2) Render pointclouds into offscreen target.
-        // Note: We intentionally do NOT mutate point-cloud materials here.
-        // Material flags (e.g. `useEDL`) should be configured by the caller when enabling/disabling EDL.
-
-        // Background marker: we clear alpha==1.0 so the EDL shader can discard background fragments.
-        // Note: This matches upstream Potree behavior. In theory, the EDL alpha channel stores log2(linearDepth),
-        // so alpha==1.0 can collide with real geometry when linearDepth==2.0 exactly.
-        // We keep the upstream convention for visual parity; collisions are expected to be extremely rare in practice.
-        const oldClearColor = new Color();
-        renderer.getClearColor(oldClearColor);
-        const oldClearAlpha = renderer.getClearAlpha();
-        renderer.setClearColor(0x000000, 1);
-
-        renderer.setRenderTarget(this.rtEDL);
-        renderer.clear(true, true, true);
-
-        renderer.setClearColor(oldClearColor, oldClearAlpha);
-        camera.layers.mask = 1 << pointCloudLayer;
-        renderer.render(scene, camera);
-
-        // 3) EDL fullscreen pass (depth-tested against layer0 depth buffer)
-        this.edlMaterial.uniforms.screenWidth.value = this.rtEDL.width;
-        this.edlMaterial.uniforms.screenHeight.value = this.rtEDL.height;
-        this.edlMaterial.uniforms.edlStrength.value = this.edlStrength;
-        this.edlMaterial.uniforms.radius.value = this.radius;
-        this.edlMaterial.uniforms.opacity.value = this.opacity;
-        this.edlMaterial.uniforms.colorMap.value = this.rtEDL.texture;
-        if (!isPerspectiveOrOrthographicCamera(camera)) {
-            throw new Error('EDLPass.render: camera must be PerspectiveCamera or OrthographicCamera');
-        }
-        this.edlMaterial.setProjectionMatrix(camera.projectionMatrix);
-
-        // Pass far plane and log depth flag so EDL shader can reconstruct depth in the correct format.
-        const capabilities = renderer.capabilities as typeof renderer.capabilities & {
-            reversedDepthBuffer?: boolean;
-            reverseDepthBuffer?: boolean;
-        };
-        const useReversedDepth =
-            capabilities.reversedDepthBuffer === true || capabilities.reverseDepthBuffer === true;
-        this.edlMaterial.uniforms.far.value = camera.far;
-        this.edlMaterial.useLogDepth = renderer.capabilities.logarithmicDepthBuffer && !useReversedDepth;
-        this.edlMaterial.useReversedDepth = useReversedDepth;
-        this.edlMaterial.uniforms.useOrthographicCamera.value = camera.type === ORTHOGRAPHIC_CAMERA;
-
-        // Keep existing depth buffer from layer0 render.
-        this.screenPass.render(renderer, this.edlMaterial, null);
-
-        // restore state
-        camera.layers.mask = oldLayerMask;
-        renderer.setRenderTarget(oldTarget);
-        renderer.autoClear = oldAutoClear;
-    }
+			this.state.bindTarget(renderer);
+			this.screenPass.render(renderer, this.edlMaterial, this.state.target);
+		}
+		finally
+		{
+			if (scene instanceof Scene) scene.background = background;
+			camera.layers.mask = oldLayerMask;
+			this.state.restore(renderer);
+		}
+	}
 }

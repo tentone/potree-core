@@ -124,6 +124,8 @@ document.body.onload = function () {
 		pointSize: 1.0,
 		sizeType: 'Adaptive',
 		pointShape: PointShape.PARABOLOID,
+		closingRadius: 2,
+		closingDepthThreshold: 0.02,
 		pointOpacityType: PointOpacityType.FIXED,
 		pointColorType: PointColorType.RGB,
 		// Transform
@@ -485,13 +487,22 @@ document.body.onload = function () {
 	pointsFolder.add(params, 'pointShape', {
 		'Square': PointShape.SQUARE,
 		'Circle': PointShape.CIRCLE,
-		'Paraboloid': PointShape.PARABOLOID
+		'Paraboloid': PointShape.PARABOLOID,
+		'Closed': PointShape.CLOSED
 	}).name('Shape').onChange((shape: PointShape) =>
 	{
 		for (const pco of pointClouds)
 		{
 			pco.material.shape = shape;
 		}
+	});
+	pointsFolder.add(params, 'closingRadius', 1, 20, 1).name('Closing Radius (px)').onChange((radius: number) =>
+	{
+		potreeRenderer.setClosed({ radius });
+	});
+	pointsFolder.add(params, 'closingDepthThreshold', 0, 0.5, 0.005).name('Closing Depth Tolerance').onChange((depthThreshold: number) =>
+	{
+		potreeRenderer.setClosed({ depthThreshold });
 	});
 	pointsFolder.add(params, 'pointOpacityType', {
 		'Fixed': PointOpacityType.FIXED,
@@ -547,11 +558,7 @@ document.body.onload = function () {
 		// As a result, we must clear manually at the start of each frame.
 		renderer.clear();
 
-		if (!params.edlEnabled) {
-			renderer.render(scene, camera);
-		} else {
-			potreeRenderer.render({ renderer, scene, camera, pointClouds });
-		}
+		potreeRenderer.render({ renderer, scene, camera, pointClouds });
 
 		// Render ViewHelper
 		viewHelper.render(renderer);

@@ -8,6 +8,8 @@ export enum PointShape {
   SQUARE = 0,
   CIRCLE = 1,
   PARABOLOID = 2,
+	/** One-pixel samples reconstructed by binary closing in PotreeRenderer. */
+	CLOSED = 3,
 }
 
 export enum TreeType {

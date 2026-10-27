@@ -125,7 +125,7 @@ out vec3 vViewPosition;
 	out float vRadius;
 #endif
 
-#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0)
+#if defined(closed_point_shape) || (defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0))
 	out vec3 vNormal;
 #endif
 
@@ -341,8 +341,9 @@ void main() {
 		vLinearDepth = gl_Position.w;
 	#endif
 
-	#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0)
-		vNormal = normalize(normalMatrix * normal);
+	#if defined(closed_point_shape) || (defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0))
+		vec3 transformedNormal = normalMatrix * normal;
+		vNormal = transformedNormal / max(length(transformedNormal), 1e-8);
 	#endif
 
 	// EDL alpha (log2(linearDepth)) is written in the fragment shader so it can
@@ -350,13 +351,14 @@ void main() {
 
 
 	// POINT SIZE COMPUTATION
+	float pointSize = 1.0;
+	#ifndef closed_point_shape
 	float tanHalfFOV = tan(fov * 0.5);
 	float projFactor = -0.5 * screenHeight / (tanHalfFOV * mvPosition.z);
 	// Scale compensation based on transformation difference 
 	float scale = length(modelViewMatrix * vec4(0, 0, 0, 1) - modelViewMatrix * vec4(spacing, 0, 0, 1)) / spacing;
 	projFactor *= scale;
 	
-	float pointSize = 1.0;
 	#if defined fixed_point_size
 		pointSize = size;
 	#elif defined attenuated_point_size
@@ -376,6 +378,7 @@ void main() {
 	#endif
 	
 	pointSize *= viewScale;
+	#endif
 	gl_PointSize = pointSize;
 
 
@@ -393,6 +396,12 @@ void main() {
 		}
 	#endif
 
+
+	// Closing starts from exactly one physical pixel, including camera view offsets
+	// and highlighting. Its footprint is controlled by the closing radius instead.
+	#ifdef closed_point_shape
+		gl_PointSize = 1.0;
+	#endif
 
 	// OPACITY
 	#ifndef color_type_point_index

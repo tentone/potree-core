@@ -1,10 +1,14 @@
 import { Camera, Object3D, WebGLRenderer } from 'three';
 
 import { PointCloudMaterial } from '../materials/point-cloud-material';
+import { PointShape } from '../materials/enums';
 import { PointCloudOctree } from '../point-cloud-octree';
 import { Potree } from '../potree';
 import { IVisibilityUpdateResult } from '../types';
 import { EDLPass } from './edl-pass';
+import { ClosedPointOptions, ClosedPointPass } from './closed-point-pass';
+
+export type { ClosedPointOptions } from './closed-point-pass';
 
 /**
  * Configuration for Eye-Dome Lighting (EDL) rendering.
@@ -29,6 +33,8 @@ export type PotreeRendererEDLOptions = {
  */
 export type PotreeRendererOptions = {
     edl?: PotreeRendererEDLOptions;
+	/** Reconstruction settings for clouds using PointShape.CLOSED. */
+	closed?: ClosedPointOptions;
 };
 
 /**
@@ -53,6 +59,9 @@ export type PotreeRendererRenderParams = {
  * `PotreeRenderer` keeps that wiring in one place while preserving backward compatibility.
  */
 export class PotreeRenderer {
+	private closedPass: ClosedPointPass | null = null;
+	private closedOptions: ClosedPointOptions = {};
+	private closedClouds: PointCloudOctree[] = [];
     private edlPass: EDLPass | null = null;
     private edlOptions: PotreeRendererEDLOptions = { enabled: false, pointCloudLayer: 1 };
     private lastPointClouds: PointCloudOctree[] | null = null;
@@ -60,6 +69,7 @@ export class PotreeRenderer {
     private overriddenLayerMasks = new WeakMap<PointCloudOctree, number>();
 
     public constructor(options: PotreeRendererOptions = {}) {
+		if (options.closed) this.setClosed(options.closed);
         if (options.edl) {
             this.setEDL(options.edl);
         }
@@ -67,9 +77,24 @@ export class PotreeRenderer {
 
     /** Releases internally owned GPU resources (render targets). */
     public dispose(): void {
+		this.closedPass?.dispose();
+		this.closedPass = null;
+		this.closedClouds.length = 0;
+		if (this.lastPointClouds) this.applyEDLState(this.lastPointClouds, false);
+		this.lastPointClouds = null;
         this.edlPass?.dispose();
         this.edlPass = null;
     }
+
+	/**
+	 * Set the square closing radius (physical pixels) and relative depth tolerance.
+     * 
+	 * Missing settings retain their previous values. Defaults are radius 2 and tolerance 0.02.
+	 */
+	public setClosed(options: ClosedPointOptions): void
+	{
+		this.closedOptions = { ...this.closedOptions, ...options };
+	}
 
     /**
      * Enables/disables EDL and updates EDL parameters.
@@ -142,7 +167,7 @@ export class PotreeRenderer {
         for (const pco of pointClouds) {
             const material = pco.material;
 
-            if (enabled) {
+            if (enabled && material.shape !== PointShape.CLOSED) {
                 // Remember + override material flags (one-time per material).
                 if (!this.overriddenMaterials.has(material)) {
                     this.overriddenMaterials.set(material, { useEDL: material.useEDL, weighted: material.weighted });
@@ -165,12 +190,14 @@ export class PotreeRenderer {
                 if (prevMat) {
                     if (material.useEDL !== prevMat.useEDL) material.useEDL = prevMat.useEDL;
                     if (material.weighted !== prevMat.weighted) material.weighted = prevMat.weighted;
+					this.overriddenMaterials.delete(material);
                 }
 
                 // Restore layer mask if we previously overrode it.
                 const prevMask = this.overriddenLayerMasks.get(pco);
                 if (prevMask !== undefined) {
                     this.setLayerMaskRecursive(pco, prevMask);
+					this.overriddenLayerMasks.delete(pco);
                 }
             }
         }
@@ -179,8 +206,11 @@ export class PotreeRenderer {
     /**
      * Renders a frame.
      *
-     * - EDL disabled: calls `renderer.render(scene, camera)`.
-     * - EDL enabled: runs the EDL multi-pass pipeline via {@link EDLPass}.
+     * CLOSED clouds are rasterized at one physical pixel, dilated, eroded and
+     * composited with interpolated color, view depth and normals. Each cloud is
+     * reconstructed separately. EDL, when enabled, shades the reconstructed surface.
+     * Requires WebGL2 with EXT_color_buffer_float for CLOSED; otherwise throws.
+     * Other shapes use the normal renderer or the EDL pipeline.
      */
     public render(params: PotreeRendererRenderParams): void {
         const { renderer, scene, camera, pointClouds } = params;
@@ -188,23 +218,58 @@ export class PotreeRenderer {
         const edlEnabled = Boolean(this.edlOptions.enabled);
         const pointCloudLayer = this.edlOptions.pointCloudLayer ?? 1;
 
+		this.closedClouds.length = 0;
+		scene.traverseVisible((object) =>
+		{
+			if (object instanceof PointCloudOctree && !object.disposed && object.material.shape === PointShape.CLOSED)
+			{
+				this.closedClouds.push(object);
+			}
+		});
+		if (this.closedClouds.length > 0)
+		{
+			this.closedPass ??= new ClosedPointPass();
+			this.closedPass.validate(renderer, camera);
+		}
+
         if (pointClouds) {
             this.lastPointClouds = pointClouds;
             // Apply/restore state for these point clouds.
             this.applyEDLState(pointClouds, edlEnabled);
         }
+		else
+		{
+			this.applyEDLState(this.closedClouds, false);
+		}
 
-        if (edlEnabled) {
-            if (!this.edlPass) {
-                this.edlPass = new EDLPass();
-                this.setEDL(this.edlOptions);
-            }
+		// Hide reconstructed clouds while rendering ordinary geometry and other shapes.
+		// Restore visibility even if a user render callback or shader setup throws.
+		try
+		{
+			for (const cloud of this.closedClouds) cloud.visible = false;
+			if (edlEnabled)
+			{
+				if (!this.edlPass)
+				{
+					this.edlPass = new EDLPass();
+					this.setEDL(this.edlOptions);
+				}
+				this.edlPass.render({ renderer, scene, camera, pointClouds, pointCloudLayer });
+			}
+			else
+			{
+				renderer.render(scene, camera);
+			}
+		}
+		finally
+		{
+			for (const cloud of this.closedClouds) cloud.visible = true;
+		}
 
-            this.edlPass.render({ renderer, scene, camera, pointClouds, pointCloudLayer });
-            return;
-        }
-
-        renderer.render(scene, camera);
+		for (const cloud of this.closedClouds)
+		{
+			this.closedPass?.render(renderer, cloud, camera, this.closedOptions, this.edlOptions);
+		}
     }
 
     /** Convenience helper: `updatePointClouds()` followed by {@link render}. */

@@ -17,7 +17,7 @@ Start with `package.json`, `source/index.ts`, `source/potree.ts`, and `example/m
 | `source/loading2/` | Potree 2 `metadata.json` loading, range requests, decoders, and worker pool. |
 | `source/materials/` | Materials, clipping, color modes, gradients, and textures. |
 | `source/materials/shaders/` | GLSL vertex (`.vs`) and fragment (`.fs`) shaders for WebGL. |
-| `source/rendering/` | `PotreeRenderer`, eye-dome lighting (EDL), and screen passes. |
+| `source/rendering/` | `PotreeRenderer`, closed point reconstruction, eye-dome lighting (EDL), and screen passes. |
 | `source/utils/` | Shared bounds, math, priority heap, and LRU helpers. |
 | `source/types.ts`, `source/type-predicates.ts`, `source/constants.ts` | Shared types, node checks, and defaults. |
 | `example/main.ts`, `example/data/` | Interactive demo and fixtures for both formats. |
@@ -37,8 +37,9 @@ Run commands from the repository root. Use `npm install` when dependencies are m
 | `npm run lint` | Run ESLint with its current coverage limits. |
 | `npm run lint-fix` | Apply lint fixes; review the resulting diff. |
 | `npm run docs` | Generate TypeDoc documentation. |
+| `node tests/run-browser-checks.mjs` | Run CLOSED GPU regression checks after building; requires installed Chromium (`BROWSER_PATH` overrides discovery). |
 
-For code changes, run type checking, build, lint, and relevant browser checks. There is no configured project test suite. Add focused regression coverage for nontrivial logic when practical. For documentation changes, check paths, commands, and whitespace.
+For code changes, run type checking, build, lint, and relevant browser checks. The focused CLOSED browser checks live in `tests/`; there is no general project test suite. Add focused regression coverage for nontrivial logic when practical. For documentation changes, check paths, commands, and whitespace.
 
 - ESLint currently skips TypeScript files and excludes `source/loading2/**`. Passing lint does not prove TypeScript coverage.
 - Root TypeScript checks cover `source/`, not the demo. Validate demo changes through the example webpack build and browser.
@@ -58,6 +59,7 @@ For code changes, run type checking, build, lint, and relevant browser checks. T
 - Preserve coordinate spaces and cloud offsets. Keep material uniforms, shaders, CPU culling, and picking consistent. Follow the clipping rules in `README.md`; CPU culling must not discard points that shaders would show.
 - Handle fetch/decode failures and disposal during loading. Balance loading counters, avoid duplicate requests, release workers, and prevent late callbacks from restoring disposed geometry. Check each loader's actual promise completion behavior.
 - Dispose owned GPU and worker resources. Restore temporary renderer, camera, layer, and material state after rendering or picking.
+- `PointShape.CLOSED` requires `PotreeRenderer`, WebGL2, and floating-point color attachments. Keep one-pixel capture, square binary dilation/erosion, attribute interpolation, reconstructed clipping, and final depth mapping consistent. Kernel radii are physical pixels. Reuse offscreen resources across clouds and keep the original-point picker independent of reconstructed pixels.
 
 ## Organization and cleanup
 

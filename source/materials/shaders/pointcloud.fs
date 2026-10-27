@@ -18,7 +18,10 @@ uniform float screenHeight;
 uniform float far;
 uniform sampler2D depthMap;
 
-out vec4 fragColor;
+layout(location = 0) out vec4 fragColor;
+#ifdef closed_point_shape
+	layout(location = 1) out vec4 fragNormalDepth;
+#endif
 
 #ifdef highlight_point
 	// Color used to highlight a point
@@ -45,7 +48,7 @@ in vec3 vViewPosition;
 	in float vRadius;
 #endif
 
-#if defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0)
+#if defined(closed_point_shape) || (defined(color_type_phong) && (MAX_POINT_LIGHTS > 0 || MAX_DIR_LIGHTS > 0))
 	// Normal for Phong shading
 	in vec3 vNormal;
 #endif
@@ -163,6 +166,13 @@ void main() {
 
 	float linearDepth = -pos.z;
 	vec4 clipPos = projectionMatrix * pos;
+	#ifdef closed_point_shape
+		// Positive view depth is the occupancy mask; opacity is independent of it.
+		#ifndef color_type_point_index
+			if (vOpacity <= 0.0) discard;
+		#endif
+		fragNormalDepth = vec4(vNormal, linearDepth);
+	#endif
 
 	#if defined(paraboloid_point_shape) || defined(use_log_depth) || defined(use_reversed_depth)
 		float fragmentDepth;

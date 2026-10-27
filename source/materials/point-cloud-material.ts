@@ -222,7 +222,8 @@ const OPACITY_DEFS = {
 const SHAPE_DEFS = {
 	[PointShape.SQUARE]: 'square_point_shape',
 	[PointShape.CIRCLE]: 'circle_point_shape',
-	[PointShape.PARABOLOID]: 'paraboloid_point_shape'
+	[PointShape.PARABOLOID]: 'paraboloid_point_shape',
+	[PointShape.CLOSED]: 'closed_point_shape'
 };
 
 const COLOR_DEFS = {
@@ -547,7 +548,7 @@ export class PointCloudMaterial extends RawShaderMaterial {
 		this.vertexShader = this.applyDefines(VertShader);
 		this.fragmentShader = this.applyDefines(FragShader);
 
-		if (this.opacity === 1.0) {
+		if (this.opacity === 1.0 || this.shape === PointShape.CLOSED) {
 			this.blending = NoBlending;
 			this.transparent = false;
 			this.depthTest = true;
@@ -561,7 +562,7 @@ export class PointCloudMaterial extends RawShaderMaterial {
 			this.depthWrite = true;
 		}
 
-		if (this.weighted) {
+		if (this.weighted && this.shape !== PointShape.CLOSED) {
 			this.blending = AdditiveBlending;
 			this.transparent = true;
 			this.depthTest = true;
@@ -603,7 +604,7 @@ export class PointCloudMaterial extends RawShaderMaterial {
 			define('use_filter_by_normal');
 		}
 
-		if (this.useEDL) {
+		if (this.useEDL && this.shape !== PointShape.CLOSED) {
 			define('use_edl');
 		}
 
@@ -615,7 +616,7 @@ export class PointCloudMaterial extends RawShaderMaterial {
 			define('use_reversed_depth');
 		}
 
-		if (this.weighted) {
+		if (this.weighted && this.shape !== PointShape.CLOSED) {
 			define('weighted_splats');
 		}
 
@@ -937,7 +938,7 @@ export class PointCloudMaterial extends RawShaderMaterial {
 		}
 
 		if (
-			this.pointSizeType === PointSizeType.ADAPTIVE ||
+			(this.shape !== PointShape.CLOSED && this.pointSizeType === PointSizeType.ADAPTIVE) ||
 			this.pointColorType === PointColorType.LOD
 		) {
 			this.updateVisibilityTextureData(visibleNodes);

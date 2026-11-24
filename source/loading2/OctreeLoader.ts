@@ -93,6 +93,8 @@ export class NodeLoader
 				let data = e.data;
 				let buffers = data.attributeBuffers;
 
+				// The handler keeps this node, and through it the octree, reachable.
+				worker.onmessage = null;
 				this.workerPool.returnWorker(workerType, worker);
 
 				let geometry = new BufferGeometry();

@@ -188,12 +188,6 @@ export class Potree implements IPotree
 		{
 			let node = queueItem.node;
 
-			// If we will end up with too many points, we stop right away.
-			if (numVisiblePoints + node.numPoints > this.pointBudget) 
-			{
-				break;
-			}
-
 			const pointCloudIndex = queueItem.pointCloudIndex;
 			const pointCloud = pointClouds[pointCloudIndex];
 
@@ -206,6 +200,13 @@ export class Potree implements IPotree
 			) 
 			{
 				continue;
+			}
+
+			// If we will end up with too many points, we stop right away.
+			// A node skipped above costs no points.
+			if (numVisiblePoints + node.numPoints > this.pointBudget) 
+			{
+				break;
 			}
 
 			numVisiblePoints += node.numPoints;

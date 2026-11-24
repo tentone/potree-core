@@ -480,11 +480,16 @@ export class Potree implements IPotree
 					.identity()
 					.multiply(inverseWorldMatrix)
 					.multiply(camera.matrixWorld);
-				cameraPositions.push(new Vector3().setFromMatrixPosition(cameraMatrix));
+				const cameraPosition = new Vector3().setFromMatrixPosition(cameraMatrix);
+				cameraPositions.push(cameraPosition);
 
 				if (pointCloud.visible && pointCloud.root !== null) 
 				{
-					const weight = Number.MAX_VALUE;
+					// Nearest root first: when the roots alone exceed the budget, the clouds
+					// around the camera get it. The box is in the cloud's frame, hence the scale.
+					const worldScale = worldMatrix.getMaxScaleOnAxis();
+					const distance = pointCloud.root.boundingBox.distanceToPoint(cameraPosition) * worldScale;
+					const weight = Number.MAX_VALUE / (1 + distance);
 					priorityQueue.push(new QueueItem(i, weight, pointCloud.root));
 				}
 

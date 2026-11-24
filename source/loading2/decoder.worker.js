@@ -18,7 +18,7 @@ const typedArrayMapping = {
 onmessage = function(event) 
 {
 
-	const {buffer, pointAttributes, scale, name, min, max, size, offset, numPoints} = event.data;
+	const {buffer, pointAttributes, scale, name, min, max, offset, numPoints} = event.data;
 
 	const tStart = performance.now();
 
@@ -33,29 +33,6 @@ onmessage = function(event)
 		bytesPerPoint += pointAttribute.byteSize;
 	}
 
-	const gridSize = 32;
-	const grid = new Uint32Array(gridSize ** 3);
-	const toIndex = (x, y, z) => 
-	{
-		// let dx = gridSize * (x - min.x) / size.x;
-		// let dy = gridSize * (y - min.y) / size.y;
-		// let dz = gridSize * (z - min.z) / size.z;
-
-		// min is already subtracted
-		const dx = gridSize * x / size.x;
-		const dy = gridSize * y / size.y;
-		const dz = gridSize * z / size.z;
-
-		const ix = Math.min(parseInt(dx), gridSize - 1);
-		const iy = Math.min(parseInt(dy), gridSize - 1);
-		const iz = Math.min(parseInt(dz), gridSize - 1);
-
-		const index = ix + iy * gridSize + iz * gridSize * gridSize;
-
-		return index;
-	};
-
-	let numOccupiedCells = 0;
 	for (const pointAttribute of pointAttributes.attributes) 
 	{
 		
@@ -72,13 +49,6 @@ onmessage = function(event)
 				const x = view.getInt32(pointOffset + attributeOffset + 0, true) * scale[0] + offset[0] - min.x;
 				const y = view.getInt32(pointOffset + attributeOffset + 4, true) * scale[1] + offset[1] - min.y;
 				const z = view.getInt32(pointOffset + attributeOffset + 8, true) * scale[2] + offset[2] - min.z;
-
-				const index = toIndex(x, y, z);
-				const count = grid[index]++;
-				if (count === 0)
-				{
-					numOccupiedCells++;
-				}
 
 				positions[3 * j + 0] = x;
 				positions[3 * j + 1] = y;
@@ -162,9 +132,6 @@ onmessage = function(event)
 
 	}
 
-	const occupancy = parseInt(numPoints / numOccupiedCells);
-	// console.log(`${name}: #points: ${numPoints}: #occupiedCells: ${numOccupiedCells}, occupancy: ${occupancy} points/cell`);
-
 	{ // add indices
 		const buff = new ArrayBuffer(numPoints * 4);
 		const indices = new Uint32Array(buff);
@@ -225,8 +192,7 @@ onmessage = function(event)
 
 	const message = {
 		buffer: buffer,
-		attributeBuffers: attributeBuffers,
-		density: occupancy
+		attributeBuffers: attributeBuffers
 	};
 
 	const transferables = [];

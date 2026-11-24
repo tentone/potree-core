@@ -63,7 +63,27 @@ export class Potree implements IPotree
 
 	public _rendererSize: Vector2 = new Vector2();
 
+	/**
+	 * Maximum number of concurrent node loads (fetch and decode) per point cloud. Each
+	 * `updatePointClouds()` call also requests at most this many of the highest-priority
+	 * unloaded nodes. The value is copied to every updated point cloud's
+	 * `pcoGeometry.maxNumNodesLoading`, so set it here rather than on the geometry.
+	 *
+	 * Raising it speeds up refinement when requests have latency, at the cost of more
+	 * parallel requests and decoder workers.
+	 *
+	 * Default: 4.
+	 */
 	public maxNumNodesLoading: number = MAX_NUM_NODES_LOADING;
+
+	/**
+	 * Maximum number of loaded nodes promoted to GPU scene nodes per
+	 * `updatePointClouds()` call, across all point clouds. Higher values make
+	 * refinement appear faster but can cause longer frames while buffers upload.
+	 *
+	 * Default: 2.
+	 */
+	public maxLoadsToGPU: number = MAX_LOADS_TO_GPU;
 
 	public get features() 
 	{
@@ -173,6 +193,12 @@ export class Potree implements IPotree
 		const visibleNodes: PointCloudOctreeNode[] = [];
 		const unloadedGeometry: PointCloudOctreeGeometryNode[] = [];
 
+		// The geometry enforces the per-cloud concurrency limit when a node load is requested.
+		for (let i = 0; i < pointClouds.length; i++) 
+		{
+			pointClouds[i].pcoGeometry.maxNumNodesLoading = this.maxNumNodesLoading;
+		}
+
 		// calculate object space frustum and cam pos and setup priority queue
 		const {frustums, cameraPositions, priorityQueue} = this.updateVisibilityStructures(
 			pointClouds,
@@ -216,7 +242,7 @@ export class Potree implements IPotree
 
 			if (isGeometryNode(node) && (!parentNode || isTreeNode(parentNode))) 
 			{
-				if (node.loaded && loadedToGPUThisFrame < MAX_LOADS_TO_GPU) 
+				if (node.loaded && loadedToGPUThisFrame < this.maxLoadsToGPU)
 				{
 					// @ts-ignore
 					node = pointCloud.toTreeNode(node, parentNode);
@@ -224,7 +250,7 @@ export class Potree implements IPotree
 				}
 				else if (!node.failed) 
 				{
-					if (node.loaded && loadedToGPUThisFrame >= MAX_LOADS_TO_GPU) 
+					if (node.loaded && loadedToGPUThisFrame >= this.maxLoadsToGPU)
 					{
 						exceededMaxLoadsToGPU = true;
 					}

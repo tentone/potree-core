@@ -2,6 +2,7 @@ import {Box3, Vector3} from 'three';
 import {BinaryLoader, XhrRequest} from './loading';
 import {PointAttributes} from './point-attributes';
 import {PointCloudOctreeGeometryNode} from './point-cloud-octree-geometry-node';
+import {MAX_NUM_NODES_LOADING} from './constants';
 
 export class PointCloudOctreeGeometry 
 {
@@ -19,7 +20,11 @@ export class PointCloudOctreeGeometry
 
 	public numNodesLoading: number = 0;
 
-	public maxNumNodesLoading: number = 3;
+	/**
+	 * Maximum number of concurrent node loads for this geometry. `Potree.updatePointClouds()`
+	 * overwrites it with `Potree.maxNumNodesLoading`.
+	 */
+	public maxNumNodesLoading: number = MAX_NUM_NODES_LOADING;
 
 	public spacing: number = 0;
 

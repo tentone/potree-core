@@ -41,6 +41,8 @@ export class PointCloudOctreeGeometry
 	{
 		this.loader.dispose();
 		this.root.traverse((node) => {return node.dispose();});
+		// node.dispose() skips the root, which keeps the LRU cache from disposing of it.
+		this.root.geometry?.dispose();
 
 		this.disposed = true;
 	}

@@ -3,6 +3,7 @@ import {
 	BufferGeometry,
 	Camera,
 	Color,
+	DataTexture,
 	GLSL3,
 	LessEqualDepth,
 	Material,
@@ -11,6 +12,7 @@ import {
 	OrthographicCamera,
 	PerspectiveCamera,
 	RawShaderMaterial,
+	RGBAFormat,
 	Scene,
 	Texture,
 	Vector3,
@@ -37,7 +39,6 @@ import { PointColorType, PointOpacityType, PointShape, PointSizeType, TreeType }
 import { SPECTRAL } from './gradients';
 import {
 	generateClassificationTexture,
-	generateDataTexture,
 	generateGradientTexture
 } from './texture-generation';
 import { IClassification, IGradient, IUniform } from './types';
@@ -45,6 +46,13 @@ import { ColorEncoding } from './color-encoding';
 
 const VertShader = require('./shaders/pointcloud.vs').default;
 const FragShader = require('./shaders/pointcloud.fs').default;
+
+/**
+ * Row width of the visible-nodes lookup texture. The texture grows in height, so the
+ * number of visible nodes is limited only by the GPU's maximum texture height. The
+ * offset from a parent to its first visible child is stored in 16 bits.
+ */
+const VISIBLE_NODES_TEXTURE_WIDTH = 2048;
 
 /**
  * Configuration parameters for point cloud material rendering.
@@ -486,10 +494,7 @@ export class PointCloudMaterial extends RawShaderMaterial {
 	constructor(parameters: Partial<IPointCloudMaterialParameters> = {}) {
 		super();
 
-		const tex = this.visibleNodesTexture = generateDataTexture(2048, 1, new Color(0xffffff));
-		tex.minFilter = NearestFilter;
-		tex.magFilter = NearestFilter;
-		this.setUniform('visibleNodes', tex);
+		this.setUniform('visibleNodes', this.createVisibleNodesTexture(1));
 
 		this.treeType = getValid(parameters.treeType, TreeType.OCTREE);
 		this.size = getValid(parameters.size, 1.0);
@@ -927,8 +932,10 @@ export class PointCloudMaterial extends RawShaderMaterial {
 		}
 
 
-		const maxScale = Math.max(octree.scale.x, octree.scale.y, octree.scale.z);
-		this.spacing = octree.pcoGeometry.spacing * maxScale;
+		// Spacing stays in the octree's local space. The vertex shader derives the
+		// object-to-view scale from modelViewMatrix, so applying octree.scale here
+		// would scale point sizes twice.
+		this.spacing = octree.pcoGeometry.spacing;
 		this.octreeSize = octree.pcoGeometry.boundingBox.getSize(PointCloudMaterial.helperVec3).x;
 		const view = (camera as any).view;
 		if (view?.enabled) {
@@ -976,11 +983,42 @@ export class PointCloudMaterial extends RawShaderMaterial {
 			data[i * 4 + 3] = node.name.length;
 		}
 
-		const texture = this.visibleNodesTexture;
-		if (texture) {
-			texture.image.data.set(data);
-			texture.needsUpdate = true;
+		if (!this.visibleNodesTexture) {
+			return;
 		}
+
+		// Grow the texture by whole rows when the visible node count exceeds its capacity.
+		const requiredHeight = Math.max(1, Math.ceil(nodes.length / VISIBLE_NODES_TEXTURE_WIDTH));
+		if (this.visibleNodesTexture.image.height < requiredHeight) {
+			this.visibleNodesTexture.dispose();
+			this.setUniform('visibleNodes', this.createVisibleNodesTexture(requiredHeight));
+		}
+
+		const texture = this.visibleNodesTexture;
+		texture.image.data.set(data);
+		texture.needsUpdate = true;
+	}
+
+	/**
+	 * Creates the RGBA8 lookup texture that encodes visible octree nodes for adaptive point
+	 * sizes and LOD coloring. Texel `i` belongs to node `i` in `byLevelAndIndex` order and is
+	 * stored row-major with a fixed width of {@link VISIBLE_NODES_TEXTURE_WIDTH}.
+	 *
+	 * @param height - Number of rows; capacity is `height * VISIBLE_NODES_TEXTURE_WIDTH` nodes.
+	 * @returns The new texture, also assigned to `visibleNodesTexture`. The material owns it.
+	 */
+	private createVisibleNodesTexture(height: number): DataTexture {
+		const texture = new DataTexture(
+			new Uint8Array(VISIBLE_NODES_TEXTURE_WIDTH * height * 4),
+			VISIBLE_NODES_TEXTURE_WIDTH,
+			height,
+			RGBAFormat,
+		);
+		texture.minFilter = NearestFilter;
+		texture.magFilter = NearestFilter;
+		texture.needsUpdate = true;
+		this.visibleNodesTexture = texture;
+		return texture;
 	}
 
 	static makeOnBeforeRender(

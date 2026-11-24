@@ -40,9 +40,6 @@ export class OctreeGeometryNode implements IPointCloudTreeNode {
 	/** The spacing value for the node's points. */
 	public spacing!: number;
 
-	/** Optional density value for the node's points. */
-	public density?: number;
-
 	/** Indicates if the node is a leaf node (has no children). */
 	public isLeafNode: boolean = true;
 

@@ -54,7 +54,7 @@ const mask_b0 = new Uint8Array([0, 1, 0, 1, 0, 1, 0, 1, 2, 3, 2, 3, 2, 3, 2, 3, 
 onmessage = function(event) 
 {
 
-	const {pointAttributes, scale, name, min, max, size, offset, numPoints} = event.data;
+	const {pointAttributes, scale, name, min, max, offset, numPoints} = event.data;
 
 	const tStart = performance.now();
 
@@ -86,26 +86,6 @@ onmessage = function(event)
 		bytesPerPoint += pointAttribute.byteSize;
 	}
 
-	const gridSize = 32;
-	const grid = new Uint32Array(gridSize ** 3);
-	const toIndex = (x, y, z) => 
-	{
-
-		// min is already subtracted
-		const dx = gridSize * x / size.x;
-		const dy = gridSize * y / size.y;
-		const dz = gridSize * z / size.z;
-
-		const ix = Math.min(parseInt(dx), gridSize - 1);
-		const iy = Math.min(parseInt(dy), gridSize - 1);
-		const iz = Math.min(parseInt(dz), gridSize - 1);
-
-		const index = ix + iy * gridSize + iz * gridSize * gridSize;
-
-		return index;
-	};
-
-	let numOccupiedCells = 0;
 	let byteOffset = 0;
 	for (const pointAttribute of pointAttributes.attributes) 
 	{
@@ -245,13 +225,6 @@ onmessage = function(event)
 				const y = parseInt(Y) * scale[1] + offset[1] - min.y;
 				const z = parseInt(Z) * scale[2] + offset[2] - min.z;
 
-				const index = toIndex(x, y, z);
-				const count = grid[index]++;
-				if (count === 0)
-				{
-					numOccupiedCells++;
-				}
-
 				positions[3 * j + 0] = x;
 				positions[3 * j + 1] = y;
 				positions[3 * j + 2] = z;
@@ -373,8 +346,6 @@ onmessage = function(event)
 
 	}
 
-	const occupancy = parseInt(numPoints / numOccupiedCells);
-
 	{ // add indices
 		const buff = new ArrayBuffer(numPoints * 4);
 		const indices = new Uint32Array(buff);
@@ -436,8 +407,7 @@ onmessage = function(event)
 
 	const message = {
 		buffer: buffer,
-		attributeBuffers: attributeBuffers,
-		density: occupancy
+		attributeBuffers: attributeBuffers
 	};
 
 	const transferables = [];

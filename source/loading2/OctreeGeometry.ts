@@ -2,6 +2,7 @@ import {NodeLoader, Metadata} from './OctreeLoader';
 import {Box3, Sphere, Vector3} from 'three';
 import {PointAttributes} from './PointAttributes';
 import {OctreeGeometryNode} from './OctreeGeometryNode';
+import {MAX_NUM_NODES_LOADING} from '../constants';
 
 export class OctreeGeometry {
 	public root!: OctreeGeometryNode;
@@ -16,7 +17,11 @@ export class OctreeGeometry {
 
 	public numNodesLoading: number = 0;
 
-	public maxNumNodesLoading: number = 3; // I don't understand why this is also a property of IPotree then. Duplicate functionality?
+	/**
+	 * Maximum number of concurrent node loads for this geometry. `Potree.updatePointClouds()`
+	 * overwrites it with `Potree.maxNumNodesLoading`.
+	 */
+	public maxNumNodesLoading: number = MAX_NUM_NODES_LOADING;
 
 	public boundingSphere: Sphere;
 

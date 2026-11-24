@@ -171,6 +171,16 @@ pco.material.setClipSpheres([sphereA, sphereB]);
    }
    ```   
 
+## Loading speed
+ - `potree.maxNumNodesLoading` (default `4`) is the maximum number of concurrent node loads per point cloud. It is copied to each point cloud's `pcoGeometry.maxNumNodesLoading` on every `updatePointClouds()` call.
+ - `potree.maxLoadsToGPU` (default `2`) is the maximum number of loaded nodes added to the scene per `updatePointClouds()` call, across all point clouds. Higher values refine faster but can make individual frames longer.
+ - Raise both when refinement feels slow, for example with many small nodes or high request latency.
+
+   ```javascript
+   potree.maxNumNodesLoading = 8;
+   potree.maxLoadsToGPU = 8;
+   ```
+
 ## Notes
  - Since potree-core is meant to be used as library and not as a full software as potree some features are not available.
  - EDL shading is available through `PotreeRenderer` with `edl: {enabled: true}`, see `example/main.ts`.

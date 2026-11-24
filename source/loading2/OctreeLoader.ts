@@ -139,7 +139,6 @@ export class NodeLoader
 					}
 
 				}
-				node.density = data.density;
 				node.geometry = geometry;
 				node.loaded = true;
 				node.loading = false;
@@ -165,7 +164,6 @@ export class NodeLoader
 				scale: scale,
 				min: min,
 				max: max,
-				size: size,
 				offset: offset,
 				numPoints: numPoints
 			};

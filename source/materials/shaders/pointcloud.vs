@@ -134,6 +134,15 @@ out vec3 vViewPosition;
 #endif
 
 
+#if defined(adaptive_point_size) || defined(color_type_lod)
+// Reads the visible-node record at the given index. Records are stored row-major and
+// the texture grows in height, so the row width comes from the texture itself.
+vec4 readVisibleNode(int index) {
+	int width = textureSize(visibleNodes, 0).x;
+	return texelFetch(visibleNodes, ivec2(index % width, index / width), 0);
+}
+#endif
+
 // OCTREE LOD FUNCTIONS
 #if (defined(adaptive_point_size) || defined(color_type_lod)) && defined(tree_type_octree)
 
@@ -167,7 +176,7 @@ float getLOD() {
 		vec3 index3d = floor((position - offset) / nodeSizeAtLevel + 0.5);
 		int index = int(round(4.0 * index3d.x + 2.0 * index3d.y + index3d.z));
 		
-		vec4 value = texture(visibleNodes, vec2(float(iOffset) / 2048.0, 0.0));
+		vec4 value = readVisibleNode(iOffset);
 		int mask = int(round(value.r * 255.0));
 
 		if (isBitSet(mask, index)) {
@@ -204,7 +213,7 @@ float getLOD() {
 	vec3 pos = position;
 		
 	for (float i = 0.0; i <= 1000.0; i++) {
-		vec4 value = texture(visibleNodes, vec2(intOffset / 2048.0, 0.0));
+		vec4 value = readVisibleNode(int(intOffset));
 		int children = int(value.r * 255.0);
 		float next = value.g * 255.0;
 		int split = int(value.b * 255.0);
